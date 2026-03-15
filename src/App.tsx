@@ -20,6 +20,8 @@ import AdminGenerate from "./pages/AdminGenerate";
 import Badges from "./pages/Badges";
 import Leaderboard from "./pages/Leaderboard";
 import Certificates from "./pages/Certificates";
+import Pricing from "./pages/Pricing";
+import AITutor from "./pages/AITutor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
