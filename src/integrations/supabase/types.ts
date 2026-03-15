@@ -14,7 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      class_members: {
+        Row: {
+          class_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          class_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          class_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_class_members_class"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          created_at: string
+          curriculum: string
+          id: string
+          join_code: string | null
+          name: string
+          subject: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          curriculum: string
+          id?: string
+          join_code?: string | null
+          name: string
+          subject: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          curriculum?: string
+          id?: string
+          join_code?: string | null
+          name?: string
+          subject?: string
+          teacher_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
