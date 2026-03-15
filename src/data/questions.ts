@@ -75,21 +75,60 @@ export const subjects: SubjectInfo[] = [
 ];
 
 export const curricula = [
-  { id: "uk-gcse", label: "UK GCSE", country: "🇬🇧", boards: ["AQA", "Edexcel", "OCR"] },
-  { id: "uk-igcse", label: "IGCSE", country: "🌍", boards: ["Cambridge", "Edexcel International"] },
-  { id: "uk-alevel", label: "A-Level", country: "🇬🇧", boards: ["AQA", "Edexcel", "OCR", "Cambridge"] },
-  { id: "ib", label: "IB Diploma", country: "🌍", boards: ["IB SL", "IB HL"] },
-  { id: "us-highschool", label: "US Grade 9–11", country: "🇺🇸", boards: ["Common Core", "AP"] },
-  { id: "india-cbse", label: "India CBSE", country: "🇮🇳", boards: ["CBSE", "ISC"] },
-  { id: "pakistan-fsc", label: "Pakistan FSC", country: "🇵🇰", boards: ["Punjab Board", "Federal Board", "Sindh Board"] },
+  // ─── UK Domestic ───
+  { id: "uk-gcse", label: "GCSE", country: "🇬🇧", boards: ["AQA", "Edexcel (Pearson)", "OCR", "WJEC/Eduqas", "CCEA"] },
+  { id: "uk-alevel", label: "A-Level", country: "🇬🇧", boards: ["AQA", "Edexcel (Pearson)", "OCR", "WJEC/Eduqas", "CCEA"] },
+  { id: "uk-btec", label: "BTEC", country: "🇬🇧", boards: ["Pearson BTEC Level 2", "Pearson BTEC Level 3"] },
+  { id: "uk-scottish-nat5", label: "Scottish National 5", country: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", boards: ["SQA"] },
+  { id: "uk-scottish-higher", label: "Scottish Higher", country: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", boards: ["SQA"] },
+  { id: "uk-scottish-adv-higher", label: "Scottish Advanced Higher", country: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", boards: ["SQA"] },
+
+  // ─── UK International ───
+  { id: "uk-igcse", label: "IGCSE", country: "🌍", boards: ["Cambridge (CAIE)", "Edexcel International", "Oxford AQA"] },
+  { id: "uk-ial", label: "International A-Level (IAL)", country: "🌍", boards: ["Edexcel International (IAL)", "Cambridge (CAIE)", "Oxford AQA International"] },
+  { id: "uk-olevel", label: "O-Level", country: "🌍", boards: ["Cambridge (CAIE)"] },
+  { id: "uk-pre-u", label: "Cambridge Pre-U", country: "🌍", boards: ["Cambridge Pre-U"] },
+
+  // ─── International Baccalaureate ───
+  { id: "ib-myp", label: "IB MYP (Middle Years)", country: "🌍", boards: ["IB MYP"] },
+  { id: "ib-dp-sl", label: "IB Diploma SL", country: "🌍", boards: ["IB SL"] },
+  { id: "ib-dp-hl", label: "IB Diploma HL", country: "🌍", boards: ["IB HL"] },
+  { id: "ib-dp-further", label: "IB Further/Higher Level", country: "🌍", boards: ["IB Further Maths", "IB HL Options"] },
+
+  // ─── USA ───
+  { id: "us-middle", label: "US Middle School (6–8)", country: "🇺🇸", boards: ["Common Core", "NGSS"] },
+  { id: "us-highschool", label: "US High School (9–11)", country: "🇺🇸", boards: ["Common Core", "NGSS", "State Standards"] },
+  { id: "us-ap", label: "AP (Advanced Placement)", country: "🇺🇸", boards: ["AP Physics 1", "AP Physics 2", "AP Physics C", "AP Chemistry", "AP Biology", "AP Calculus AB", "AP Calculus BC", "AP Statistics", "AP Computer Science A", "AP Computer Science Principles"] },
+  { id: "us-sat", label: "SAT / SAT Subject", country: "🇺🇸", boards: ["SAT Math", "SAT Subject Physics", "SAT Subject Chemistry", "SAT Subject Biology"] },
+  { id: "us-act", label: "ACT", country: "🇺🇸", boards: ["ACT Math", "ACT Science"] },
+
+  // ─── India ───
+  { id: "india-cbse-10", label: "CBSE Class 10", country: "🇮🇳", boards: ["CBSE"] },
+  { id: "india-cbse-12", label: "CBSE Class 12", country: "🇮🇳", boards: ["CBSE"] },
+  { id: "india-icse-10", label: "ICSE Class 10", country: "🇮🇳", boards: ["ICSE (CISCE)"] },
+  { id: "india-isc-12", label: "ISC Class 12", country: "🇮🇳", boards: ["ISC (CISCE)"] },
+  { id: "india-state", label: "India State Boards", country: "🇮🇳", boards: ["Maharashtra Board", "Karnataka Board (PUC)", "Tamil Nadu Board", "Kerala Board", "Telangana Board", "AP Board", "UP Board", "Rajasthan Board", "MP Board", "Gujarat Board"] },
+  { id: "india-jee", label: "JEE Main & Advanced", country: "🇮🇳", boards: ["JEE Main", "JEE Advanced"] },
+  { id: "india-neet", label: "NEET", country: "🇮🇳", boards: ["NEET UG"] },
+  { id: "india-olympiad", label: "India Olympiad", country: "🇮🇳", boards: ["NSEP", "NSEC", "NSEB", "RMO/INMO", "INPhO", "INChO", "INBO"] },
+
+  // ─── Pakistan ───
+  { id: "pakistan-matric", label: "Matric (SSC)", country: "🇵🇰", boards: ["Punjab Board (Lahore)", "Federal Board (FBISE)", "Sindh Board (Karachi)", "KPK Board (Peshawar)", "Balochistan Board (Quetta)", "AJK Board (Mirpur)"] },
+  { id: "pakistan-fsc", label: "FSC / Intermediate (HSSC)", country: "🇵🇰", boards: ["Punjab Board (Lahore)", "Federal Board (FBISE)", "Sindh Board (Karachi)", "KPK Board (Peshawar)", "Balochistan Board (Quetta)", "AJK Board (Mirpur)"] },
+  { id: "pakistan-olevel", label: "Pakistan O-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International"] },
+  { id: "pakistan-alevel", label: "Pakistan A-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International (IAL)"] },
+  { id: "pakistan-ecat-mdcat", label: "ECAT / MDCAT", country: "🇵🇰", boards: ["ECAT (Engineering)", "MDCAT (Medical)"] },
 ];
+
+// All unique boards extracted for filtering
+export const allBoards = [...new Set(curricula.flatMap(c => c.boards))];
 
 export const difficultyLabels: Record<Difficulty, string> = {
   1: "Foundation",
-  2: "GCSE",
-  3: "Advanced GCSE",
-  4: "A-Level",
-  5: "Olympiad",
+  2: "GCSE / Grade 9–10",
+  3: "Advanced GCSE / O-Level",
+  4: "A-Level / AP / IB HL",
+  5: "Olympiad / JEE Advanced",
 };
 
 // ─── PHYSICS QUESTIONS ───────────────────────────────────────────────
