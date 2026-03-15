@@ -2,11 +2,19 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
-import { TIERS, type TierKey } from "@/lib/subscriptionTiers";
-import { Check, Crown, Building2, Sparkles } from "lucide-react";
+import { useGeoRegion } from "@/hooks/useGeoRegion";
+import { TIERS, type TierKey, type RegionKey } from "@/lib/subscriptionTiers";
+import { Check, Crown, Building2, Sparkles, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const tierIcons: Record<TierKey, typeof Crown> = {
   free: Sparkles,
@@ -14,9 +22,18 @@ const tierIcons: Record<TierKey, typeof Crown> = {
   school: Building2,
 };
 
+const regionLabels: Record<RegionKey, string> = {
+  uk: "🇬🇧 United Kingdom",
+  us: "🇺🇸 United States",
+  ae: "🇦🇪 UAE",
+  in: "🇮🇳 India",
+  pk: "🇵🇰 Pakistan",
+};
+
 export default function Pricing() {
   const { user } = useAuth();
   const { tier: currentTier, subscribed, checkout, manageSubscription, loading } = useSubscription();
+  const { region, setRegion, loading: geoLoading } = useGeoRegion();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -26,10 +43,11 @@ export default function Pricing() {
       return;
     }
     const tier = TIERS[key];
-    if (!tier.price_id) return;
+    const priceId = tier.regional[region].price_id;
+    if (!priceId) return;
 
     try {
-      await checkout(tier.price_id);
+      await checkout(priceId);
     } catch (e) {
       toast({ title: "Error", description: "Could not start checkout. Please try again.", variant: "destructive" });
     }
@@ -42,6 +60,22 @@ export default function Pricing() {
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold tracking-tight">Choose Your Plan</h1>
           <p className="mt-3 text-lg text-muted-foreground">Unlock your full potential with STEMCoach</p>
+
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <Select value={region} onValueChange={(v) => setRegion(v as RegionKey)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.entries(regionLabels) as [RegionKey, string][]).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
@@ -49,6 +83,8 @@ export default function Pricing() {
             const Icon = tierIcons[key];
             const isCurrent = key === currentTier;
             const isPopular = key === "pro";
+            const regionalPrice = tier.regional[region];
+            const priceDisplay = regionalPrice.price;
 
             return (
               <motion.div
@@ -77,9 +113,9 @@ export default function Pricing() {
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-3xl font-bold">{tier.price.split("/")[0]}</span>
-                  {tier.price.includes("/") && (
-                    <span className="text-sm text-muted-foreground">/{tier.price.split("/")[1]}</span>
+                  <span className="text-3xl font-bold">{priceDisplay.split("/")[0]}</span>
+                  {priceDisplay.includes("/") && (
+                    <span className="text-sm text-muted-foreground">/{priceDisplay.split("/")[1]}</span>
                   )}
                 </div>
 
@@ -102,10 +138,10 @@ export default function Pricing() {
                   </Button>
                 ) : (
                   <Button
-                    className={`w-full rounded-xl ${isPopular ? "" : "variant-outline"}`}
+                    className="w-full rounded-xl"
                     variant={isPopular ? "default" : "outline"}
                     onClick={() => handleSelect(key)}
-                    disabled={loading}
+                    disabled={loading || geoLoading}
                   >
                     {user ? "Subscribe" : "Sign in to subscribe"}
                   </Button>
