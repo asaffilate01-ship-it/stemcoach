@@ -12,6 +12,9 @@ import MockExam from "./pages/MockExam";
 import Auth from "./pages/Auth";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminGenerate from "./pages/AdminGenerate";
+import Badges from "./pages/Badges";
+import Leaderboard from "./pages/Leaderboard";
+import Certificates from "./pages/Certificates";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +33,9 @@ const App = () => (
             <Route path="/practice/:subjectId" element={<Practice />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/mock-exam" element={<MockExam />} />
+            <Route path="/badges" element={<Badges />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/certificates" element={<Certificates />} />
             <Route path="/teacher" element={<TeacherDashboard />} />
             <Route path="/admin/generate" element={<AdminGenerate />} />
             <Route path="*" element={<NotFound />} />
