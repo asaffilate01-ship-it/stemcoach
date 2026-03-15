@@ -134,6 +134,11 @@ export const curricula = [
   { id: "pakistan-olevel", label: "Pakistan O-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International"] },
   { id: "pakistan-alevel", label: "Pakistan A-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International (IAL)"] },
   { id: "pakistan-ecat-mdcat", label: "ECAT / MDCAT", country: "🇵🇰", boards: ["ECAT (Engineering)", "MDCAT (Medical)"] },
+
+  // ─── Language & Teaching ───
+  { id: "ielts-academic", label: "IELTS Academic", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
+  { id: "ielts-general", label: "IELTS General Training", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
+  { id: "celta", label: "CELTA", country: "🌍", boards: ["Cambridge CELTA"] },
 ];
 
 // All unique boards extracted for filtering
