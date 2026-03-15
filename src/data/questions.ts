@@ -385,7 +385,6 @@ const chemQuestions: Question[] = [
     workedSolution: "Step 1: Fe = 26 electrons\nStep 2: Fill: 1s² 2s² 2p⁶ 3s² 3p⁶ = 18 (Ar core)\nStep 3: 4s² → 20 electrons\nStep 4: 3d⁶ → 26 electrons\nStep 5: Written as: 1s² 2s² 2p⁶ 3s² 3p⁶ 3d⁶ 4s²",
     tuitionTips: ["4s fills before 3d, but 4s empties first in ions", "Use the Aufbau principle and diagonal rule", "Shorthand: [Ar] 3d⁶ 4s²", "Exceptions: Cr and Cu have special configurations"],
     examTip: "Write both full and shorthand notation. Check total equals atomic number.",
-    points: 3,
   },
   {
     id: "chem-003", subject: "chemistry", topic: "Bonding", subtopic: "Ionic Bonding",
