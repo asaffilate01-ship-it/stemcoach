@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,13 +7,15 @@ import { useAuth } from "@/hooks/useAuth";
 const navItems = [
   { to: "/", label: "Home", icon: BookOpen },
   { to: "/subjects", label: "Subjects", icon: GraduationCap },
+  { to: "/my-classes", label: "Classes", icon: BookCheck },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/mock-exam", label: "Mock Exam", icon: Trophy },
+  { to: "/mock-exam", label: "Exam", icon: Trophy },
   { to: "/badges", label: "Badges", icon: Award },
   { to: "/leaderboard", label: "Board", icon: Medal },
   { to: "/certificates", label: "Certs", icon: ScrollText },
   { to: "/parent", label: "Parent", icon: Eye },
   { to: "/teacher", label: "Teacher", icon: Users },
+  { to: "/institution", label: "Admin", icon: Building2 },
   { to: "/admin/generate", label: "Generate", icon: Sparkles },
 ];
 
