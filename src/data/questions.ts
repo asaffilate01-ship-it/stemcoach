@@ -72,6 +72,22 @@ export const subjects: SubjectInfo[] = [
     questionCount: 4000,
     topics: ["Programming", "Algorithms", "Data Structures", "Databases", "Networking", "Cybersecurity", "Operating Systems", "AI"],
   },
+  {
+    id: "ielts",
+    name: "IELTS",
+    icon: "🌐",
+    color: "200 80% 50%",
+    questionCount: 5000,
+    topics: ["Reading Comprehension", "Writing Task 1", "Writing Task 2", "Listening", "Speaking Part 1", "Speaking Part 2", "Speaking Part 3", "Academic Vocabulary", "Grammar for IELTS"],
+  },
+  {
+    id: "celta",
+    name: "CELTA",
+    icon: "📝",
+    color: "330 70% 55%",
+    questionCount: 3000,
+    topics: ["Language Analysis", "Teaching Methodology", "Classroom Management", "Lesson Planning", "Phonology", "Grammar Teaching", "Skills Teaching", "Error Correction"],
+  },
 ];
 
 export const curricula = [
