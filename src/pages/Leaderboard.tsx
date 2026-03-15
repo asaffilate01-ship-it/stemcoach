@@ -3,7 +3,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Trophy, Flame, Zap, Target } from "lucide-react";
+import { Trophy, Flame, Zap, Target, Users, Calendar } from "lucide-react";
 
 interface LeaderEntry {
   user_id: string;
@@ -15,36 +15,89 @@ interface LeaderEntry {
   correct_answers: number;
 }
 
+type Tab = "xp" | "streak" | "accuracy";
+type TimeFrame = "all" | "weekly";
+
 export default function Leaderboard() {
   const { user } = useAuth();
   const [entries, setEntries] = useState<LeaderEntry[]>([]);
-  const [tab, setTab] = useState<"xp" | "streak" | "accuracy">("xp");
+  const [tab, setTab] = useState<Tab>("xp");
+  const [timeFrame, setTimeFrame] = useState<TimeFrame>("all");
+  const [classId, setClassId] = useState<string | null>(null);
+  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    async function load() {
-      const { data: statsData } = await supabase
-        .from("user_stats")
-        .select("user_id, xp, streak, level, total_questions, correct_answers")
-        .order("xp", { ascending: false })
-        .limit(50);
+    loadLeaderboard();
+  }, [timeFrame, classId]);
 
-      if (!statsData?.length) { setEntries([]); return; }
+  useEffect(() => {
+    if (!user) return;
+    // Load user's classes for class filter
+    supabase
+      .from("class_members")
+      .select("class_id")
+      .eq("user_id", user.id)
+      .then(async ({ data: memberships }) => {
+        if (!memberships?.length) return;
+        const ids = memberships.map((m) => m.class_id);
+        const { data: classData } = await supabase
+          .from("classes")
+          .select("id, name")
+          .in("id", ids);
+        setClasses(classData || []);
+      });
+  }, [user]);
 
-      const userIds = statsData.map(s => s.user_id);
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, display_name")
-        .in("user_id", userIds);
+  const loadLeaderboard = async () => {
+    let query = supabase
+      .from("user_stats")
+      .select("user_id, xp, streak, level, total_questions, correct_answers")
+      .order("xp", { ascending: false })
+      .limit(50);
 
-      const profileMap = new Map((profiles || []).map(p => [p.user_id, p.display_name || "Student"]));
+    // If class filter, get class member IDs first
+    let memberIds: string[] | null = null;
+    if (classId) {
+      const { data: members } = await supabase
+        .from("class_members")
+        .select("user_id")
+        .eq("class_id", classId);
+      memberIds = members?.map((m) => m.user_id) || [];
+      if (memberIds.length === 0) {
+        setEntries([]);
+        return;
+      }
+      query = query.in("user_id", memberIds);
+    }
 
-      setEntries(statsData.map(s => ({
+    // Weekly: filter by last_active_date within 7 days
+    if (timeFrame === "weekly") {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      query = query.gte("last_active_date", weekAgo.toISOString().split("T")[0]);
+    }
+
+    const { data: statsData } = await query;
+    if (!statsData?.length) {
+      setEntries([]);
+      return;
+    }
+
+    const userIds = statsData.map((s) => s.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, display_name")
+      .in("user_id", userIds);
+
+    const profileMap = new Map((profiles || []).map((p) => [p.user_id, p.display_name || "Student"]));
+
+    setEntries(
+      statsData.map((s) => ({
         ...s,
         display_name: profileMap.get(s.user_id) || "Student",
-      })));
-    }
-    load();
-  }, []);
+      }))
+    );
+  };
 
   const sorted = [...entries].sort((a, b) => {
     if (tab === "xp") return b.xp - a.xp;
@@ -65,7 +118,8 @@ export default function Leaderboard() {
           <h1 className="stem-heading text-3xl">Leaderboard</h1>
         </div>
 
-        <div className="mb-6 flex gap-2">
+        {/* Filters */}
+        <div className="mb-4 flex flex-wrap gap-2">
           {[
             { key: "xp" as const, label: "XP", icon: Zap },
             { key: "streak" as const, label: "Streak", icon: Flame },
@@ -84,14 +138,67 @@ export default function Leaderboard() {
               {t.label}
             </button>
           ))}
+
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => setTimeFrame("all")}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
+                timeFrame === "all"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground"
+              }`}
+            >
+              <Trophy className="h-3.5 w-3.5" /> All Time
+            </button>
+            <button
+              onClick={() => setTimeFrame("weekly")}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
+                timeFrame === "weekly"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground"
+              }`}
+            >
+              <Calendar className="h-3.5 w-3.5" /> This Week
+            </button>
+          </div>
         </div>
+
+        {/* Class filter */}
+        {classes.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            <button
+              onClick={() => setClassId(null)}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
+                !classId
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground"
+              }`}
+            >
+              <Users className="h-3 w-3" /> Global
+            </button>
+            {classes.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setClassId(c.id)}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
+                  classId === c.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground"
+                }`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="space-y-2">
           {sorted.map((entry, i) => {
             const isMe = entry.user_id === user?.id;
-            const accuracy = entry.total_questions > 0
-              ? Math.round((entry.correct_answers / entry.total_questions) * 100)
-              : 0;
+            const accuracy =
+              entry.total_questions > 0
+                ? Math.round((entry.correct_answers / entry.total_questions) * 100)
+                : 0;
 
             return (
               <motion.div

@@ -3,7 +3,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Eye, TrendingUp, Target, Flame, AlertTriangle, BookOpen, Link2, CheckCircle2, Clock } from "lucide-react";
+import { Eye, TrendingUp, Target, Flame, BookOpen, Link2, CheckCircle2, Clock, AlertTriangle, Award, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -14,14 +14,22 @@ interface ChildData {
   display_name: string;
   status: string;
   stats: any;
-  recentAttempts: any[];
+  recentAttempts: AttemptData[];
+  badges: number;
+  certificates: number;
+}
+
+interface AttemptData {
+  id: string;
+  correct: boolean;
+  created_at: string;
+  question: { subject: string; topic: string } | null;
 }
 
 export default function ParentDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [children, setChildren] = useState<ChildData[]>([]);
-  const [linkCode, setLinkCode] = useState("");
   const [childEmail, setChildEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
@@ -42,22 +50,33 @@ export default function ParentDashboard() {
     if (!links?.length) { setLoading(false); return; }
 
     const childIds = links.map(l => l.child_id);
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, display_name")
-      .in("user_id", childIds);
 
-    const { data: stats } = await supabase
-      .from("user_stats")
-      .select("*")
-      .in("user_id", childIds);
+    const [profilesRes, statsRes, badgesRes, certsRes, attemptsRes] = await Promise.all([
+      supabase.from("profiles").select("user_id, display_name").in("user_id", childIds),
+      supabase.from("user_stats").select("*").in("user_id", childIds),
+      supabase.from("user_badges").select("user_id").in("user_id", childIds),
+      supabase.from("certificates").select("user_id").in("user_id", childIds),
+      supabase.from("attempts").select("id, user_id, correct, created_at, question_id").in("user_id", childIds).order("created_at", { ascending: false }).limit(20),
+    ]);
 
-    const childrenData: ChildData[] = (profiles || []).map(p => ({
+    const profiles = profilesRes.data || [];
+    const stats = statsRes.data || [];
+    const badges = badgesRes.data || [];
+    const certs = certsRes.data || [];
+
+    const childrenData: ChildData[] = profiles.map(p => ({
       user_id: p.user_id,
       display_name: p.display_name || "Student",
       status: "approved",
-      stats: stats?.find(s => s.user_id === p.user_id) || null,
-      recentAttempts: [],
+      stats: stats.find(s => s.user_id === p.user_id) || null,
+      recentAttempts: (attemptsRes.data || []).filter(a => a.user_id === p.user_id).map(a => ({
+        id: a.id,
+        correct: a.correct,
+        created_at: a.created_at,
+        question: null,
+      })),
+      badges: badges.filter(b => b.user_id === p.user_id).length,
+      certificates: certs.filter(c => c.user_id === p.user_id).length,
     }));
 
     setChildren(childrenData);
@@ -67,7 +86,6 @@ export default function ParentDashboard() {
 
   const requestLink = async () => {
     if (!user || !childEmail.trim()) return;
-    // Look up child by email via profiles — in reality we'd need a lookup endpoint
     toast({
       title: "Link request sent",
       description: "Your child will need to approve this link from their account settings.",
@@ -79,6 +97,17 @@ export default function ParentDashboard() {
   const childStats = child?.stats;
   const accuracy = childStats && childStats.total_questions > 0
     ? Math.round((childStats.correct_answers / childStats.total_questions) * 100) : 0;
+
+  // Inactivity alert
+  const lastActive = childStats?.last_active_date;
+  const daysSinceActive = lastActive
+    ? Math.floor((Date.now() - new Date(lastActive).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+  const isInactive = daysSinceActive !== null && daysSinceActive > 3;
+
+  // Readiness tier
+  const readinessTier = accuracy >= 80 ? "Exam Ready" : accuracy >= 60 ? "On Track" : accuracy > 0 ? "Needs Work" : "Not Started";
+  const readinessColor = accuracy >= 80 ? "text-success" : accuracy >= 60 ? "text-primary" : accuracy > 0 ? "text-warning" : "text-muted-foreground";
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,90 +167,133 @@ export default function ParentDashboard() {
             )}
 
             {child && (
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Overview stats */}
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { label: "Questions", value: childStats?.total_questions || 0, icon: Target, color: "text-primary" },
-                    { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "text-success" },
-                    { label: "Streak", value: `${childStats?.streak || 0} days`, icon: Flame, color: "text-warning" },
-                    { label: "Level", value: childStats?.level || 1, icon: BookOpen, color: "text-primary" },
-                  ].map((stat, i) => (
-                    <motion.div
-                      key={stat.label}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="stem-card rounded-xl p-4"
-                    >
-                      <stat.icon className={`mb-2 h-5 w-5 ${stat.color}`} />
-                      <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
-                      <div className="stem-label mt-1">{stat.label}</div>
-                    </motion.div>
-                  ))}
-                </div>
+              <>
+                {/* Inactivity Alert */}
+                {isInactive && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 flex items-center gap-3 rounded-xl border border-warning/30 bg-warning/5 p-4"
+                  >
+                    <Bell className="h-5 w-5 text-warning" />
+                    <div>
+                      <p className="text-sm font-medium">Inactivity Alert</p>
+                      <p className="text-xs text-muted-foreground">
+                        {child.display_name} hasn't practiced in {daysSinceActive} days. Encourage them to keep their streak going!
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
 
-                {/* XP & Level Progress */}
-                <div className="stem-card rounded-xl p-6">
-                  <h3 className="mb-4 font-semibold">XP & Level</h3>
-                  <div className="mb-2 text-3xl font-bold text-primary">{childStats?.xp || 0} XP</div>
-                  <div className="mb-2 text-sm text-muted-foreground">Level {childStats?.level || 1}</div>
-                  <Progress value={((childStats?.xp || 0) % 500) / 5} className="h-2" />
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {500 - ((childStats?.xp || 0) % 500)} XP to next level
-                  </p>
-                </div>
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {/* Overview stats */}
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    {[
+                      { label: "Questions", value: childStats?.total_questions || 0, icon: Target, color: "text-primary" },
+                      { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "text-success" },
+                      { label: "Streak", value: `${childStats?.streak || 0} days`, icon: Flame, color: "text-warning" },
+                      { label: "Level", value: childStats?.level || 1, icon: BookOpen, color: "text-primary" },
+                      { label: "Badges", value: child.badges, icon: Award, color: "text-primary" },
+                      { label: "Certificates", value: child.certificates, icon: CheckCircle2, color: "text-success" },
+                    ].map((stat, i) => (
+                      <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                        className="stem-card rounded-xl p-4"
+                      >
+                        <stat.icon className={`mb-2 h-5 w-5 ${stat.color}`} />
+                        <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
+                        <div className="stem-label mt-1">{stat.label}</div>
+                      </motion.div>
+                    ))}
+                  </div>
 
-                {/* Activity status */}
-                <div className="stem-card rounded-xl p-6">
-                  <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <Clock className="h-4 w-4 text-primary" /> Activity Status
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between rounded-lg border p-3">
-                      <span className="text-sm font-medium">Last Active</span>
-                      <span className="text-sm text-muted-foreground">
-                        {childStats?.last_active_date || "Not yet active"}
-                      </span>
+                  {/* Exam Readiness */}
+                  <div className="stem-card rounded-xl p-6">
+                    <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                      <CheckCircle2 className="h-4 w-4 text-success" /> Exam Readiness
+                    </h3>
+                    <div className="mb-4 flex items-center gap-3">
+                      <span className={`text-3xl font-bold ${readinessColor}`}>{accuracy}%</span>
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        accuracy >= 80 ? "bg-success/10 text-success" :
+                        accuracy >= 60 ? "bg-primary/10 text-primary" :
+                        accuracy > 0 ? "bg-warning/10 text-warning" :
+                        "bg-muted text-muted-foreground"
+                      }`}>{readinessTier}</span>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg border p-3">
-                      <span className="text-sm font-medium">Current Streak</span>
-                      <span className="text-sm font-bold text-warning">{childStats?.streak || 0} days</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border p-3">
-                      <span className="text-sm font-medium">Longest Streak</span>
-                      <span className="text-sm text-muted-foreground">{childStats?.longest_streak || 0} days</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border p-3">
-                      <span className="text-sm font-medium">Perfect Scores</span>
-                      <span className="text-sm text-muted-foreground">{childStats?.perfect_scores || 0}</span>
+                    <Progress value={accuracy} className="mb-3 h-3" />
+                    <p className="text-sm text-muted-foreground">
+                      {accuracy >= 80
+                        ? "Excellent! Your child is performing very well. Keep up the consistent practice!"
+                        : accuracy >= 60
+                        ? "Good progress. Encourage them to focus on weak areas to improve further."
+                        : accuracy > 0
+                        ? "Your child needs more practice. Consider helping them set a daily study routine."
+                        : "Your child hasn't started practicing yet. Encourage them to begin!"}
+                    </p>
+                  </div>
+
+                  {/* XP & Level Progress */}
+                  <div className="stem-card rounded-xl p-6">
+                    <h3 className="mb-4 font-semibold">XP & Level</h3>
+                    <div className="mb-2 text-3xl font-bold text-primary">{childStats?.xp || 0} XP</div>
+                    <div className="mb-2 text-sm text-muted-foreground">Level {childStats?.level || 1}</div>
+                    <Progress value={((childStats?.xp || 0) % 500) / 5} className="h-2" />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {500 - ((childStats?.xp || 0) % 500)} XP to next level
+                    </p>
+                  </div>
+
+                  {/* Activity status */}
+                  <div className="stem-card rounded-xl p-6">
+                    <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                      <Clock className="h-4 w-4 text-primary" /> Activity Status
+                    </h3>
+                    <div className="space-y-3">
+                      {[
+                        { label: "Last Active", value: childStats?.last_active_date || "Not yet active" },
+                        { label: "Current Streak", value: `${childStats?.streak || 0} days`, bold: true, color: "text-warning" },
+                        { label: "Longest Streak", value: `${childStats?.longest_streak || 0} days` },
+                        { label: "Perfect Scores", value: childStats?.perfect_scores || 0 },
+                      ].map((item) => (
+                        <div key={item.label} className="flex items-center justify-between rounded-lg border p-3">
+                          <span className="text-sm font-medium">{item.label}</span>
+                          <span className={`text-sm ${item.bold ? `font-bold ${item.color}` : "text-muted-foreground"}`}>
+                            {item.value}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
 
-                {/* Readiness summary */}
-                <div className="stem-card rounded-xl p-6">
-                  <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <CheckCircle2 className="h-4 w-4 text-success" /> Exam Readiness
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {accuracy >= 80
-                      ? "Your child is performing very well. Keep up the consistent practice!"
-                      : accuracy >= 60
-                      ? "Your child is making good progress. Encourage them to focus on weak areas."
-                      : accuracy > 0
-                      ? "Your child needs more practice. Consider extra support in weak topics."
-                      : "Your child hasn't started practicing yet. Encourage them to begin!"}
-                  </p>
-                  <div className="mt-4">
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span className="font-medium">Overall Readiness</span>
-                      <span className="text-muted-foreground">{accuracy}%</span>
+                  {/* Recent Activity */}
+                  {child.recentAttempts.length > 0 && (
+                    <div className="stem-card rounded-xl p-6 lg:col-span-2">
+                      <h3 className="mb-4 font-semibold">Recent Activity</h3>
+                      <div className="space-y-2">
+                        {child.recentAttempts.slice(0, 10).map((a) => (
+                          <div key={a.id} className="flex items-center justify-between rounded-lg border px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              {a.correct ? (
+                                <CheckCircle2 className="h-4 w-4 text-success" />
+                              ) : (
+                                <AlertTriangle className="h-4 w-4 text-destructive" />
+                              )}
+                              <span className="text-sm">{a.correct ? "Correct" : "Incorrect"}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(a.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <Progress value={accuracy} className="h-2" />
-                  </div>
+                  )}
                 </div>
-              </div>
+              </>
             )}
           </>
         )}

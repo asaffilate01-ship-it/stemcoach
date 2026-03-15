@@ -1,6 +1,6 @@
 export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
-export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science";
+export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta";
 
 export interface Question {
   id: string;
@@ -72,6 +72,22 @@ export const subjects: SubjectInfo[] = [
     questionCount: 4000,
     topics: ["Programming", "Algorithms", "Data Structures", "Databases", "Networking", "Cybersecurity", "Operating Systems", "AI"],
   },
+  {
+    id: "ielts",
+    name: "IELTS",
+    icon: "🌐",
+    color: "200 80% 50%",
+    questionCount: 5000,
+    topics: ["Reading Comprehension", "Writing Task 1", "Writing Task 2", "Listening", "Speaking Part 1", "Speaking Part 2", "Speaking Part 3", "Academic Vocabulary", "Grammar for IELTS"],
+  },
+  {
+    id: "celta",
+    name: "CELTA",
+    icon: "📝",
+    color: "330 70% 55%",
+    questionCount: 3000,
+    topics: ["Language Analysis", "Teaching Methodology", "Classroom Management", "Lesson Planning", "Phonology", "Grammar Teaching", "Skills Teaching", "Error Correction"],
+  },
 ];
 
 export const curricula = [
@@ -118,6 +134,11 @@ export const curricula = [
   { id: "pakistan-olevel", label: "Pakistan O-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International"] },
   { id: "pakistan-alevel", label: "Pakistan A-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International (IAL)"] },
   { id: "pakistan-ecat-mdcat", label: "ECAT / MDCAT", country: "🇵🇰", boards: ["ECAT (Engineering)", "MDCAT (Medical)"] },
+
+  // ─── Language & Teaching ───
+  { id: "ielts-academic", label: "IELTS Academic", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
+  { id: "ielts-general", label: "IELTS General Training", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
+  { id: "celta", label: "CELTA", country: "🌍", boards: ["Cambridge CELTA"] },
 ];
 
 // All unique boards extracted for filtering
