@@ -1,14 +1,20 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { subjects, sampleQuestions, type Question } from "@/data/questions";
-import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useGameStats } from "@/hooks/useGameStats";
+import { StreakBar } from "@/components/gamification/StreakBar";
+import { XPPopup } from "@/components/gamification/XPPopup";
+import { BadgeUnlock } from "@/components/gamification/BadgeUnlock";
+import { CorrectAnimation } from "@/components/gamification/CorrectAnimation";
+import { QuizTimer } from "@/components/gamification/QuizTimer";
 import ReactMarkdown from "react-markdown";
 
 export default function Practice() {
@@ -16,6 +22,7 @@ export default function Practice() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
   const subject = subjects.find((s) => s.id === subjectId);
 
   const questions = useMemo(
@@ -33,6 +40,12 @@ export default function Practice() {
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [aiGrading, setAiGrading] = useState<any>(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const [xpGained, setXpGained] = useState(0);
+  const [showXP, setShowXP] = useState(false);
+  const [showCorrectAnim, setShowCorrectAnim] = useState(false);
+  const [lastCorrect, setLastCorrect] = useState(false);
+  const [timerRunning, setTimerRunning] = useState(true);
+  const [timeTaken, setTimeTaken] = useState(0);
 
   if (!subject || questions.length === 0) {
     return (
@@ -52,14 +65,19 @@ export default function Practice() {
   const question = questions[currentIndex];
   const isMultiSelect = question.type === "multi-select";
   const isEssay = question.type === "essay";
-  const isCorrect = isMultiSelect
-    ? false // handled differently
-    : selectedAnswer === question.correctAnswer;
+  const isCorrect = isMultiSelect ? false : selectedAnswer === question.correctAnswer;
+
+  const showXPPopup = (xp: number) => {
+    setXpGained(xp);
+    setShowXP(true);
+    setTimeout(() => setShowXP(false), 1500);
+  };
 
   const handleSubmit = async () => {
     if (isEssay) {
       if (!essayAnswer.trim()) return;
       setLoadingAI(true);
+      setTimerRunning(false);
       try {
         const { data, error } = await supabase.functions.invoke("ai-tutor", {
           body: {
@@ -76,10 +94,16 @@ export default function Practice() {
         if (error) throw error;
         setAiGrading(data.grading);
         setShowFeedback(true);
+        const passed = data.grading?.score >= data.grading?.max_marks * 0.6;
+        setLastCorrect(passed);
+        setShowCorrectAnim(true);
+        setTimeout(() => setShowCorrectAnim(false), 2000);
         setScore((prev) => ({
-          correct: prev.correct + (data.grading?.score >= data.grading?.max_marks * 0.6 ? 1 : 0),
+          correct: prev.correct + (passed ? 1 : 0),
           total: prev.total + 1,
         }));
+        const result = await recordAnswer(passed, question.points);
+        showXPPopup(result.xpGained);
       } catch (e: any) {
         toast({ title: "AI grading failed", description: e.message, variant: "destructive" });
       } finally {
@@ -89,12 +113,18 @@ export default function Practice() {
     }
 
     if (!selectedAnswer && selectedAnswers.size === 0) return;
+    setTimerRunning(false);
     setShowFeedback(true);
     const correct = isMultiSelect ? false : selectedAnswer === question.correctAnswer;
+    setLastCorrect(correct);
+    setShowCorrectAnim(true);
+    setTimeout(() => setShowCorrectAnim(false), 2000);
     setScore((prev) => ({
       correct: prev.correct + (correct ? 1 : 0),
       total: prev.total + 1,
     }));
+    const result = await recordAnswer(correct, question.points);
+    showXPPopup(result.xpGained);
   };
 
   const handleNext = () => {
@@ -105,6 +135,8 @@ export default function Practice() {
     setShowTips(false);
     setAiExplanation(null);
     setAiGrading(null);
+    setTimerRunning(true);
+    setTimeTaken(0);
     setCurrentIndex((prev) => (prev + 1) % questions.length);
   };
 
@@ -142,12 +174,17 @@ export default function Practice() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="container mx-auto max-w-3xl px-4 py-8">
+        {/* Gamification Bar */}
+        {user && <div className="mb-4"><StreakBar stats={stats} /></div>}
+
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <button onClick={() => navigate("/subjects")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Subjects
           </button>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <QuizTimer isRunning={timerRunning} onTimeUpdate={setTimeTaken} />
+            <CorrectAnimation show={showCorrectAnim} correct={lastCorrect} />
             <span className="stem-label">{score.correct}/{score.total} correct</span>
             <span className="stem-label">Q{currentIndex + 1}/{questions.length}</span>
           </div>
@@ -186,13 +223,15 @@ export default function Practice() {
                     const isOptionCorrect = option === question.correctAnswer;
 
                     let optionClass = "border-2 border-transparent hover:border-primary/20";
-                    if (showFeedback && isOptionCorrect) optionClass = "stem-success-card";
+                    if (showFeedback && isOptionCorrect) optionClass = "stem-success-card animate-pulse-success";
                     else if (showFeedback && isSelected && !isOptionCorrect) optionClass = "stem-error-card";
                     else if (isSelected && !showFeedback) optionClass = "border-2 border-primary bg-primary/5";
 
                     return (
-                      <button
+                      <motion.button
                         key={option}
+                        whileHover={!showFeedback ? { scale: 1.01 } : {}}
+                        whileTap={!showFeedback ? { scale: 0.99 } : {}}
                         onClick={() => {
                           if (showFeedback) return;
                           isMultiSelect ? toggleMultiSelect(option) : setSelectedAnswer(option);
@@ -204,7 +243,7 @@ export default function Practice() {
                         <span className="text-sm font-medium">{option}</span>
                         {showFeedback && isOptionCorrect && <CheckCircle2 className="ml-auto h-5 w-5 text-success" />}
                         {showFeedback && isSelected && !isOptionCorrect && <XCircle className="ml-auto h-5 w-5 text-destructive" />}
-                      </button>
+                      </motion.button>
                     );
                   })}
                 </div>
@@ -255,6 +294,11 @@ export default function Practice() {
                     ) : (
                       <><XCircle className="h-5 w-5 text-destructive" /><span className="font-semibold text-destructive">Incorrect</span>
                       <span className="text-sm text-muted-foreground">— Correct: {question.correctAnswer}</span></>
+                    )}
+                    {timeTaken > 0 && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        ⏱ {timeTaken}s
+                      </span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">{question.explanation}</p>
@@ -356,6 +400,15 @@ export default function Practice() {
             </AnimatePresence>
           </motion.div>
         </AnimatePresence>
+
+        {/* XP Popup */}
+        <XPPopup xp={xpGained} show={showXP} />
+
+        {/* Badge Unlock Modal */}
+        <BadgeUnlock
+          badge={newBadges.length > 0 ? newBadges[0] : null}
+          onDismiss={() => newBadges.length > 0 && dismissBadge(newBadges[0].id)}
+        />
       </main>
     </div>
   );

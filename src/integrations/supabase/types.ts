@@ -58,6 +58,78 @@ export type Database = {
           },
         ]
       }
+      badges: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_subject: string | null
+          requirement_type: string
+          requirement_value: number
+          xp_reward: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          name: string
+          requirement_subject?: string | null
+          requirement_type: string
+          requirement_value?: number
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_subject?: string | null
+          requirement_type?: string
+          requirement_value?: number
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      certificates: {
+        Row: {
+          achievement_type: string
+          id: string
+          issued_at: string
+          score_percent: number | null
+          subject: string | null
+          title: string
+          user_id: string
+          verification_code: string
+        }
+        Insert: {
+          achievement_type: string
+          id?: string
+          issued_at?: string
+          score_percent?: number | null
+          subject?: string | null
+          title: string
+          user_id: string
+          verification_code?: string
+        }
+        Update: {
+          achievement_type?: string
+          id?: string
+          issued_at?: string
+          score_percent?: number | null
+          subject?: string | null
+          title?: string
+          user_id?: string
+          verification_code?: string
+        }
+        Relationships: []
+      }
       class_members: {
         Row: {
           class_id: string
@@ -225,6 +297,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -240,6 +341,48 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          correct_answers: number
+          id: string
+          last_active_date: string | null
+          level: number
+          longest_streak: number
+          perfect_scores: number
+          streak: number
+          total_questions: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          correct_answers?: number
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          longest_streak?: number
+          perfect_scores?: number
+          streak?: number
+          total_questions?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          correct_answers?: number
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          longest_streak?: number
+          perfect_scores?: number
+          streak?: number
+          total_questions?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
         }
         Relationships: []
       }
