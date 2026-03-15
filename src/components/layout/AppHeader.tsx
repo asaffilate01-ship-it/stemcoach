@@ -80,6 +80,7 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <NotificationBell />
           {user ? (
             <>
               <span className="hidden text-sm text-muted-foreground sm:inline">
