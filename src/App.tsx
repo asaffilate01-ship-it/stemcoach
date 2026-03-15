@@ -20,6 +20,8 @@ import AdminGenerate from "./pages/AdminGenerate";
 import Badges from "./pages/Badges";
 import Leaderboard from "./pages/Leaderboard";
 import Certificates from "./pages/Certificates";
+import Pricing from "./pages/Pricing";
+import AITutor from "./pages/AITutor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/ai-tutor" element={<AITutor />} />
 
             {/* Student */}
             <Route path="/subjects" element={<Subjects />} />

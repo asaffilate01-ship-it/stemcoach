@@ -1,34 +1,52 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 
-const navItems = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: typeof BookOpen;
+  roles?: string[]; // if set, only show for these roles. empty = public
+}
+
+const navItems: NavItem[] = [
   { to: "/", label: "Home", icon: BookOpen },
   { to: "/subjects", label: "Subjects", icon: GraduationCap },
-  { to: "/my-classes", label: "Classes", icon: BookCheck },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/ai-tutor", label: "AI Tutor", icon: Bot },
+  { to: "/my-classes", label: "Classes", icon: BookCheck, roles: ["student"] },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"] },
   { to: "/mock-exam", label: "Exam", icon: Trophy },
   { to: "/badges", label: "Badges", icon: Award },
   { to: "/leaderboard", label: "Board", icon: Medal },
-  { to: "/certificates", label: "Certs", icon: ScrollText },
-  { to: "/parent", label: "Parent", icon: Eye },
-  { to: "/teacher", label: "Teacher", icon: Users },
-  { to: "/institution", label: "Admin", icon: Building2 },
-  { to: "/admin/generate", label: "Generate", icon: Sparkles },
+  { to: "/certificates", label: "Certs", icon: ScrollText, roles: ["student", "admin"] },
+  { to: "/parent", label: "Parent", icon: Eye, roles: ["parent"] },
+  { to: "/teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"] },
+  { to: "/institution", label: "Admin", icon: Building2, roles: ["admin"] },
+  { to: "/admin/generate", label: "Generate", icon: Sparkles, roles: ["admin"] },
+  { to: "/pricing", label: "Pricing", icon: CreditCard },
 ];
 
 export function AppHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { roles, loading: rolesLoading } = useUserRole();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
+
+  const visibleItems = navItems.filter(item => {
+    if (!item.roles) return true; // public nav item
+    if (!user) return false; // hide role-based items for guests
+    if (rolesLoading) return false;
+    return item.roles.some(r => roles.includes(r as any));
+  });
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
@@ -41,7 +59,7 @@ export function AppHeader() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
@@ -83,7 +101,7 @@ export function AppHeader() {
 
       {mobileOpen && (
         <nav className="border-t bg-background px-4 py-3 md:hidden">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
