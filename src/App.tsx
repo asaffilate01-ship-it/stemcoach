@@ -25,6 +25,8 @@ import Leaderboard from "./pages/Leaderboard";
 import Certificates from "./pages/Certificates";
 import Pricing from "./pages/Pricing";
 import AITutor from "./pages/AITutor";
+import StudyPlanner from "./pages/StudyPlanner";
+import WeakTopicDrill from "./pages/WeakTopicDrill";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
