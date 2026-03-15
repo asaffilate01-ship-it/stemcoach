@@ -10,6 +10,7 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/mock-exam", label: "Mock Exam", icon: Trophy },
   { to: "/teacher", label: "Teacher", icon: Users },
+  { to: "/admin/generate", label: "Generate", icon: Sparkles },
 ];
 
 export function AppHeader() {
