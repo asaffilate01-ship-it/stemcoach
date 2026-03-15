@@ -481,6 +481,45 @@ export type Database = {
         }
         Relationships: []
       }
+      study_goals: {
+        Row: {
+          completed_minutes: number
+          completed_questions: number
+          created_at: string
+          date: string
+          id: string
+          subjects: string[]
+          target_minutes: number
+          target_questions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_minutes?: number
+          completed_questions?: number
+          created_at?: string
+          date?: string
+          id?: string
+          subjects?: string[]
+          target_minutes?: number
+          target_questions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_minutes?: number
+          completed_questions?: number
+          created_at?: string
+          date?: string
+          id?: string
+          subjects?: string[]
+          target_minutes?: number
+          target_questions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tenant_members: {
         Row: {
           approved_at: string | null

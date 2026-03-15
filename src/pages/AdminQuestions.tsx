@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Search, Trash2, Edit3, Save, X, ChevronLeft, ChevronRight, Database } from "lucide-react";
+import { CSVImport } from "@/components/admin/CSVImport";
 
 export default function AdminQuestions() {
   const { toast } = useToast();
@@ -97,6 +98,9 @@ export default function AdminQuestions() {
             Browse, search, edit, and delete questions. {data?.total.toLocaleString()} total questions.
           </p>
         </div>
+
+        {/* CSV Import */}
+        <CSVImport />
 
         {/* Filters */}
         <div className="stem-card mb-6 rounded-xl p-4">

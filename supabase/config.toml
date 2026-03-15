@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.geo-detect]
 verify_jwt = false
+
+[functions.weak-topic-drill]
+verify_jwt = false

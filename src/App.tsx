@@ -25,6 +25,8 @@ import Leaderboard from "./pages/Leaderboard";
 import Certificates from "./pages/Certificates";
 import Pricing from "./pages/Pricing";
 import AITutor from "./pages/AITutor";
+import StudyPlanner from "./pages/StudyPlanner";
+import WeakTopicDrill from "./pages/WeakTopicDrill";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +52,7 @@ const App = () => (
             <Route path="/mock-exam" element={<MockExam />} />
             <Route path="/badges" element={<Badges />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/weak-drills" element={<WeakTopicDrill />} />
 
             {/* Protected */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -61,6 +64,7 @@ const App = () => (
             <Route path="/admin/generate" element={<ProtectedRoute><AdminGenerate /></ProtectedRoute>} />
             <Route path="/admin/questions" element={<ProtectedRoute><AdminQuestions /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/study-planner" element={<ProtectedRoute><StudyPlanner /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
