@@ -1,0 +1,174 @@
+import { useState } from "react";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
+import { Users, BookOpen, Plus, Copy, BarChart3, ClipboardList } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { subjects, curricula } from "@/data/questions";
+
+export default function TeacherDashboard() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showCreate, setShowCreate] = useState(false);
+  const [newClassName, setNewClassName] = useState("");
+  const [newClassSubject, setNewClassSubject] = useState("mathematics");
+  const [newClassCurriculum, setNewClassCurriculum] = useState("uk-alevel");
+
+  const { data: classes = [], isLoading } = useQuery({
+    queryKey: ["teacher-classes", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("classes")
+        .select("*")
+        .eq("teacher_id", user!.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const createClass = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("classes").insert({
+        teacher_id: user!.id,
+        name: newClassName,
+        subject: newClassSubject,
+        curriculum: newClassCurriculum,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teacher-classes"] });
+      setShowCreate(false);
+      setNewClassName("");
+      toast({ title: "Class created", description: "Students can now join with the class code." });
+    },
+    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast({ title: "Copied!", description: `Join code: ${code}` });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <AppHeader />
+      <main className="container mx-auto px-4 py-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <div className="stem-label mb-2">Teacher Portal</div>
+            <h1 className="stem-heading text-3xl">Your Classes</h1>
+          </div>
+          <Button onClick={() => setShowCreate(!showCreate)} className="gap-2 rounded">
+            <Plus className="h-4 w-4" /> Create Class
+          </Button>
+        </div>
+
+        {/* Create Class Form */}
+        {showCreate && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="stem-card mb-6 rounded-xl p-6"
+          >
+            <h3 className="mb-4 font-semibold">New Class</h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <Label className="text-sm">Class Name</Label>
+                <Input
+                  value={newClassName}
+                  onChange={(e) => setNewClassName(e.target.value)}
+                  placeholder="Year 12 Physics"
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Subject</Label>
+                <select
+                  value={newClassSubject}
+                  onChange={(e) => setNewClassSubject(e.target.value)}
+                  className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                >
+                  {subjects.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label className="text-sm">Curriculum</Label>
+                <select
+                  value={newClassCurriculum}
+                  onChange={(e) => setNewClassCurriculum(e.target.value)}
+                  className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                >
+                  {curricula.map((c) => (
+                    <option key={c.id} value={c.id}>{c.country} {c.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <Button onClick={() => createClass.mutate()} disabled={!newClassName} className="rounded">
+                Create
+              </Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)} className="rounded">
+                Cancel
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Classes Grid */}
+        {isLoading ? (
+          <div className="text-center text-muted-foreground">Loading...</div>
+        ) : classes.length === 0 ? (
+          <div className="stem-card rounded-xl p-8 text-center">
+            <Users className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
+            <h3 className="mb-2 font-semibold">No classes yet</h3>
+            <p className="text-sm text-muted-foreground">Create your first class to start tracking students.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {classes.map((cls: any, i: number) => (
+              <motion.div
+                key={cls.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className="stem-card rounded-xl p-6"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  <button
+                    onClick={() => copyCode(cls.join_code)}
+                    className="flex items-center gap-1 rounded bg-muted px-2 py-1 text-xs font-mono text-muted-foreground hover:text-foreground"
+                  >
+                    <Copy className="h-3 w-3" />
+                    {cls.join_code}
+                  </button>
+                </div>
+                <h3 className="mb-1 font-semibold">{cls.name}</h3>
+                <p className="text-sm text-muted-foreground capitalize">{cls.subject} · {cls.curriculum}</p>
+                <div className="mt-4 flex gap-2">
+                  <Button variant="outline" size="sm" className="gap-1.5 rounded text-xs">
+                    <BarChart3 className="h-3 w-3" /> Analytics
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1.5 rounded text-xs">
+                    <ClipboardList className="h-3 w-3" /> Assign
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

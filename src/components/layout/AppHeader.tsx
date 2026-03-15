@@ -1,18 +1,27 @@
-import { Link, useLocation } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { to: "/", label: "Home", icon: BookOpen },
   { to: "/subjects", label: "Subjects", icon: GraduationCap },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/mock-exam", label: "Mock Exam", icon: Trophy },
+  { to: "/teacher", label: "Teacher", icon: Users },
 ];
 
 export function AppHeader() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
@@ -42,9 +51,20 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" className="hidden rounded sm:inline-flex">
-            Sign Up Free
-          </Button>
+          {user ? (
+            <>
+              <span className="hidden text-sm text-muted-foreground sm:inline">
+                {user.email}
+              </span>
+              <Button size="sm" variant="outline" onClick={handleSignOut} className="gap-1.5 rounded">
+                <LogOut className="h-3.5 w-3.5" /> Sign Out
+              </Button>
+            </>
+          ) : (
+            <Button size="sm" onClick={() => navigate("/auth")} className="rounded">
+              Sign In
+            </Button>
+          )}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="rounded p-1.5 text-muted-foreground hover:text-foreground md:hidden"
@@ -71,9 +91,11 @@ export function AppHeader() {
               {item.label}
             </Link>
           ))}
-          <Button size="sm" className="mt-2 w-full rounded">
-            Sign Up Free
-          </Button>
+          {!user && (
+            <Button size="sm" onClick={() => { setMobileOpen(false); navigate("/auth"); }} className="mt-2 w-full rounded">
+              Sign In
+            </Button>
+          )}
         </nav>
       )}
     </header>
