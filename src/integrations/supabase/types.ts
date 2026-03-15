@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      attempts: {
+        Row: {
+          ai_feedback: string | null
+          ai_score: number | null
+          answer: string
+          correct: boolean
+          created_at: string
+          id: string
+          question_id: string
+          time_taken_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          ai_score?: number | null
+          answer: string
+          correct: boolean
+          created_at?: string
+          id?: string
+          question_id: string
+          time_taken_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          ai_score?: number | null
+          answer?: string
+          correct?: boolean
+          created_at?: string
+          id?: string
+          question_id?: string
+          time_taken_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_members: {
         Row: {
           class_id: string
@@ -73,15 +117,147 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          allow_multiple_answers: boolean
+          boards: string[]
+          command_word: string | null
+          correct_answer: string
+          correct_answers: string[] | null
+          created_at: string
+          curriculum: string
+          difficulty: number
+          exam_tip: string
+          explanation: string
+          formula: string | null
+          id: string
+          mark_scheme: string | null
+          max_marks: number | null
+          model_answer: string | null
+          options: Json | null
+          points: number
+          question_text: string
+          question_type: string
+          subject: string
+          subtopic: string
+          topic: string
+          tuition_tips: string[]
+          worked_solution: string
+        }
+        Insert: {
+          allow_multiple_answers?: boolean
+          boards?: string[]
+          command_word?: string | null
+          correct_answer?: string
+          correct_answers?: string[] | null
+          created_at?: string
+          curriculum: string
+          difficulty: number
+          exam_tip?: string
+          explanation?: string
+          formula?: string | null
+          id?: string
+          mark_scheme?: string | null
+          max_marks?: number | null
+          model_answer?: string | null
+          options?: Json | null
+          points?: number
+          question_text: string
+          question_type?: string
+          subject: string
+          subtopic: string
+          topic: string
+          tuition_tips?: string[]
+          worked_solution?: string
+        }
+        Update: {
+          allow_multiple_answers?: boolean
+          boards?: string[]
+          command_word?: string | null
+          correct_answer?: string
+          correct_answers?: string[] | null
+          created_at?: string
+          curriculum?: string
+          difficulty?: number
+          exam_tip?: string
+          explanation?: string
+          formula?: string | null
+          id?: string
+          mark_scheme?: string | null
+          max_marks?: number | null
+          model_answer?: string | null
+          options?: Json | null
+          points?: number
+          question_text?: string
+          question_type?: string
+          subject?: string
+          subtopic?: string
+          topic?: string
+          tuition_tips?: string[]
+          worked_solution?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "teacher" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -208,6 +384,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "teacher", "student"],
+    },
   },
 } as const
