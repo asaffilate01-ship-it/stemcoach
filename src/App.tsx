@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import MockExam from "./pages/MockExam";
 import Auth from "./pages/Auth";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import AdminGenerate from "./pages/AdminGenerate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/mock-exam" element={<MockExam />} />
             <Route path="/teacher" element={<TeacherDashboard />} />
+            <Route path="/admin/generate" element={<AdminGenerate />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
