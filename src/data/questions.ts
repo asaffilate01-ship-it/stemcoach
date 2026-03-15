@@ -1,4 +1,4 @@
-export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay";
+export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
 export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science";
 
