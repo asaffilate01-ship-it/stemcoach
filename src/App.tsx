@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import MockExam from "./pages/MockExam";
 import Auth from "./pages/Auth";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import ParentDashboard from "./pages/ParentDashboard";
 import AdminGenerate from "./pages/AdminGenerate";
 import Badges from "./pages/Badges";
 import Leaderboard from "./pages/Leaderboard";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/teacher" element={<TeacherDashboard />} />
+            <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/admin/generate" element={<AdminGenerate />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

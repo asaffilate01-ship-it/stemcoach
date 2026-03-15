@@ -14,6 +14,130 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_sessions: {
+        Row: {
+          device_info: string | null
+          id: string
+          ip_address: string | null
+          last_active: string
+          session_token: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          last_active?: string
+          session_token: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          last_active?: string
+          session_token?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      assignment_submissions: {
+        Row: {
+          assignment_id: string
+          completed_at: string | null
+          id: string
+          score: number | null
+          started_at: string
+          student_id: string
+          total: number | null
+        }
+        Insert: {
+          assignment_id: string
+          completed_at?: string | null
+          id?: string
+          score?: number | null
+          started_at?: string
+          student_id: string
+          total?: number | null
+        }
+        Update: {
+          assignment_id?: string
+          completed_at?: string | null
+          id?: string
+          score?: number | null
+          started_at?: string
+          student_id?: string
+          total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          class_id: string
+          created_at: string
+          curriculum: string
+          description: string | null
+          difficulty_max: number
+          difficulty_min: number
+          due_date: string | null
+          id: string
+          question_count: number
+          subject: string
+          teacher_id: string
+          title: string
+          topics: string[]
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          curriculum: string
+          description?: string | null
+          difficulty_max?: number
+          difficulty_min?: number
+          due_date?: string | null
+          id?: string
+          question_count?: number
+          subject: string
+          teacher_id: string
+          title: string
+          topics?: string[]
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          curriculum?: string
+          description?: string | null
+          difficulty_max?: number
+          difficulty_min?: number
+          due_date?: string | null
+          id?: string
+          question_count?: number
+          subject?: string
+          teacher_id?: string
+          title?: string
+          topics?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attempts: {
         Row: {
           ai_feedback: string | null
@@ -189,6 +313,33 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_links: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          link_code: string
+          parent_id: string
+          status: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          link_code?: string
+          parent_id: string
+          status?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          link_code?: string
+          parent_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -297,6 +448,89 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_members: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          id: string
+          joined_at: string
+          role: string
+          status: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          custom_domain: string | null
+          id: string
+          logo_url: string | null
+          max_students: number | null
+          name: string
+          plan: string
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          logo_url?: string | null
+          max_students?: number | null
+          name: string
+          plan?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          logo_url?: string | null
+          max_students?: number | null
+          name?: string
+          plan?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -400,7 +634,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "teacher" | "student"
+      app_role: "admin" | "teacher" | "student" | "parent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -528,7 +762,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "teacher", "student"],
+      app_role: ["admin", "teacher", "student", "parent"],
     },
   },
 } as const
