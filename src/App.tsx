@@ -17,6 +17,9 @@ import ParentDashboard from "./pages/ParentDashboard";
 import StudentClasses from "./pages/StudentClasses";
 import TenantAdmin from "./pages/TenantAdmin";
 import AdminGenerate from "./pages/AdminGenerate";
+import AdminQuestions from "./pages/AdminQuestions";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import Badges from "./pages/Badges";
 import Leaderboard from "./pages/Leaderboard";
 import Certificates from "./pages/Certificates";
@@ -56,6 +59,9 @@ const App = () => (
             <Route path="/parent" element={<ProtectedRoute><ParentDashboard /></ProtectedRoute>} />
             <Route path="/institution" element={<ProtectedRoute><TenantAdmin /></ProtectedRoute>} />
             <Route path="/admin/generate" element={<ProtectedRoute><AdminGenerate /></ProtectedRoute>} />
+            <Route path="/admin/questions" element={<ProtectedRoute><AdminQuestions /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,9 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { NotificationBell } from "./NotificationBell";
 
 interface NavItem {
   to: string;
@@ -26,6 +27,9 @@ const navItems: NavItem[] = [
   { to: "/teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"] },
   { to: "/institution", label: "Admin", icon: Building2, roles: ["admin"] },
   { to: "/admin/generate", label: "Generate", icon: Sparkles, roles: ["admin"] },
+  { to: "/admin/questions", label: "Content", icon: Database, roles: ["admin"] },
+  { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"] },
+  { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"] },
   { to: "/pricing", label: "Pricing", icon: CreditCard },
 ];
 
@@ -76,6 +80,7 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <NotificationBell />
           {user ? (
             <>
               <span className="hidden text-sm text-muted-foreground sm:inline">
