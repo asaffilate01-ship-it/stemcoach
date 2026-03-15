@@ -28,7 +28,9 @@ const navItems: NavItem[] = [
   { to: "/institution", label: "Admin", icon: Building2, roles: ["admin"] },
   { to: "/admin/generate", label: "Generate", icon: Sparkles, roles: ["admin"] },
   { to: "/admin/questions", label: "Content", icon: Database, roles: ["admin"] },
+  { to: "/weak-drills", label: "Drills", icon: Brain },
   { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"] },
+  { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"] },
   { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"] },
   { to: "/pricing", label: "Pricing", icon: CreditCard },
 ];

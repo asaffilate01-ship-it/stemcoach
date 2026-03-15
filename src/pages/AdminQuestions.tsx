@@ -99,6 +99,9 @@ export default function AdminQuestions() {
           </p>
         </div>
 
+        {/* CSV Import */}
+        <CSVImport />
+
         {/* Filters */}
         <div className="stem-card mb-6 rounded-xl p-4">
           <div className="flex flex-wrap gap-3">
