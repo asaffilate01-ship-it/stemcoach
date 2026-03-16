@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { usePushNotifications } from "@/hooks/useNotifications";
 import { motion } from "framer-motion";
-import { User, Shield, Bell, Link2, Check, X } from "lucide-react";
+import { User, Shield, Bell, Link2, Check, X, BellRing } from "lucide-react";
 
 interface PendingLink {
   id: string;
@@ -201,6 +202,9 @@ export default function Settings() {
             </div>
           </motion.div>
 
+          {/* Push Notifications */}
+          <PushNotificationCard />
+
           {/* Security */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -230,5 +234,47 @@ export default function Settings() {
         </div>
       </main>
     </div>
+  );
+}
+
+function PushNotificationCard() {
+  const { permission, requestPermission } = usePushNotifications();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.15 }}
+      className="stem-card rounded-xl p-6"
+    >
+      <h3 className="mb-4 flex items-center gap-2 font-semibold">
+        <BellRing className="h-4 w-4 text-primary" /> Browser Push Notifications
+      </h3>
+      <div className="flex items-center justify-between rounded-lg border p-3">
+        <div>
+          <p className="text-sm font-medium">
+            {permission === "granted" ? "Notifications enabled" : permission === "denied" ? "Notifications blocked" : "Enable push notifications"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {permission === "granted"
+              ? "You'll receive study reminders and alerts"
+              : permission === "denied"
+              ? "Unblock in browser settings to enable"
+              : "Get reminders for study goals, streaks, and due dates"}
+          </p>
+        </div>
+        {permission === "default" && (
+          <Button size="sm" onClick={requestPermission} className="rounded">
+            Enable
+          </Button>
+        )}
+        {permission === "granted" && (
+          <span className="rounded bg-success/10 px-2 py-1 text-xs font-medium text-success">Active</span>
+        )}
+        {permission === "denied" && (
+          <span className="rounded bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">Blocked</span>
+        )}
+      </div>
+    </motion.div>
   );
 }

@@ -28,6 +28,7 @@ import AITutor from "./pages/AITutor";
 import StudyPlanner from "./pages/StudyPlanner";
 import WeakTopicDrill from "./pages/WeakTopicDrill";
 import LiveClassroom from "./pages/LiveClassroom";
+import ProgressReports from "./pages/ProgressReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/study-planner" element={<ProtectedRoute><StudyPlanner /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/progress-report" element={<ProtectedRoute><ProgressReports /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,6 +33,7 @@ const navItems: NavItem[] = [
   { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"] },
   { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"] },
   { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"] },
+  { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"] },
   { to: "/pricing", label: "Pricing", icon: CreditCard },
 ];
 
