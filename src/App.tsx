@@ -27,6 +27,7 @@ import Pricing from "./pages/Pricing";
 import AITutor from "./pages/AITutor";
 import StudyPlanner from "./pages/StudyPlanner";
 import WeakTopicDrill from "./pages/WeakTopicDrill";
+import LiveClassroom from "./pages/LiveClassroom";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
