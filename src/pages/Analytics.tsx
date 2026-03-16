@@ -1,10 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, Target, BookOpen, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { BarChart3, TrendingUp, Target, BookOpen, AlertTriangle } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+} from "recharts";
 
 interface AttemptWithQuestion {
   id: string;
@@ -56,7 +62,6 @@ export default function Analytics() {
 
     if (!data?.length) { setLoading(false); return; }
 
-    // Fetch question details
     const questionIds = [...new Set(data.map(a => a.question_id))];
     const { data: questions } = await supabase
       .from("questions")
@@ -130,7 +135,7 @@ export default function Analytics() {
       });
       const correct = weekAttempts.filter(a => a.correct).length;
       weeks.push({
-        label: `W${4 - i}`,
+        label: `Week ${4 - i}`,
         total: weekAttempts.length,
         correct,
         accuracy: weekAttempts.length > 0 ? Math.round((correct / weekAttempts.length) * 100) : 0,
@@ -139,11 +144,34 @@ export default function Analytics() {
     return weeks;
   }, [attempts]);
 
+  // Radar chart data
+  const radarData = useMemo(() => {
+    return subjectBreakdowns.slice(0, 6).map(s => ({
+      subject: s.subject.length > 8 ? s.subject.slice(0, 8) + "…" : s.subject,
+      accuracy: s.accuracy,
+      fullMark: 100,
+    }));
+  }, [subjectBreakdowns]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="flex items-center justify-center py-20 text-muted-foreground">Loading analytics...</div>
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="mb-2 h-4 w-24" />
+          <Skeleton className="mb-8 h-8 w-48" />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              ))}
+            </div>
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-48 w-full rounded-xl" />
+              <Skeleton className="h-48 w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -151,133 +179,156 @@ export default function Analytics() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="stem-label mb-2">Performance</div>
-          <h1 className="stem-heading text-3xl">Subject Analytics</h1>
-        </div>
-
-        {attempts.length === 0 ? (
-          <div className="stem-card rounded-xl p-12 text-center">
-            <BarChart3 className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-            <h3 className="mb-2 text-lg font-semibold">No data yet</h3>
-            <p className="text-sm text-muted-foreground">Practice some questions to see your analytics.</p>
+      <PageTransition>
+        <main className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <div className="stem-label mb-2">Performance</div>
+            <h1 className="stem-heading text-3xl">Subject Analytics</h1>
           </div>
-        ) : (
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* Subject Cards */}
-            <div className="space-y-4 lg:col-span-1">
-              <h3 className="flex items-center gap-2 text-sm font-semibold">
-                <BookOpen className="h-4 w-4 text-primary" /> By Subject
-              </h3>
-              {subjectBreakdowns.map((s, i) => (
-                <motion.button
-                  key={s.subject}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  onClick={() => setSelectedSubject(selectedSubject === s.subject ? null : s.subject)}
-                  className={`w-full rounded-xl border p-4 text-left transition-all ${
-                    selectedSubject === s.subject
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/30"
-                  }`}
-                >
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-semibold capitalize">{s.subject}</span>
-                    <span className={`text-sm font-bold ${
-                      s.accuracy >= 80 ? "text-success" : s.accuracy >= 60 ? "text-primary" : "text-destructive"
-                    }`}>{s.accuracy}%</span>
-                  </div>
-                  <Progress value={s.accuracy} className="mb-2 h-2" />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{s.total} questions</span>
-                    <span>{s.correct} correct</span>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
 
-            {/* Detail Panel */}
-            <div className="space-y-6 lg:col-span-2">
-              {/* Weekly Trend */}
-              <div className="stem-card rounded-xl p-6">
-                <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                  <TrendingUp className="h-4 w-4 text-primary" /> Weekly Trend
+          {attempts.length === 0 ? (
+            <div className="stem-card rounded-xl p-12 text-center">
+              <BarChart3 className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+              <h3 className="mb-2 text-lg font-semibold">No data yet</h3>
+              <p className="text-sm text-muted-foreground">Practice some questions to see your analytics.</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Subject Cards */}
+              <div className="space-y-4 lg:col-span-1">
+                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                  <BookOpen className="h-4 w-4 text-primary" /> By Subject
                 </h3>
-                <div className="grid grid-cols-4 gap-3">
-                  {weeklyTrend.map((w, i) => (
-                    <div key={i} className="text-center">
-                      <div className="mx-auto mb-2 flex h-24 w-full items-end justify-center rounded-lg bg-muted/50">
-                        <div
-                          className="w-8 rounded-t bg-primary/80 transition-all"
-                          style={{ height: `${Math.max(w.accuracy, 4)}%` }}
-                        />
-                      </div>
-                      <div className="text-xs font-semibold">{w.accuracy}%</div>
-                      <div className="text-[10px] text-muted-foreground">{w.label} · {w.total}q</div>
+                {subjectBreakdowns.map((s, i) => (
+                  <motion.button
+                    key={s.subject}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => setSelectedSubject(selectedSubject === s.subject ? null : s.subject)}
+                    className={`w-full rounded-xl border p-4 text-left transition-all ${
+                      selectedSubject === s.subject
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/30"
+                    }`}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-sm font-semibold capitalize">{s.subject}</span>
+                      <span className={`text-sm font-bold ${
+                        s.accuracy >= 80 ? "text-success" : s.accuracy >= 60 ? "text-primary" : "text-destructive"
+                      }`}>{s.accuracy}%</span>
                     </div>
-                  ))}
-                </div>
+                    <Progress value={s.accuracy} className="mb-2 h-2" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{s.total} questions</span>
+                      <span>{s.correct} correct</span>
+                    </div>
+                  </motion.button>
+                ))}
+
+                {/* Radar Chart */}
+                {radarData.length >= 3 && (
+                  <div className="stem-card rounded-xl p-4">
+                    <h4 className="mb-2 text-xs font-semibold text-muted-foreground">Subject Radar</h4>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <RadarChart data={radarData}>
+                        <PolarGrid stroke="hsl(var(--border))" />
+                        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                        <Radar name="Accuracy" dataKey="accuracy" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} strokeWidth={2} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </div>
 
-              {/* Topic Breakdown */}
-              {selected && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="stem-card rounded-xl p-6"
-                >
-                  <h3 className="mb-4 flex items-center gap-2 font-semibold capitalize">
-                    <Target className="h-4 w-4 text-primary" /> {selected.subject} — Topics
-                  </h3>
-                  <div className="space-y-3">
-                    {selected.topics.map((t) => (
-                      <div key={t.topic} className="rounded-lg border p-3">
-                        <div className="mb-1.5 flex items-center justify-between">
-                          <span className="text-sm font-medium">{t.topic}</span>
-                          <div className="flex items-center gap-2">
-                            {t.avgTime > 0 && (
-                              <span className="text-[10px] text-muted-foreground">{t.avgTime}s avg</span>
-                            )}
-                            <span className={`text-sm font-bold ${
-                              t.accuracy >= 80 ? "text-success" : t.accuracy >= 60 ? "text-primary" : "text-destructive"
-                            }`}>{t.accuracy}%</span>
-                          </div>
-                        </div>
-                        <Progress value={t.accuracy} className="h-1.5" />
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {t.correct}/{t.total} correct
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Weak Topics */}
-              {weakTopics.length > 0 && (
+              {/* Detail Panel */}
+              <div className="space-y-6 lg:col-span-2">
+                {/* Weekly Trend Chart */}
                 <div className="stem-card rounded-xl p-6">
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <AlertTriangle className="h-4 w-4 text-warning" /> Focus Areas
+                    <TrendingUp className="h-4 w-4 text-primary" /> Weekly Trend
                   </h3>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {weakTopics.map((t) => (
-                      <div key={`${t.subject}-${t.topic}`} className="rounded-lg border border-warning/20 bg-warning/5 p-3">
-                        <div className="mb-1 flex items-center justify-between">
-                          <span className="text-sm font-medium">{t.topic}</span>
-                          <span className="text-xs font-bold text-destructive">{t.accuracy}%</span>
-                        </div>
-                        <div className="text-xs capitalize text-muted-foreground">{t.subject} · {t.total} attempts</div>
-                      </div>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={weeklyTrend}>
+                      <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} width={30} domain={[0, 100]} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "0.75rem",
+                          fontSize: "0.75rem",
+                        }}
+                        formatter={(value: number, name: string) => [
+                          name === "accuracy" ? `${value}%` : value,
+                          name === "accuracy" ? "Accuracy" : "Questions",
+                        ]}
+                      />
+                      <Bar dataKey="accuracy" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} name="accuracy" />
+                      <Bar dataKey="total" fill="hsl(var(--primary) / 0.25)" radius={[6, 6, 0, 0]} name="total" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-              )}
+
+                {/* Topic Breakdown */}
+                {selected && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="stem-card rounded-xl p-6"
+                  >
+                    <h3 className="mb-4 flex items-center gap-2 font-semibold capitalize">
+                      <Target className="h-4 w-4 text-primary" /> {selected.subject} — Topics
+                    </h3>
+                    <div className="space-y-3">
+                      {selected.topics.map((t) => (
+                        <div key={t.topic} className="rounded-lg border p-3">
+                          <div className="mb-1.5 flex items-center justify-between">
+                            <span className="text-sm font-medium">{t.topic}</span>
+                            <div className="flex items-center gap-2">
+                              {t.avgTime > 0 && (
+                                <span className="text-[10px] text-muted-foreground">{t.avgTime}s avg</span>
+                              )}
+                              <span className={`text-sm font-bold ${
+                                t.accuracy >= 80 ? "text-success" : t.accuracy >= 60 ? "text-primary" : "text-destructive"
+                              }`}>{t.accuracy}%</span>
+                            </div>
+                          </div>
+                          <Progress value={t.accuracy} className="h-1.5" />
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {t.correct}/{t.total} correct
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Weak Topics */}
+                {weakTopics.length > 0 && (
+                  <div className="stem-card rounded-xl p-6">
+                    <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                      <AlertTriangle className="h-4 w-4 text-warning" /> Focus Areas
+                    </h3>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {weakTopics.map((t) => (
+                        <div key={`${t.subject}-${t.topic}`} className="rounded-lg border border-warning/20 bg-warning/5 p-3">
+                          <div className="mb-1 flex items-center justify-between">
+                            <span className="text-sm font-medium">{t.topic}</span>
+                            <span className="text-xs font-bold text-destructive">{t.accuracy}%</span>
+                          </div>
+                          <div className="text-xs capitalize text-muted-foreground">{t.subject} · {t.total} attempts</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </PageTransition>
     </div>
   );
 }
