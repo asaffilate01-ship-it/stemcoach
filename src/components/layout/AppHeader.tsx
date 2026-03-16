@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
   { to: "/admin/questions", label: "Content", icon: Database, roles: ["admin"] },
   { to: "/weak-drills", label: "Drills", icon: Brain },
   { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"] },
+  { to: "/flashcards", label: "Cards", icon: Layers, roles: ["student", "admin"] },
   { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"] },
   { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"] },
   { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"] },
