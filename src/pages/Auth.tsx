@@ -43,22 +43,30 @@ export default function Auth() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
-        // Check role and redirect accordingly
+        // Check role and onboarding status, then redirect
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          // Check onboarding
+          const { data: prefs } = await supabase
+            .from("user_preferences")
+            .select("onboarding_complete")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          if (!prefs?.onboarding_complete) {
+            navigate("/onboarding");
+            return;
+          }
+
           const { data: roles } = await supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", user.id);
 
           const userRole = roles?.[0]?.role;
-          if (userRole === "teacher") {
-            navigate("/teacher");
-          } else if (userRole === "parent") {
-            navigate("/parent");
-          } else {
-            navigate("/subjects");
-          }
+          if (userRole === "teacher") navigate("/teacher");
+          else if (userRole === "parent") navigate("/parent");
+          else navigate("/subjects");
         }
       }
     } catch (error: any) {

@@ -1,8 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { subjects, sampleQuestions, type Question } from "@/data/questions";
+import { subjects, type Question as LocalQuestion } from "@/data/questions";
 import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,30 @@ import { CorrectAnimation } from "@/components/gamification/CorrectAnimation";
 import { QuizTimer } from "@/components/gamification/QuizTimer";
 import ReactMarkdown from "react-markdown";
 
+interface DBQuestion {
+  id: string;
+  question_text: string;
+  options: any;
+  correct_answer: string;
+  correct_answers: string[] | null;
+  allow_multiple_answers: boolean;
+  explanation: string;
+  worked_solution: string;
+  tuition_tips: string[];
+  exam_tip: string;
+  formula: string | null;
+  topic: string;
+  subtopic: string;
+  subject: string;
+  difficulty: number;
+  points: number;
+  question_type: string;
+  boards: string[];
+  mark_scheme: string | null;
+  model_answer: string | null;
+  max_marks: number | null;
+}
+
 export default function Practice() {
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
@@ -25,11 +49,8 @@ export default function Practice() {
   const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
   const subject = subjects.find((s) => s.id === subjectId);
 
-  const questions = useMemo(
-    () => sampleQuestions.filter((q) => q.subject === subjectId),
-    [subjectId]
-  );
-
+  const [questions, setQuestions] = useState<DBQuestion[]>([]);
+  const [dbLoading, setDbLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(new Set());
@@ -47,13 +68,59 @@ export default function Practice() {
   const [timerRunning, setTimerRunning] = useState(true);
   const [timeTaken, setTimeTaken] = useState(0);
 
-  if (!subject || questions.length === 0) {
+  // Load questions from DB
+  useEffect(() => {
+    if (!subjectId) return;
+    const loadQuestions = async () => {
+      setDbLoading(true);
+      const { data, error } = await supabase
+        .from("questions")
+        .select("*")
+        .eq("subject", subjectId)
+        .limit(50);
+
+      if (data && data.length > 0) {
+        // Shuffle
+        const shuffled = (data as DBQuestion[]).sort(() => Math.random() - 0.5);
+        setQuestions(shuffled);
+      }
+      setDbLoading(false);
+    };
+    loadQuestions();
+  }, [subjectId]);
+
+  if (!subject) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h2 className="stem-heading mb-4">Subject not found</h2>
+          <Button onClick={() => navigate("/subjects")} variant="outline" className="rounded gap-2">
+            <ArrowLeft className="h-4 w-4" /> Back to Subjects
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (dbLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
         <div className="container mx-auto px-4 py-16 text-center">
           <h2 className="stem-heading mb-4">No questions available yet</h2>
-          <p className="mb-6 text-muted-foreground">Questions for this subject are being added.</p>
+          <p className="mb-6 text-muted-foreground">Questions for {subject.name} are being added. Check back soon!</p>
           <Button onClick={() => navigate("/subjects")} variant="outline" className="rounded gap-2">
             <ArrowLeft className="h-4 w-4" /> Back to Subjects
           </Button>
@@ -63,9 +130,12 @@ export default function Practice() {
   }
 
   const question = questions[currentIndex];
-  const isMultiSelect = question.type === "multi-select";
-  const isEssay = question.type === "essay";
-  const isCorrect = isMultiSelect ? false : selectedAnswer === question.correctAnswer;
+  const isMultiSelect = question.allow_multiple_answers || question.question_type === "multi-select";
+  const isEssay = question.question_type === "essay";
+  const parsedOptions: string[] = typeof question.options === "string"
+    ? JSON.parse(question.options)
+    : (Array.isArray(question.options) ? question.options : []);
+  const isCorrect = isMultiSelect ? false : selectedAnswer === question.correct_answer;
 
   const showXPPopup = (xp: number) => {
     setXpGained(xp);
@@ -82,11 +152,11 @@ export default function Practice() {
         const { data, error } = await supabase.functions.invoke("ai-tutor", {
           body: {
             action: "grade-essay",
-            question_text: question.text,
+            question_text: question.question_text,
             student_answer: essayAnswer,
-            mark_scheme: question.workedSolution,
-            model_answer: question.correctAnswer,
-            max_marks: question.points,
+            mark_scheme: question.mark_scheme || question.worked_solution,
+            model_answer: question.model_answer || question.correct_answer,
+            max_marks: question.max_marks || question.points,
             subject: question.subject,
             topic: question.topic,
           },
@@ -98,10 +168,21 @@ export default function Practice() {
         setLastCorrect(passed);
         setShowCorrectAnim(true);
         setTimeout(() => setShowCorrectAnim(false), 2000);
-        setScore((prev) => ({
-          correct: prev.correct + (passed ? 1 : 0),
-          total: prev.total + 1,
-        }));
+        setScore((prev) => ({ correct: prev.correct + (passed ? 1 : 0), total: prev.total + 1 }));
+
+        // Record attempt
+        if (user) {
+          await supabase.from("attempts").insert({
+            user_id: user.id,
+            question_id: question.id,
+            answer: essayAnswer.slice(0, 500),
+            correct: passed,
+            time_taken_seconds: timeTaken,
+            ai_score: data.grading?.score,
+            ai_feedback: data.grading?.feedback?.slice(0, 500),
+          });
+        }
+
         const result = await recordAnswer(passed, question.points);
         showXPPopup(result.xpGained);
       } catch (e: any) {
@@ -115,14 +196,23 @@ export default function Practice() {
     if (!selectedAnswer && selectedAnswers.size === 0) return;
     setTimerRunning(false);
     setShowFeedback(true);
-    const correct = isMultiSelect ? false : selectedAnswer === question.correctAnswer;
+    const correct = isMultiSelect ? false : selectedAnswer === question.correct_answer;
     setLastCorrect(correct);
     setShowCorrectAnim(true);
     setTimeout(() => setShowCorrectAnim(false), 2000);
-    setScore((prev) => ({
-      correct: prev.correct + (correct ? 1 : 0),
-      total: prev.total + 1,
-    }));
+    setScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
+
+    // Record attempt to DB
+    if (user) {
+      await supabase.from("attempts").insert({
+        user_id: user.id,
+        question_id: question.id,
+        answer: selectedAnswer || Array.from(selectedAnswers).join(", "),
+        correct,
+        time_taken_seconds: timeTaken,
+      });
+    }
+
     const result = await recordAnswer(correct, question.points);
     showXPPopup(result.xpGained);
   };
@@ -146,8 +236,8 @@ export default function Practice() {
       const { data, error } = await supabase.functions.invoke("ai-tutor", {
         body: {
           action: "explain",
-          question_text: question.text,
-          correct_answer: question.correctAnswer,
+          question_text: question.question_text,
+          correct_answer: question.correct_answer,
           student_answer: selectedAnswer || essayAnswer || "",
           subject: question.subject,
           topic: question.topic,
@@ -174,10 +264,8 @@ export default function Practice() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="container mx-auto max-w-3xl px-4 py-8">
-        {/* Gamification Bar */}
         {user && <div className="mb-4"><StreakBar stats={stats} /></div>}
 
-        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <button onClick={() => navigate("/subjects")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Subjects
@@ -193,13 +281,12 @@ export default function Practice() {
         <AnimatePresence mode="wait">
           <motion.div key={question.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
             <div className="stem-card rounded-xl p-6 md:p-8">
-              {/* Meta */}
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{subject.name}</span>
                 <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{question.topic}</span>
                 <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{question.subtopic}</span>
                 <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">L{question.difficulty} · {question.points} pts</span>
-                {question.boards && (
+                {question.boards?.length > 0 && (
                   <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     {question.boards.slice(0, 3).join(", ")}
                   </span>
@@ -208,19 +295,19 @@ export default function Practice() {
                 {isEssay && <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Essay · AI graded</span>}
               </div>
 
-              <h2 className="mb-6 text-xl font-semibold leading-relaxed">{question.text}</h2>
+              <h2 className="mb-6 text-xl font-semibold leading-relaxed">{question.question_text}</h2>
 
               {question.formula && (
                 <div className="mb-6 rounded-lg bg-muted/50 px-4 py-3 font-mono text-sm">{question.formula}</div>
               )}
 
               {/* MCQ Options */}
-              {question.options && !isEssay && (
+              {parsedOptions.length > 0 && !isEssay && (
                 <div className="mb-6 space-y-3">
-                  {question.options.map((option, i) => {
+                  {parsedOptions.map((option, i) => {
                     const letter = String.fromCharCode(65 + i);
                     const isSelected = isMultiSelect ? selectedAnswers.has(option) : selectedAnswer === option;
-                    const isOptionCorrect = option === question.correctAnswer;
+                    const isOptionCorrect = option === question.correct_answer;
 
                     let optionClass = "border-2 border-transparent hover:border-primary/20";
                     if (showFeedback && isOptionCorrect) optionClass = "stem-success-card animate-pulse-success";
@@ -259,7 +346,7 @@ export default function Practice() {
                     rows={8}
                     className="resize-none"
                   />
-                  <p className="mt-2 text-xs text-muted-foreground">{question.points} marks available · Your answer will be graded by AI</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{question.max_marks || question.points} marks available · AI graded</p>
                 </div>
               )}
 
@@ -293,23 +380,27 @@ export default function Practice() {
                       <><CheckCircle2 className="h-5 w-5 text-success" /><span className="font-semibold text-success">Correct!</span></>
                     ) : (
                       <><XCircle className="h-5 w-5 text-destructive" /><span className="font-semibold text-destructive">Incorrect</span>
-                      <span className="text-sm text-muted-foreground">— Correct: {question.correctAnswer}</span></>
+                      <span className="text-sm text-muted-foreground">— Correct: {question.correct_answer}</span></>
                     )}
-                    {timeTaken > 0 && (
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        ⏱ {timeTaken}s
-                      </span>
-                    )}
+                    {timeTaken > 0 && <span className="ml-auto text-xs text-muted-foreground">⏱ {timeTaken}s</span>}
                   </div>
                   <p className="text-sm text-muted-foreground">{question.explanation}</p>
                 </div>
-                <div className="stem-card mt-4 rounded-xl p-6">
-                  <div className="mb-3 flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-semibold">Step-by-Step Solution</span>
+                {question.worked_solution && (
+                  <div className="stem-card mt-4 rounded-xl p-6">
+                    <div className="mb-3 flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-semibold">Step-by-Step Solution</span>
+                    </div>
+                    <div className="whitespace-pre-line font-mono text-sm text-muted-foreground">{question.worked_solution}</div>
                   </div>
-                  <div className="whitespace-pre-line font-mono text-sm text-muted-foreground">{question.workedSolution}</div>
-                </div>
+                )}
+                {question.exam_tip && (
+                  <div className="stem-tuition-tip mt-4">
+                    <div className="text-xs font-semibold text-primary mb-1">Exam Tip</div>
+                    <p className="text-sm">{question.exam_tip}</p>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -323,41 +414,18 @@ export default function Practice() {
                   </div>
                   <p className="text-sm text-muted-foreground">{aiGrading.feedback}</p>
                 </div>
-
                 {aiGrading.strengths?.length > 0 && (
                   <div className="stem-card rounded-xl p-6">
                     <h4 className="mb-2 text-sm font-semibold text-success">✓ Strengths</h4>
-                    <ul className="space-y-1">
-                      {aiGrading.strengths.map((s: string, i: number) => <li key={i} className="text-sm text-muted-foreground">• {s}</li>)}
-                    </ul>
+                    <ul className="space-y-1">{aiGrading.strengths.map((s: string, i: number) => <li key={i} className="text-sm text-muted-foreground">• {s}</li>)}</ul>
                   </div>
                 )}
-
                 {aiGrading.improvements?.length > 0 && (
                   <div className="stem-card rounded-xl p-6">
                     <h4 className="mb-2 text-sm font-semibold text-warning">△ Improvements</h4>
-                    <ul className="space-y-1">
-                      {aiGrading.improvements.map((s: string, i: number) => <li key={i} className="text-sm text-muted-foreground">• {s}</li>)}
-                    </ul>
+                    <ul className="space-y-1">{aiGrading.improvements.map((s: string, i: number) => <li key={i} className="text-sm text-muted-foreground">• {s}</li>)}</ul>
                   </div>
                 )}
-
-                {aiGrading.missing_points?.length > 0 && (
-                  <div className="stem-card rounded-xl p-6">
-                    <h4 className="mb-2 text-sm font-semibold text-destructive">✗ Missing Points</h4>
-                    <ul className="space-y-1">
-                      {aiGrading.missing_points.map((s: string, i: number) => <li key={i} className="text-sm text-muted-foreground">• {s}</li>)}
-                    </ul>
-                  </div>
-                )}
-
-                {aiGrading.corrected_answer && (
-                  <div className="stem-card rounded-xl p-6">
-                    <h4 className="mb-2 text-sm font-semibold">Model Answer</h4>
-                    <div className="text-sm text-muted-foreground whitespace-pre-line">{aiGrading.corrected_answer}</div>
-                  </div>
-                )}
-
                 {aiGrading.tuition_tip && (
                   <div className="stem-tuition-tip">
                     <div className="text-xs font-semibold text-primary mb-1">Tuition Tip</div>
@@ -367,48 +435,40 @@ export default function Practice() {
               </motion.div>
             )}
 
-            {/* AI Explanation */}
-            {aiExplanation && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="stem-card mt-4 rounded-xl p-6">
-                <div className="mb-3 flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold">AI Tutor Explanation</span>
-                </div>
-                <div className="prose prose-sm max-w-none text-muted-foreground">
-                  <ReactMarkdown>{aiExplanation}</ReactMarkdown>
+            {/* Tuition Tips */}
+            {showTips && question.tuition_tips?.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                <div className="stem-tuition-tip">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-primary">
+                    <Lightbulb className="h-4 w-4" /> Tuition Tips
+                  </div>
+                  <ul className="space-y-1.5">
+                    {question.tuition_tips.map((tip, i) => (
+                      <li key={i} className="text-sm">• {tip}</li>
+                    ))}
+                  </ul>
                 </div>
               </motion.div>
             )}
 
-            {/* Tuition Tips */}
-            <AnimatePresence>
-              {showTips && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="mt-4 space-y-3">
-                  <div className="stem-label flex items-center gap-2"><Lightbulb className="h-3.5 w-3.5" /> Tuition Tips</div>
-                  {question.tuitionTips.map((tip, i) => (
-                    <div key={i} className="stem-tuition-tip">
-                      <div className="text-xs font-semibold text-primary mb-1">Tip {i + 1}</div>
-                      <p className="text-sm">{tip}</p>
-                    </div>
-                  ))}
-                  <div className="rounded-lg bg-warning/10 border border-warning/20 p-4">
-                    <div className="text-xs font-semibold text-warning mb-1">Exam Technique</div>
-                    <p className="text-sm">{question.examTip}</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* AI Explanation */}
+            {aiExplanation && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-xl border bg-card p-6">
+                <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                  <MessageSquare className="h-4 w-4 text-primary" /> AI Tutor Explanation
+                </div>
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{aiExplanation}</ReactMarkdown>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </AnimatePresence>
 
-        {/* XP Popup */}
         <XPPopup xp={xpGained} show={showXP} />
-
-        {/* Badge Unlock Modal */}
-        <BadgeUnlock
-          badge={newBadges.length > 0 ? newBadges[0] : null}
-          onDismiss={() => newBadges.length > 0 && dismissBadge(newBadges[0].id)}
-        />
+        {newBadges.map((badge) => (
+          <BadgeUnlock key={badge.id} badge={badge} onDismiss={() => dismissBadge(badge.id)} />
+        ))}
       </main>
     </div>
   );
