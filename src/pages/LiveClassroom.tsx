@@ -113,7 +113,7 @@ export default function LiveClassroom() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={45} minSize={25}>
-              <Whiteboard />
+              <Whiteboard roomId={activeRoom} />
             </ResizablePanel>
           </ResizablePanelGroup>
         ) : (
