@@ -202,6 +202,9 @@ export default function Settings() {
             </div>
           </motion.div>
 
+          {/* Push Notifications */}
+          <PushNotificationCard />
+
           {/* Security */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
