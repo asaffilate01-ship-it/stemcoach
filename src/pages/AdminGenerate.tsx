@@ -9,8 +9,9 @@ import { subjects, curricula } from "@/data/questions";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { motion } from "framer-motion";
-import { Loader2, Sparkles, Database, ShieldAlert } from "lucide-react";
+import { Loader2, Sparkles, Database, ShieldAlert, Rocket, BarChart3, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Progress } from "@/components/ui/progress";
 
 const questionTypes = [
   { id: "mcq", label: "Multiple Choice (single answer)" },
@@ -24,6 +25,7 @@ export default function AdminGenerate() {
   const { isAdmin, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const [generating, setGenerating] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("physics");
   const [selectedTopic, setSelectedTopic] = useState("");
   const [selectedSubtopic, setSelectedSubtopic] = useState("");
@@ -37,8 +39,7 @@ export default function AdminGenerate() {
   const subjectInfo = subjects.find((s) => s.id === selectedSubject);
   const curriculumInfo = curricula.find((c) => c.id === selectedCurriculum);
 
-  // Get DB question count
-  const { data: dbCount } = useQuery({
+  const { data: dbCount, refetch: refetchCount } = useQuery({
     queryKey: ["question-count"],
     queryFn: async () => {
       const { count, error } = await supabase
@@ -66,9 +67,24 @@ export default function AdminGenerate() {
     refetchInterval: 10000,
   });
 
+  const { data: batchStatus, refetch: refetchBatch } = useQuery({
+    queryKey: ["batch-status"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("batch-generate", {
+          body: { action: "status" },
+        });
+        if (error) return null;
+        return data;
+      } catch {
+        return null;
+      }
+    },
+    refetchInterval: 10000,
+  });
+
   const addLog = (msg: string) => setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
-  // Block non-admins
   if (!roleLoading && !isAdmin) {
     return (
       <div className="min-h-screen bg-background">
@@ -88,7 +104,7 @@ export default function AdminGenerate() {
       return;
     }
     setGenerating(true);
-    addLog(`Generating ${count} ${selectedType} questions for ${selectedSubject} > ${selectedTopic} > ${selectedSubtopic || "General"}...`);
+    addLog(`Generating ${count} ${selectedType} questions for ${selectedSubject} > ${selectedTopic}...`);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
@@ -111,7 +127,8 @@ export default function AdminGenerate() {
         toast({ title: "Generation failed", description: data.error, variant: "destructive" });
       } else {
         addLog(`✅ Inserted ${data.inserted} questions`);
-        toast({ title: "Questions generated!", description: `${data.inserted} questions added to the database.` });
+        toast({ title: "Questions generated!", description: `${data.inserted} questions added.` });
+        refetchCount();
       }
     } catch (e: any) {
       addLog(`❌ Error: ${e.message}`);
@@ -121,88 +138,101 @@ export default function AdminGenerate() {
     }
   };
 
-  const handleBulkGenerate = async () => {
-    if (!subjectInfo) return;
-    setGenerating(true);
-    addLog(`🚀 Starting bulk generation for ${subjectInfo.name}...`);
+  const handleSeedQueue = async () => {
+    setSeeding(true);
+    addLog("🌱 Seeding batch generation queue with all 1M combinations...");
+    try {
+      const { data, error } = await supabase.functions.invoke("batch-generate", {
+        body: { action: "seed" },
+      });
+      if (error) throw error;
+      addLog(`✅ Queue seeded: ${data.pending} pending combos (~${data.estimated_questions?.toLocaleString()} questions)`);
+      toast({ title: "Queue seeded!", description: `${data.pending} combinations queued for generation.` });
+      refetchBatch();
+    } catch (e: any) {
+      addLog(`❌ Seed failed: ${e.message}`);
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setSeeding(false);
+    }
+  };
 
-    for (const topic of subjectInfo.topics) {
-      for (const type of ["mcq", "multi-select", "essay"]) {
-        for (const diff of [1, 2, 3, 4, 5]) {
-          addLog(`Generating ${type} D${diff}: ${topic}...`);
-          try {
-            const { data, error } = await supabase.functions.invoke("generate-questions", {
-              body: {
-                subject: selectedSubject,
-                topic,
-                subtopic: topic,
-                curriculum: selectedCurriculum,
-                boards: selectedBoards,
-                difficulty: diff,
-                question_type: type,
-                count: type === "essay" ? 5 : 10,
-              },
-            });
-            if (error) throw error;
-            addLog(`  ✅ ${data?.inserted || 0} ${type} questions`);
-            await new Promise((r) => setTimeout(r, 1500));
-          } catch (e: any) {
-            addLog(`  ❌ ${e.message}`);
-            if (e.message?.includes("429") || e.message?.includes("rate")) {
-              addLog("  ⏳ Rate limited — waiting 15s...");
-              await new Promise((r) => setTimeout(r, 15000));
-            }
-          }
+  const handleProcessBatch = async () => {
+    setGenerating(true);
+    addLog("⚡ Processing next batch from queue...");
+    try {
+      const { data, error } = await supabase.functions.invoke("batch-generate", {
+        body: { action: "process" },
+      });
+      if (error) throw error;
+      addLog(`✅ Batch complete: ${data.inserted} questions inserted from ${data.processed} items`);
+      data.results?.forEach((r: any) => {
+        if (r.status === "done") addLog(`  ✅ ${r.subject}/${r.topic}: ${r.inserted} questions`);
+        else if (r.status === "rate_limited") addLog(`  ⏳ Rate limited — will retry`);
+        else addLog(`  ❌ ${r.status}: ${r.error || ""}`);
+      });
+      toast({ title: "Batch processed!", description: `${data.inserted} questions generated.` });
+      refetchCount();
+      refetchBatch();
+    } catch (e: any) {
+      addLog(`❌ Batch error: ${e.message}`);
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAutoGenerate = async () => {
+    setGenerating(true);
+    addLog("🚀🚀 Starting auto-generation loop (will process until rate-limited)...");
+
+    let totalInserted = 0;
+    let iterations = 0;
+    const MAX_ITERATIONS = 50; // Safety cap
+
+    while (iterations < MAX_ITERATIONS) {
+      iterations++;
+      try {
+        const { data, error } = await supabase.functions.invoke("batch-generate", {
+          body: { action: "process" },
+        });
+        if (error) throw error;
+
+        if (data.message === "No pending items in queue") {
+          addLog("🏆 All queue items processed!");
+          break;
+        }
+
+        totalInserted += data.inserted || 0;
+        const hasRateLimit = data.results?.some((r: any) => r.status === "rate_limited");
+
+        addLog(`  Iteration ${iterations}: +${data.inserted} questions (total: ${totalInserted})`);
+
+        if (hasRateLimit) {
+          addLog("  ⏳ Rate limited — waiting 30s...");
+          await new Promise(r => setTimeout(r, 30000));
+        } else {
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      } catch (e: any) {
+        addLog(`  ❌ Error: ${e.message}`);
+        if (e.message?.includes("429") || e.message?.includes("rate")) {
+          addLog("  ⏳ Waiting 30s...");
+          await new Promise(r => setTimeout(r, 30000));
+        } else {
+          break;
         }
       }
     }
-    addLog(`✅ Bulk generation complete for ${subjectInfo.name}`);
+
+    addLog(`🏁 Auto-generation stopped. Total: ${totalInserted} questions in ${iterations} iterations.`);
+    toast({ title: "Auto-generation complete", description: `${totalInserted} questions added.` });
+    refetchCount();
+    refetchBatch();
     setGenerating(false);
   };
 
-  const handleMegaGenerate = async () => {
-    setGenerating(true);
-    addLog(`🚀🚀 MEGA GENERATION: All subjects × all curricula`);
-    
-    const allCurricula = curricula.slice(0, 8);
-    
-    for (const sub of subjects) {
-      for (const curr of allCurricula) {
-        for (const topic of sub.topics) {
-          for (const type of ["mcq", "multi-select", "essay", "numerical"]) {
-            for (const diff of [1, 2, 3, 4, 5]) {
-              addLog(`${sub.name} > ${curr.label} > ${topic} > ${type} D${diff}...`);
-              try {
-                const { data, error } = await supabase.functions.invoke("generate-questions", {
-                  body: {
-                    subject: sub.id,
-                    topic,
-                    subtopic: topic,
-                    curriculum: curr.id,
-                    boards: curr.boards.slice(0, 3),
-                    difficulty: diff,
-                    question_type: type,
-                    count: type === "essay" ? 5 : 15,
-                  },
-                });
-                if (error) throw error;
-                addLog(`  ✅ ${data?.inserted || 0} questions`);
-                await new Promise((r) => setTimeout(r, 1200));
-              } catch (e: any) {
-                addLog(`  ❌ ${e.message}`);
-                if (e.message?.includes("429") || e.message?.includes("rate")) {
-                  addLog("  ⏳ Rate limited — waiting 20s...");
-                  await new Promise((r) => setTimeout(r, 20000));
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    addLog(`🏆 MEGA GENERATION COMPLETE`);
-    setGenerating(false);
-  };
+  const progressPct = batchStatus?.progress_pct || ((dbCount || 0) / 1000000) * 100;
 
   return (
     <div className="min-h-screen bg-background">
@@ -212,16 +242,62 @@ export default function AdminGenerate() {
           <div className="stem-label mb-2">Admin Panel</div>
           <h1 className="stem-heading text-3xl">Question Generator</h1>
           <p className="mt-2 text-muted-foreground">
-            Generate exam-accurate questions using AI. Each question includes tuition tips, worked solutions, and exam technique advice.
+            Generate exam-accurate questions using AI. Target: 1,000,000 questions.
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {/* Progress to 1M */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 stem-card rounded-xl p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold flex items-center gap-2">
+              <Rocket className="h-4 w-4 text-primary" /> Progress to 1,000,000 Questions
+            </h3>
+            <span className="text-sm font-bold text-primary">{progressPct.toFixed(1)}%</span>
+          </div>
+          <Progress value={progressPct} className="h-3 mb-3" />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 text-center text-sm">
+            <div>
+              <div className="text-xl font-bold">{(dbCount || 0).toLocaleString()}</div>
+              <div className="stem-label">Total Questions</div>
+            </div>
+            <div>
+              <div className="text-xl font-bold">{(batchStatus?.queue_pending || 0).toLocaleString()}</div>
+              <div className="stem-label">Queue Pending</div>
+            </div>
+            <div>
+              <div className="text-xl font-bold">{(batchStatus?.queue_done || 0).toLocaleString()}</div>
+              <div className="stem-label">Queue Done</div>
+            </div>
+            <div>
+              <div className="text-xl font-bold">1,000,000</div>
+              <div className="stem-label">Target</div>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button onClick={handleSeedQueue} disabled={seeding || generating} variant="outline" className="gap-2 rounded">
+              {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
+              1. Seed Queue (All Combos)
+            </Button>
+            <Button onClick={handleProcessBatch} disabled={generating} variant="outline" className="gap-2 rounded">
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              2. Process Next Batch
+            </Button>
+            <Button onClick={handleAutoGenerate} disabled={generating} className="gap-2 rounded bg-primary">
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
+              🚀 Auto-Generate (Loop)
+            </Button>
+            <Button onClick={() => refetchBatch()} variant="ghost" size="sm" className="gap-1 rounded">
+              <RefreshCw className="h-3 w-3" /> Refresh
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Stats per subject */}
+        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-8">
           <div className="stem-card rounded-xl p-4 text-center">
             <Database className="mx-auto mb-2 h-5 w-5 text-primary" />
             <div className="text-2xl font-bold">{(dbCount || 0).toLocaleString()}</div>
-            <div className="stem-label">Total Questions</div>
+            <div className="stem-label">Total</div>
           </div>
           {subjects.map((s) => (
             <div key={s.id} className="stem-card rounded-xl p-4 text-center">
@@ -233,9 +309,9 @@ export default function AdminGenerate() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Generator Form */}
+          {/* Manual Generator */}
           <div className="stem-card rounded-xl p-6">
-            <h3 className="mb-4 font-semibold">Generate Questions</h3>
+            <h3 className="mb-4 font-semibold">Manual Generate</h3>
             <div className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -305,32 +381,29 @@ export default function AdminGenerate() {
                   ))}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={handleGenerate} disabled={generating || !selectedTopic} className="gap-2 rounded">
-                  {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  Generate {count} Questions
-                </Button>
-                <Button onClick={handleBulkGenerate} disabled={generating} variant="outline" className="gap-2 rounded">
-                  {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
-                  Bulk: All Topics
-                </Button>
-                <Button onClick={handleMegaGenerate} disabled={generating} variant="outline" className="gap-2 rounded border-primary text-primary">
-                  {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
-                  🚀 Mega: All Subjects
-                </Button>
-              </div>
+              <Button onClick={handleGenerate} disabled={generating || !selectedTopic} className="gap-2 rounded">
+                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                Generate {count} Questions
+              </Button>
             </div>
           </div>
 
           {/* Generation Log */}
           <div className="stem-card rounded-xl p-6">
             <h3 className="mb-4 font-semibold">Generation Log</h3>
-            <div className="h-[400px] overflow-y-auto rounded-lg bg-muted/50 p-4 font-mono text-xs">
+            <div className="h-[500px] overflow-y-auto rounded-lg bg-muted/50 p-4 font-mono text-xs">
               {log.length === 0 ? (
-                <span className="text-muted-foreground">No activity yet. Generate some questions to see logs.</span>
+                <span className="text-muted-foreground">
+                  How to generate 1M questions:{"\n\n"}
+                  1. Click "Seed Queue" to create all subject×curriculum×type×difficulty combos{"\n"}
+                  2. Click "Auto-Generate (Loop)" to start processing{"\n"}
+                  3. The system will auto-pause on rate limits and resume{"\n"}
+                  4. You can close this page and come back — progress is saved{"\n\n"}
+                  Each batch processes 3 items (~30-45 questions) per iteration.
+                </span>
               ) : (
                 log.map((l, i) => (
-                  <div key={i} className={`mb-1 ${l.includes("✅") ? "text-success" : l.includes("❌") ? "text-destructive" : "text-foreground"}`}>
+                  <div key={i} className={`mb-1 ${l.includes("✅") || l.includes("🏆") ? "text-success" : l.includes("❌") ? "text-destructive" : l.includes("⏳") ? "text-warning" : "text-foreground"}`}>
                     {l}
                   </div>
                 ))
