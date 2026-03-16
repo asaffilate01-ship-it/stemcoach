@@ -110,7 +110,7 @@ export default function Badges() {
             </div>
           </div>
         ))}
-      </main>
+        </main>
       </PageTransition>
     </div>
   );

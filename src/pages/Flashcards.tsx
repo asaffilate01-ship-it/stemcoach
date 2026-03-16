@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -175,6 +176,7 @@ export default function Flashcards() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -311,7 +313,8 @@ export default function Flashcards() {
             </div>
           </>
         )}
-      </main>
+        </main>
+      </PageTransition>
     </div>
   );
 }
