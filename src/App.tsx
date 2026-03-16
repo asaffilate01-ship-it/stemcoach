@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { PageTransition } from "@/components/layout/PageTransition";
 import Index from "./pages/Index";
 import Subjects from "./pages/Subjects";
 import Practice from "./pages/Practice";
@@ -39,6 +40,10 @@ import { DevToolsPanel } from "./components/dev/DevToolsPanel";
 
 const queryClient = new QueryClient();
 
+const P = ({ children }: { children: React.ReactNode }) => (
+  <PageTransition>{children}</PageTransition>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -49,39 +54,39 @@ const App = () => (
           <Routes>
             {/* Public */}
             <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/ai-tutor" element={<AITutor />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+            <Route path="/auth" element={<P><Auth /></P>} />
+            <Route path="/reset-password" element={<P><ResetPassword /></P>} />
+            <Route path="/pricing" element={<P><Pricing /></P>} />
+            <Route path="/ai-tutor" element={<P><AITutor /></P>} />
+            <Route path="/privacy" element={<P><PrivacyPolicy /></P>} />
+            <Route path="/terms" element={<P><TermsOfService /></P>} />
+            <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
 
             {/* Student */}
-            <Route path="/subjects" element={<Subjects />} />
-            <Route path="/practice/:subjectId" element={<Practice />} />
-            <Route path="/mock-exam" element={<MockExam />} />
-            <Route path="/badges" element={<Badges />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/weak-drills" element={<WeakTopicDrill />} />
-            <Route path="/flashcards" element={<ProtectedRoute><Flashcards /></ProtectedRoute>} />
-            <Route path="/live-classroom" element={<ProtectedRoute><LiveClassroom /></ProtectedRoute>} />
+            <Route path="/subjects" element={<P><Subjects /></P>} />
+            <Route path="/practice/:subjectId" element={<P><Practice /></P>} />
+            <Route path="/mock-exam" element={<P><MockExam /></P>} />
+            <Route path="/badges" element={<P><Badges /></P>} />
+            <Route path="/leaderboard" element={<P><Leaderboard /></P>} />
+            <Route path="/weak-drills" element={<P><WeakTopicDrill /></P>} />
+            <Route path="/flashcards" element={<ProtectedRoute><P><Flashcards /></P></ProtectedRoute>} />
+            <Route path="/live-classroom" element={<ProtectedRoute><P><LiveClassroom /></P></ProtectedRoute>} />
 
             {/* Protected */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
-            <Route path="/my-classes" element={<ProtectedRoute><StudentClasses /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-            <Route path="/study-planner" element={<ProtectedRoute><StudyPlanner /></ProtectedRoute>} />
-            <Route path="/progress-report" element={<ProtectedRoute><ProgressReports /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><P><Dashboard /></P></ProtectedRoute>} />
+            <Route path="/certificates" element={<ProtectedRoute><P><Certificates /></P></ProtectedRoute>} />
+            <Route path="/my-classes" element={<ProtectedRoute><P><StudentClasses /></P></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><P><Analytics /></P></ProtectedRoute>} />
+            <Route path="/study-planner" element={<ProtectedRoute><P><StudyPlanner /></P></ProtectedRoute>} />
+            <Route path="/progress-report" element={<ProtectedRoute><P><ProgressReports /></P></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><P><Settings /></P></ProtectedRoute>} />
 
             {/* Role-protected */}
-            <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherDashboard /></ProtectedRoute>} />
-            <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><ParentDashboard /></ProtectedRoute>} />
-            <Route path="/institution" element={<ProtectedRoute requiredRole="admin"><TenantAdmin /></ProtectedRoute>} />
-            <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><AdminGenerate /></ProtectedRoute>} />
-            <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><AdminQuestions /></ProtectedRoute>} />
+            <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><P><TeacherDashboard /></P></ProtectedRoute>} />
+            <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><P><ParentDashboard /></P></ProtectedRoute>} />
+            <Route path="/institution" element={<ProtectedRoute requiredRole="admin"><P><TenantAdmin /></P></ProtectedRoute>} />
+            <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><P><AdminGenerate /></P></ProtectedRoute>} />
+            <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><P><AdminQuestions /></P></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
