@@ -1,12 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.99.1";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// All subjects and their topics
 const SUBJECTS = [
   { id: "mathematics", topics: ["Algebra", "Calculus", "Trigonometry", "Statistics", "Geometry", "Vectors", "Matrices", "Differential Equations"] },
   { id: "physics", topics: ["Mechanics", "Electricity", "Waves", "Thermodynamics", "Magnetism", "Nuclear Physics", "Quantum Physics", "Optics"] },
@@ -59,18 +58,19 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    }
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const body = await req.json().catch(() => ({}));
     const action = body.action || "process";
 
     if (action === "seed") {
-      // Seed the queue with all combinations
       console.log("[BATCH] Seeding generation queue...");
 
-      // Check what already exists to avoid duplicates
       const { count: existingCount } = await supabase
         .from("generation_queue")
         .select("*", { count: "exact", head: true })
@@ -82,35 +82,18 @@ serve(async (req) => {
         });
       }
 
-      // Get existing question coverage to skip already-covered combos
-      const { data: existingQuestions } = await supabase
-        .from("questions")
-        .select("subject, topic, curriculum, question_type, difficulty")
-        .limit(1000);
-
-      const existingKeys = new Set(
-        (existingQuestions || []).map(q => `${q.subject}|${q.topic}|${q.curriculum}|${q.question_type}|${q.difficulty}`)
-      );
-
       const rows: any[] = [];
       for (const subject of SUBJECTS) {
         for (const topic of subject.topics) {
           for (const curr of CURRICULA) {
             for (const qType of QUESTION_TYPES) {
               for (const diff of DIFFICULTIES) {
-                const key = `${subject.id}|${topic}|${curr.id}|${qType}|${diff}`;
-                // Generate 15 per combo for MCQ/multi-select, 5 for essay, 10 for numerical
                 const count = qType === "essay" ? 5 : qType === "numerical" ? 10 : 15;
                 rows.push({
-                  subject: subject.id,
-                  topic,
-                  subtopic: topic,
-                  curriculum: curr.id,
-                  boards: curr.boards,
-                  difficulty: diff,
-                  question_type: qType,
-                  count,
-                  status: existingKeys.has(key) ? "done" : "pending",
+                  subject: subject.id, topic, subtopic: topic,
+                  curriculum: curr.id, boards: curr.boards,
+                  difficulty: diff, question_type: qType,
+                  count, status: "pending",
                 });
               }
             }
@@ -118,7 +101,6 @@ serve(async (req) => {
         }
       }
 
-      // Insert in batches of 500
       let inserted = 0;
       for (let i = 0; i < rows.length; i += 500) {
         const batch = rows.slice(i, i + 500);
@@ -127,18 +109,13 @@ serve(async (req) => {
         else inserted += batch.length;
       }
 
-      const pendingCount = rows.filter(r => r.status === "pending").length;
-      const estimatedQuestions = rows.reduce((sum, r) => sum + (r.status === "pending" ? r.count : 0), 0);
+      const pendingCount = rows.length;
+      const estimatedQuestions = rows.reduce((sum, r) => sum + r.count, 0);
 
       return new Response(JSON.stringify({
-        message: "Queue seeded",
-        total_combinations: rows.length,
-        pending: pendingCount,
-        already_covered: rows.length - pendingCount,
-        estimated_questions: estimatedQuestions,
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        message: "Queue seeded", total_combinations: rows.length,
+        pending: pendingCount, estimated_questions: estimatedQuestions,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (action === "status") {
@@ -149,27 +126,20 @@ serve(async (req) => {
       ]);
 
       return new Response(JSON.stringify({
-        queue_pending: pending.count || 0,
-        queue_done: done.count || 0,
-        total_questions: total.count || 0,
-        target: 1000000,
+        queue_pending: pending.count || 0, queue_done: done.count || 0,
+        total_questions: total.count || 0, target: 1000000,
         progress_pct: Math.round(((total.count || 0) / 1000000) * 100 * 10) / 10,
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Process: pick next batch of pending items and generate
-    const BATCH_SIZE = 3; // Process 3 items per invocation to stay within time limits
+    // Process: pick next pending items and generate
+    const BATCH_SIZE = 3;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const { data: pendingItems } = await supabase
-      .from("generation_queue")
-      .select("*")
-      .eq("status", "pending")
-      .order("created_at", { ascending: true })
-      .limit(BATCH_SIZE);
+      .from("generation_queue").select("*")
+      .eq("status", "pending").order("created_at", { ascending: true }).limit(BATCH_SIZE);
 
     if (!pendingItems || pendingItems.length === 0) {
       return new Response(JSON.stringify({ message: "No pending items in queue" }), {
@@ -181,7 +151,6 @@ serve(async (req) => {
     const results: any[] = [];
 
     for (const item of pendingItems) {
-      // Mark as processing
       await supabase.from("generation_queue").update({ status: "processing" }).eq("id", item.id);
 
       try {
@@ -257,7 +226,6 @@ CRITICAL: All answers must be FACTUALLY CORRECT.`,
           const errText = await aiResponse.text();
           console.error(`[BATCH] AI error for ${item.subject}/${item.topic}: ${aiResponse.status} ${errText}`);
           if (aiResponse.status === 429) {
-            // Rate limited — put back to pending and stop
             await supabase.from("generation_queue").update({ status: "pending" }).eq("id", item.id);
             results.push({ id: item.id, status: "rate_limited" });
             break;
@@ -278,13 +246,9 @@ CRITICAL: All answers must be FACTUALLY CORRECT.`,
         }
 
         const rows = generated.questions.map((q: any) => ({
-          subject: item.subject,
-          topic: item.topic,
-          subtopic: item.subtopic,
-          curriculum: item.curriculum,
-          boards: item.boards,
-          difficulty: item.difficulty,
-          question_type: item.question_type,
+          subject: item.subject, topic: item.topic, subtopic: item.subtopic,
+          curriculum: item.curriculum, boards: item.boards,
+          difficulty: item.difficulty, question_type: item.question_type,
           question_text: q.question_text,
           options: q.options ? JSON.stringify(q.options) : null,
           correct_answer: q.correct_answer || "",
@@ -315,7 +279,6 @@ CRITICAL: All answers must be FACTUALLY CORRECT.`,
         await supabase.from("generation_queue").update({ status: "done", completed_at: new Date().toISOString() }).eq("id", item.id);
         results.push({ id: item.id, status: "done", inserted: count, subject: item.subject, topic: item.topic });
 
-        // Small delay between items
         await new Promise(r => setTimeout(r, 500));
       } catch (e) {
         console.error(`[BATCH] Error processing ${item.id}:`, e);
@@ -330,8 +293,7 @@ CRITICAL: All answers must be FACTUALLY CORRECT.`,
   } catch (e) {
     console.error("[BATCH] Fatal error:", e);
     return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

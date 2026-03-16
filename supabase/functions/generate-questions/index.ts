@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.99.1";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,7 +18,6 @@ serve(async (req) => {
       throw new Error("Missing required environment variables");
     }
 
-    // Auth check: only admins can generate questions
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Not authenticated");
 
@@ -27,17 +26,13 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData.user) throw new Error("Invalid authentication");
 
-    // Check admin role
     const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .eq("role", "admin");
+      .from("user_roles").select("role")
+      .eq("user_id", userData.user.id).eq("role", "admin");
 
     if (!roleData || roleData.length === 0) {
       return new Response(JSON.stringify({ error: "Unauthorized: admin role required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -46,60 +41,10 @@ serve(async (req) => {
     const typeInstructions: Record<string, string> = {
       mcq: "Multiple choice with exactly 4 options and one correct answer.",
       "multi-select": "Multiple choice with 4-6 options where 2-3 are correct. Set allow_multiple_answers to true and list all correct answers in correct_answers array.",
-      essay: "Extended written response question. Include command_word (explain/evaluate/discuss/compare), mark_scheme with bullet points for marks, model_answer, and max_marks (4-8).",
+      essay: "Extended written response question. Include command_word, mark_scheme with bullet points, model_answer, and max_marks (4-8).",
       numerical: "Numerical calculation question. The answer should be a specific number with units.",
     };
 
-    const systemPrompt = `You are an expert ${subject} question writer for ${curriculum} exams.
-Create ${count} HIGH QUALITY, EXAM-ACCURATE questions.
-Subject: ${subject}, Topic: ${topic}, Subtopic: ${subtopic}
-Difficulty: ${difficulty}/5, Boards: ${boards?.join(", ") || "All"}
-Type: ${question_type} - ${typeInstructions[question_type] || typeInstructions.mcq}
-
-CRITICAL: All answers must be FACTUALLY CORRECT. Double-check every answer.
-Include detailed tuition tips and exam technique advice with every question.`;
-
-    const tools = [{
-      type: "function",
-      function: {
-        name: "submit_questions",
-        description: "Submit the generated questions.",
-        parameters: {
-          type: "object",
-          properties: {
-            questions: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  question_text: { type: "string" },
-                  options: { type: "array", items: { type: "string" } },
-                  correct_answer: { type: "string" },
-                  correct_answers: { type: "array", items: { type: "string" } },
-                  allow_multiple_answers: { type: "boolean" },
-                  explanation: { type: "string" },
-                  worked_solution: { type: "string" },
-                  tuition_tips: { type: "array", items: { type: "string" } },
-                  exam_tip: { type: "string" },
-                  formula: { type: "string" },
-                  points: { type: "number" },
-                  mark_scheme: { type: "string" },
-                  model_answer: { type: "string" },
-                  max_marks: { type: "number" },
-                  command_word: { type: "string" },
-                },
-                required: ["question_text", "correct_answer", "explanation", "worked_solution", "tuition_tips", "exam_tip", "points"],
-                additionalProperties: false,
-              },
-            },
-          },
-          required: ["questions"],
-          additionalProperties: false,
-        },
-      },
-    }];
-
-    // Call Lovable AI gateway directly
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -109,10 +54,56 @@ Include detailed tuition tips and exam technique advice with every question.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: systemPrompt },
+          {
+            role: "system",
+            content: `You are an expert ${subject} question writer for ${curriculum} exams.
+Create ${count} HIGH QUALITY, EXAM-ACCURATE questions.
+Subject: ${subject}, Topic: ${topic}, Subtopic: ${subtopic}
+Difficulty: ${difficulty}/5, Boards: ${boards?.join(", ") || "All"}
+Type: ${question_type} - ${typeInstructions[question_type] || typeInstructions.mcq}
+CRITICAL: All answers must be FACTUALLY CORRECT.`,
+          },
           { role: "user", content: `Generate ${count} ${question_type} questions for ${topic} > ${subtopic} at difficulty ${difficulty}.` },
         ],
-        tools,
+        tools: [{
+          type: "function",
+          function: {
+            name: "submit_questions",
+            description: "Submit the generated questions.",
+            parameters: {
+              type: "object",
+              properties: {
+                questions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      question_text: { type: "string" },
+                      options: { type: "array", items: { type: "string" } },
+                      correct_answer: { type: "string" },
+                      correct_answers: { type: "array", items: { type: "string" } },
+                      allow_multiple_answers: { type: "boolean" },
+                      explanation: { type: "string" },
+                      worked_solution: { type: "string" },
+                      tuition_tips: { type: "array", items: { type: "string" } },
+                      exam_tip: { type: "string" },
+                      formula: { type: "string" },
+                      points: { type: "number" },
+                      mark_scheme: { type: "string" },
+                      model_answer: { type: "string" },
+                      max_marks: { type: "number" },
+                      command_word: { type: "string" },
+                    },
+                    required: ["question_text", "correct_answer", "explanation", "worked_solution", "tuition_tips", "exam_tip", "points"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["questions"],
+              additionalProperties: false,
+            },
+          },
+        }],
         tool_choice: { type: "function", function: { name: "submit_questions" } },
       }),
     });
@@ -135,15 +126,9 @@ Include detailed tuition tips and exam technique advice with every question.`;
       });
     }
 
-    // Insert into database
     const rows = generated.questions.map((q: any) => ({
-      subject,
-      topic,
-      subtopic,
-      curriculum,
-      boards: boards || [],
-      difficulty,
-      question_type,
+      subject, topic, subtopic, curriculum,
+      boards: boards || [], difficulty, question_type,
       question_text: q.question_text,
       options: q.options ? JSON.stringify(q.options) : null,
       correct_answer: q.correct_answer || '',
@@ -162,23 +147,16 @@ Include detailed tuition tips and exam technique advice with every question.`;
     }));
 
     const { data, error } = await supabase.from("questions").insert(rows).select("id");
-    
-    if (error) {
-      console.error("Insert error:", error);
-      throw new Error(`Database insert failed: ${error.message}`);
-    }
+    if (error) throw new Error(`Database insert failed: ${error.message}`);
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       inserted: data?.length || 0,
-      message: `Successfully generated and inserted ${data?.length || 0} questions for ${subject} > ${topic} > ${subtopic}`
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      message: `Successfully generated ${data?.length || 0} questions for ${subject} > ${topic}`
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("generate-questions error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
