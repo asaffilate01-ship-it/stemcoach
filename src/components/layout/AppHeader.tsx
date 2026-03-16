@@ -1,40 +1,54 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 
 interface NavItem {
   to: string;
   label: string;
   icon: typeof BookOpen;
-  roles?: string[]; // if set, only show for these roles. empty = public
+  roles?: string[];
+  group?: string;
 }
 
 const navItems: NavItem[] = [
   { to: "/", label: "Home", icon: BookOpen },
   { to: "/subjects", label: "Subjects", icon: GraduationCap },
-  { to: "/ai-tutor", label: "AI Tutor", icon: Bot },
-  { to: "/my-classes", label: "Classes", icon: BookCheck, roles: ["student"] },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"] },
   { to: "/mock-exam", label: "Exam", icon: Trophy },
-  { to: "/badges", label: "Badges", icon: Award },
-  { to: "/leaderboard", label: "Board", icon: Medal },
-  { to: "/certificates", label: "Certs", icon: ScrollText, roles: ["student", "admin"] },
-  { to: "/parent", label: "Parent", icon: Eye, roles: ["parent"] },
+  { to: "/ai-tutor", label: "AI Tutor", icon: Bot },
+  // Study group
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study" },
+  { to: "/flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study" },
+  { to: "/weak-drills", label: "Drills", icon: Brain, group: "study" },
+  { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"], group: "study" },
+  { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"], group: "study" },
+  { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"], group: "study" },
+  // Social
+  { to: "/badges", label: "Badges", icon: Award, group: "social" },
+  { to: "/leaderboard", label: "Leaderboard", icon: Medal, group: "social" },
+  { to: "/certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social" },
+  // Classes
+  { to: "/my-classes", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes" },
+  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes" },
+  // Role-specific
+  { to: "/parent", label: "Parent Portal", icon: Eye, roles: ["parent"] },
   { to: "/teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"] },
-  { to: "/institution", label: "Admin", icon: Building2, roles: ["admin"] },
+  { to: "/institution", label: "Institution", icon: Building2, roles: ["admin"] },
   { to: "/admin/generate", label: "Generate", icon: Sparkles, roles: ["admin"] },
   { to: "/admin/questions", label: "Content", icon: Database, roles: ["admin"] },
-  { to: "/weak-drills", label: "Drills", icon: Brain },
-  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"] },
-  { to: "/flashcards", label: "Cards", icon: Layers, roles: ["student", "admin"] },
-  { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"] },
-  { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"] },
+  // Utility
   { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"] },
-  { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"] },
   { to: "/pricing", label: "Pricing", icon: CreditCard },
 ];
 
@@ -50,12 +64,57 @@ export function AppHeader() {
     navigate("/");
   };
 
-  const visibleItems = navItems.filter(item => {
-    if (!item.roles) return true; // public nav item
-    if (!user) return false; // hide role-based items for guests
-    if (rolesLoading) return false;
-    return item.roles.some(r => roles.includes(r as any));
-  });
+  const filterVisible = (items: NavItem[]) =>
+    items.filter(item => {
+      if (!item.roles) return true;
+      if (!user) return false;
+      if (rolesLoading) return false;
+      return item.roles.some(r => roles.includes(r as any));
+    });
+
+  const topNav = filterVisible(navItems.filter(i => !i.group));
+  const studyItems = filterVisible(navItems.filter(i => i.group === "study"));
+  const socialItems = filterVisible(navItems.filter(i => i.group === "social"));
+  const classItems = filterVisible(navItems.filter(i => i.group === "classes"));
+  const allVisible = filterVisible(navItems);
+
+  const NavLink = ({ item }: { item: NavItem }) => (
+    <Link
+      to={item.to}
+      className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-sm font-medium transition-colors ${
+        location.pathname === item.to
+          ? "bg-primary/10 text-primary"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      <item.icon className="h-3.5 w-3.5" />
+      {item.label}
+    </Link>
+  );
+
+  const GroupDropdown = ({ label, items }: { label: string; items: NavItem[] }) => {
+    if (items.length === 0) return null;
+    const isActive = items.some(i => location.pathname === i.to);
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className={`flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-medium transition-colors ${
+            isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
+          }`}>
+            {label} <ChevronDown className="h-3 w-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          {items.map(item => (
+            <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)} className="gap-2">
+              <item.icon className="h-3.5 w-3.5" />
+              {item.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
@@ -67,33 +126,39 @@ export function AppHeader() {
           <span className="hidden sm:inline">STEMCoach</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
-          {visibleItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition-colors ${
-                location.pathname === item.to
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <item.icon className="h-3.5 w-3.5" />
-              {item.label}
-            </Link>
-          ))}
+        <nav className="hidden items-center gap-0.5 lg:flex">
+          {topNav.slice(0, 4).map(item => <NavLink key={item.to} item={item} />)}
+          {user && <GroupDropdown label="Study" items={studyItems} />}
+          <GroupDropdown label="Rewards" items={socialItems} />
+          {classItems.length > 0 && <GroupDropdown label="Classes" items={classItems} />}
         </nav>
 
         <div className="flex items-center gap-2">
           <NotificationBell />
           {user ? (
             <>
-              <span className="hidden text-sm text-muted-foreground sm:inline">
-                {user.email}
-              </span>
-              <Button size="sm" variant="outline" onClick={handleSignOut} className="gap-1.5 rounded">
-                <LogOut className="h-3.5 w-3.5" /> Sign Out
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost" className="gap-1.5 rounded text-sm">
+                    <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel className="text-xs truncate max-w-[200px]">{user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2">
+                    <Settings className="h-3.5 w-3.5" /> Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/pricing")} className="gap-2">
+                    <CreditCard className="h-3.5 w-3.5" /> Pricing
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
+                    <LogOut className="h-3.5 w-3.5" /> Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <Button size="sm" onClick={() => navigate("/auth")} className="rounded">
@@ -102,7 +167,7 @@ export function AppHeader() {
           )}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded p-1.5 text-muted-foreground hover:text-foreground md:hidden"
+            className="rounded p-1.5 text-muted-foreground hover:text-foreground lg:hidden"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -110,8 +175,8 @@ export function AppHeader() {
       </div>
 
       {mobileOpen && (
-        <nav className="border-t bg-background px-4 py-3 md:hidden">
-          {visibleItems.map((item) => (
+        <nav className="border-t bg-background px-4 py-3 lg:hidden max-h-[70vh] overflow-y-auto">
+          {allVisible.map((item) => (
             <Link
               key={item.to}
               to={item.to}

@@ -9,7 +9,19 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { usePushNotifications } from "@/hooks/useNotifications";
 import { motion } from "framer-motion";
-import { User, Shield, Bell, Link2, Check, X, BellRing } from "lucide-react";
+import { User, Shield, Bell, Link2, Check, X, BellRing, Download, Trash2, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface PendingLink {
   id: string;
@@ -20,10 +32,13 @@ interface PendingLink {
 }
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [pendingLinks, setPendingLinks] = useState<PendingLink[]>([]);
   const [notifPrefs, setNotifPrefs] = useState({
     badge_alerts: true,
@@ -85,6 +100,40 @@ export default function Settings() {
     }
   };
 
+  const handleExportData = async () => {
+    setExporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("export-data");
+      if (error) throw error;
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `stemcoach-data-export-${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Data exported successfully!" });
+    } catch (e: any) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    }
+    setExporting(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) throw error;
+      await signOut();
+      navigate("/");
+      toast({ title: "Account deleted", description: "All your data has been permanently removed." });
+    } catch (e: any) {
+      toast({ title: "Deletion failed", description: e.message, variant: "destructive" });
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
@@ -96,11 +145,7 @@ export default function Settings() {
 
         <div className="space-y-6">
           {/* Profile Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="stem-card rounded-xl p-6"
-          >
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
               <User className="h-4 w-4 text-primary" /> Profile
             </h3>
@@ -111,12 +156,7 @@ export default function Settings() {
               </div>
               <div>
                 <Label className="text-sm">Display Name</Label>
-                <Input
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your name"
-                  className="mt-1.5"
-                />
+                <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="mt-1.5" />
               </div>
               <Button onClick={saveProfile} disabled={saving} className="rounded">
                 {saving ? "Saving..." : "Save Profile"}
@@ -125,12 +165,7 @@ export default function Settings() {
           </motion.div>
 
           {/* Parent Link Requests */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.06 }}
-            className="stem-card rounded-xl p-6"
-          >
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
               <Link2 className="h-4 w-4 text-primary" /> Parent Link Requests
             </h3>
@@ -142,25 +177,13 @@ export default function Settings() {
                   <div key={link.id} className="flex items-center justify-between rounded-lg border p-3">
                     <div>
                       <p className="text-sm font-medium">Parent request</p>
-                      <p className="text-xs text-muted-foreground">
-                        Received {new Date(link.created_at).toLocaleDateString()}
-                      </p>
+                      <p className="text-xs text-muted-foreground">Received {new Date(link.created_at).toLocaleDateString()}</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1 rounded text-success"
-                        onClick={() => handleLinkAction(link.id, "approved")}
-                      >
+                      <Button size="sm" variant="outline" className="gap-1 rounded text-success" onClick={() => handleLinkAction(link.id, "approved")}>
                         <Check className="h-3.5 w-3.5" /> Approve
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1 rounded text-destructive"
-                        onClick={() => handleLinkAction(link.id, "rejected")}
-                      >
+                      <Button size="sm" variant="outline" className="gap-1 rounded text-destructive" onClick={() => handleLinkAction(link.id, "rejected")}>
                         <X className="h-3.5 w-3.5" /> Reject
                       </Button>
                     </div>
@@ -171,12 +194,7 @@ export default function Settings() {
           </motion.div>
 
           {/* Notification Preferences */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
-            className="stem-card rounded-xl p-6"
-          >
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
               <Bell className="h-4 w-4 text-primary" /> Notification Preferences
             </h3>
@@ -191,12 +209,7 @@ export default function Settings() {
                     <p className="text-sm font-medium">{pref.label}</p>
                     <p className="text-xs text-muted-foreground">{pref.desc}</p>
                   </div>
-                  <Switch
-                    checked={notifPrefs[pref.key]}
-                    onCheckedChange={(checked) =>
-                      setNotifPrefs((prev) => ({ ...prev, [pref.key]: checked }))
-                    }
-                  />
+                  <Switch checked={notifPrefs[pref.key]} onCheckedChange={(checked) => setNotifPrefs((prev) => ({ ...prev, [pref.key]: checked }))} />
                 </div>
               ))}
             </div>
@@ -206,12 +219,7 @@ export default function Settings() {
           <PushNotificationCard />
 
           {/* Security */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            className="stem-card rounded-xl p-6"
-          >
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
               <Shield className="h-4 w-4 text-primary" /> Security
             </h3>
@@ -231,6 +239,44 @@ export default function Settings() {
               Change Password
             </Button>
           </motion.div>
+
+          {/* Data & Privacy (GDPR) */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="stem-card rounded-xl p-6">
+            <h3 className="mb-4 flex items-center gap-2 font-semibold">
+              <Download className="h-4 w-4 text-primary" /> Data & Privacy
+            </h3>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Under GDPR and data protection law, you have the right to export or delete all your personal data.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button variant="outline" className="gap-2 rounded" onClick={handleExportData} disabled={exporting}>
+                {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                Export My Data
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="gap-2 rounded border-destructive/30 text-destructive hover:bg-destructive/5">
+                    <Trash2 className="h-4 w-4" /> Delete Account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your account and all associated data including progress, badges, certificates, and flashcards. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteAccount} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      Yes, delete my account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </motion.div>
         </div>
       </main>
     </div>
@@ -241,12 +287,7 @@ function PushNotificationCard() {
   const { permission, requestPermission } = usePushNotifications();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
-      className="stem-card rounded-xl p-6"
-    >
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="stem-card rounded-xl p-6">
       <h3 className="mb-4 flex items-center gap-2 font-semibold">
         <BellRing className="h-4 w-4 text-primary" /> Browser Push Notifications
       </h3>
@@ -264,9 +305,7 @@ function PushNotificationCard() {
           </p>
         </div>
         {permission === "default" && (
-          <Button size="sm" onClick={requestPermission} className="rounded">
-            Enable
-          </Button>
+          <Button size="sm" onClick={requestPermission} className="rounded">Enable</Button>
         )}
         {permission === "granted" && (
           <span className="rounded bg-success/10 px-2 py-1 text-xs font-medium text-success">Active</span>

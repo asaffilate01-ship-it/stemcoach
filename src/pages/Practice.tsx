@@ -3,13 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { subjects, type Question as LocalQuestion } from "@/data/questions";
-import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2, Lock, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useGameStats } from "@/hooks/useGameStats";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { StreakBar } from "@/components/gamification/StreakBar";
 import { XPPopup } from "@/components/gamification/XPPopup";
 import { BadgeUnlock } from "@/components/gamification/BadgeUnlock";
@@ -47,6 +48,7 @@ export default function Practice() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
+  const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
 
   const [questions, setQuestions] = useState<DBQuestion[]>([]);
@@ -144,6 +146,11 @@ export default function Practice() {
   };
 
   const handleSubmit = async () => {
+    // Check free tier limit
+    if (isFree && !canPractice) {
+      toast({ title: "Daily limit reached", description: "Upgrade to Pro for unlimited practice.", variant: "destructive" });
+      return;
+    }
     if (isEssay) {
       if (!essayAnswer.trim()) return;
       setLoadingAI(true);
@@ -185,6 +192,7 @@ export default function Practice() {
 
         const result = await recordAnswer(passed, question.points);
         showXPPopup(result.xpGained);
+        incrementCount();
       } catch (e: any) {
         toast({ title: "AI grading failed", description: e.message, variant: "destructive" });
       } finally {
@@ -215,6 +223,7 @@ export default function Practice() {
 
     const result = await recordAnswer(correct, question.points);
     showXPPopup(result.xpGained);
+    incrementCount();
   };
 
   const handleNext = () => {
@@ -264,6 +273,28 @@ export default function Practice() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="container mx-auto max-w-3xl px-4 py-8">
+        {/* Free tier limit banner */}
+        {isFree && user && (
+          <div className={`mb-4 flex items-center justify-between rounded-xl border p-3 ${
+            canPractice ? "border-primary/20 bg-primary/5" : "border-destructive/20 bg-destructive/5"
+          }`}>
+            <div className="flex items-center gap-2 text-sm">
+              {canPractice ? (
+                <CreditCard className="h-4 w-4 text-primary" />
+              ) : (
+                <Lock className="h-4 w-4 text-destructive" />
+              )}
+              <span>
+                {canPractice
+                  ? `${remainingToday} of ${FREE_DAILY_LIMIT} free questions remaining today`
+                  : "Daily limit reached — upgrade for unlimited practice"}
+              </span>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => navigate("/pricing")} className="rounded text-xs">
+              Upgrade
+            </Button>
+          </div>
+        )}
         {user && <div className="mb-4"><StreakBar stats={stats} /></div>}
 
         <div className="mb-6 flex items-center justify-between">
@@ -353,8 +384,8 @@ export default function Practice() {
               {/* Actions */}
               <div className="flex flex-wrap gap-3">
                 {!showFeedback ? (
-                  <Button onClick={handleSubmit} disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI} className="rounded">
-                    {loadingAI ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Grading...</> : isEssay ? "Submit for AI Grading" : "Submit Answer"}
+                  <Button onClick={handleSubmit} disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI || (isFree && !canPractice)} className="rounded">
+                    {loadingAI ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Grading...</> : isFree && !canPractice ? <><Lock className="mr-2 h-4 w-4" /> Limit Reached</> : isEssay ? "Submit for AI Grading" : "Submit Answer"}
                   </Button>
                 ) : (
                   <>
@@ -362,10 +393,16 @@ export default function Practice() {
                     <Button variant="outline" onClick={() => setShowTips(!showTips)} className="gap-2 rounded">
                       <Lightbulb className="h-4 w-4" /> {showTips ? "Hide Tips" : "Tuition Tips"}
                     </Button>
-                    <Button variant="outline" onClick={handleAskAI} disabled={loadingAI} className="gap-2 rounded">
-                      {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                      Ask AI Tutor
-                    </Button>
+                    {canUseAITutor ? (
+                      <Button variant="outline" onClick={handleAskAI} disabled={loadingAI} className="gap-2 rounded">
+                        {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                        Ask AI Tutor
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => navigate("/pricing")} className="gap-2 rounded text-muted-foreground">
+                        <Lock className="h-4 w-4" /> AI Tutor (Pro)
+                      </Button>
+                    )}
                   </>
                 )}
               </div>
