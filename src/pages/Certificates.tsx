@@ -112,6 +112,7 @@ export default function Certificates() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto max-w-3xl px-4 py-8">
         <div className="mb-6">
           <div className="stem-label mb-2">Recognition</div>
