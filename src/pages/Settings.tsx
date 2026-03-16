@@ -231,7 +231,7 @@ export default function Settings() {
                     <p className="text-sm font-medium">{pref.label}</p>
                     <p className="text-xs text-muted-foreground">{pref.desc}</p>
                   </div>
-                  <Switch checked={notifPrefs[pref.key]} onCheckedChange={(checked) => setNotifPrefs((prev) => ({ ...prev, [pref.key]: checked }))} />
+                  <Switch checked={notifPrefs[pref.key]} onCheckedChange={(checked) => updateNotifPref(pref.key, checked)} />
                 </div>
               ))}
             </div>
