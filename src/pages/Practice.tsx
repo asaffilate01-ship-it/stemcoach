@@ -266,6 +266,28 @@ export default function Practice() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="container mx-auto max-w-3xl px-4 py-8">
+        {/* Free tier limit banner */}
+        {isFree && user && (
+          <div className={`mb-4 flex items-center justify-between rounded-xl border p-3 ${
+            canPractice ? "border-primary/20 bg-primary/5" : "border-destructive/20 bg-destructive/5"
+          }`}>
+            <div className="flex items-center gap-2 text-sm">
+              {canPractice ? (
+                <CreditCard className="h-4 w-4 text-primary" />
+              ) : (
+                <Lock className="h-4 w-4 text-destructive" />
+              )}
+              <span>
+                {canPractice
+                  ? `${remainingToday} of ${FREE_DAILY_LIMIT} free questions remaining today`
+                  : "Daily limit reached — upgrade for unlimited practice"}
+              </span>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => navigate("/pricing")} className="rounded text-xs">
+              Upgrade
+            </Button>
+          </div>
+        )}
         {user && <div className="mb-4"><StreakBar stats={stats} /></div>}
 
         <div className="mb-6 flex items-center justify-between">
