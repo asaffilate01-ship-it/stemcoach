@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -64,7 +65,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
-      <main className="flex-1">
+      <PageTransition><main className="flex-1">
         {/* Header */}
         <section className="relative overflow-hidden border-b py-16 md:py-24">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,hsl(var(--primary)/0.08),transparent)]" />
@@ -227,7 +228,7 @@ export default function Pricing() {
             </div>
           </div>
         </section>
-      </main>
+      </main></PageTransition>
       <Footer />
     </div>
   );
