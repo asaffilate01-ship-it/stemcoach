@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
