@@ -35,6 +35,7 @@ import Onboarding from "./pages/Onboarding";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
+import { DevToolsPanel } from "./components/dev/DevToolsPanel";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CookieConsent />
+          <DevToolsPanel />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
