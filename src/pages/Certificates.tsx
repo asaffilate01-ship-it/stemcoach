@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Award, Download, ExternalLink } from "lucide-react";
+import { Award, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
 
 interface Certificate {
   id: string;
@@ -30,46 +31,81 @@ export default function Certificates() {
       .then(({ data }) => setCerts(data || []));
   }, [user]);
 
-  const handleDownload = (cert: Certificate) => {
-    // Generate a printable certificate in a new tab
-    const html = `
-<!DOCTYPE html>
-<html><head><title>Certificate - ${cert.title}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
-  * { margin: 0; box-sizing: border-box; }
-  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f0f4f8; font-family: Inter, sans-serif; }
-  .cert { width: 800px; padding: 60px; background: white; border: 3px solid #2563eb; position: relative; text-align: center; }
-  .cert::before { content: ''; position: absolute; inset: 8px; border: 1px solid #93c5fd; pointer-events: none; }
-  .cert h1 { font-family: 'Playfair Display', serif; font-size: 36px; color: #1e3a5f; margin-bottom: 8px; }
-  .cert .sub { color: #64748b; font-size: 14px; margin-bottom: 32px; }
-  .cert .awarded { font-size: 12px; text-transform: uppercase; letter-spacing: 4px; color: #94a3b8; margin-bottom: 16px; }
-  .cert .name { font-size: 28px; font-weight: 700; color: #1e40af; border-bottom: 2px solid #2563eb; display: inline-block; padding-bottom: 4px; margin-bottom: 16px; }
-  .cert .desc { color: #475569; font-size: 16px; margin-bottom: 24px; line-height: 1.6; }
-  .cert .score { font-size: 48px; font-weight: 700; color: #2563eb; margin-bottom: 8px; }
-  .cert .meta { display: flex; justify-content: space-between; margin-top: 40px; font-size: 12px; color: #94a3b8; }
-  .cert .verify { background: #f1f5f9; padding: 8px 16px; border-radius: 6px; font-family: monospace; font-size: 13px; display: inline-block; margin-top: 16px; }
-  @media print { body { background: white; } .cert { border: 3px solid #2563eb; } }
-</style></head><body>
-<div class="cert">
-  <div class="awarded">Certificate of Achievement</div>
-  <h1>STEMCoach</h1>
-  <div class="sub">Science, Technology, Engineering & Mathematics</div>
-  <div class="desc">${cert.title}</div>
-  ${cert.score_percent !== null ? `<div class="score">${cert.score_percent}%</div>` : ''}
-  ${cert.subject ? `<div class="desc">Subject: ${cert.subject}</div>` : ''}
-  <div class="meta">
-    <span>Issued: ${new Date(cert.issued_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-    <span>ID: ${cert.verification_code}</span>
-  </div>
-  <div class="verify">Verify at stemcoach.app/verify/${cert.verification_code}</div>
-</div>
-<script>window.print();</script>
-</body></html>`;
+  const downloadPDF = (cert: Certificate) => {
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    const w = doc.internal.pageSize.getWidth();
+    const h = doc.internal.pageSize.getHeight();
 
-    const w = window.open("", "_blank");
-    w?.document.write(html);
-    w?.document.close();
+    // Border
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(2);
+    doc.rect(8, 8, w - 16, h - 16);
+    doc.setLineWidth(0.5);
+    doc.rect(12, 12, w - 24, h - 24);
+
+    // Header
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(148, 163, 184);
+    doc.text("CERTIFICATE OF ACHIEVEMENT", w / 2, 35, { align: "center" });
+
+    // Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(32);
+    doc.setTextColor(30, 58, 95);
+    doc.text("STEMCoach", w / 2, 52, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setTextColor(148, 163, 184);
+    doc.text("Science, Technology, Engineering & Mathematics", w / 2, 60, { align: "center" });
+
+    // Divider
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(w / 2 - 40, 67, w / 2 + 40, 67);
+
+    // Cert title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(37, 99, 235);
+    doc.text(cert.title, w / 2, 82, { align: "center", maxWidth: w - 60 });
+
+    // Score
+    if (cert.score_percent !== null) {
+      doc.setFontSize(40);
+      doc.setTextColor(37, 99, 235);
+      doc.text(`${cert.score_percent}%`, w / 2, 105, { align: "center" });
+    }
+
+    // Subject
+    if (cert.subject) {
+      doc.setFontSize(12);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Subject: ${cert.subject}`, w / 2, 118, { align: "center" });
+    }
+
+    // Date and verification
+    const dateStr = new Date(cert.issued_at).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Issued: ${dateStr}`, 25, h - 25);
+    doc.text(`Verification: ${cert.verification_code}`, w - 25, h - 25, { align: "right" });
+
+    // QR-like verification box
+    doc.setFillColor(241, 245, 249);
+    const vText = `stemcoach.app/verify/${cert.verification_code}`;
+    const vWidth = doc.getTextWidth(vText) + 12;
+    doc.roundedRect(w / 2 - vWidth / 2, h - 38, vWidth, 8, 2, 2, "F");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text(vText, w / 2, h - 33, { align: "center" });
+
+    doc.save(`certificate-${cert.verification_code}.pdf`);
   };
 
   return (
@@ -113,9 +149,9 @@ export default function Certificates() {
                     ID: {cert.verification_code}
                   </p>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => handleDownload(cert)} className="gap-1.5 rounded">
+                <Button size="sm" variant="outline" onClick={() => downloadPDF(cert)} className="gap-1.5 rounded">
                   <Download className="h-3.5 w-3.5" />
-                  Print
+                  PDF
                 </Button>
               </motion.div>
             ))}

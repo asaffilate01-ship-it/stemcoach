@@ -29,6 +29,8 @@ import StudyPlanner from "./pages/StudyPlanner";
 import WeakTopicDrill from "./pages/WeakTopicDrill";
 import LiveClassroom from "./pages/LiveClassroom";
 import ProgressReports from "./pages/ProgressReports";
+import Flashcards from "./pages/Flashcards";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +49,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/ai-tutor" element={<AITutor />} />
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
             {/* Student */}
             <Route path="/subjects" element={<Subjects />} />
@@ -55,6 +58,7 @@ const App = () => (
             <Route path="/badges" element={<Badges />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/weak-drills" element={<WeakTopicDrill />} />
+            <Route path="/flashcards" element={<ProtectedRoute><Flashcards /></ProtectedRoute>} />
             <Route path="/live-classroom" element={<ProtectedRoute><LiveClassroom /></ProtectedRoute>} />
 
             {/* Protected */}
