@@ -146,6 +146,11 @@ export default function Practice() {
   };
 
   const handleSubmit = async () => {
+    // Check free tier limit
+    if (isFree && !canPractice) {
+      toast({ title: "Daily limit reached", description: "Upgrade to Pro for unlimited practice.", variant: "destructive" });
+      return;
+    }
     if (isEssay) {
       if (!essayAnswer.trim()) return;
       setLoadingAI(true);
