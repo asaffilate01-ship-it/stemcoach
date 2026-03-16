@@ -2,94 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
-    /* STEM-OS Neutrals */
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* Premium Sapphire Palette */
+    --background: 220 20% 97%;
+    --foreground: 224 40% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 224 40% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 224 40% 10%;
 
-    /* Brand: STEM Blue */
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand: Deep Sapphire */
+    --primary: 230 72% 52%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary */
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
+    /* Secondary: Warm Slate */
+    --secondary: 220 16% 93%;
+    --secondary-foreground: 224 40% 10%;
 
     /* Muted */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 16% 93%;
+    --muted-foreground: 220 12% 46%;
 
-    /* Accent */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11%;
+    /* Accent: Soft Indigo */
+    --accent: 245 58% 96%;
+    --accent-foreground: 230 72% 52%;
 
     /* Status Colors */
-    --success: 142 71% 45%;
+    --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
     /* Borders & Inputs */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --border: 220 16% 90%;
+    --input: 220 16% 90%;
+    --ring: 230 72% 52%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-background: 224 40% 4%;
+    --sidebar-foreground: 220 16% 85%;
+    --sidebar-primary: 230 72% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 224 30% 12%;
+    --sidebar-accent-foreground: 220 16% 85%;
+    --sidebar-border: 224 30% 14%;
+    --sidebar-ring: 230 72% 52%;
 
     /* Custom tokens */
-    --stem-card-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.02), 0 8px 16px -4px rgba(0,0,0,.04);
-    --stem-card-hover: 0 0 0 1px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06);
-    --stem-ease: cubic-bezier(0.2, 0, 0, 1);
-    --stem-blue-glow: 221 83% 53%;
+    --stem-card-shadow: 0 1px 3px 0 rgba(0,0,0,.04), 0 4px 12px -2px rgba(0,0,0,.06);
+    --stem-card-hover: 0 1px 3px 0 rgba(0,0,0,.06), 0 8px 24px -4px rgba(0,0,0,.1);
+    --stem-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --stem-blue-glow: 230 72% 52%;
+
+    /* Premium gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(230 72% 52%), hsl(260 65% 58%));
+    --gradient-accent: linear-gradient(135deg, hsl(230 72% 52% / 0.08), hsl(260 65% 58% / 0.04));
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 96%;
-    --card: 222 47% 8%;
-    --card-foreground: 210 40% 96%;
-    --popover: 222 47% 8%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 221 83% 60%;
-    --primary-foreground: 222 47% 6%;
-    --secondary: 217 33% 15%;
-    --secondary-foreground: 210 40% 96%;
-    --muted: 217 33% 15%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 15%;
-    --accent-foreground: 210 40% 96%;
+    --background: 224 40% 4%;
+    --foreground: 220 20% 95%;
+    --card: 224 36% 7%;
+    --card-foreground: 220 20% 95%;
+    --popover: 224 36% 7%;
+    --popover-foreground: 220 20% 95%;
+    --primary: 230 72% 62%;
+    --primary-foreground: 224 40% 4%;
+    --secondary: 224 30% 12%;
+    --secondary-foreground: 220 20% 95%;
+    --muted: 224 30% 12%;
+    --muted-foreground: 220 12% 60%;
+    --accent: 224 30% 12%;
+    --accent-foreground: 220 20% 95%;
     --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 221 83% 60%;
-    --sidebar-background: 222 47% 6%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 221 83% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 30% 14%;
+    --input: 224 30% 14%;
+    --ring: 230 72% 62%;
+    --sidebar-background: 224 40% 3%;
+    --sidebar-foreground: 220 16% 85%;
+    --sidebar-primary: 230 72% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 221 83% 60%;
+    --sidebar-accent: 224 30% 10%;
+    --sidebar-accent-foreground: 220 16% 85%;
+    --sidebar-border: 224 30% 10%;
+    --sidebar-ring: 230 72% 62%;
   }
 }
 
@@ -102,7 +107,7 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight text-balance;
+    @apply tracking-tight text-balance font-semibold;
   }
   p {
     @apply leading-relaxed;
@@ -111,22 +116,23 @@
 
 @layer components {
   .stem-card {
-    @apply bg-card rounded-xl;
+    @apply bg-card rounded-xl border border-border/50;
     box-shadow: var(--stem-card-shadow);
-    transition: box-shadow 150ms var(--stem-ease);
+    transition: box-shadow 200ms var(--stem-ease), transform 200ms var(--stem-ease);
   }
   .stem-card:hover {
     box-shadow: var(--stem-card-hover);
+    transform: translateY(-1px);
   }
   .stem-label {
-    @apply text-xs font-medium uppercase tracking-widest text-muted-foreground;
+    @apply text-xs font-semibold uppercase tracking-widest text-primary;
   }
   .stem-heading {
-    @apply text-2xl font-semibold tracking-tight text-foreground;
+    @apply text-2xl font-bold tracking-tight text-foreground;
   }
   .stem-gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(221 83% 53%), hsl(250 80% 60%));
+    background-image: linear-gradient(135deg, hsl(230 72% 52%), hsl(260 65% 58%));
   }
   .stem-tuition-tip {
     @apply bg-primary/5 border-l-2 border-primary rounded-r-lg p-4;
@@ -140,5 +146,12 @@
     @apply border-2;
     border-color: hsl(var(--destructive));
     background-color: hsl(var(--destructive) / 0.05);
+  }
+  .stem-glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/30;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.05) inset;
+  }
+  .stem-section-heading {
+    @apply text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl;
   }
 }

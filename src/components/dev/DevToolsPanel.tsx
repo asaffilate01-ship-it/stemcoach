@@ -13,7 +13,8 @@ const DEV_ACCOUNTS = [
   { label: "Admin", email: "dev-admin@stemcoach.test", password: "DevAdmin123!", role: "admin", emoji: "🛡️" },
 ];
 
-const IS_DEV = import.meta.env.DEV;
+// Show in dev mode OR when ?dev=1 is in the URL (for previews)
+const IS_DEV = import.meta.env.DEV || new URLSearchParams(window.location.search).has("dev");
 
 export function DevToolsPanel() {
   const [open, setOpen] = useState(false);
@@ -34,7 +35,6 @@ export function DevToolsPanel() {
         password: account.password,
       });
       if (error) {
-        // Account might not exist yet — create it
         const { error: signUpError } = await supabase.auth.signUp({
           email: account.email,
           password: account.password,
@@ -72,23 +72,21 @@ export function DevToolsPanel() {
 
   return (
     <>
-      {/* Floating bug icon */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-4 left-4 z-[9999] flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg transition-transform hover:scale-110 active:scale-95"
+        className="fixed bottom-4 left-4 z-[9999] flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/20 transition-transform hover:scale-110 active:scale-95"
         title="Dev Tools"
       >
         <Bug className="h-5 w-5" />
       </button>
 
-      {/* Panel */}
       {open && (
-        <div className="fixed bottom-16 left-4 z-[9999] w-80 rounded-xl border border-orange-500/30 bg-background shadow-2xl">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <div className="fixed bottom-16 left-4 z-[9999] w-80 rounded-xl border bg-card shadow-2xl">
+          <div className="flex items-center justify-between border-b px-4 py-3">
             <div className="flex items-center gap-2">
-              <Bug className="h-4 w-4 text-orange-500" />
+              <Bug className="h-4 w-4 text-primary" />
               <span className="text-sm font-bold">Dev Tools</span>
-              <span className="rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-orange-600">DEV</span>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">DEV</span>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
               <X className="h-4 w-4" />
@@ -96,7 +94,6 @@ export function DevToolsPanel() {
           </div>
 
           <div className="p-4 space-y-3">
-            {/* Current user */}
             <div className="rounded-lg bg-muted/50 p-3">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Current User</p>
               {user ? (
@@ -111,12 +108,11 @@ export function DevToolsPanel() {
               )}
             </div>
 
-            {/* Quick logins */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Quick Login</p>
               <div className="space-y-1.5">
                 {DEV_ACCOUNTS.map((account) => (
-                  <div key={account.role} className="flex items-center gap-2 rounded-lg border border-border p-2">
+                  <div key={account.role} className="flex items-center gap-2 rounded-lg border p-2">
                     <span className="text-base">{account.emoji}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold">{account.label}</p>
@@ -127,7 +123,7 @@ export function DevToolsPanel() {
                       className="rounded p-1 text-muted-foreground hover:text-foreground"
                       title="Copy credentials"
                     >
-                      {copied === account.role ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                      {copied === account.role ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
                     </button>
                     <Button
                       size="sm"
@@ -144,7 +140,6 @@ export function DevToolsPanel() {
               </div>
             </div>
 
-            {/* Credentials table */}
             <details className="text-xs">
               <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 All Credentials
@@ -160,7 +155,6 @@ export function DevToolsPanel() {
               </div>
             </details>
 
-            {/* Quick nav */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Quick Nav</p>
               <div className="flex flex-wrap gap-1">
@@ -168,7 +162,7 @@ export function DevToolsPanel() {
                   <button
                     key={path}
                     onClick={() => { navigate(path); setOpen(false); }}
-                    className="rounded bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                   >
                     {path}
                   </button>
