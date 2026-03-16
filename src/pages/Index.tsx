@@ -1,4 +1,5 @@
 import { HeroSection } from "@/components/landing/HeroSection";
+import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { CurriculaSection } from "@/components/landing/CurriculaSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
@@ -12,6 +13,7 @@ const Index = () => {
       <AppHeader />
       <main className="flex-1">
         <HeroSection />
+        <SocialProofBar />
         <FeaturesSection />
         <CurriculaSection />
         <TestimonialsSection />
