@@ -223,6 +223,7 @@ export default function Practice() {
 
     const result = await recordAnswer(correct, question.points);
     showXPPopup(result.xpGained);
+    incrementCount();
   };
 
   const handleNext = () => {
