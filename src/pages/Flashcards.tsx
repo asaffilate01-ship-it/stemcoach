@@ -20,7 +20,6 @@ interface Flashcard {
   next_review: string;
 }
 
-// SM-2 algorithm
 function sm2(card: Flashcard, quality: number): Partial<Flashcard> {
   let { ease_factor, interval_days, repetitions } = card;
 
@@ -85,7 +84,6 @@ export default function Flashcards() {
     if (!user) return;
     setGenerating(true);
     try {
-      // Get recent wrong attempts
       const { data: wrongAttempts } = await supabase
         .from("attempts")
         .select("question_id")
@@ -102,7 +100,6 @@ export default function Flashcards() {
 
       const qIds = [...new Set(wrongAttempts.map((a) => a.question_id))];
 
-      // Check existing flashcards to avoid duplicates
       const { data: existing } = await supabase
         .from("flashcards")
         .select("question_id")
@@ -188,7 +185,7 @@ export default function Flashcards() {
               size="sm"
               variant={mode === "deck" ? "default" : "outline"}
               onClick={() => { setMode("deck"); setCurrentIdx(0); setFlipped(false); }}
-              className="rounded"
+              className="rounded-xl"
             >
               All ({cards.length})
             </Button>
@@ -196,19 +193,18 @@ export default function Flashcards() {
               size="sm"
               variant={mode === "review" ? "default" : "outline"}
               onClick={() => { setMode("review"); setCurrentIdx(0); setFlipped(false); }}
-              className="rounded"
+              className="rounded-xl"
             >
               Due ({dueCards.length})
             </Button>
           </div>
         </div>
 
-        {/* Generate button */}
         <Button
           onClick={generateFromWrongAnswers}
           disabled={generating}
           variant="outline"
-          className="mb-6 w-full gap-2 rounded"
+          className="mb-6 w-full gap-2 rounded-xl"
         >
           {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Auto-generate from missed questions
@@ -231,12 +227,12 @@ export default function Flashcards() {
             <div className="mb-4 text-center text-sm text-muted-foreground">
               Card {currentIdx + 1} of {reviewCards.length}
               {currentCard?.subject && (
-                <span className="ml-2 rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                <span className="ml-2 rounded-lg bg-primary/10 px-2 py-0.5 text-xs text-primary">
                   {currentCard.subject}
                 </span>
               )}
               {currentCard?.topic && (
-                <span className="ml-1 rounded bg-muted px-2 py-0.5 text-xs">
+                <span className="ml-1 rounded-lg bg-muted px-2 py-0.5 text-xs">
                   {currentCard.topic}
                 </span>
               )}
@@ -244,7 +240,7 @@ export default function Flashcards() {
 
             <div
               onClick={() => setFlipped(!flipped)}
-              className="stem-card cursor-pointer rounded-xl p-8 text-center transition-all hover:shadow-lg"
+              className="stem-card cursor-pointer rounded-2xl p-8 text-center transition-all hover:shadow-lg"
               style={{ minHeight: 200, perspective: 1000 }}
             >
               <AnimatePresence mode="wait">
@@ -276,16 +272,16 @@ export default function Flashcards() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 flex justify-center gap-2"
               >
-                <Button size="sm" variant="outline" onClick={() => rateCard(1)} className="gap-1 rounded border-destructive/30 text-destructive hover:bg-destructive/5">
+                <Button size="sm" variant="outline" onClick={() => rateCard(1)} className="gap-1 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/5">
                   <X className="h-3.5 w-3.5" /> Again
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => rateCard(3)} className="gap-1 rounded">
+                <Button size="sm" variant="outline" onClick={() => rateCard(3)} className="gap-1 rounded-xl">
                   Hard
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => rateCard(4)} className="gap-1 rounded border-primary/30 text-primary hover:bg-primary/5">
+                <Button size="sm" variant="outline" onClick={() => rateCard(4)} className="gap-1 rounded-xl border-primary/30 text-primary hover:bg-primary/5">
                   Good
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => rateCard(5)} className="gap-1 rounded border-success/30 text-success hover:bg-success/5">
+                <Button size="sm" variant="outline" onClick={() => rateCard(5)} className="gap-1 rounded-xl border-success/30 text-success hover:bg-success/5">
                   <Check className="h-3.5 w-3.5" /> Easy
                 </Button>
               </motion.div>
@@ -297,7 +293,7 @@ export default function Flashcards() {
                 variant="ghost"
                 onClick={() => { setCurrentIdx(Math.max(0, currentIdx - 1)); setFlipped(false); }}
                 disabled={currentIdx === 0}
-                className="rounded"
+                className="rounded-xl"
               >
                 Previous
               </Button>
@@ -306,7 +302,7 @@ export default function Flashcards() {
                 variant="ghost"
                 onClick={() => { setCurrentIdx(Math.min(reviewCards.length - 1, currentIdx + 1)); setFlipped(false); }}
                 disabled={currentIdx === reviewCards.length - 1}
-                className="rounded"
+                className="rounded-xl"
               >
                 Next
               </Button>
