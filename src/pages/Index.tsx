@@ -2,6 +2,7 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { CurriculaSection } from "@/components/landing/CurriculaSection";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -11,9 +12,18 @@ const Index = () => {
         <HeroSection />
         <FeaturesSection />
         <CurriculaSection />
-        <footer className="border-t py-8 text-center text-sm text-muted-foreground">
+        <footer className="border-t py-8">
           <div className="container mx-auto px-4">
-            STEMCoach — Virtual Tuition Centre · 100,000+ questions across 7+ curricula
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="text-sm text-muted-foreground">
+                © {new Date().getFullYear()} STEMCoach — Virtual Tuition Centre
+              </div>
+              <nav className="flex gap-4 text-sm text-muted-foreground">
+                <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+                <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
+                <a href="mailto:support@stemcoach.app" className="hover:text-foreground">Contact</a>
+              </nav>
+            </div>
           </div>
         </footer>
       </main>
