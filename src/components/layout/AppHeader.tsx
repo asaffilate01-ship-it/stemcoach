@@ -33,6 +33,7 @@ const navItems: NavItem[] = [
   { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"] },
   { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"] },
   { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"] },
+  { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"] },
   { to: "/pricing", label: "Pricing", icon: CreditCard },
 ];
 
