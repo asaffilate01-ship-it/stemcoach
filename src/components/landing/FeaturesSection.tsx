@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { BookOpen, Brain, Clock, GraduationCap, LineChart, Shield, Users, Zap } from "lucide-react";
+import dashboardImg from "@/assets/dashboard-preview.png";
 
 const features = [
   {
@@ -68,6 +69,26 @@ export function FeaturesSection() {
             Built by teachers and tutors, powered by AI. From practice questions to live classrooms, everything you need to ace your exams.
           </p>
         </div>
+
+        {/* Dashboard preview image */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto mb-16 max-w-4xl"
+        >
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/8 via-transparent to-primary/4 blur-2xl" />
+            <img
+              src={dashboardImg}
+              alt="STEMCoach dashboard showing exam analytics, progress tracking, and achievement badges"
+              className="relative w-full rounded-2xl shadow-2xl shadow-primary/10 ring-1 ring-border/50"
+              loading="lazy"
+            />
+          </div>
+        </motion.div>
+
         <div className="mx-auto grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, i) => (
             <motion.div
