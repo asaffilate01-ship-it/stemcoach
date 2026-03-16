@@ -50,7 +50,29 @@ export default function Settings() {
     if (!user) return;
     loadProfile();
     loadPendingLinks();
+    loadNotifPrefs();
   }, [user]);
+
+  const loadNotifPrefs = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("user_preferences")
+      .select("notification_prefs")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (data?.notification_prefs) {
+      setNotifPrefs(data.notification_prefs as typeof notifPrefs);
+    }
+  };
+
+  const updateNotifPref = async (key: keyof typeof notifPrefs, checked: boolean) => {
+    const updated = { ...notifPrefs, [key]: checked };
+    setNotifPrefs(updated);
+    if (!user) return;
+    await supabase
+      .from("user_preferences")
+      .upsert({ user_id: user.id, notification_prefs: updated }, { onConflict: "user_id" });
+  };
 
   const loadProfile = async () => {
     if (!user) return;
