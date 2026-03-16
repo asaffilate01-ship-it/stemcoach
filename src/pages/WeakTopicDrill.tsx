@@ -257,7 +257,7 @@ export default function WeakTopicDrill() {
             </motion.div>
           </AnimatePresence>
         )}
-      </main>
+        </main>
       </PageTransition>
     </div>
   );

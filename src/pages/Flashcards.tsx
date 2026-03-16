@@ -313,7 +313,7 @@ export default function Flashcards() {
             </div>
           </>
         )}
-      </main>
+        </main>
       </PageTransition>
     </div>
   );

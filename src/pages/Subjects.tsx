@@ -189,7 +189,7 @@ export default function Subjects() {
             </motion.div>
           ))}
         </div>
-      </main>
+        </main>
       </PageTransition>
     </div>
   );

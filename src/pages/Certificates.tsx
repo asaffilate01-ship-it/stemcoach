@@ -159,7 +159,7 @@ export default function Certificates() {
             ))}
           </div>
         )}
-      </main>
+        </main>
       </PageTransition>
     </div>
   );

@@ -248,7 +248,7 @@ export default function Leaderboard() {
             </div>
           )}
         </div>
-      </main>
+        </main>
       </PageTransition>
     </div>
   );

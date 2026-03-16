@@ -262,7 +262,7 @@ export default function StudyPlanner() {
             </div>
           </motion.div>
         </div>
-      </main>
+        </main>
       </PageTransition>
     </div>
   );
