@@ -54,6 +54,7 @@ const App = () => (
             <Route path="/badges" element={<Badges />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/weak-drills" element={<WeakTopicDrill />} />
+            <Route path="/live-classroom" element={<ProtectedRoute><LiveClassroom /></ProtectedRoute>} />
 
             {/* Protected */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
