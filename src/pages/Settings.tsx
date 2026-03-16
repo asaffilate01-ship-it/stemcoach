@@ -50,7 +50,29 @@ export default function Settings() {
     if (!user) return;
     loadProfile();
     loadPendingLinks();
+    loadNotifPrefs();
   }, [user]);
+
+  const loadNotifPrefs = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("user_preferences")
+      .select("notification_prefs")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (data?.notification_prefs) {
+      setNotifPrefs(data.notification_prefs as typeof notifPrefs);
+    }
+  };
+
+  const updateNotifPref = async (key: keyof typeof notifPrefs, checked: boolean) => {
+    const updated = { ...notifPrefs, [key]: checked };
+    setNotifPrefs(updated);
+    if (!user) return;
+    await supabase
+      .from("user_preferences")
+      .upsert({ user_id: user.id, notification_prefs: updated }, { onConflict: "user_id" });
+  };
 
   const loadProfile = async () => {
     if (!user) return;
@@ -209,7 +231,7 @@ export default function Settings() {
                     <p className="text-sm font-medium">{pref.label}</p>
                     <p className="text-xs text-muted-foreground">{pref.desc}</p>
                   </div>
-                  <Switch checked={notifPrefs[pref.key]} onCheckedChange={(checked) => setNotifPrefs((prev) => ({ ...prev, [pref.key]: checked }))} />
+                  <Switch checked={notifPrefs[pref.key]} onCheckedChange={(checked) => updateNotifPref(pref.key, checked)} />
                 </div>
               ))}
             </div>

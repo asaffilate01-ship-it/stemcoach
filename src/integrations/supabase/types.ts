@@ -765,6 +765,7 @@ export type Database = {
           created_at: string
           curriculum: string | null
           id: string
+          notification_prefs: Json
           onboarding_complete: boolean
           subjects: string[]
           updated_at: string
@@ -774,6 +775,7 @@ export type Database = {
           created_at?: string
           curriculum?: string | null
           id?: string
+          notification_prefs?: Json
           onboarding_complete?: boolean
           subjects?: string[]
           updated_at?: string
@@ -783,6 +785,7 @@ export type Database = {
           created_at?: string
           curriculum?: string | null
           id?: string
+          notification_prefs?: Json
           onboarding_complete?: boolean
           subjects?: string[]
           updated_at?: string
