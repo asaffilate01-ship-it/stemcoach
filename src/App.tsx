@@ -28,6 +28,7 @@ import AITutor from "./pages/AITutor";
 import StudyPlanner from "./pages/StudyPlanner";
 import WeakTopicDrill from "./pages/WeakTopicDrill";
 import LiveClassroom from "./pages/LiveClassroom";
+import ProgressReports from "./pages/ProgressReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
