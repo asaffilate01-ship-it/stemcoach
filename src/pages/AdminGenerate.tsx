@@ -110,7 +110,7 @@ export default function AdminGenerate() {
 
     for (const topic of subjectInfo.topics) {
       for (const type of ["mcq", "multi-select", "essay"]) {
-        for (const diff of [2, 3, 4]) {
+        for (const diff of [1, 2, 3, 4, 5]) {
           addLog(`Generating ${type} D${diff}: ${topic}...`);
           try {
             const { data, error } = await supabase.functions.invoke("generate-questions", {
@@ -122,24 +122,67 @@ export default function AdminGenerate() {
                 boards: selectedBoards,
                 difficulty: diff,
                 question_type: type,
-                count: type === "essay" ? 3 : 5,
+                count: type === "essay" ? 5 : 10,
               },
             });
             if (error) throw error;
             addLog(`  ✅ ${data?.inserted || 0} ${type} questions`);
-            // Small delay to avoid rate limits
-            await new Promise((r) => setTimeout(r, 2000));
+            await new Promise((r) => setTimeout(r, 1500));
           } catch (e: any) {
             addLog(`  ❌ ${e.message}`);
             if (e.message?.includes("429") || e.message?.includes("rate")) {
-              addLog("  ⏳ Rate limited — waiting 10s...");
-              await new Promise((r) => setTimeout(r, 10000));
+              addLog("  ⏳ Rate limited — waiting 15s...");
+              await new Promise((r) => setTimeout(r, 15000));
             }
           }
         }
       }
     }
     addLog(`✅ Bulk generation complete for ${subjectInfo.name}`);
+    setGenerating(false);
+  };
+
+  const handleMegaGenerate = async () => {
+    setGenerating(true);
+    addLog(`🚀🚀 MEGA GENERATION: All subjects × all curricula`);
+    
+    const allCurricula = curricula.slice(0, 8); // Top 8 curricula
+    
+    for (const sub of subjects) {
+      for (const curr of allCurricula) {
+        for (const topic of sub.topics) {
+          for (const type of ["mcq", "multi-select", "essay", "numerical"]) {
+            for (const diff of [1, 2, 3, 4, 5]) {
+              addLog(`${sub.name} > ${curr.label} > ${topic} > ${type} D${diff}...`);
+              try {
+                const { data, error } = await supabase.functions.invoke("generate-questions", {
+                  body: {
+                    subject: sub.id,
+                    topic,
+                    subtopic: topic,
+                    curriculum: curr.id,
+                    boards: curr.boards.slice(0, 3),
+                    difficulty: diff,
+                    question_type: type,
+                    count: type === "essay" ? 5 : 15,
+                  },
+                });
+                if (error) throw error;
+                addLog(`  ✅ ${data?.inserted || 0} questions`);
+                await new Promise((r) => setTimeout(r, 1200));
+              } catch (e: any) {
+                addLog(`  ❌ ${e.message}`);
+                if (e.message?.includes("429") || e.message?.includes("rate")) {
+                  addLog("  ⏳ Rate limited — waiting 20s...");
+                  await new Promise((r) => setTimeout(r, 20000));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    addLog(`🏆 MEGA GENERATION COMPLETE`);
     setGenerating(false);
   };
 

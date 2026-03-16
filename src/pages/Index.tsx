@@ -20,6 +20,7 @@ const Index = () => {
               </div>
               <nav className="flex gap-4 text-sm text-muted-foreground">
                 <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+                <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
                 <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
                 <a href="mailto:support@stemcoach.app" className="hover:text-foreground">Contact</a>
               </nav>

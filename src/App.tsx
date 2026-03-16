@@ -53,6 +53,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/ai-tutor" element={<AITutor />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
             {/* Student */}
