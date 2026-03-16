@@ -138,6 +138,13 @@ export function AppHeader() {
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
           {user && <NotificationBell />}
           {user ? (
             <DropdownMenu>
