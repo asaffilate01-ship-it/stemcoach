@@ -127,7 +127,7 @@ export default function WeakTopicDrill() {
             <Brain className="mx-auto mb-4 h-12 w-12 text-primary" />
             <h3 className="mb-2 text-lg font-semibold">Analyze Your Performance</h3>
             <p className="mb-6 text-sm text-muted-foreground">AI will review your past answers to identify weak areas and generate targeted practice questions.</p>
-            <Button onClick={analyze} disabled={loading} className="gap-2 rounded">
+            <Button onClick={analyze} disabled={loading} className="gap-2 rounded-xl">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</> : <><Sparkles className="h-4 w-4" /> Start Analysis</>}
             </Button>
           </motion.div>
@@ -135,7 +135,6 @@ export default function WeakTopicDrill() {
 
         {analyzed && !drilling && (
           <div className="space-y-6">
-            {/* Weak Topics */}
             {weakTopics.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-6">
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
@@ -158,7 +157,6 @@ export default function WeakTopicDrill() {
               </motion.div>
             )}
 
-            {/* AI Study Plan */}
             {aiPlan?.plans && aiPlan.plans.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="stem-card rounded-xl p-6">
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
@@ -172,7 +170,7 @@ export default function WeakTopicDrill() {
                       <p className="mb-2 text-sm text-muted-foreground">{plan.advice}</p>
                       <div className="flex flex-wrap gap-1">
                         {plan.focus_areas.map((f, j) => (
-                          <span key={j} className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{f}</span>
+                          <span key={j} className="rounded-lg bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{f}</span>
                         ))}
                       </div>
                     </div>
@@ -181,10 +179,9 @@ export default function WeakTopicDrill() {
               </motion.div>
             )}
 
-            {/* Start Drill */}
             {drillQuestions.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-center">
-                <Button onClick={startDrill} size="lg" className="gap-2 rounded">
+                <Button onClick={startDrill} size="lg" className="gap-2 rounded-xl">
                   <Target className="h-5 w-5" /> Start Targeted Drill ({drillQuestions.length} questions)
                 </Button>
               </motion.div>
@@ -200,14 +197,13 @@ export default function WeakTopicDrill() {
           </div>
         )}
 
-        {/* Drill Mode */}
         {drilling && question && (
           <AnimatePresence mode="wait">
             <motion.div key={currentQ} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="stem-card rounded-xl p-6">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex gap-2">
-                  <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{question.subject}</span>
-                  <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{question.topic}</span>
+                  <span className="rounded-lg bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{question.subject}</span>
+                  <span className="rounded-lg bg-muted px-2 py-0.5 text-xs text-muted-foreground">{question.topic}</span>
                 </div>
                 <span className="text-sm text-muted-foreground">{currentQ + 1}/{drillQuestions.length}</span>
               </div>
@@ -228,9 +224,9 @@ export default function WeakTopicDrill() {
                         key={opt}
                         onClick={() => !showFeedback && setSelected(opt)}
                         disabled={showFeedback}
-                        className={`flex w-full items-center gap-3 rounded-lg p-4 text-left transition-all ${cls}`}
+                        className={`flex w-full items-center gap-3 rounded-xl p-4 text-left transition-all ${cls}`}
                       >
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-muted text-xs font-semibold">{letter}</span>
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-semibold">{letter}</span>
                         <span className="text-sm font-medium">{opt}</span>
                         {showFeedback && opt === question.correct_answer && <CheckCircle2 className="ml-auto h-5 w-5 text-success" />}
                         {showFeedback && selected === opt && opt !== question.correct_answer && <XCircle className="ml-auto h-5 w-5 text-destructive" />}
@@ -241,14 +237,14 @@ export default function WeakTopicDrill() {
               )}
 
               {showFeedback && question.explanation && (
-                <div className="mb-4 rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">{question.explanation}</div>
+                <div className="mb-4 rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground">{question.explanation}</div>
               )}
 
               <div className="flex gap-3">
                 {!showFeedback ? (
-                  <Button onClick={submitAnswer} disabled={!selected} className="rounded">Submit</Button>
+                  <Button onClick={submitAnswer} disabled={!selected} className="rounded-xl">Submit</Button>
                 ) : (
-                  <Button onClick={nextQuestion} className="gap-2 rounded">
+                  <Button onClick={nextQuestion} className="gap-2 rounded-xl">
                     {currentQ + 1 < drillQuestions.length ? <>Next <ArrowRight className="h-4 w-4" /></> : "Finish Drill"}
                   </Button>
                 )}

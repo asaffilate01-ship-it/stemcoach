@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,7 +34,6 @@ export default function Onboarding() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Check if already onboarded
   useEffect(() => {
     if (!user) return;
     supabase
@@ -58,7 +58,6 @@ export default function Onboarding() {
       return;
     }
     setLoading(true);
-    // Fetch 2 questions per selected subject for diagnostic
     const allQs: DiagnosticQ[] = [];
     for (const subj of selectedSubjects) {
       const { data } = await supabase
@@ -71,7 +70,6 @@ export default function Onboarding() {
     }
 
     if (allQs.length === 0) {
-      // Skip diagnostic if no questions available
       await completeOnboarding();
       return;
     }
@@ -85,7 +83,6 @@ export default function Onboarding() {
     if (!user) return;
     setSaving(true);
 
-    // Save preferences
     await supabase.from("user_preferences").upsert({
       user_id: user.id,
       curriculum: selectedCurriculum,
@@ -93,7 +90,6 @@ export default function Onboarding() {
       onboarding_complete: true,
     } as any);
 
-    // Record diagnostic attempts
     for (let i = 0; i < diagnosticQs.length; i++) {
       if (diagAnswers[i]) {
         await supabase.from("attempts").insert({
@@ -105,7 +101,6 @@ export default function Onboarding() {
       }
     }
 
-    // Init user_stats if needed
     const { data: existingStats } = await supabase
       .from("user_stats")
       .select("id")
@@ -133,6 +128,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto flex max-w-lg flex-col items-center px-4 py-16">
         {step === "welcome" && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
@@ -143,7 +139,7 @@ export default function Onboarding() {
             <p className="mb-8 text-muted-foreground">
               Let's personalize your learning experience. This takes less than 2 minutes.
             </p>
-            <Button size="lg" onClick={() => setStep("curriculum")} className="gap-2 rounded">
+            <Button size="lg" onClick={() => setStep("curriculum")} className="gap-2 rounded-xl">
               Get Started <ChevronRight className="h-4 w-4" />
             </Button>
           </motion.div>
@@ -153,7 +149,7 @@ export default function Onboarding() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
             <h2 className="mb-2 text-2xl font-bold">Choose your curriculum</h2>
             <p className="mb-6 text-sm text-muted-foreground">Select the exam board you're studying for.</p>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
               {curricula.map((c) => (
                 <button
                   key={c.id}
@@ -173,7 +169,7 @@ export default function Onboarding() {
             <Button
               onClick={() => setStep("subjects")}
               disabled={!selectedCurriculum}
-              className="mt-6 w-full gap-2 rounded"
+              className="mt-6 w-full gap-2 rounded-xl"
             >
               Continue <ChevronRight className="h-4 w-4" />
             </Button>
@@ -201,12 +197,12 @@ export default function Onboarding() {
             <Button
               onClick={startDiagnostic}
               disabled={selectedSubjects.length === 0 || loading}
-              className="mt-6 w-full gap-2 rounded"
+              className="mt-6 w-full gap-2 rounded-xl"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Take Diagnostic Quiz <ChevronRight className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" onClick={completeOnboarding} className="mt-2 w-full rounded text-muted-foreground">
+            <Button variant="ghost" onClick={completeOnboarding} className="mt-2 w-full rounded-xl text-muted-foreground">
               Skip diagnostic
             </Button>
           </motion.div>
@@ -222,7 +218,7 @@ export default function Onboarding() {
             </div>
 
             <div className="stem-card rounded-xl p-6">
-              <span className="mb-2 inline-block rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
+              <span className="mb-2 inline-block rounded-lg bg-primary/10 px-2 py-0.5 text-xs text-primary">
                 {diagnosticQs[currentDiag].subject} · {diagnosticQs[currentDiag].topic}
               </span>
               <h3 className="mb-4 text-base font-semibold">{diagnosticQs[currentDiag].question_text}</h3>
@@ -238,11 +234,11 @@ export default function Onboarding() {
                       <button
                         key={opt}
                         onClick={() => setDiagAnswers((p) => ({ ...p, [currentDiag]: opt }))}
-                        className={`flex w-full items-center gap-3 rounded-lg border-2 p-3 text-left text-sm transition-all ${
+                        className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left text-sm transition-all ${
                           diagAnswers[currentDiag] === opt ? "border-primary bg-primary/5" : "border-transparent hover:border-primary/20"
                         }`}
                       >
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-muted text-xs font-semibold">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-semibold">
                           {String.fromCharCode(65 + oi)}
                         </span>
                         {opt}
@@ -255,16 +251,16 @@ export default function Onboarding() {
 
             <div className="mt-4 flex gap-2">
               {currentDiag > 0 && (
-                <Button variant="outline" onClick={() => setCurrentDiag((p) => p - 1)} className="rounded">
+                <Button variant="outline" onClick={() => setCurrentDiag((p) => p - 1)} className="rounded-xl">
                   Previous
                 </Button>
               )}
               {currentDiag < diagnosticQs.length - 1 ? (
-                <Button onClick={() => setCurrentDiag((p) => p + 1)} className="flex-1 rounded">
+                <Button onClick={() => setCurrentDiag((p) => p + 1)} className="flex-1 rounded-xl">
                   Next
                 </Button>
               ) : (
-                <Button onClick={completeOnboarding} disabled={saving} className="flex-1 rounded">
+                <Button onClick={completeOnboarding} disabled={saving} className="flex-1 rounded-xl">
                   {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Finish
                 </Button>
@@ -287,12 +283,13 @@ export default function Onboarding() {
             <p className="mb-8 text-muted-foreground">
               Your personalized study plan is ready. Let's start learning!
             </p>
-            <Button size="lg" onClick={() => navigate("/dashboard")} className="gap-2 rounded">
+            <Button size="lg" onClick={() => navigate("/dashboard")} className="gap-2 rounded-xl">
               Go to Dashboard <ChevronRight className="h-4 w-4" />
             </Button>
           </motion.div>
         )}
       </main>
+      </PageTransition>
     </div>
   );
 }

@@ -113,7 +113,6 @@ export default function StudyPlanner() {
     return "bg-warning/20";
   };
 
-  // Calculate streak from goals
   const calculateStreak = () => {
     let streak = 0;
     const d = new Date();
@@ -158,7 +157,6 @@ export default function StudyPlanner() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Today's Goal */}
           <div className="lg:col-span-1 space-y-4">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-6">
               <h3 className="mb-4 flex items-center gap-2 font-semibold">
@@ -181,7 +179,7 @@ export default function StudyPlanner() {
                     <Progress value={mPct} className="h-3" />
                   </div>
                   {qPct >= 100 && mPct >= 100 && (
-                    <div className="flex items-center gap-2 rounded-lg bg-success/10 p-3 text-sm font-medium text-success">
+                    <div className="flex items-center gap-2 rounded-xl bg-success/10 p-3 text-sm font-medium text-success">
                       <CheckCircle2 className="h-4 w-4" /> Goal Complete! 🎉
                     </div>
                   )}
@@ -190,20 +188,19 @@ export default function StudyPlanner() {
                 <div className="space-y-3">
                   <div>
                     <label className="mb-1 block text-xs text-muted-foreground">Target Questions</label>
-                    <Input type="number" min={1} max={100} value={targetQuestions} onChange={(e) => setTargetQuestions(Number(e.target.value))} />
+                    <Input type="number" min={1} max={100} value={targetQuestions} onChange={(e) => setTargetQuestions(Number(e.target.value))} className="rounded-xl" />
                   </div>
                   <div>
                     <label className="mb-1 block text-xs text-muted-foreground">Target Minutes</label>
-                    <Input type="number" min={5} max={300} value={targetMinutes} onChange={(e) => setTargetMinutes(Number(e.target.value))} />
+                    <Input type="number" min={5} max={300} value={targetMinutes} onChange={(e) => setTargetMinutes(Number(e.target.value))} className="rounded-xl" />
                   </div>
-                  <Button onClick={setTodayTarget} className="w-full gap-2 rounded">
+                  <Button onClick={setTodayTarget} className="w-full gap-2 rounded-xl">
                     <Plus className="h-4 w-4" /> Set Today's Goal
                   </Button>
                 </div>
               )}
             </motion.div>
 
-            {/* Streak Card */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="stem-card rounded-xl p-6">
               <h3 className="mb-3 flex items-center gap-2 font-semibold">
                 <Flame className="h-4 w-4 text-warning" /> Current Streak
@@ -213,18 +210,17 @@ export default function StudyPlanner() {
             </motion.div>
           </div>
 
-          {/* Calendar Heatmap */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="lg:col-span-2 stem-card rounded-xl p-6">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-semibold">
                 <Calendar className="h-4 w-4 text-primary" /> Activity Calendar
               </h3>
               <div className="flex items-center gap-2">
-                <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1))} className="rounded p-1.5 text-muted-foreground hover:text-foreground">
+                <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1))} className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <span className="text-sm font-medium min-w-[140px] text-center">{monthLabel}</span>
-                <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1))} className="rounded p-1.5 text-muted-foreground hover:text-foreground">
+                <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1))} className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
@@ -241,7 +237,7 @@ export default function StudyPlanner() {
                   <div
                     key={date}
                     title={goal ? `${goal.completed_questions}/${goal.target_questions} questions` : "No goal set"}
-                    className={`relative flex aspect-square items-center justify-center rounded text-xs transition-all ${
+                    className={`relative flex aspect-square items-center justify-center rounded-lg text-xs transition-all ${
                       inMonth ? getHeatColor(goal) : "opacity-20 bg-muted/10"
                     } ${isToday ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}`}
                   >
