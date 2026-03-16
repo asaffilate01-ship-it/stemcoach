@@ -176,6 +176,7 @@ export default function Flashcards() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
