@@ -51,7 +51,7 @@ export const NotificationBell = forwardRef<HTMLDivElement>(function Notification
   if (!user) return null;
 
   return (
-    <div className="relative">
+    <div ref={ref} className="relative">
       <button
         onClick={() => { setOpen(!open); if (!open && unreadCount > 0) markAllRead(); }}
         className="relative rounded p-1.5 text-muted-foreground hover:text-foreground"
@@ -87,4 +87,4 @@ export const NotificationBell = forwardRef<HTMLDivElement>(function Notification
       )}
     </div>
   );
-}
+});
