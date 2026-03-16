@@ -149,6 +149,7 @@ export default function StudyPlanner() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="stem-label mb-2">Study Planner</div>
