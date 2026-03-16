@@ -26,7 +26,7 @@ export default function Auth() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -35,10 +35,33 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        toast({
-          title: "Check your email",
-          description: "We've sent you a verification link to confirm your account.",
-        });
+        
+        // If auto-confirmed (dev mode), create profile & role immediately
+        if (signUpData?.user && !signUpData.user.identities?.length) {
+          toast({
+            title: "Check your email",
+            description: "We've sent you a verification link to confirm your account.",
+          });
+        } else if (signUpData?.user) {
+          // User was auto-confirmed, seed profile + role
+          await supabase.from("profiles").upsert({
+            user_id: signUpData.user.id,
+            display_name: displayName || email,
+          });
+          const assignRole = role === "teacher" || role === "parent" ? role : "student";
+          await supabase.from("user_roles").upsert({
+            user_id: signUpData.user.id,
+            role: assignRole,
+          });
+          await supabase.from("user_stats").upsert({ user_id: signUpData.user.id });
+          navigate("/onboarding");
+          return;
+        } else {
+          toast({
+            title: "Check your email",
+            description: "We've sent you a verification link to confirm your account.",
+          });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
