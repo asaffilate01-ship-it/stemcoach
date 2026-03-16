@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
