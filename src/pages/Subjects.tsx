@@ -190,6 +190,7 @@ export default function Subjects() {
           ))}
         </div>
       </main>
+      </PageTransition>
     </div>
   );
 }

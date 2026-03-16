@@ -303,6 +303,7 @@ export default function Settings() {
           </motion.div>
         </div>
       </main>
+      </PageTransition>
     </div>
   );
 }
