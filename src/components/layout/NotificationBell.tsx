@@ -1,9 +1,9 @@
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export const NotificationBell = forwardRef<HTMLDivElement>(function NotificationBell(_props, ref) {
+export function NotificationBell() {
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
