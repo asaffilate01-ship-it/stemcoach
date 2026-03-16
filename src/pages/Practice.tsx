@@ -384,8 +384,8 @@ export default function Practice() {
               {/* Actions */}
               <div className="flex flex-wrap gap-3">
                 {!showFeedback ? (
-                  <Button onClick={handleSubmit} disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI} className="rounded">
-                    {loadingAI ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Grading...</> : isEssay ? "Submit for AI Grading" : "Submit Answer"}
+                  <Button onClick={handleSubmit} disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI || (isFree && !canPractice)} className="rounded">
+                    {loadingAI ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Grading...</> : isFree && !canPractice ? <><Lock className="mr-2 h-4 w-4" /> Limit Reached</> : isEssay ? "Submit for AI Grading" : "Submit Answer"}
                   </Button>
                 ) : (
                   <>
@@ -393,10 +393,16 @@ export default function Practice() {
                     <Button variant="outline" onClick={() => setShowTips(!showTips)} className="gap-2 rounded">
                       <Lightbulb className="h-4 w-4" /> {showTips ? "Hide Tips" : "Tuition Tips"}
                     </Button>
-                    <Button variant="outline" onClick={handleAskAI} disabled={loadingAI} className="gap-2 rounded">
-                      {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                      Ask AI Tutor
-                    </Button>
+                    {canUseAITutor ? (
+                      <Button variant="outline" onClick={handleAskAI} disabled={loadingAI} className="gap-2 rounded">
+                        {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                        Ask AI Tutor
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => navigate("/pricing")} className="gap-2 rounded text-muted-foreground">
+                        <Lock className="h-4 w-4" /> AI Tutor (Pro)
+                      </Button>
+                    )}
                   </>
                 )}
               </div>
