@@ -54,6 +54,7 @@ export function AppHeader() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { roles, loading: rolesLoading } = useUserRole();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
