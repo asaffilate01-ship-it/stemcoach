@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
@@ -129,6 +130,7 @@ export default function ProgressReports() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -142,12 +144,12 @@ export default function ProgressReports() {
                 size="sm"
                 variant={period === p ? "default" : "outline"}
                 onClick={() => setPeriod(p)}
-                className="rounded capitalize"
+                className="rounded-xl capitalize"
               >
                 {p === "all" ? "All Time" : `Last ${p === "week" ? "7 Days" : "30 Days"}`}
               </Button>
             ))}
-            <Button size="sm" variant="outline" onClick={exportReport} className="gap-1.5 rounded">
+            <Button size="sm" variant="outline" onClick={exportReport} className="gap-1.5 rounded-xl">
               <Download className="h-3.5 w-3.5" /> Export CSV
             </Button>
           </div>
@@ -258,6 +260,7 @@ export default function ProgressReports() {
           )}
         </div>
       </main>
+      </PageTransition>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Users, BookOpen, Plus, Copy, BarChart3, ClipboardList, Send, Calendar, CheckCircle2, Clock, X } from "lucide-react";
+import { Users, BookOpen, Plus, Copy, BarChart3, ClipboardList, Send, Calendar, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,6 @@ export default function TeacherDashboard() {
   const [newClassSubject, setNewClassSubject] = useState("mathematics");
   const [newClassCurriculum, setNewClassCurriculum] = useState("uk-alevel");
 
-  // Assignment form state
   const [assignTitle, setAssignTitle] = useState("");
   const [assignDesc, setAssignDesc] = useState("");
   const [assignTopics, setAssignTopics] = useState("");
@@ -103,47 +103,46 @@ export default function TeacherDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <div className="stem-label mb-2">Teacher Portal</div>
             <h1 className="stem-heading text-3xl">Your Classes</h1>
           </div>
-          <Button onClick={() => setShowCreate(!showCreate)} className="gap-2 rounded">
+          <Button onClick={() => setShowCreate(!showCreate)} className="gap-2 rounded-xl">
             <Plus className="h-4 w-4" /> Create Class
           </Button>
         </div>
 
-        {/* Create Class Form */}
         {showCreate && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="stem-card mb-6 rounded-xl p-6">
             <h3 className="mb-4 font-semibold">New Class</h3>
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <Label className="text-sm">Class Name</Label>
-                <Input value={newClassName} onChange={(e) => setNewClassName(e.target.value)} placeholder="Year 12 Physics" className="mt-1.5" />
+                <Input value={newClassName} onChange={(e) => setNewClassName(e.target.value)} placeholder="Year 12 Physics" className="mt-1.5 rounded-xl" />
               </div>
               <div>
                 <Label className="text-sm">Subject</Label>
-                <select value={newClassSubject} onChange={(e) => setNewClassSubject(e.target.value)} className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 text-sm">
+                <select value={newClassSubject} onChange={(e) => setNewClassSubject(e.target.value)} className="mt-1.5 w-full rounded-xl border bg-background px-3 py-2 text-sm">
                   {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div>
                 <Label className="text-sm">Curriculum</Label>
-                <select value={newClassCurriculum} onChange={(e) => setNewClassCurriculum(e.target.value)} className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 text-sm">
+                <select value={newClassCurriculum} onChange={(e) => setNewClassCurriculum(e.target.value)} className="mt-1.5 w-full rounded-xl border bg-background px-3 py-2 text-sm">
                   {curricula.map((c) => <option key={c.id} value={c.id}>{c.country} {c.label}</option>)}
                 </select>
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <Button onClick={() => createClass.mutate()} disabled={!newClassName} className="rounded">Create</Button>
-              <Button variant="outline" onClick={() => setShowCreate(false)} className="rounded">Cancel</Button>
+              <Button onClick={() => createClass.mutate()} disabled={!newClassName} className="rounded-xl">Create</Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)} className="rounded-xl">Cancel</Button>
             </div>
           </motion.div>
         )}
 
-        {/* Classes Grid */}
         {isLoading ? (
           <div className="text-center text-muted-foreground">Loading...</div>
         ) : classes.length === 0 ? (
@@ -158,22 +157,21 @@ export default function TeacherDashboard() {
               <motion.div key={cls.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} className="stem-card rounded-xl p-6">
                 <div className="mb-3 flex items-center justify-between">
                   <BookOpen className="h-5 w-5 text-primary" />
-                  <button onClick={() => copyCode(cls.join_code)} className="flex items-center gap-1 rounded bg-muted px-2 py-1 text-xs font-mono text-muted-foreground hover:text-foreground">
+                  <button onClick={() => copyCode(cls.join_code)} className="flex items-center gap-1 rounded-lg bg-muted px-2 py-1 text-xs font-mono text-muted-foreground hover:text-foreground">
                     <Copy className="h-3 w-3" />{cls.join_code}
                   </button>
                 </div>
                 <h3 className="mb-1 font-semibold">{cls.name}</h3>
                 <p className="text-sm text-muted-foreground capitalize">{cls.subject} · {cls.curriculum}</p>
                 <div className="mt-4 flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-1.5 rounded text-xs">
+                  <Button variant="outline" size="sm" className="gap-1.5 rounded-xl text-xs">
                     <BarChart3 className="h-3 w-3" /> Analytics
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setShowAssign(cls.id)} className="gap-1.5 rounded text-xs">
+                  <Button variant="outline" size="sm" onClick={() => setShowAssign(cls.id)} className="gap-1.5 rounded-xl text-xs">
                     <ClipboardList className="h-3 w-3" /> Assign Work
                   </Button>
                 </div>
 
-                {/* Inline assignment form */}
                 {showAssign === cls.id && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-4 border-t pt-4">
                     <div className="mb-3 flex items-center justify-between">
@@ -183,27 +181,27 @@ export default function TeacherDashboard() {
                     <div className="space-y-3">
                       <div>
                         <Label className="text-xs">Title</Label>
-                        <Input value={assignTitle} onChange={(e) => setAssignTitle(e.target.value)} placeholder="Mechanics Quiz Week 3" className="mt-1" />
+                        <Input value={assignTitle} onChange={(e) => setAssignTitle(e.target.value)} placeholder="Mechanics Quiz Week 3" className="mt-1 rounded-xl" />
                       </div>
                       <div>
                         <Label className="text-xs">Description (optional)</Label>
-                        <Textarea value={assignDesc} onChange={(e) => setAssignDesc(e.target.value)} placeholder="Focus on SUVAT equations..." rows={2} className="mt-1 resize-none" />
+                        <Textarea value={assignDesc} onChange={(e) => setAssignDesc(e.target.value)} placeholder="Focus on SUVAT equations..." rows={2} className="mt-1 resize-none rounded-xl" />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Label className="text-xs">Topics (comma-separated)</Label>
-                          <Input value={assignTopics} onChange={(e) => setAssignTopics(e.target.value)} placeholder="Mechanics, Waves" className="mt-1" />
+                          <Input value={assignTopics} onChange={(e) => setAssignTopics(e.target.value)} placeholder="Mechanics, Waves" className="mt-1 rounded-xl" />
                         </div>
                         <div>
                           <Label className="text-xs">Questions</Label>
-                          <Input type="number" value={assignCount} onChange={(e) => setAssignCount(parseInt(e.target.value) || 10)} min={1} max={50} className="mt-1" />
+                          <Input type="number" value={assignCount} onChange={(e) => setAssignCount(parseInt(e.target.value) || 10)} min={1} max={50} className="mt-1 rounded-xl" />
                         </div>
                       </div>
                       <div>
                         <Label className="text-xs">Due Date (optional)</Label>
-                        <Input type="datetime-local" value={assignDueDate} onChange={(e) => setAssignDueDate(e.target.value)} className="mt-1" />
+                        <Input type="datetime-local" value={assignDueDate} onChange={(e) => setAssignDueDate(e.target.value)} className="mt-1 rounded-xl" />
                       </div>
-                      <Button onClick={() => createAssignment.mutate(cls.id)} disabled={!assignTitle} size="sm" className="gap-1.5 rounded">
+                      <Button onClick={() => createAssignment.mutate(cls.id)} disabled={!assignTitle} size="sm" className="gap-1.5 rounded-xl">
                         <Send className="h-3.5 w-3.5" /> Assign
                       </Button>
                     </div>
@@ -214,7 +212,6 @@ export default function TeacherDashboard() {
           </div>
         )}
 
-        {/* Recent Assignments */}
         {assignments.length > 0 && (
           <div className="mt-10">
             <h2 className="mb-4 stem-heading text-xl">Recent Assignments</h2>
@@ -246,6 +243,7 @@ export default function TeacherDashboard() {
           </div>
         )}
       </main>
+      </PageTransition>
     </div>
   );
 }
