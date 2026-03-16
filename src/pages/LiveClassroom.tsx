@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Whiteboard } from "@/components/classroom/Whiteboard";
-import { Video, PenTool, Users, Copy, ExternalLink } from "lucide-react";
+import { ClassroomChat } from "@/components/classroom/ClassroomChat";
+import { Video, PenTool, Users, Copy, ExternalLink, MessageSquare } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
@@ -15,6 +16,7 @@ export default function LiveClassroom() {
   const [roomName, setRoomName] = useState("");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [showWhiteboard, setShowWhiteboard] = useState(true);
+  const [showChat, setShowChat] = useState(true);
 
   const generateRoom = () => {
     const id = `stemcoach-${Date.now().toString(36)}`;
@@ -45,9 +47,8 @@ export default function LiveClassroom() {
           </div>
           <h1 className="text-2xl font-bold">Live Classroom</h1>
           <p className="text-center text-muted-foreground">
-            Start or join a live video classroom with a built-in collaborative whiteboard.
+            Start or join a live video classroom with collaborative whiteboard and chat.
           </p>
-
           <div className="flex w-full gap-2">
             <Input
               value={roomName}
@@ -57,7 +58,6 @@ export default function LiveClassroom() {
             />
             <Button onClick={joinRoom}>Join</Button>
           </div>
-
           <Button variant="outline" onClick={generateRoom} className="gap-2">
             <Users className="h-4 w-4" /> Generate New Room
           </Button>
@@ -71,8 +71,6 @@ export default function LiveClassroom() {
   return (
     <div className="flex h-screen flex-col bg-background">
       <AppHeader />
-
-      {/* Room bar */}
       <div className="flex items-center gap-2 border-b bg-muted/30 px-4 py-2">
         <span className="text-sm font-medium text-muted-foreground">Room:</span>
         <code className="rounded bg-muted px-2 py-0.5 text-sm font-mono">{activeRoom}</code>
@@ -87,42 +85,57 @@ export default function LiveClassroom() {
         <div className="flex-1" />
         <Button
           size="sm"
+          variant={showChat ? "default" : "outline"}
+          onClick={() => setShowChat(!showChat)}
+          className="gap-1.5"
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+          Chat
+        </Button>
+        <Button
+          size="sm"
           variant={showWhiteboard ? "default" : "outline"}
           onClick={() => setShowWhiteboard(!showWhiteboard)}
           className="gap-1.5"
         >
           <PenTool className="h-3.5 w-3.5" />
-          {showWhiteboard ? "Hide" : "Show"} Whiteboard
+          Board
         </Button>
         <Button size="sm" variant="destructive" onClick={() => setActiveRoom(null)}>
           Leave
         </Button>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 overflow-hidden">
-        {showWhiteboard ? (
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={55} minSize={30}>
-              <iframe
-                src={jitsiUrl}
-                className="h-full w-full border-0"
-                allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-                title="Live Video"
-              />
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={45} minSize={25}>
-              <Whiteboard roomId={activeRoom} />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        ) : (
-          <iframe
-            src={jitsiUrl}
-            className="h-full w-full border-0"
-            allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-            title="Live Video"
-          />
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden">
+          {showWhiteboard ? (
+            <ResizablePanelGroup direction="horizontal">
+              <ResizablePanel defaultSize={55} minSize={30}>
+                <iframe
+                  src={jitsiUrl}
+                  className="h-full w-full border-0"
+                  allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+                  title="Live Video"
+                />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={45} minSize={25}>
+                <Whiteboard roomId={activeRoom} />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          ) : (
+            <iframe
+              src={jitsiUrl}
+              className="h-full w-full border-0"
+              allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+              title="Live Video"
+            />
+          )}
+        </div>
+        {showChat && (
+          <div className="w-72 shrink-0">
+            <ClassroomChat roomId={activeRoom} />
+          </div>
         )}
       </div>
     </div>
