@@ -27,6 +27,7 @@ import Pricing from "./pages/Pricing";
 import AITutor from "./pages/AITutor";
 import StudyPlanner from "./pages/StudyPlanner";
 import WeakTopicDrill from "./pages/WeakTopicDrill";
+import LiveClassroom from "./pages/LiveClassroom";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/badges" element={<Badges />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/weak-drills" element={<WeakTopicDrill />} />
+            <Route path="/live-classroom" element={<ProtectedRoute><LiveClassroom /></ProtectedRoute>} />
 
             {/* Protected */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
