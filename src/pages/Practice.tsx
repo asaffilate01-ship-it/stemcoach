@@ -192,6 +192,7 @@ export default function Practice() {
 
         const result = await recordAnswer(passed, question.points);
         showXPPopup(result.xpGained);
+        incrementCount();
       } catch (e: any) {
         toast({ title: "AI grading failed", description: e.message, variant: "destructive" });
       } finally {
