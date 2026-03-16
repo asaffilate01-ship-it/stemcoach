@@ -19,8 +19,8 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,hsl(var(--primary)/0.12),transparent)]" />
       <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(ellipse_at_100%_0%,hsl(260_65%_58%/0.06),transparent)]" />
       
-      <div className="container relative mx-auto px-4 pt-24 pb-16 md:pt-32 md:pb-24">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+      <div className="container relative mx-auto px-4 pt-20 pb-12 md:pt-28 md:pb-20 lg:pt-32 lg:pb-24">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -29,7 +29,7 @@ export function HeroSection() {
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
               <Sparkles className="h-3.5 w-3.5" /> Virtual Tuition Centre
             </div>
-            <h1 className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
+            <h1 className="mb-6 text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
               Master STEM exams{" "}
               <br className="hidden md:block" />
               through{" "}
@@ -37,7 +37,7 @@ export function HeroSection() {
                 deliberate practice
               </span>
             </h1>
-            <p className="mb-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               A private tutor in your pocket. 1,000,000+ exam-style questions with step-by-step
               solutions, AI coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
             </p>
@@ -59,26 +59,26 @@ export function HeroSection() {
               </Button>
             </div>
 
-            <div className="mt-12 flex items-center gap-8 border-t border-border/50 pt-8">
+            <div className="mt-10 flex items-center gap-6 border-t border-border/50 pt-8 sm:gap-8 sm:mt-12">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <div className="flex items-center justify-center gap-1.5 mb-1">
                     <stat.icon className="h-4 w-4 text-primary/60" />
-                    <span className="text-2xl font-bold tracking-tight">{stat.value}</span>
+                    <span className="text-xl font-bold tracking-tight sm:text-2xl">{stat.value}</span>
                   </div>
-                  <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{stat.label}</div>
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground sm:text-[11px]">{stat.label}</div>
                 </div>
               ))}
             </div>
           </motion.div>
 
+          {/* Hero image — visible on all viewports */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="hidden lg:block"
           >
-            <div className="relative">
+            <div className="relative mx-auto max-w-md lg:max-w-none">
               <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/10 via-transparent to-primary/5 blur-2xl" />
               <img
                 src={heroImg}

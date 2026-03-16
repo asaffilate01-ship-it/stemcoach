@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -114,7 +115,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-sm font-extrabold text-primary-foreground shadow-sm">
@@ -173,89 +174,98 @@ export function AppHeader() {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+            aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile nav */}
-      {mobileOpen && (
-        <nav className="border-t bg-background px-4 py-4 lg:hidden max-h-[70vh] overflow-y-auto">
-          <div className="space-y-0.5">
-            {topNav.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            ))}
+      {/* Mobile nav with animation */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.nav
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden border-t bg-background lg:hidden"
+          >
+            <div className="px-4 py-4 max-h-[70vh] overflow-y-auto space-y-0.5">
+              {topNav.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+                    isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              ))}
 
-            {studyItems.length > 0 && (
-              <>
-                <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Study</div>
-                {studyItems.map((item) => (
-                  <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                      isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                    }`}>
-                    <item.icon className="h-4 w-4" />{item.label}
-                  </Link>
-                ))}
-              </>
-            )}
+              {studyItems.length > 0 && (
+                <>
+                  <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Study</div>
+                  {studyItems.map((item) => (
+                    <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+                        isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                      }`}>
+                      <item.icon className="h-4 w-4" />{item.label}
+                    </Link>
+                  ))}
+                </>
+              )}
 
-            {socialItems.length > 0 && (
-              <>
-                <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rewards</div>
-                {socialItems.map((item) => (
-                  <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                      isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                    }`}>
-                    <item.icon className="h-4 w-4" />{item.label}
-                  </Link>
-                ))}
-              </>
-            )}
+              {socialItems.length > 0 && (
+                <>
+                  <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rewards</div>
+                  {socialItems.map((item) => (
+                    <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+                        isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                      }`}>
+                      <item.icon className="h-4 w-4" />{item.label}
+                    </Link>
+                  ))}
+                </>
+              )}
 
-            {classItems.length > 0 && (
-              <>
-                <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Classes</div>
-                {classItems.map((item) => (
-                  <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                      isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                    }`}>
-                    <item.icon className="h-4 w-4" />{item.label}
-                  </Link>
-                ))}
-              </>
-            )}
+              {classItems.length > 0 && (
+                <>
+                  <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Classes</div>
+                  {classItems.map((item) => (
+                    <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+                        isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                      }`}>
+                      <item.icon className="h-4 w-4" />{item.label}
+                    </Link>
+                  ))}
+                </>
+              )}
 
-            {filterVisible(navItems.filter(i => !i.group && i.roles && !topNav.includes(i))).map((item) => (
-              <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                }`}>
-                <item.icon className="h-4 w-4" />{item.label}
-              </Link>
-            ))}
-          </div>
+              {filterVisible(navItems.filter(i => !i.group && i.roles && !topNav.includes(i))).map((item) => (
+                <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+                    isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                  }`}>
+                  <item.icon className="h-4 w-4" />{item.label}
+                </Link>
+              ))}
 
-          {!user && (
-            <Button size="sm" onClick={() => { setMobileOpen(false); navigate("/auth"); }} className="mt-4 w-full rounded-lg">
-              Sign In
-            </Button>
-          )}
-        </nav>
-      )}
+              {!user && (
+                <Button size="sm" onClick={() => { setMobileOpen(false); navigate("/auth"); }} className="mt-4 w-full rounded-lg">
+                  Sign In
+                </Button>
+              )}
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
