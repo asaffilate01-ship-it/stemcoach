@@ -78,11 +78,13 @@ export function AppHeader() {
   const classItems = filterVisible(navItems.filter(i => i.group === "classes"));
   const allVisible = filterVisible(navItems);
 
+  const isActive = (path: string) => location.pathname === path;
+
   const NavLink = ({ item }: { item: NavItem }) => (
     <Link
       to={item.to}
       className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-sm font-medium transition-colors ${
-        location.pathname === item.to
+        isActive(item.to)
           ? "bg-primary/10 text-primary"
           : "text-muted-foreground hover:text-foreground"
       }`}
@@ -94,12 +96,12 @@ export function AppHeader() {
 
   const GroupDropdown = ({ label, items }: { label: string; items: NavItem[] }) => {
     if (items.length === 0) return null;
-    const isActive = items.some(i => location.pathname === i.to);
+    const active = items.some(i => isActive(i.to));
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className={`flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-medium transition-colors ${
-            isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
+            active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
           }`}>
             {label} <ChevronDown className="h-3 w-3" />
           </button>
@@ -134,32 +136,33 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <NotificationBell />
+          {user && <NotificationBell />}
           {user ? (
-            <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="ghost" className="gap-1.5 rounded text-sm">
-                    <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel className="text-xs truncate max-w-[200px]">{user.email}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2">
-                    <Settings className="h-3.5 w-3.5" /> Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/pricing")} className="gap-2">
-                    <CreditCard className="h-3.5 w-3.5" /> Pricing
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
-                    <LogOut className="h-3.5 w-3.5" /> Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="ghost" className="gap-1.5 rounded text-sm">
+                  <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="text-xs truncate max-w-[200px]">{user.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2">
+                  <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2">
+                  <Settings className="h-3.5 w-3.5" /> Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/pricing")} className="gap-2">
+                  <CreditCard className="h-3.5 w-3.5" /> Pricing
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
+                  <LogOut className="h-3.5 w-3.5" /> Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button size="sm" onClick={() => navigate("/auth")} className="rounded">
               Sign In
@@ -176,23 +179,80 @@ export function AppHeader() {
 
       {mobileOpen && (
         <nav className="border-t bg-background px-4 py-3 lg:hidden max-h-[70vh] overflow-y-auto">
-          {allVisible.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-2 rounded px-3 py-2 text-sm font-medium ${
-                location.pathname === item.to
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground"
-              }`}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          ))}
+          <div className="space-y-0.5">
+            {/* Top nav */}
+            {topNav.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-2 rounded px-3 py-2.5 text-sm font-medium ${
+                  isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            ))}
+
+            {/* Study */}
+            {studyItems.length > 0 && (
+              <>
+                <div className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Study</div>
+                {studyItems.map((item) => (
+                  <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-2 rounded px-3 py-2.5 text-sm font-medium ${
+                      isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                    }`}>
+                    <item.icon className="h-4 w-4" />{item.label}
+                  </Link>
+                ))}
+              </>
+            )}
+
+            {/* Rewards */}
+            {socialItems.length > 0 && (
+              <>
+                <div className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rewards</div>
+                {socialItems.map((item) => (
+                  <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-2 rounded px-3 py-2.5 text-sm font-medium ${
+                      isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                    }`}>
+                    <item.icon className="h-4 w-4" />{item.label}
+                  </Link>
+                ))}
+              </>
+            )}
+
+            {/* Classes */}
+            {classItems.length > 0 && (
+              <>
+                <div className="pt-3 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Classes</div>
+                {classItems.map((item) => (
+                  <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-2 rounded px-3 py-2.5 text-sm font-medium ${
+                      isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                    }`}>
+                    <item.icon className="h-4 w-4" />{item.label}
+                  </Link>
+                ))}
+              </>
+            )}
+
+            {/* Role-specific items (not in a group) */}
+            {filterVisible(navItems.filter(i => !i.group && i.roles && !topNav.includes(i))).map((item) => (
+              <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-2 rounded px-3 py-2.5 text-sm font-medium ${
+                  isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                }`}>
+                <item.icon className="h-4 w-4" />{item.label}
+              </Link>
+            ))}
+          </div>
+
           {!user && (
-            <Button size="sm" onClick={() => { setMobileOpen(false); navigate("/auth"); }} className="mt-2 w-full rounded">
+            <Button size="sm" onClick={() => { setMobileOpen(false); navigate("/auth"); }} className="mt-3 w-full rounded">
               Sign In
             </Button>
           )}

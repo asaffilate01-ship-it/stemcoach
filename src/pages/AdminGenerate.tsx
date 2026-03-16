@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { subjects, curricula } from "@/data/questions";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { motion } from "framer-motion";
-import { Loader2, Sparkles, Database, CheckCircle2 } from "lucide-react";
+import { Loader2, Sparkles, Database, ShieldAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const questionTypes = [
@@ -18,6 +20,8 @@ const questionTypes = [
 ];
 
 export default function AdminGenerate() {
+  const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const [generating, setGenerating] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("physics");
@@ -63,6 +67,20 @@ export default function AdminGenerate() {
   });
 
   const addLog = (msg: string) => setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+
+  // Block non-admins
+  if (!roleLoading && !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader />
+        <main className="container mx-auto px-4 py-16 text-center">
+          <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-destructive/50" />
+          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+          <p className="text-muted-foreground">Only administrators can generate questions.</p>
+        </main>
+      </div>
+    );
+  }
 
   const handleGenerate = async () => {
     if (!selectedTopic) {
@@ -146,7 +164,7 @@ export default function AdminGenerate() {
     setGenerating(true);
     addLog(`🚀🚀 MEGA GENERATION: All subjects × all curricula`);
     
-    const allCurricula = curricula.slice(0, 8); // Top 8 curricula
+    const allCurricula = curricula.slice(0, 8);
     
     for (const sub of subjects) {
       for (const curr of allCurricula) {
@@ -287,7 +305,7 @@ export default function AdminGenerate() {
                   ))}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button onClick={handleGenerate} disabled={generating || !selectedTopic} className="gap-2 rounded">
                   {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   Generate {count} Questions
