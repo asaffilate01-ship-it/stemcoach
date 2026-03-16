@@ -296,6 +296,10 @@ export default function AdminGenerate() {
                   {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
                   Bulk: All Topics
                 </Button>
+                <Button onClick={handleMegaGenerate} disabled={generating} variant="outline" className="gap-2 rounded border-primary text-primary">
+                  {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
+                  🚀 Mega: All Subjects
+                </Button>
               </div>
             </div>
           </div>
