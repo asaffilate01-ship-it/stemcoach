@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { subjects, curricula, difficultyLabels, type Difficulty } from "@/data/questions";
 import { ChevronRight, Filter } from "lucide-react";
 
@@ -27,6 +28,7 @@ export default function Subjects() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="stem-label mb-2">Select Your Programme</div>
@@ -188,6 +190,7 @@ export default function Subjects() {
           ))}
         </div>
       </main>
+      </PageTransition>
     </div>
   );
 }

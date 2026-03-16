@@ -1,8 +1,10 @@
 import { HeroSection } from "@/components/landing/HeroSection";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { CurriculaSection } from "@/components/landing/CurriculaSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { FAQSection } from "@/components/landing/FAQSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
@@ -14,9 +16,11 @@ const Index = () => {
       <main className="flex-1">
         <HeroSection />
         <SocialProofBar />
+        <HowItWorksSection />
         <FeaturesSection />
         <CurriculaSection />
         <TestimonialsSection />
+        <FAQSection />
         <CTASection />
       </main>
       <Footer />

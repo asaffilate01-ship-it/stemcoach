@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -159,6 +160,7 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto max-w-2xl px-4 py-8">
         <div className="mb-8">
           <div className="stem-label mb-2">Account</div>
@@ -301,6 +303,7 @@ export default function Settings() {
           </motion.div>
         </div>
       </main>
+      </PageTransition>
     </div>
   );
 }

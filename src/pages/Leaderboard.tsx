@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
@@ -112,6 +113,7 @@ export default function Leaderboard() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
+      <PageTransition>
       <main className="container mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
           <div className="stem-label mb-2">Competition</div>
@@ -247,6 +249,7 @@ export default function Leaderboard() {
           )}
         </div>
       </main>
+      </PageTransition>
     </div>
   );
 }
