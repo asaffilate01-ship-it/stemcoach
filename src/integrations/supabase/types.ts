@@ -396,6 +396,51 @@ export type Database = {
           },
         ]
       }
+      generation_queue: {
+        Row: {
+          boards: string[]
+          completed_at: string | null
+          count: number
+          created_at: string
+          curriculum: string
+          difficulty: number
+          id: string
+          question_type: string
+          status: string
+          subject: string
+          subtopic: string
+          topic: string
+        }
+        Insert: {
+          boards?: string[]
+          completed_at?: string | null
+          count?: number
+          created_at?: string
+          curriculum: string
+          difficulty: number
+          id?: string
+          question_type: string
+          status?: string
+          subject: string
+          subtopic: string
+          topic: string
+        }
+        Update: {
+          boards?: string[]
+          completed_at?: string | null
+          count?: number
+          created_at?: string
+          curriculum?: string
+          difficulty?: number
+          id?: string
+          question_type?: string
+          status?: string
+          subject?: string
+          subtopic?: string
+          topic?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
