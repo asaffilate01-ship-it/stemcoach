@@ -51,7 +51,7 @@ export function NotificationBell() {
   if (!user) return null;
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <button
         onClick={() => { setOpen(!open); if (!open && unreadCount > 0) markAllRead(); }}
         className="relative rounded p-1.5 text-muted-foreground hover:text-foreground"
