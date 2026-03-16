@@ -160,6 +160,7 @@ export default function Certificates() {
           </div>
         )}
       </main>
+      </PageTransition>
     </div>
   );
 }
