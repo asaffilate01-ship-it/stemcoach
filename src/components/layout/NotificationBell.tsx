@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export function NotificationBell() {
+export const NotificationBell = forwardRef<HTMLDivElement>(function NotificationBell(_props, ref) {
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -51,7 +51,7 @@ export function NotificationBell() {
   if (!user) return null;
 
   return (
-    <div className="relative">
+    <div ref={ref} className="relative">
       <button
         onClick={() => { setOpen(!open); if (!open && unreadCount > 0) markAllRead(); }}
         className="relative rounded p-1.5 text-muted-foreground hover:text-foreground"
@@ -87,4 +87,4 @@ export function NotificationBell() {
       )}
     </div>
   );
-}
+});
