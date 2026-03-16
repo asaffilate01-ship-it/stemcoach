@@ -29,6 +29,8 @@ import StudyPlanner from "./pages/StudyPlanner";
 import WeakTopicDrill from "./pages/WeakTopicDrill";
 import LiveClassroom from "./pages/LiveClassroom";
 import ProgressReports from "./pages/ProgressReports";
+import Flashcards from "./pages/Flashcards";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
