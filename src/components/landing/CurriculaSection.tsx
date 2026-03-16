@@ -25,7 +25,7 @@ export function CurriculaSection() {
               transition={{ duration: 0.4, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
               className="stem-card flex items-center gap-4 p-5"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 text-2xl">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 text-3xl leading-none">
                 {c.country}
               </span>
               <div>
