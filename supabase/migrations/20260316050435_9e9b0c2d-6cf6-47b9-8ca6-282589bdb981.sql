@@ -1,0 +1,1 @@
+ALTER TABLE public.user_preferences ADD COLUMN IF NOT EXISTS notification_prefs jsonb NOT NULL DEFAULT '{"badge_alerts": true, "streak_reminders": true, "parent_updates": true}'::jsonb;
