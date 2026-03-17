@@ -317,6 +317,7 @@ export default function ParentDashboard() {
           </>
         )}
       </main>
+      </PageTransition>
     </div>
   );
 }

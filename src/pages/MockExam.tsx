@@ -113,10 +113,11 @@ export default function MockExam() {
     );
     const percent = Math.round((totalScore / questions.length) * 100);
 
-    // Record attempts in batches
+    // Record attempts in batches — preserve original index for answer lookup
     const insertData = questions
-      .filter((_, i) => answers[i])
-      .map((q, i) => ({
+      .map((q, i) => ({ q, i }))
+      .filter(({ i }) => answers[i] !== undefined)
+      .map(({ q, i }) => ({
         user_id: user.id,
         question_id: q.id,
         answer: answers[i],
