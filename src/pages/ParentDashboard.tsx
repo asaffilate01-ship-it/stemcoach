@@ -86,11 +86,28 @@ export default function ParentDashboard() {
 
   const requestLink = async () => {
     if (!user || !childEmail.trim()) return;
-    toast({
-      title: "Link request sent",
-      description: "Your child will need to approve this link from their account settings.",
-    });
-    setChildEmail("");
+    
+    // Look up the child user by email via profiles (we can't query auth.users)
+    // For now, create a pending link. The child will see it in Settings.
+    // We need the child's user_id — search profiles by display_name or use a lookup approach
+    // Since we can't query auth.users, we'll create a placeholder and let the admin/system resolve it
+    // Better approach: use an edge function to look up by email
+    try {
+      const { data, error } = await supabase.functions.invoke("link-parent-child", {
+        body: { child_email: childEmail.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      
+      toast({
+        title: "Link request sent",
+        description: "Your child will need to approve this link from their account settings.",
+      });
+      setChildEmail("");
+      loadChildren();
+    } catch (e: any) {
+      toast({ title: "Could not send request", description: e.message, variant: "destructive" });
+    }
   };
 
   const child = children.find(c => c.user_id === selectedChild);
