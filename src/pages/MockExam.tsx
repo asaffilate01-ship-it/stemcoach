@@ -51,19 +51,23 @@ export default function MockExam() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   }, []);
 
+  const handleSubmitExamRef = useCallback(() => {
+    handleSubmitExam();
+  }, [questions, answers, user, submitting, examSubject]);
+
   useEffect(() => {
     if (state !== "active") return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          handleSubmitExam();
+          handleSubmitExamRef();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [state]);
+  }, [state, handleSubmitExamRef]);
 
   const startExam = async () => {
     setState("loading");
@@ -109,10 +113,11 @@ export default function MockExam() {
     );
     const percent = Math.round((totalScore / questions.length) * 100);
 
-    // Record attempts in batches
+    // Record attempts in batches — preserve original index for answer lookup
     const insertData = questions
-      .filter((_, i) => answers[i])
-      .map((q, i) => ({
+      .map((q, i) => ({ q, i }))
+      .filter(({ i }) => answers[i] !== undefined)
+      .map(({ q, i }) => ({
         user_id: user.id,
         question_id: q.id,
         answer: answers[i],

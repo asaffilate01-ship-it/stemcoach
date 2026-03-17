@@ -865,6 +865,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_certificate: {
+        Args: { _code: string }
+        Returns: {
+          achievement_type: string
+          issued_at: string
+          score_percent: number
+          subject: string
+          title: string
+          verification_code: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "teacher" | "student" | "parent"
