@@ -51,19 +51,23 @@ export default function MockExam() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   }, []);
 
+  const handleSubmitExamRef = useCallback(() => {
+    handleSubmitExam();
+  }, [questions, answers, user, submitting, examSubject]);
+
   useEffect(() => {
     if (state !== "active") return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          handleSubmitExam();
+          handleSubmitExamRef();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [state]);
+  }, [state, handleSubmitExamRef]);
 
   const startExam = async () => {
     setState("loading");
