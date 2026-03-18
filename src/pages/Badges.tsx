@@ -24,6 +24,7 @@ interface BadgeData {
 }
 
 export default function Badges() {
+  useDocumentTitle("Badges");
   const { user } = useAuth();
   const { stats } = useGameStats();
   const [badges, setBadges] = useState<BadgeData[]>([]);
