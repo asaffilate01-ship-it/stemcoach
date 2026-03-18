@@ -4,9 +4,11 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Bot, Send, User, Loader2, Trash2, Sparkles } from "lucide-react";
+import { Bot, Send, User, Loader2, Trash2, Sparkles, Lock, CreditCard } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuotaGate } from "@/hooks/useQuotaGate";
+import { useNavigate } from "react-router-dom";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
