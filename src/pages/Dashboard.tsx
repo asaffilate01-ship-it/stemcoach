@@ -8,7 +8,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, BookOpen, Brain, Layers, BarChart3 } from "lucide-react";
+import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, BookOpen, Brain, Layers, BarChart3, Trophy, Star, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { QuotaWidget } from "@/components/dashboard/QuotaWidget";
@@ -231,21 +231,27 @@ export default function Dashboard() {
           {/* Stats Grid */}
           <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              { label: "Questions", value: totalQ, icon: Target, color: "text-primary" },
-              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "text-success" },
-              { label: "Streak", value: `${stats?.streak || 0} days`, icon: Flame, color: "text-warning" },
-              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, color: "text-primary" },
+              { label: "Questions", value: totalQ, icon: Target, color: "bg-primary/10 text-primary", gradient: false },
+              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]", gradient: false },
+              { label: "Streak", value: `${stats?.streak || 0}`, icon: Flame, color: "bg-warning/10 text-warning", suffix: " days", gradient: false },
+              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, color: "bg-primary/10 text-primary", gradient: true },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="stem-card rounded-xl p-4"
+                className="rounded-2xl border border-border/40 bg-card p-4 md:p-5"
+                style={{ boxShadow: "var(--stem-card-shadow)" }}
               >
-                <stat.icon className={`mb-2 h-5 w-5 ${stat.color}`} />
-                <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
-                <div className="stem-label mt-1">{stat.label}</div>
+                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
+                  <stat.icon className="h-5 w-5" />
+                </div>
+                <div className="text-2xl font-extrabold tracking-tight">
+                  {stat.value}
+                  {stat.suffix && <span className="text-sm font-semibold text-muted-foreground">{stat.suffix}</span>}
+                </div>
+                <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -365,16 +371,22 @@ export default function Dashboard() {
               {/* Badges */}
               {badges.length > 0 && (
                 <div className="stem-card rounded-xl p-6">
-                  <h3 className="mb-4 font-semibold">Recent Badges</h3>
+                  <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                    <Trophy className="h-4 w-4 text-primary" /> Recent Badges
+                  </h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {badges.map((ub: any) => (
-                      <div key={ub.id} className="rounded-lg border bg-primary/5 border-primary/20 p-3 text-center">
-                        <div className="mb-1 text-2xl">{ub.badges?.icon || "🏆"}</div>
-                        <div className="text-xs font-semibold">{ub.badges?.name || "Badge"}</div>
+                      <motion.div
+                        key={ub.id}
+                        whileHover={{ scale: 1.03, y: -2 }}
+                        className="rounded-xl border border-primary/15 bg-gradient-to-br from-primary/5 to-transparent p-3 text-center transition-shadow hover:shadow-lg"
+                      >
+                        <div className="mb-1.5 text-2xl">{ub.badges?.icon || "🏆"}</div>
+                        <div className="text-xs font-bold">{ub.badges?.name || "Badge"}</div>
                         <div className="mt-1 text-[10px] text-muted-foreground">
                           {new Date(ub.earned_at).toLocaleDateString()}
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>

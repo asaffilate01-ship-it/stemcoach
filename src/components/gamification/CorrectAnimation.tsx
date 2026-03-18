@@ -5,34 +5,35 @@ interface CorrectAnimationProps {
   correct: boolean;
 }
 
-const emojis = ["🎉", "🔥", "⭐", "💪", "🚀"];
-const wrongEmojis = ["😤", "💡", "📚"];
+const correctEmojis = ["🎉", "🔥", "⭐", "💪", "🚀", "✨", "🎯", "💎"];
+const wrongEmojis = ["😤", "💡", "📚", "🧠"];
+const correctMessages = ["Nailed it!", "Brilliant!", "You got it!", "On fire!", "Perfect!", "Legendary!", "Unstoppable!"];
+const wrongMessages = ["Keep going!", "Learn & grow!", "Nearly there!", "Next time!"];
 
 export function CorrectAnimation({ show, correct }: CorrectAnimationProps) {
-  const pool = correct ? emojis : wrongEmojis;
+  const pool = correct ? correctEmojis : wrongEmojis;
+  const messages = correct ? correctMessages : wrongMessages;
   const emoji = pool[Math.floor(Math.random() * pool.length)];
-  const message = correct
-    ? ["Nailed it!", "Brilliant!", "You got it!", "On fire!", "Perfect!"][Math.floor(Math.random() * 5)]
-    : ["Keep going!", "Learn & grow!", "Nearly there!"][Math.floor(Math.random() * 3)];
+  const message = messages[Math.floor(Math.random() * messages.length)];
 
   return (
     <AnimatePresence>
       {show && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.5 }}
+          initial={{ opacity: 0, scale: 0.5, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.5, y: -10 }}
           transition={{ type: "spring", damping: 12, stiffness: 200 }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-xl bg-card border border-border/40 px-3 py-1.5 shadow-lg"
         >
           <motion.span
-            animate={{ rotate: [0, -15, 15, 0] }}
-            transition={{ duration: 0.5 }}
-            className="text-2xl"
+            animate={{ rotate: [0, -15, 15, -8, 8, 0], scale: [1, 1.3, 1] }}
+            transition={{ duration: 0.6 }}
+            className="text-xl"
           >
             {emoji}
           </motion.span>
-          <span className={`text-sm font-bold ${correct ? "text-success" : "text-warning"}`}>
+          <span className={`text-xs font-bold ${correct ? "text-[hsl(var(--success))]" : "text-warning"}`}>
             {message}
           </span>
         </motion.div>
