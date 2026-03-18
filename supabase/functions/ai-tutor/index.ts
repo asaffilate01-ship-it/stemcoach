@@ -40,7 +40,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    await verifyAuth(req);
+    const user = await verifyAuth(req);
+
+    // Rate limit: 30 requests per minute per user
+    if (!rateLimit(user.id, 30, 60_000)) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please slow down." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "30" },
+      });
+    }
 
     const { action, ...params } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");

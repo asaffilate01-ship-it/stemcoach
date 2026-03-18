@@ -40,6 +40,13 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData.user) throw new Error("Invalid authentication");
 
+    // Rate limit: 10 requests per minute per user (admin-only, heavy operation)
+    if (!rateLimit(userData.user.id, 10, 60_000)) {
+      return new Response(JSON.stringify({ error: "Too many generation requests. Please wait." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+      });
+    }
+
     const { data: roleData } = await supabase
       .from("user_roles").select("role")
       .eq("user_id", userData.user.id).eq("role", "admin");

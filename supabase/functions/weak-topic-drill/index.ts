@@ -34,8 +34,14 @@ serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate limit: 15 requests per minute per user
+    if (!rateLimit(user.id, 15, 60_000)) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please wait." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "30" },
       });
     }
 
