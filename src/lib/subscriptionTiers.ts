@@ -38,9 +38,9 @@ export const PACKS: Record<string, QuestionPack> = {
   topup: {
     name: "Top-Up Pack",
     product_id: "prod_UAj5MWyj4cFOgT",
-    questions: 20000,
+    questions: 2000,
     features: [
-      "20,000 extra questions",
+      "2,000 extra questions",
       "Add more subjects anytime",
       "Stack with existing pack",
       "Instant access",
