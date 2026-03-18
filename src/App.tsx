@@ -39,6 +39,7 @@ import Onboarding from "./pages/Onboarding";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
+import InstallApp from "./pages/InstallApp";
 import { DevToolsPanel } from "./components/dev/DevToolsPanel";
 
 const queryClient = new QueryClient();
