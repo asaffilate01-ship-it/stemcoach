@@ -164,7 +164,7 @@ export default function Auth() {
         >
           {/* Mobile logo */}
           <div className="mb-8 text-center lg:hidden">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-lg font-extrabold text-primary-foreground shadow-lg shadow-primary/25">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-lg font-extrabold text-white shadow-lg shadow-primary/25">
               S
             </div>
             <h1 className="stem-heading text-3xl">STEMCoach</h1>
