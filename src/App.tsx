@@ -39,6 +39,7 @@ import Onboarding from "./pages/Onboarding";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
+import InstallApp from "./pages/InstallApp";
 import { DevToolsPanel } from "./components/dev/DevToolsPanel";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/pricing" element={<P><Pricing /></P>} />
               <Route path="/ai-tutor" element={<P><AITutor /></P>} />
               <Route path="/privacy" element={<P><PrivacyPolicy /></P>} />
+              <Route path="/install" element={<P><InstallApp /></P>} />
               <Route path="/terms" element={<P><TermsOfService /></P>} />
               <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Bot, Send, User, Loader2, Trash2, Sparkles } from "lucide-react";
@@ -23,6 +24,7 @@ const QUICK_PROMPTS: Record<string, string[]> = {
 };
 
 export default function AITutor() {
+  useDocumentTitle("AI Tutor");
   const { user } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");

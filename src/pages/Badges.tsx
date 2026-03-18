@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useGameStats } from "@/hooks/useGameStats";
 import { StreakBar } from "@/components/gamification/StreakBar";
 import { motion } from "framer-motion";
@@ -22,6 +24,7 @@ interface BadgeData {
 }
 
 export default function Badges() {
+  useDocumentTitle("Badges");
   const { user } = useAuth();
   const { stats } = useGameStats();
   const [badges, setBadges] = useState<BadgeData[]>([]);
@@ -57,10 +60,10 @@ export default function Badges() {
   const categories = [...new Set(badges.map((b) => b.category))];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         <div className="mb-6">
           <div className="stem-label mb-2">Achievements</div>
           <h1 className="stem-heading text-3xl">Badges & Awards</h1>
@@ -112,6 +115,7 @@ export default function Badges() {
         ))}
         </main>
       </PageTransition>
+      <Footer />
     </div>
   );
 }
