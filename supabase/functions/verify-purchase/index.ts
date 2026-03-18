@@ -7,6 +7,34 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Map of valid price IDs to their question grants for server-side validation
+const VALID_PRICES: Record<string, { questions: number; pack: string }> = {
+  // Standard pack
+  "price_1TCNddFFogsDQVs4QyDkGoa6": { questions: 10000, pack: "standard" },
+  "price_1TCNdhFFogsDQVs4QJcncX1T": { questions: 10000, pack: "standard" },
+  "price_1TCNdjFFogsDQVs4VVGK1Ncx": { questions: 10000, pack: "standard" },
+  "price_1TCNdkFFogsDQVs4ZeZ8ikLB": { questions: 10000, pack: "standard" },
+  "price_1TCNdmFFogsDQVs4WszzaaSM": { questions: 10000, pack: "standard" },
+  // Top-up pack
+  "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 2000, pack: "topup" },
+  "price_1TCNdiFFogsDQVs4Kek0zoTb": { questions: 2000, pack: "topup" },
+  "price_1TCNdkFFogsDQVs4Xdwg4abI": { questions: 2000, pack: "topup" },
+  "price_1TCNdlFFogsDQVs4PSOP1So1": { questions: 2000, pack: "topup" },
+  "price_1TCNdmFFogsDQVs4Hju7qgvO": { questions: 2000, pack: "topup" },
+};
+
+// Detect region from Stripe currency
+function currencyToRegion(currency: string | null): string {
+  switch (currency?.toLowerCase()) {
+    case "gbp": return "uk";
+    case "usd": return "us";
+    case "aed": return "ae";
+    case "inr": return "in";
+    case "pkr": return "pk";
+    default: return "uk";
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -57,8 +85,31 @@ serve(async (req) => {
       if (existingIds.has(session.id)) continue;
       if (session.payment_status !== "paid") continue;
 
-      const questionsGranted = parseInt(session.metadata?.questions_granted || "0");
-      const packType = session.metadata?.pack_type || "standard";
+      // Server-side validation: resolve questions from the actual Stripe line items
+      let questionsGranted = 0;
+      let packType = "standard";
+      const region = currencyToRegion(session.currency);
+
+      // Expand line items to get actual price ID
+      const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 5 });
+      for (const item of lineItems.data) {
+        const priceId = item.price?.id;
+        if (priceId && VALID_PRICES[priceId]) {
+          questionsGranted += VALID_PRICES[priceId].questions * (item.quantity || 1);
+          packType = VALID_PRICES[priceId].pack;
+        }
+      }
+
+      // Fallback: if no valid price ID found but metadata exists (legacy sessions)
+      if (questionsGranted === 0) {
+        const metaQuestions = parseInt(session.metadata?.questions_granted || "0");
+        const metaPack = session.metadata?.pack_type || "standard";
+        // Only accept known amounts to prevent tampering
+        if (metaQuestions === 10000 || metaQuestions === 2000) {
+          questionsGranted = metaQuestions;
+          packType = metaPack;
+        }
+      }
 
       if (questionsGranted > 0) {
         await supabaseClient.from("purchases").insert({
@@ -68,6 +119,7 @@ serve(async (req) => {
           questions_granted: questionsGranted,
           amount_paid: session.amount_total || 0,
           currency: session.currency || "gbp",
+          region: region,
         });
         totalNewQuestions += questionsGranted;
       }

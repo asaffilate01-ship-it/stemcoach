@@ -13,8 +13,8 @@ const DEV_ACCOUNTS = [
   { label: "Admin", email: "dev-admin@stemcoach.test", password: "DevAdmin123!", role: "admin", emoji: "🛡️" },
 ];
 
-// Show in dev mode OR when ?dev=1 is in the URL (for previews)
-const IS_DEV = import.meta.env.DEV || new URLSearchParams(window.location.search).has("dev");
+// Only show in Vite dev mode — never in production builds
+const IS_DEV = import.meta.env.DEV;
 
 export function DevToolsPanel() {
   const [open, setOpen] = useState(false);

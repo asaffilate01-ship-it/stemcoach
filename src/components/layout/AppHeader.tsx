@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -30,14 +30,19 @@ const navItems: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study" },
   { to: "/flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study" },
   { to: "/weak-drills", label: "Drills", icon: Brain, group: "study" },
+  { to: "/daily-challenge", label: "Daily Challenge", icon: Flame, group: "study" },
+  { to: "/past-papers", label: "Past Papers", icon: FileText, group: "study" },
   { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"], group: "study" },
   { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"], group: "study" },
   { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"], group: "study" },
   { to: "/badges", label: "Badges", icon: Award, group: "social" },
   { to: "/leaderboard", label: "Leaderboard", icon: Medal, group: "social" },
   { to: "/certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social" },
+  { to: "/study-groups", label: "Study Groups", icon: Users, group: "social" },
   { to: "/my-classes", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes" },
   { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes" },
+  { to: "/formulas", label: "Formula Sheets", icon: ScrollText, group: "resources" },
+  { to: "/blog", label: "Blog", icon: FileText, group: "resources" },
   { to: "/parent", label: "Parent Portal", icon: Eye, roles: ["parent"] },
   { to: "/teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"] },
   { to: "/institution", label: "Institution", icon: Building2, roles: ["admin"] },
@@ -71,6 +76,7 @@ export function AppHeader() {
   const studyItems = filterVisible(navItems.filter(i => i.group === "study"));
   const socialItems = filterVisible(navItems.filter(i => i.group === "social"));
   const classItems = filterVisible(navItems.filter(i => i.group === "classes"));
+  const resourceItems = filterVisible(navItems.filter(i => i.group === "resources"));
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -131,6 +137,7 @@ export function AppHeader() {
           {user && <GroupDropdown label="Study" items={studyItems} />}
           <GroupDropdown label="Rewards" items={socialItems} />
           {classItems.length > 0 && <GroupDropdown label="Classes" items={classItems} />}
+          <GroupDropdown label="Resources" items={resourceItems} />
         </nav>
 
         {/* Right actions */}

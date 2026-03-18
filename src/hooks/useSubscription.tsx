@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import { PACKS, type PackKey, type RegionKey } from "@/lib/subscriptionTiers";
+import { type PackKey } from "@/lib/subscriptionTiers";
 
 export function useSubscription() {
   const { user } = useAuth();
@@ -14,7 +14,10 @@ export function useSubscription() {
         body: { priceId, packType, questionsGranted },
       });
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+      if (data?.url) {
+        // Use location.href for PWA/native compatibility (window.open breaks in standalone mode)
+        window.location.href = data.url;
+      }
     } finally {
       setLoading(false);
     }
@@ -23,7 +26,7 @@ export function useSubscription() {
   const manageSubscription = useCallback(async () => {
     const { data, error } = await supabase.functions.invoke("customer-portal");
     if (error) throw error;
-    if (data?.url) window.open(data.url, "_blank");
+    if (data?.url) window.location.href = data.url;
   }, []);
 
   return { checkout, manageSubscription, loading };
