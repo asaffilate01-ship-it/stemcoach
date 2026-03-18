@@ -17,9 +17,9 @@ export const PACKS: Record<string, QuestionPack> = {
   standard: {
     name: "Ultimate Pack",
     product_id: "prod_UAj58fkEwB0P8O",
-    questions: 100000,
+    questions: 10000,
     features: [
-      "100,000 curriculum-aligned questions",
+      "10,000 curriculum-aligned questions",
       "Choose your subjects & levels",
       "AI Tutor chat — unlimited",
       "Mock exams & certificates",
