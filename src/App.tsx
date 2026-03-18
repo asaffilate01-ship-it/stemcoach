@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SessionGuard } from "@/components/SessionGuard";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -43,6 +44,11 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 import InstallApp from "./pages/InstallApp";
+import FormulaSheets from "./pages/FormulaSheets";
+import PastPapers from "./pages/PastPapers";
+import DailyChallenge from "./pages/DailyChallenge";
+import StudyGroups from "./pages/StudyGroups";
+import Blog from "./pages/Blog";
 import { DevToolsPanel } from "./components/dev/DevToolsPanel";
 
 const queryClient = new QueryClient();
@@ -55,61 +61,71 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <SessionGuard />
-            <SkipToContent />
-            <ScrollToTop />
-            <div className="pb-16 lg:pb-0">
-              <Routes>
-                {/* Public */}
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<P><Auth /></P>} />
-                <Route path="/reset-password" element={<P><ResetPassword /></P>} />
-                <Route path="/pricing" element={<P><Pricing /></P>} />
-                <Route path="/ai-tutor" element={<ProtectedRoute><P><AITutor /></P></ProtectedRoute>} />
-                <Route path="/privacy" element={<P><PrivacyPolicy /></P>} />
-                <Route path="/install" element={<P><InstallApp /></P>} />
-                <Route path="/terms" element={<P><TermsOfService /></P>} />
-                <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
-                <Route path="/select-subjects" element={<ProtectedRoute><P><SelectSubjects /></P></ProtectedRoute>} />
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SessionGuard />
+              <SkipToContent />
+              <ScrollToTop />
+              <div className="pb-16 lg:pb-0">
+                <Routes>
+                  {/* Public */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<P><Auth /></P>} />
+                  <Route path="/reset-password" element={<P><ResetPassword /></P>} />
+                  <Route path="/pricing" element={<P><Pricing /></P>} />
+                  <Route path="/privacy" element={<P><PrivacyPolicy /></P>} />
+                  <Route path="/install" element={<P><InstallApp /></P>} />
+                  <Route path="/terms" element={<P><TermsOfService /></P>} />
+                  <Route path="/blog" element={<P><Blog /></P>} />
+                  <Route path="/blog/:slug" element={<P><Blog /></P>} />
+                  <Route path="/formulas" element={<P><FormulaSheets /></P>} />
 
-                {/* Student — require auth + quota */}
-                <Route path="/subjects" element={<ProtectedRoute><P><Subjects /></P></ProtectedRoute>} />
-                <Route path="/practice/:subjectId" element={<ProtectedRoute><P><Practice /></P></ProtectedRoute>} />
-                <Route path="/mock-exam" element={<ProtectedRoute><P><MockExam /></P></ProtectedRoute>} />
-                <Route path="/badges" element={<ProtectedRoute><P><Badges /></P></ProtectedRoute>} />
-                <Route path="/leaderboard" element={<ProtectedRoute><P><Leaderboard /></P></ProtectedRoute>} />
-                <Route path="/weak-drills" element={<ProtectedRoute><P><WeakTopicDrill /></P></ProtectedRoute>} />
-                <Route path="/flashcards" element={<ProtectedRoute><P><Flashcards /></P></ProtectedRoute>} />
-                <Route path="/live-classroom" element={<ProtectedRoute><P><LiveClassroom /></P></ProtectedRoute>} />
+                  {/* Auth-required public */}
+                  <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
+                  <Route path="/select-subjects" element={<ProtectedRoute><P><SelectSubjects /></P></ProtectedRoute>} />
 
-                {/* Protected */}
-                <Route path="/dashboard" element={<ProtectedRoute><P><Dashboard /></P></ProtectedRoute>} />
-                <Route path="/certificates" element={<ProtectedRoute><P><Certificates /></P></ProtectedRoute>} />
-                <Route path="/my-classes" element={<ProtectedRoute><P><StudentClasses /></P></ProtectedRoute>} />
-                <Route path="/analytics" element={<ProtectedRoute><P><Analytics /></P></ProtectedRoute>} />
-                <Route path="/study-planner" element={<ProtectedRoute><P><StudyPlanner /></P></ProtectedRoute>} />
-                <Route path="/progress-report" element={<ProtectedRoute><P><ProgressReports /></P></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><P><Settings /></P></ProtectedRoute>} />
+                  {/* Student — require auth */}
+                  <Route path="/subjects" element={<ProtectedRoute><P><Subjects /></P></ProtectedRoute>} />
+                  <Route path="/practice/:subjectId" element={<ProtectedRoute><P><Practice /></P></ProtectedRoute>} />
+                  <Route path="/mock-exam" element={<ProtectedRoute><P><MockExam /></P></ProtectedRoute>} />
+                  <Route path="/ai-tutor" element={<ProtectedRoute><P><AITutor /></P></ProtectedRoute>} />
+                  <Route path="/badges" element={<ProtectedRoute><P><Badges /></P></ProtectedRoute>} />
+                  <Route path="/leaderboard" element={<ProtectedRoute><P><Leaderboard /></P></ProtectedRoute>} />
+                  <Route path="/weak-drills" element={<ProtectedRoute><P><WeakTopicDrill /></P></ProtectedRoute>} />
+                  <Route path="/flashcards" element={<ProtectedRoute><P><Flashcards /></P></ProtectedRoute>} />
+                  <Route path="/live-classroom" element={<ProtectedRoute><P><LiveClassroom /></P></ProtectedRoute>} />
+                  <Route path="/daily-challenge" element={<ProtectedRoute><P><DailyChallenge /></P></ProtectedRoute>} />
+                  <Route path="/past-papers" element={<ProtectedRoute><P><PastPapers /></P></ProtectedRoute>} />
+                  <Route path="/study-groups" element={<ProtectedRoute><P><StudyGroups /></P></ProtectedRoute>} />
 
-                {/* Role-protected */}
-                <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><P><TeacherDashboard /></P></ProtectedRoute>} />
-                <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><P><ParentDashboard /></P></ProtectedRoute>} />
-                <Route path="/institution" element={<ProtectedRoute requiredRole="admin"><P><TenantAdmin /></P></ProtectedRoute>} />
-                <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><P><AdminGenerate /></P></ProtectedRoute>} />
-                <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><P><AdminQuestions /></P></ProtectedRoute>} />
+                  {/* Protected */}
+                  <Route path="/dashboard" element={<ProtectedRoute><P><Dashboard /></P></ProtectedRoute>} />
+                  <Route path="/certificates" element={<ProtectedRoute><P><Certificates /></P></ProtectedRoute>} />
+                  <Route path="/my-classes" element={<ProtectedRoute><P><StudentClasses /></P></ProtectedRoute>} />
+                  <Route path="/analytics" element={<ProtectedRoute><P><Analytics /></P></ProtectedRoute>} />
+                  <Route path="/study-planner" element={<ProtectedRoute><P><StudyPlanner /></P></ProtectedRoute>} />
+                  <Route path="/progress-report" element={<ProtectedRoute><P><ProgressReports /></P></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><P><Settings /></P></ProtectedRoute>} />
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-            <MobileBottomNav />
-            <CookieConsent />
-            <DevToolsPanel />
-          </BrowserRouter>
-        </TooltipProvider>
+                  {/* Role-protected */}
+                  <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><P><TeacherDashboard /></P></ProtectedRoute>} />
+                  <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><P><ParentDashboard /></P></ProtectedRoute>} />
+                  <Route path="/institution" element={<ProtectedRoute requiredRole="admin"><P><TenantAdmin /></P></ProtectedRoute>} />
+                  <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><P><AdminGenerate /></P></ProtectedRoute>} />
+                  <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><P><AdminQuestions /></P></ProtectedRoute>} />
+
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+              <MobileBottomNav />
+              <CookieConsent />
+              <DevToolsPanel />
+            </BrowserRouter>
+          </TooltipProvider>
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>

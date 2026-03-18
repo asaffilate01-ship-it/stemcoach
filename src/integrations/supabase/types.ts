@@ -221,6 +221,51 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_name: string
+          category: string
+          content: string
+          cover_image: string | null
+          created_at: string
+          excerpt: string
+          id: string
+          published: boolean
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string
+          category?: string
+          content?: string
+          cover_image?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          category?: string
+          content?: string
+          cover_image?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           achievement_type: string
@@ -337,6 +382,77 @@ export type Database = {
           message?: string
           room_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      daily_challenge_attempts: {
+        Row: {
+          challenge_id: string
+          completed_at: string
+          id: string
+          score: number
+          time_taken_seconds: number | null
+          total: number
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string
+          id?: string
+          score?: number
+          time_taken_seconds?: number | null
+          total?: number
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string
+          id?: string
+          score?: number
+          time_taken_seconds?: number | null
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_challenge_attempts_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_challenges: {
+        Row: {
+          created_at: string
+          curriculum: string
+          date: string
+          id: string
+          question_count: number
+          subject: string
+          time_limit_seconds: number
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          curriculum?: string
+          date?: string
+          id?: string
+          question_count?: number
+          subject: string
+          time_limit_seconds?: number
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          curriculum?: string
+          date?: string
+          id?: string
+          question_count?: number
+          subject?: string
+          time_limit_seconds?: number
+          xp_reward?: number
         }
         Relationships: []
       }
@@ -681,6 +797,68 @@ export type Database = {
           target_questions?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      study_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          join_code: string
+          max_members: number
+          name: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          join_code?: string
+          max_members?: number
+          name: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          join_code?: string
+          max_members?: number
+          name?: string
+          subject?: string
         }
         Relationships: []
       }
