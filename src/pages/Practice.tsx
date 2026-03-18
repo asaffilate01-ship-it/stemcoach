@@ -18,6 +18,7 @@ import { BadgeUnlock } from "@/components/gamification/BadgeUnlock";
 import { CorrectAnimation } from "@/components/gamification/CorrectAnimation";
 import { QuizTimer } from "@/components/gamification/QuizTimer";
 import ReactMarkdown from "react-markdown";
+import { getCachedQuestions, cacheQuestions } from "@/lib/questionCache";
 
 interface DBQuestion {
   id: string;
