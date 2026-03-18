@@ -279,7 +279,12 @@ export default function Practice() {
     if (!selectedAnswer && selectedAnswers.size === 0) return;
     setTimerRunning(false);
     setShowFeedback(true);
-    const correct = isMultiSelect ? false : selectedAnswer === question.correct_answer;
+    const correct = isMultiSelect
+      ? (() => {
+          const correctSet = new Set(question.correct_answers || [question.correct_answer]);
+          return correctSet.size === selectedAnswers.size && [...correctSet].every(a => selectedAnswers.has(a));
+        })()
+      : selectedAnswer === question.correct_answer;
     setLastCorrect(correct);
     setShowCorrectAnim(true);
     setTimeout(() => setShowCorrectAnim(false), 2000);
