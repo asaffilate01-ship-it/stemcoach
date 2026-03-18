@@ -115,6 +115,7 @@ export default function Badges() {
         ))}
         </main>
       </PageTransition>
+      <Footer />
     </div>
   );
 }
