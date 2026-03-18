@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
 
 const footerLinks = {
   Product: [
@@ -17,34 +18,35 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/30 py-12">
+    <footer className="border-t border-border/30 bg-muted/10 py-14">
       <div className="container mx-auto px-4">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2.5 mb-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-sm font-extrabold text-primary-foreground">
+            <div className="flex items-center gap-2.5 mb-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-sm font-extrabold text-white shadow-md shadow-primary/20">
                 S
               </span>
-              <span className="font-bold tracking-tight text-foreground">
+              <span className="text-lg font-bold tracking-tight text-foreground">
                 STEM<span className="text-primary">Coach</span>
               </span>
             </div>
-            <p className="max-w-xs text-sm text-muted-foreground leading-relaxed">
-              The virtual tuition centre helping students ace STEM exams worldwide with AI-powered practice and expert solutions.
+            <p className="max-w-sm text-sm text-muted-foreground leading-relaxed">
+              The virtual tuition centre helping students ace STEM exams worldwide with AI-powered practice and expert-crafted solutions.
             </p>
           </div>
 
           {/* Links */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h4>
-              <ul className="space-y-2">
+              <h4 className="mb-4 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">{title}</h4>
+              <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.label}>
                     {"external" in link ? (
-                      <a href={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                      <a href={link.to} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
                         {link.label}
+                        <ArrowUpRight className="h-3 w-3 opacity-50" />
                       </a>
                     ) : (
                       <Link to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -58,10 +60,14 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 border-t pt-6 text-center">
-          <p className="text-xs text-muted-foreground">
+        <div className="mt-12 border-t border-border/30 pt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+          <p className="text-xs text-muted-foreground/70">
             © {new Date().getFullYear()} STEMCoach — Virtual Tuition Centre. All rights reserved.
           </p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">Privacy</Link>
+            <Link to="/terms" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">Terms</Link>
+          </div>
         </div>
       </div>
     </footer>
