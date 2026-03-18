@@ -58,6 +58,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <SessionGuard />
             <SkipToContent />
             <ScrollToTop />
             <div className="pb-16 lg:pb-0">

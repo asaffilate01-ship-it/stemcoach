@@ -223,6 +223,11 @@ export default function Dashboard() {
             ))}
           </div>
 
+          {/* Quota Widget */}
+          <div className="mb-8">
+            <QuotaWidget />
+          </div>
+
           {/* Stats Grid */}
           <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[

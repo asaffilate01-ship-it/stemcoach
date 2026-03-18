@@ -379,8 +379,27 @@ export default function Practice() {
       </div>
 
       <main className="container mx-auto max-w-4xl px-4 py-6 md:py-10">
-        {/* Free tier banner */}
+        {/* Quota banner */}
         {isFree && user && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/5 p-4"
+          >
+            <div className="flex items-center gap-3 text-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                <Zap className="h-4 w-4 text-primary" />
+              </div>
+              <span className="font-medium">
+                Purchase a question pack to start practicing
+              </span>
+            </div>
+            <Button size="sm" onClick={() => navigate("/pricing")} className="rounded-xl text-xs">
+              Get Started
+            </Button>
+          </motion.div>
+        )}
+        {!isFree && user && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -400,13 +419,15 @@ export default function Practice() {
               )}
               <span className="font-medium">
                 {canPractice
-                  ? `${remainingToday} of ${FREE_DAILY_LIMIT} free questions remaining`
-                  : "Daily limit reached — upgrade for unlimited"}
+                  ? `${remainingToday} questions remaining`
+                  : "Questions exhausted — top up to continue"}
               </span>
             </div>
-            <Button size="sm" onClick={() => navigate("/pricing")} className="rounded-xl text-xs">
-              Upgrade
-            </Button>
+            {!canPractice && (
+              <Button size="sm" onClick={() => navigate("/pricing")} className="rounded-xl text-xs">
+                Top Up
+              </Button>
+            )}
           </motion.div>
         )}
 
