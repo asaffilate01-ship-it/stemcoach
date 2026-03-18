@@ -186,38 +186,40 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
-        <main id="main-content" className="container mx-auto px-4 py-8 flex-1">
-          <div className="mb-8">
-            <div className="stem-label mb-2">Student Dashboard</div>
-            <h1 className="stem-heading text-3xl">Your Progress</h1>
+        <main id="main-content" className="container mx-auto px-4 py-5 pb-28 flex-1 md:py-8">
+          <div className="mb-5 md:mb-8">
+            <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">Student Dashboard</div>
+            <h1 className="stem-heading text-2xl md:text-3xl">Your Progress</h1>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {quickActions.map((action, i) => (
-              <motion.button
-                key={action.label}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                onClick={() => navigate(action.to)}
-                className="stem-card flex items-center gap-3 rounded-xl p-3 text-left"
-              >
-                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${action.color}`}>
-                  <action.icon className="h-4 w-4" />
-                </div>
-                <span className="text-sm font-semibold">{action.label}</span>
-              </motion.button>
-            ))}
+          {/* Quick Actions - horizontal scroll on mobile */}
+          <div className="mb-5 md:mb-8">
+            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none sm:grid sm:grid-cols-4 sm:gap-3 sm:overflow-visible">
+              {quickActions.map((action, i) => (
+                <motion.button
+                  key={action.label}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  onClick={() => navigate(action.to)}
+                  className="stem-card flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left sm:gap-3 sm:p-3"
+                >
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${action.color}`}>
+                    <action.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </div>
+                  <span className="text-xs font-semibold whitespace-nowrap sm:text-sm">{action.label}</span>
+                </motion.button>
+              ))}
+            </div>
           </div>
 
           {/* Quota Widget */}
-          <div className="mb-8">
+          <div className="mb-5 md:mb-8">
             <QuotaWidget />
           </div>
 
           {/* Stats Grid */}
-          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4 md:mb-8">
             {[
               { label: "Questions", value: totalQ, icon: Target, color: "bg-primary/10 text-primary", gradient: false },
               { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]", gradient: false },
@@ -229,17 +231,17 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="rounded-2xl border border-border/40 bg-card p-4 md:p-5"
+                className="rounded-xl border border-border/40 bg-card p-3 sm:rounded-2xl sm:p-5"
                 style={{ boxShadow: "var(--stem-card-shadow)" }}
               >
-                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
-                  <stat.icon className="h-5 w-5" />
+                <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg sm:mb-3 sm:h-10 sm:w-10 sm:rounded-xl ${stat.color}`}>
+                  <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div className="text-2xl font-extrabold tracking-tight">
+                <div className="text-xl font-extrabold tracking-tight sm:text-2xl">
                   {stat.value}
-                  {stat.suffix && <span className="text-sm font-semibold text-muted-foreground">{stat.suffix}</span>}
+                  {stat.suffix && <span className="text-[10px] font-semibold text-muted-foreground sm:text-sm">{stat.suffix}</span>}
                 </div>
-                <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</div>
+                <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:mt-1 sm:text-[11px]">{stat.label}</div>
               </motion.div>
             ))}
           </div>

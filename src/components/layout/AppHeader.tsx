@@ -1,12 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, Menu, X, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun } from "lucide-react";
-import { useState } from "react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
 import { useTheme } from "@/hooks/useTheme";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +53,6 @@ export function AppHeader() {
   const { user, signOut } = useAuth();
   const { roles, loading: rolesLoading } = useUserRole();
   const { theme, toggleTheme } = useTheme();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -117,13 +114,13 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/30 bg-background/70 backdrop-blur-2xl backdrop-saturate-150">
-      <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:h-16">
+      <div className="container mx-auto flex h-12 items-center justify-between px-4 sm:h-16">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-sm font-extrabold text-white shadow-sm shadow-primary/20">
+        <Link to="/" className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-extrabold text-white shadow-sm shadow-primary/20 sm:h-8 sm:w-8 sm:rounded-xl sm:text-sm">
             S
           </span>
-          <span className="hidden font-bold tracking-tight text-foreground sm:inline">
+          <span className="font-bold tracking-tight text-foreground text-sm sm:text-base">
             STEM<span className="text-primary">Coach</span>
           </span>
         </Link>
@@ -137,10 +134,10 @@ export function AppHeader() {
         </nav>
 
         {/* Right actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={toggleTheme}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors sm:p-2"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -149,11 +146,11 @@ export function AppHeader() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="ghost" className="gap-1.5 rounded-lg text-sm">
+                <Button size="sm" variant="ghost" className="gap-1.5 rounded-lg text-xs h-8 px-2 sm:h-9 sm:px-3">
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
                     {user.email?.charAt(0).toUpperCase()}
                   </div>
-                  <span className="hidden sm:inline max-w-[100px] truncate text-xs">{user.email?.split("@")[0]}</span>
+                  <span className="hidden sm:inline max-w-[100px] truncate">{user.email?.split("@")[0]}</span>
                   <ChevronDown className="h-3 w-3 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
@@ -176,105 +173,12 @@ export function AppHeader() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button size="sm" onClick={() => navigate("/auth")} className="rounded-lg shadow-sm">
+            <Button size="sm" onClick={() => navigate("/auth")} className="rounded-lg shadow-sm h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
               Sign In
             </Button>
           )}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
       </div>
-
-      {/* Mobile nav with animation */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.nav
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden border-t bg-background lg:hidden"
-          >
-            <div className="px-4 py-4 max-h-[70vh] overflow-y-auto space-y-0.5">
-              {topNav.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
-                    isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              ))}
-
-              {studyItems.length > 0 && (
-                <>
-                  <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Study</div>
-                  {studyItems.map((item) => (
-                    <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
-                        isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                      }`}>
-                      <item.icon className="h-4 w-4" />{item.label}
-                    </Link>
-                  ))}
-                </>
-              )}
-
-              {socialItems.length > 0 && (
-                <>
-                  <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rewards</div>
-                  {socialItems.map((item) => (
-                    <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
-                        isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                      }`}>
-                      <item.icon className="h-4 w-4" />{item.label}
-                    </Link>
-                  ))}
-                </>
-              )}
-
-              {classItems.length > 0 && (
-                <>
-                  <div className="pt-4 pb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Classes</div>
-                  {classItems.map((item) => (
-                    <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
-                        isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                      }`}>
-                      <item.icon className="h-4 w-4" />{item.label}
-                    </Link>
-                  ))}
-                </>
-              )}
-
-              {filterVisible(navItems.filter(i => !i.group && i.roles && !topNav.includes(i))).map((item) => (
-                <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
-                    isActive(item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                  }`}>
-                  <item.icon className="h-4 w-4" />{item.label}
-                </Link>
-              ))}
-
-              {!user && (
-                <Button size="sm" onClick={() => { setMobileOpen(false); navigate("/auth"); }} className="mt-4 w-full rounded-lg">
-                  Sign In
-                </Button>
-              )}
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
     </header>
   );
 }
