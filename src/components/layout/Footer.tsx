@@ -6,6 +6,7 @@ const footerLinks = {
     { label: "Mock Exams", to: "/mock-exam" },
     { label: "AI Tutor", to: "/ai-tutor" },
     { label: "Pricing", to: "/pricing" },
+    { label: "Install App", to: "/install" },
   ],
   Company: [
     { label: "Privacy Policy", to: "/privacy" },
