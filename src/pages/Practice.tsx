@@ -77,14 +77,36 @@ export default function Practice() {
     if (!subjectId) return;
     const loadQuestions = async () => {
       setDbLoading(true);
-      const { data } = await supabase
-        .from("questions")
-        .select("*")
-        .eq("subject", subjectId)
-        .limit(50);
-      if (data && data.length > 0) {
-        setQuestions((data as DBQuestion[]).sort(() => Math.random() - 0.5));
+
+      // Try network first, fall back to IndexedDB cache for offline support
+      try {
+        const { data } = await supabase
+          .from("questions")
+          .select("*")
+          .eq("subject", subjectId)
+          .limit(50);
+        if (data && data.length > 0) {
+          const shuffled = (data as DBQuestion[]).sort(() => Math.random() - 0.5);
+          setQuestions(shuffled);
+          // Cache for offline use
+          cacheQuestions(subjectId, shuffled);
+        } else {
+          // No data from network — try cache
+          const cached = await getCachedQuestions(subjectId);
+          if (cached && cached.length > 0) {
+            setQuestions(cached as DBQuestion[]);
+            toast({ title: "Offline mode", description: "Showing cached questions." });
+          }
+        }
+      } catch {
+        // Network error — use cached questions
+        const cached = await getCachedQuestions(subjectId);
+        if (cached && cached.length > 0) {
+          setQuestions(cached as DBQuestion[]);
+          toast({ title: "You're offline", description: "Practicing with cached questions." });
+        }
       }
+
       setDbLoading(false);
     };
     loadQuestions();
