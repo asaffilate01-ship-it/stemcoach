@@ -186,29 +186,31 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
-        <main id="main-content" className="container mx-auto px-4 py-8 flex-1">
-          <div className="mb-8">
-            <div className="stem-label mb-2">Student Dashboard</div>
-            <h1 className="stem-heading text-3xl">Your Progress</h1>
+        <main id="main-content" className="container mx-auto px-4 py-5 pb-28 flex-1 md:py-8">
+          <div className="mb-5 md:mb-8">
+            <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">Student Dashboard</div>
+            <h1 className="stem-heading text-2xl md:text-3xl">Your Progress</h1>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {quickActions.map((action, i) => (
-              <motion.button
-                key={action.label}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                onClick={() => navigate(action.to)}
-                className="stem-card flex items-center gap-3 rounded-xl p-3 text-left"
-              >
-                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${action.color}`}>
-                  <action.icon className="h-4 w-4" />
-                </div>
-                <span className="text-sm font-semibold">{action.label}</span>
-              </motion.button>
-            ))}
+          {/* Quick Actions - horizontal scroll on mobile */}
+          <div className="mb-5 md:mb-8">
+            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none sm:grid sm:grid-cols-4 sm:gap-3 sm:overflow-visible">
+              {quickActions.map((action, i) => (
+                <motion.button
+                  key={action.label}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  onClick={() => navigate(action.to)}
+                  className="stem-card flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left sm:gap-3 sm:p-3"
+                >
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${action.color}`}>
+                    <action.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </div>
+                  <span className="text-xs font-semibold whitespace-nowrap sm:text-sm">{action.label}</span>
+                </motion.button>
+              ))}
+            </div>
           </div>
 
           {/* Quota Widget */}
