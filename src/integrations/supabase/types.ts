@@ -528,6 +528,42 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          currency: string
+          id: string
+          pack_type: string
+          questions_granted: number
+          region: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pack_type?: string
+          questions_granted?: number
+          region?: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pack_type?: string
+          questions_granted?: number
+          region?: string
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           allow_multiple_answers: boolean
@@ -789,6 +825,39 @@ export type Database = {
           onboarding_complete?: boolean
           subjects?: string[]
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_quotas: {
+        Row: {
+          created_at: string
+          id: string
+          levels: string[]
+          subjects: string[]
+          total_questions: number
+          updated_at: string
+          used_questions: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          levels?: string[]
+          subjects?: string[]
+          total_questions?: number
+          updated_at?: string
+          used_questions?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          levels?: string[]
+          subjects?: string[]
+          total_questions?: number
+          updated_at?: string
+          used_questions?: number
           user_id?: string
         }
         Relationships: []
