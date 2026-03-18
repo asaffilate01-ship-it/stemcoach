@@ -2,80 +2,95 @@ export type RegionKey = "uk" | "us" | "ae" | "in" | "pk";
 
 export interface RegionalPrice {
   price: string;
-  price_id: string | null;
+  price_id: string;
 }
 
-export interface Tier {
+export interface QuestionPack {
   name: string;
-  product_id: string | null;
+  product_id: string;
+  questions: number;
   features: string[];
   regional: Record<RegionKey, RegionalPrice>;
 }
 
-export const TIERS: Record<string, Tier> = {
-  free: {
-    name: "Free",
-    product_id: null,
+export const PACKS: Record<string, QuestionPack> = {
+  standard: {
+    name: "Standard Pack",
+    product_id: "prod_UAj58fkEwB0P8O",
+    questions: 5000,
     features: [
-      "5 practice questions per day",
-      "Basic progress tracking",
-      "Access to 3 subjects",
-    ],
-    regional: {
-      uk: { price: "£0", price_id: null },
-      us: { price: "$0", price_id: null },
-      ae: { price: "AED 0", price_id: null },
-      in: { price: "₹0", price_id: null },
-      pk: { price: "PKR 0", price_id: null },
-    },
-  },
-  pro: {
-    name: "Pro",
-    product_id: "prod_U9ZtTvGE2aOmTq",
-    features: [
-      "Unlimited practice questions",
+      "5,000 curriculum-aligned questions",
+      "Choose your subjects & levels",
       "AI Tutor chat",
       "Mock exams & certificates",
-      "All subjects & curricula",
+      "Streaks, XP & leaderboards",
       "Detailed analytics",
-      "IELTS & CELTA prep",
+      "Offline mode (PWA)",
     ],
     regional: {
-      uk: { price: "£9.99/mo", price_id: "price_1TBGjfFFogsDQVs44Q1mPAM3" },
-      us: { price: "$4.99/mo", price_id: "price_1TBHxeFFogsDQVs4xC9c3mA7" },
-      ae: { price: "AED 19.99/mo", price_id: "price_1TBHxfFFogsDQVs4OD3ykuzn" },
-      in: { price: "₹299/mo", price_id: "price_1TBHxgFFogsDQVs4saYx4rXz" },
-      pk: { price: "PKR 799/mo", price_id: "price_1TBHxgFFogsDQVs4nAQ7DBkw" },
+      uk: { price: "£14.99", price_id: "price_1TCNddFFogsDQVs4QyDkGoa6" },
+      us: { price: "$19.99", price_id: "price_1TCNdhFFogsDQVs4QJcncX1T" },
+      ae: { price: "AED 99", price_id: "price_1TCNdjFFogsDQVs4VVGK1Ncx" },
+      in: { price: "₹499", price_id: "price_1TCNdkFFogsDQVs4ZeZ8ikLB" },
+      pk: { price: "PKR 4,999", price_id: "price_1TCNdmFFogsDQVs4WszzaaSM" },
     },
   },
-  school: {
-    name: "School",
-    product_id: "prod_U9ZtSc5VHQnmLs",
+  topup: {
+    name: "Top-Up Pack",
+    product_id: "prod_UAj5MWyj4cFOgT",
+    questions: 2000,
     features: [
-      "Everything in Pro",
-      "Teacher dashboard & classes",
-      "Parent monitoring portal",
-      "White-label branding",
-      "Up to 50 students",
-      "Assignment management",
-      "Priority support",
+      "2,000 extra questions",
+      "Add more subjects anytime",
+      "Stack with existing pack",
+      "Instant access",
     ],
     regional: {
-      uk: { price: "£49.99/mo", price_id: "price_1TBGjgFFogsDQVs4PlLCADnH" },
-      us: { price: "$39.99/mo", price_id: "price_1TBHxhFFogsDQVs4w7FF4nhz" },
-      ae: { price: "AED 149.99/mo", price_id: "price_1TBHxiFFogsDQVs4pf8VULsI" },
-      in: { price: "₹2,499/mo", price_id: "price_1TBHxjFFogsDQVs4hegTA6OI" },
-      pk: { price: "PKR 7,999/mo", price_id: "price_1TBHxkFFogsDQVs4oy2xKsVu" },
+      uk: { price: "£4.99", price_id: "price_1TCNdeFFogsDQVs4WutIKPQw" },
+      us: { price: "$7.99", price_id: "price_1TCNdiFFogsDQVs4Kek0zoTb" },
+      ae: { price: "AED 39", price_id: "price_1TCNdkFFogsDQVs4Xdwg4abI" },
+      in: { price: "₹199", price_id: "price_1TCNdlFFogsDQVs4PSOP1So1" },
+      pk: { price: "PKR 999", price_id: "price_1TCNdmFFogsDQVs4Hju7qgvO" },
     },
   },
 } as const;
 
-export type TierKey = keyof typeof TIERS;
+export type PackKey = keyof typeof PACKS;
+
+// Legacy compat
+export type TierKey = "free" | "standard" | "topup";
 
 export function getTierByProductId(productId: string | null): TierKey {
   if (!productId) return "free";
-  for (const [key, tier] of Object.entries(TIERS)) {
-    if (tier.product_id === productId) return key as TierKey;
+  for (const [key, pack] of Object.entries(PACKS)) {
+    if (pack.product_id === productId) return key as TierKey;
   }
   return "free";
 }
+
+/** Calculates how questions are distributed across subjects */
+export function calculateQuestionAllocation(
+  totalQuestions: number,
+  subjects: string[],
+  levels: string[]
+): { perSubject: number; perLevel: number } {
+  const subjectCount = Math.max(1, subjects.length);
+  const levelCount = Math.max(1, levels.length);
+
+  // 1 subject + 1 level = 10K questions (bonus)
+  if (subjectCount === 1 && levelCount === 1) {
+    return { perSubject: totalQuestions * 2, perLevel: totalQuestions * 2 };
+  }
+
+  const perSubject = Math.floor(totalQuestions / subjectCount);
+  const perLevel = Math.floor(perSubject / levelCount);
+  return { perSubject, perLevel };
+}
+
+export const regionLabels: Record<RegionKey, string> = {
+  uk: "🇬🇧 United Kingdom",
+  us: "🇺🇸 United States",
+  ae: "🇦🇪 UAE",
+  in: "🇮🇳 India",
+  pk: "🇵🇰 Pakistan",
+};

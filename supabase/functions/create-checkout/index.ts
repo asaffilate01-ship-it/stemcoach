@@ -25,7 +25,7 @@ serve(async (req) => {
     if (userError || !userData.user?.email) throw new Error("User not authenticated");
     const user = userData.user;
 
-    const { priceId } = await req.json();
+    const { priceId, packType, questionsGranted } = await req.json();
     if (!priceId || typeof priceId !== "string") throw new Error("Valid priceId is required");
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -42,9 +42,14 @@ serve(async (req) => {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
-      mode: "subscription",
-      success_url: `${origin}/dashboard?checkout=success`,
+      mode: "payment",
+      success_url: `${origin}/dashboard?checkout=success&pack=${packType || "standard"}&questions=${questionsGranted || 5000}`,
       cancel_url: `${origin}/pricing?checkout=cancelled`,
+      metadata: {
+        user_id: user.id,
+        pack_type: packType || "standard",
+        questions_granted: String(questionsGranted || 5000),
+      },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
