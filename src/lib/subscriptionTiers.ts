@@ -17,9 +17,9 @@ export const PACKS: Record<string, QuestionPack> = {
   standard: {
     name: "Ultimate Pack",
     product_id: "prod_UAj58fkEwB0P8O",
-    questions: 100000,
+    questions: 10000,
     features: [
-      "100,000 curriculum-aligned questions",
+      "10,000 curriculum-aligned questions",
       "Choose your subjects & levels",
       "AI Tutor chat — unlimited",
       "Mock exams & certificates",
@@ -38,9 +38,9 @@ export const PACKS: Record<string, QuestionPack> = {
   topup: {
     name: "Top-Up Pack",
     product_id: "prod_UAj5MWyj4cFOgT",
-    questions: 20000,
+    questions: 2000,
     features: [
-      "20,000 extra questions",
+      "2,000 extra questions",
       "Add more subjects anytime",
       "Stack with existing pack",
       "Instant access",
@@ -77,7 +77,7 @@ export function calculateQuestionAllocation(
   const subjectCount = Math.max(1, subjects.length);
   const levelCount = Math.max(1, levels.length);
 
-  // 1 subject + 1 level = 200K questions (bonus)
+  // 1 subject + 1 level = 20K questions (bonus)
   if (subjectCount === 1 && levelCount === 1) {
     return { perSubject: totalQuestions * 2, perLevel: totalQuestions * 2 };
   }
