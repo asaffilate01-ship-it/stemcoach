@@ -371,16 +371,22 @@ export default function Dashboard() {
               {/* Badges */}
               {badges.length > 0 && (
                 <div className="stem-card rounded-xl p-6">
-                  <h3 className="mb-4 font-semibold">Recent Badges</h3>
+                  <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                    <Trophy className="h-4 w-4 text-primary" /> Recent Badges
+                  </h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {badges.map((ub: any) => (
-                      <div key={ub.id} className="rounded-lg border bg-primary/5 border-primary/20 p-3 text-center">
-                        <div className="mb-1 text-2xl">{ub.badges?.icon || "🏆"}</div>
-                        <div className="text-xs font-semibold">{ub.badges?.name || "Badge"}</div>
+                      <motion.div
+                        key={ub.id}
+                        whileHover={{ scale: 1.03, y: -2 }}
+                        className="rounded-xl border border-primary/15 bg-gradient-to-br from-primary/5 to-transparent p-3 text-center transition-shadow hover:shadow-lg"
+                      >
+                        <div className="mb-1.5 text-2xl">{ub.badges?.icon || "🏆"}</div>
+                        <div className="text-xs font-bold">{ub.badges?.name || "Badge"}</div>
                         <div className="mt-1 text-[10px] text-muted-foreground">
                           {new Date(ub.earned_at).toLocaleDateString()}
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
