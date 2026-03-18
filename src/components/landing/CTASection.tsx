@@ -19,7 +19,7 @@ export function CTASection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="hidden lg:block"
+            className="hidden md:block"
           >
             <div className="relative">
               <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/8 via-transparent to-primary/4 blur-2xl" />
