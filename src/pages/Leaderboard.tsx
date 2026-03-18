@@ -22,6 +22,7 @@ type Tab = "xp" | "streak" | "accuracy";
 type TimeFrame = "all" | "weekly";
 
 export default function Leaderboard() {
+  useDocumentTitle("Leaderboard");
   const { user } = useAuth();
   const [entries, setEntries] = useState<LeaderEntry[]>([]);
   const [tab, setTab] = useState<Tab>("xp");
