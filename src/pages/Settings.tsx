@@ -35,6 +35,7 @@ interface PendingLink {
 }
 
 export default function Settings() {
+  useDocumentTitle("Settings");
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
