@@ -213,7 +213,12 @@ export default function Practice() {
   const parsedOptions: string[] = typeof question.options === "string"
     ? JSON.parse(question.options)
     : (Array.isArray(question.options) ? question.options : []);
-  const isCorrect = isMultiSelect ? false : selectedAnswer === question.correct_answer;
+  const isCorrect = isMultiSelect
+    ? (() => {
+        const correctSet = new Set(question.correct_answers || [question.correct_answer]);
+        return correctSet.size === selectedAnswers.size && [...correctSet].every(a => selectedAnswers.has(a));
+      })()
+    : selectedAnswer === question.correct_answer;
   const progressPercent = ((currentIndex + 1) / questions.length) * 100;
 
   const showXPPopup = (xp: number) => {
@@ -274,7 +279,12 @@ export default function Practice() {
     if (!selectedAnswer && selectedAnswers.size === 0) return;
     setTimerRunning(false);
     setShowFeedback(true);
-    const correct = isMultiSelect ? false : selectedAnswer === question.correct_answer;
+    const correct = isMultiSelect
+      ? (() => {
+          const correctSet = new Set(question.correct_answers || [question.correct_answer]);
+          return correctSet.size === selectedAnswers.size && [...correctSet].every(a => selectedAnswers.has(a));
+        })()
+      : selectedAnswer === question.correct_answer;
     setLastCorrect(correct);
     setShowCorrectAnim(true);
     setTimeout(() => setShowCorrectAnim(false), 2000);
