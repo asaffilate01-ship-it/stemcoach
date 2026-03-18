@@ -231,21 +231,27 @@ export default function Dashboard() {
           {/* Stats Grid */}
           <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              { label: "Questions", value: totalQ, icon: Target, color: "text-primary" },
-              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "text-success" },
-              { label: "Streak", value: `${stats?.streak || 0} days`, icon: Flame, color: "text-warning" },
-              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, color: "text-primary" },
+              { label: "Questions", value: totalQ, icon: Target, color: "bg-primary/10 text-primary", gradient: false },
+              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]", gradient: false },
+              { label: "Streak", value: `${stats?.streak || 0}`, icon: Flame, color: "bg-warning/10 text-warning", suffix: " days", gradient: false },
+              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, color: "bg-primary/10 text-primary", gradient: true },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="stem-card rounded-xl p-4"
+                className="rounded-2xl border border-border/40 bg-card p-4 md:p-5"
+                style={{ boxShadow: "var(--stem-card-shadow)" }}
               >
-                <stat.icon className={`mb-2 h-5 w-5 ${stat.color}`} />
-                <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
-                <div className="stem-label mt-1">{stat.label}</div>
+                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
+                  <stat.icon className="h-5 w-5" />
+                </div>
+                <div className="text-2xl font-extrabold tracking-tight">
+                  {stat.value}
+                  {stat.suffix && <span className="text-sm font-semibold text-muted-foreground">{stat.suffix}</span>}
+                </div>
+                <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</div>
               </motion.div>
             ))}
           </div>
