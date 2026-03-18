@@ -69,7 +69,7 @@ const App = () => (
                 <Route path="/auth" element={<P><Auth /></P>} />
                 <Route path="/reset-password" element={<P><ResetPassword /></P>} />
                 <Route path="/pricing" element={<P><Pricing /></P>} />
-                <Route path="/ai-tutor" element={<P><AITutor /></P>} />
+                <Route path="/ai-tutor" element={<ProtectedRoute><P><AITutor /></P></ProtectedRoute>} />
                 <Route path="/privacy" element={<P><PrivacyPolicy /></P>} />
                 <Route path="/install" element={<P><InstallApp /></P>} />
                 <Route path="/terms" element={<P><TermsOfService /></P>} />
