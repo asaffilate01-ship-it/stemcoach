@@ -63,7 +63,7 @@ export default function Badges() {
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         <div className="mb-6">
           <div className="stem-label mb-2">Achievements</div>
           <h1 className="stem-heading text-3xl">Badges & Awards</h1>
