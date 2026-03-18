@@ -27,6 +27,7 @@ interface WeakTopic {
 }
 
 export default function Dashboard() {
+  useDocumentTitle("Dashboard");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
