@@ -50,7 +50,7 @@ export default function Auth() {
         if (error) throw error;
 
         if (signUpData?.user && signUpData.session) {
-          await seedUserData(signUpData.user.id, displayName, role);
+          await seedUserData(signUpData.user.id, displayName);
           navigate("/onboarding");
           return;
         }
