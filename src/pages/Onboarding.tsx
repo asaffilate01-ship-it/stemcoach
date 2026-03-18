@@ -169,8 +169,8 @@ export default function Onboarding() {
   const allocationSummary = () => {
     const s = selectedSubjects.length || 1;
     const l = selectedLevels.length || 1;
-    if (s === 1 && l === 1) return "10,000 questions (2× bonus!)";
-    return `5,000 questions split across ${s} subject${s > 1 ? "s" : ""} × ${l} level${l > 1 ? "s" : ""}`;
+    if (s === 1 && l === 1) return "200,000 questions (2× bonus!)";
+    return `100,000 questions split across ${s} subject${s > 1 ? "s" : ""} × ${l} level${l > 1 ? "s" : ""}`;
   };
 
   return (

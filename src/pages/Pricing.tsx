@@ -178,7 +178,7 @@ export default function Pricing() {
               <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">1 subject, 1 level</strong> → 10,000 questions</span>
+                  <span><strong className="text-foreground">1 subject, 1 level</strong> → 200,000 questions</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
@@ -186,7 +186,7 @@ export default function Pricing() {
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Need more?</strong> → Buy Top-Up for 2,000 extra questions</span>
+                  <span><strong className="text-foreground">Need more?</strong> → Buy Top-Up for 20,000 extra questions</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
