@@ -43,7 +43,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "payment",
-      success_url: `${origin}/dashboard?checkout=success&pack=${packType || "standard"}&questions=${questionsGranted || 5000}`,
+      success_url: `${origin}/select-subjects?checkout=success`,
       cancel_url: `${origin}/pricing?checkout=cancelled`,
       metadata: {
         user_id: user.id,

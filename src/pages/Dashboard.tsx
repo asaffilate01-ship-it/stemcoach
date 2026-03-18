@@ -42,18 +42,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
 
-    // Handle post-checkout: verify purchase and grant quota
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("checkout") === "success") {
-      supabase.functions.invoke("verify-purchase").then(({ data }) => {
-        if (data?.granted) {
-          console.log("Purchase verified, granted", data.new_questions, "questions");
-        }
-      });
-      // Clean URL
-      window.history.replaceState({}, "", "/dashboard");
-    }
-
     loadDashboard();
   }, [user]);
 
