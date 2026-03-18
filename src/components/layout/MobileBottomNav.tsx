@@ -17,7 +17,7 @@ export function MobileBottomNav() {
   const visible = items.filter(i => !i.auth || user);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-xl lg:hidden safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/30 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 lg:hidden safe-area-bottom">
       <div className="flex items-center justify-around py-1.5 px-1">
         {visible.map((item) => {
           const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to));
@@ -25,13 +25,15 @@ export function MobileBottomNav() {
             <Link
               key={item.to}
               to={item.to}
-              className={`flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-[10px] font-medium transition-colors ${
+              className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-semibold transition-all ${
                 active
                   ? "text-primary"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <item.icon className={`h-5 w-5 ${active ? "text-primary" : ""}`} />
+              <div className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${active ? "bg-primary/10" : ""}`}>
+                <item.icon className={`h-[18px] w-[18px] ${active ? "text-primary" : ""}`} />
+              </div>
               {item.label}
             </Link>
           );
