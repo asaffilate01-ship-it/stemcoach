@@ -116,11 +116,11 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border/30 bg-background/70 backdrop-blur-2xl backdrop-saturate-150">
       <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-sm font-extrabold text-primary-foreground shadow-sm">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-sm font-extrabold text-white shadow-sm shadow-primary/20">
             S
           </span>
           <span className="hidden font-bold tracking-tight text-foreground sm:inline">
