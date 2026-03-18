@@ -223,8 +223,8 @@ export default function Practice() {
   };
 
   const handleSubmit = async () => {
-    if (isFree && !canPractice) {
-      toast({ title: "Daily limit reached", description: "Upgrade to Pro for unlimited practice.", variant: "destructive" });
+    if (!canPractice) {
+      toast({ title: "Question limit reached", description: "Purchase more questions to continue practicing.", variant: "destructive" });
       return;
     }
     if (isEssay) {
