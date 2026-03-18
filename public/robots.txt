@@ -12,3 +12,12 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /admin*
+Disallow: /teacher*
+Disallow: /parent*
+Disallow: /onboarding
+Disallow: /select-subjects
+
+Sitemap: https://stemcoach.app/sitemap.xml
