@@ -69,7 +69,7 @@ export function useQuotaGate() {
       .eq("user_id", user.id);
   }, [user, state.usedQuestions]);
 
-  const canPractice = state.remainingQuestions > 0 || !state.hasPurchased;
+  const canPractice = state.hasPurchased && state.remainingQuestions > 0;
   const canUseAITutor = state.hasPurchased;
 
   return {
