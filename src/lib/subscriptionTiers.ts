@@ -77,7 +77,7 @@ export function calculateQuestionAllocation(
   const subjectCount = Math.max(1, subjects.length);
   const levelCount = Math.max(1, levels.length);
 
-  // 1 subject + 1 level = 200K questions (bonus)
+  // 1 subject + 1 level = 20K questions (bonus)
   if (subjectCount === 1 && levelCount === 1) {
     return { perSubject: totalQuestions * 2, perLevel: totalQuestions * 2 };
   }
