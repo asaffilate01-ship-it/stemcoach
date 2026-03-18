@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGeoRegion } from "@/hooks/useGeoRegion";
-import { TIERS, type TierKey, type RegionKey } from "@/lib/subscriptionTiers";
-import { Check, Crown, Building2, Sparkles, Globe, ArrowRight, Shield } from "lucide-react";
+import { PACKS, type PackKey, type RegionKey, regionLabels } from "@/lib/subscriptionTiers";
+import { Check, Zap, Plus, Globe, ArrowRight, Shield, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -18,45 +18,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const tierIcons: Record<TierKey, typeof Crown> = {
-  free: Sparkles,
-  pro: Crown,
-  school: Building2,
-};
-
-const regionLabels: Record<RegionKey, string> = {
-  uk: "🇬🇧 United Kingdom",
-  us: "🇺🇸 United States",
-  ae: "🇦🇪 UAE",
-  in: "🇮🇳 India",
-  pk: "🇵🇰 Pakistan",
+const packIcons: Record<PackKey, typeof Zap> = {
+  standard: Package,
+  topup: Plus,
 };
 
 const faqs = [
-  { q: "Can I cancel anytime?", a: "Yes — cancel from your dashboard with one click. No long-term contracts." },
-  { q: "Is there a free trial?", a: "The Free tier gives you 5 questions/day forever. Upgrade when you're ready." },
-  { q: "What payment methods do you accept?", a: "Visa, Mastercard, and all major cards via Stripe. Fully secure." },
-  { q: "Can my school get a bulk discount?", a: "Yes! The School plan includes volume pricing. Contact us for 50+ students." },
+  { q: "How does question allocation work?", a: "Choose 1 subject & 1 level = 10,000 questions. Multiple subjects split your 5,000 question pack evenly." },
+  { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 2,000 more questions to new or existing subjects." },
+  { q: "Is this a one-time purchase?", a: "Yes — pay once, access forever. No subscriptions or recurring charges." },
+  { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
 ];
 
 export default function Pricing() {
   const { user } = useAuth();
-  const { tier: currentTier, subscribed, checkout, manageSubscription, loading } = useSubscription();
+  const { checkout, loading } = useSubscription();
   const { region, setRegion, loading: geoLoading } = useGeoRegion();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSelect = async (key: TierKey) => {
+  const handleSelect = async (key: PackKey) => {
     if (!user) {
       navigate("/auth");
       return;
     }
-    const tier = TIERS[key];
-    const priceId = tier.regional[region].price_id;
+    const pack = PACKS[key];
+    const priceId = pack.regional[region].price_id;
     if (!priceId) return;
 
     try {
-      await checkout(priceId);
+      await checkout(priceId, key, pack.questions);
     } catch (e) {
       toast({ title: "Error", description: "Could not start checkout. Please try again.", variant: "destructive" });
     }
@@ -76,14 +67,14 @@ export default function Pricing() {
               transition={{ duration: 0.5 }}
             >
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Sparkles className="h-3.5 w-3.5" /> Simple Pricing
+                <Zap className="h-3.5 w-3.5" /> One-Time Purchase
               </div>
               <h1 className="stem-section-heading mb-4">
-                Plans that grow{" "}
-                <span className="stem-gradient-text">with you</span>
+                Pay once,{" "}
+                <span className="stem-gradient-text">learn forever</span>
               </h1>
               <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-                Start free, upgrade when you need more. No hidden fees, cancel anytime.
+                Get thousands of exam-ready questions. No subscriptions, no hidden fees.
               </p>
 
               <div className="mt-8 flex items-center justify-center gap-2">
@@ -108,13 +99,11 @@ export default function Pricing() {
         {/* Pricing Cards */}
         <section className="relative py-12 md:py-16">
           <div className="container mx-auto px-4">
-            <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-              {(Object.entries(TIERS) as [TierKey, typeof TIERS[TierKey]][]).map(([key, tier], i) => {
-                const Icon = tierIcons[key];
-                const isCurrent = key === currentTier;
-                const isPopular = key === "pro";
-                const regionalPrice = tier.regional[region];
-                const priceDisplay = regionalPrice.price;
+            <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+              {(Object.entries(PACKS) as [PackKey, typeof PACKS[PackKey]][]).map(([key, pack], i) => {
+                const Icon = packIcons[key];
+                const isMain = key === "standard";
+                const regionalPrice = pack.regional[region];
 
                 return (
                   <motion.div
@@ -123,40 +112,36 @@ export default function Pricing() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className={`relative rounded-2xl border p-7 transition-shadow duration-300 ${
-                      isPopular
+                      isMain
                         ? "border-primary bg-card shadow-xl shadow-primary/10 scale-[1.02]"
                         : "border-border bg-card hover:shadow-lg hover:shadow-primary/5"
-                    } ${isCurrent ? "ring-2 ring-primary" : ""}`}
+                    }`}
                   >
-                    {isPopular && (
+                    {isMain && (
                       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/30">
-                        Most Popular
-                      </div>
-                    )}
-                    {isCurrent && (
-                      <div className="absolute -top-3.5 right-4 rounded-full bg-accent border border-primary/20 px-3 py-1 text-xs font-bold text-primary">
-                        Your Plan
+                        Best Value
                       </div>
                     )}
 
                     <div className="mb-5 flex items-center gap-2.5">
                       <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                        isPopular ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+                        isMain ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
                       }`}>
                         <Icon className="h-5 w-5" />
                       </div>
-                      <h3 className="text-lg font-bold">{tier.name}</h3>
+                      <div>
+                        <h3 className="text-lg font-bold">{pack.name}</h3>
+                        <p className="text-xs text-muted-foreground">{pack.questions.toLocaleString()} questions</p>
+                      </div>
                     </div>
 
                     <div className="mb-6">
-                      <span className="text-4xl font-extrabold tracking-tight">{priceDisplay.split("/")[0]}</span>
-                      {priceDisplay.includes("/") && (
-                        <span className="text-sm text-muted-foreground">/{priceDisplay.split("/")[1]}</span>
-                      )}
+                      <span className="text-4xl font-extrabold tracking-tight">{regionalPrice.price}</span>
+                      <span className="ml-2 text-sm text-muted-foreground">one-time</span>
                     </div>
 
                     <ul className="mb-8 space-y-3">
-                      {tier.features.map((f) => (
+                      {pack.features.map((f) => (
                         <li key={f} className="flex items-start gap-2.5 text-sm">
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                           <span className="text-muted-foreground">{f}</span>
@@ -164,40 +149,57 @@ export default function Pricing() {
                       ))}
                     </ul>
 
-                    {isCurrent && subscribed ? (
-                      <Button variant="outline" className="w-full rounded-xl" onClick={manageSubscription}>
-                        Manage Subscription
-                      </Button>
-                    ) : key === "free" ? (
-                      <Button variant="outline" className="w-full rounded-xl" disabled>
-                        {currentTier === "free" ? "Current Plan" : "Downgrade via portal"}
-                      </Button>
-                    ) : (
-                      <Button
-                        className={`w-full rounded-xl gap-2 ${
-                          isPopular
-                            ? "shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
-                            : ""
-                        }`}
-                        variant={isPopular ? "default" : "outline"}
-                        onClick={() => handleSelect(key)}
-                        disabled={loading || geoLoading}
-                      >
-                        {user ? "Subscribe Now" : "Sign in to subscribe"}
-                        {isPopular && <ArrowRight className="h-4 w-4" />}
-                      </Button>
-                    )}
+                    <Button
+                      className={`w-full rounded-xl gap-2 ${
+                        isMain
+                          ? "shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
+                          : ""
+                      }`}
+                      variant={isMain ? "default" : "outline"}
+                      onClick={() => handleSelect(key)}
+                      disabled={loading || geoLoading}
+                    >
+                      {user ? "Buy Now" : "Sign in to purchase"}
+                      {isMain && <ArrowRight className="h-4 w-4" />}
+                    </Button>
                   </motion.div>
                 );
               })}
             </div>
 
-            {/* Security badge */}
+            {/* Allocation info */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="mx-auto mt-10 max-w-2xl rounded-xl border border-primary/10 bg-primary/5 p-6"
+            >
+              <h3 className="mb-3 text-center text-sm font-bold text-primary">How Question Allocation Works</h3>
+              <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+                <div className="flex items-start gap-2">
+                  <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                  <span><strong className="text-foreground">1 subject, 1 level</strong> → 10,000 questions</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                  <span><strong className="text-foreground">Multiple subjects</strong> → Split evenly across subjects</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                  <span><strong className="text-foreground">Need more?</strong> → Buy Top-Up for 2,000 extra questions</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                  <span><strong className="text-foreground">Add subjects</strong> → Top-Up lets you expand anytime</span>
+                </div>
+              </div>
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mx-auto mt-10 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+              className="mx-auto mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground"
             >
               <Shield className="h-4 w-4" />
               <span>Payments secured by Stripe · 256-bit SSL encryption</span>
