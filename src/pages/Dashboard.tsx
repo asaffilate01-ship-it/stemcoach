@@ -231,17 +231,17 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="rounded-2xl border border-border/40 bg-card p-4 md:p-5"
+                className="rounded-xl border border-border/40 bg-card p-3 sm:rounded-2xl sm:p-5"
                 style={{ boxShadow: "var(--stem-card-shadow)" }}
               >
-                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
-                  <stat.icon className="h-5 w-5" />
+                <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg sm:mb-3 sm:h-10 sm:w-10 sm:rounded-xl ${stat.color}`}>
+                  <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div className="text-2xl font-extrabold tracking-tight">
+                <div className="text-xl font-extrabold tracking-tight sm:text-2xl">
                   {stat.value}
-                  {stat.suffix && <span className="text-sm font-semibold text-muted-foreground">{stat.suffix}</span>}
+                  {stat.suffix && <span className="text-[10px] font-semibold text-muted-foreground sm:text-sm">{stat.suffix}</span>}
                 </div>
-                <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</div>
+                <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:mt-1 sm:text-[11px]">{stat.label}</div>
               </motion.div>
             ))}
           </div>
