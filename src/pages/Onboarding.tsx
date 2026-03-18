@@ -7,10 +7,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { GraduationCap, BookOpen, ChevronRight, Loader2, Sparkles } from "lucide-react";
+import { GraduationCap, BookOpen, ChevronRight, Loader2, Sparkles, Layers } from "lucide-react";
 import { subjects, curricula } from "@/data/questions";
 
-type Step = "welcome" | "curriculum" | "subjects" | "diagnostic" | "complete";
+type Step = "welcome" | "curriculum" | "subjects" | "levels" | "diagnostic" | "complete";
+
+const LEVELS = [
+  { id: "year-9", label: "Year 9", description: "Foundation level" },
+  { id: "gcse", label: "GCSE", description: "Key Stage 4" },
+  { id: "igcse", label: "IGCSE", description: "International GCSE" },
+  { id: "a-level", label: "A-Level", description: "Advanced Level" },
+  { id: "ib-sl", label: "IB SL", description: "Standard Level" },
+  { id: "ib-hl", label: "IB HL", description: "Higher Level" },
+  { id: "ap", label: "AP", description: "Advanced Placement" },
+  { id: "university", label: "University", description: "Undergraduate" },
+];
 
 interface DiagnosticQ {
   id: string;
@@ -28,6 +39,7 @@ export default function Onboarding() {
   const [step, setStep] = useState<Step>("welcome");
   const [selectedCurriculum, setSelectedCurriculum] = useState("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [diagnosticQs, setDiagnosticQs] = useState<DiagnosticQ[]>([]);
   const [currentDiag, setCurrentDiag] = useState(0);
   const [diagAnswers, setDiagAnswers] = useState<Record<number, string>>({});
@@ -49,6 +61,12 @@ export default function Onboarding() {
   const toggleSubject = (id: string) => {
     setSelectedSubjects((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  const toggleLevel = (id: string) => {
+    setSelectedLevels((prev) =>
+      prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id]
     );
   };
 
@@ -90,6 +108,28 @@ export default function Onboarding() {
       onboarding_complete: true,
     } as any);
 
+    // Save subjects & levels to user_quotas for allocation
+    const { data: existingQuota } = await supabase
+      .from("user_quotas")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existingQuota) {
+      await supabase
+        .from("user_quotas")
+        .update({ subjects: selectedSubjects, levels: selectedLevels, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+    } else {
+      await supabase.from("user_quotas").insert({
+        user_id: user.id,
+        subjects: selectedSubjects,
+        levels: selectedLevels,
+        total_questions: 0,
+        used_questions: 0,
+      });
+    }
+
     for (let i = 0; i < diagnosticQs.length; i++) {
       if (diagAnswers[i]) {
         await supabase.from("attempts").insert({
@@ -124,6 +164,14 @@ export default function Onboarding() {
           100
       )
     : 0;
+
+  // Question allocation summary
+  const allocationSummary = () => {
+    const s = selectedSubjects.length || 1;
+    const l = selectedLevels.length || 1;
+    if (s === 1 && l === 1) return "10,000 questions (2× bonus!)";
+    return `5,000 questions split across ${s} subject${s > 1 ? "s" : ""} × ${l} level${l > 1 ? "s" : ""}`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,8 +243,44 @@ export default function Onboarding() {
               ))}
             </div>
             <Button
+              onClick={() => setStep("levels")}
+              disabled={selectedSubjects.length === 0}
+              className="mt-6 w-full gap-2 rounded-xl"
+            >
+              Continue <ChevronRight className="h-4 w-4" />
+            </Button>
+          </motion.div>
+        )}
+
+        {step === "levels" && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
+            <h2 className="mb-2 text-2xl font-bold">Select your level</h2>
+            <p className="mb-6 text-sm text-muted-foreground">Choose which academic level(s) you're studying at.</p>
+            <div className="grid grid-cols-2 gap-3">
+              {LEVELS.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => toggleLevel(l.id)}
+                  className={`flex flex-col rounded-xl border-2 p-3 text-left transition-all ${
+                    selectedLevels.includes(l.id) ? "border-primary bg-primary/5" : "border-transparent hover:border-primary/20"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-4 w-4 shrink-0 text-primary" />
+                    <span className="text-sm font-medium">{l.label}</span>
+                  </div>
+                  <span className="mt-1 text-xs text-muted-foreground">{l.description}</span>
+                </button>
+              ))}
+            </div>
+            {selectedLevels.length > 0 && (
+              <p className="mt-4 rounded-lg bg-primary/5 p-3 text-center text-xs text-primary font-medium">
+                📦 After purchase: {allocationSummary()}
+              </p>
+            )}
+            <Button
               onClick={startDiagnostic}
-              disabled={selectedSubjects.length === 0 || loading}
+              disabled={selectedLevels.length === 0 || loading}
               className="mt-6 w-full gap-2 rounded-xl"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
