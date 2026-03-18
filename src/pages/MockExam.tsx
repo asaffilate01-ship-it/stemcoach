@@ -29,6 +29,7 @@ interface ExamQuestion {
 }
 
 export default function MockExam() {
+  useDocumentTitle("Mock Exam");
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();

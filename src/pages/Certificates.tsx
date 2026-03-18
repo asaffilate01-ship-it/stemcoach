@@ -21,6 +21,7 @@ interface Certificate {
 }
 
 export default function Certificates() {
+  useDocumentTitle("Certificates");
   const { user } = useAuth();
   const [certs, setCerts] = useState<Certificate[]>([]);
 

@@ -18,6 +18,7 @@ const countryGroups = [
 ];
 
 export default function Subjects() {
+  useDocumentTitle("Subjects");
   const navigate = useNavigate();
   const [selectedCurriculum, setSelectedCurriculum] = useState("uk-alevel");
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
