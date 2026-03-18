@@ -26,11 +26,11 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const seedUserData = async (userId: string, name: string, userRole: string) => {
-    await supabase.from("profiles").upsert({ user_id: userId, display_name: name || email });
-    const assignRole = userRole === "teacher" || userRole === "parent" ? userRole : "student";
-    await supabase.from("user_roles").upsert({ user_id: userId, role: assignRole });
-    await supabase.from("user_stats").upsert({ user_id: userId });
+  const seedUserData = async (userId: string, name: string) => {
+    // Only create profile and student role — admin must manually assign teacher/parent/admin roles
+    await supabase.from("profiles").upsert({ user_id: userId, display_name: name || email }, { onConflict: "user_id" });
+    await supabase.from("user_roles").upsert({ user_id: userId, role: "student" }, { onConflict: "user_id,role" });
+    await supabase.from("user_stats").upsert({ user_id: userId }, { onConflict: "user_id" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
