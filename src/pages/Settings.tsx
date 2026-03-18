@@ -307,6 +307,7 @@ export default function Settings() {
         </div>
         </main>
       </PageTransition>
+      <Footer />
     </div>
   );
 }

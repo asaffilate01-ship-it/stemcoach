@@ -364,6 +364,7 @@ export default function Dashboard() {
           )}
         </main>
       </PageTransition>
+      <Footer />
     </div>
   );
 }

@@ -253,6 +253,7 @@ export default function Leaderboard() {
         </div>
         </main>
       </PageTransition>
+      <Footer />
     </div>
   );
 }
