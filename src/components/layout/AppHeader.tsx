@@ -76,6 +76,7 @@ export function AppHeader() {
   const studyItems = filterVisible(navItems.filter(i => i.group === "study"));
   const socialItems = filterVisible(navItems.filter(i => i.group === "social"));
   const classItems = filterVisible(navItems.filter(i => i.group === "classes"));
+  const resourceItems = filterVisible(navItems.filter(i => i.group === "resources"));
 
   const isActive = (path: string) => location.pathname === path;
 
