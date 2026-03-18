@@ -26,11 +26,11 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const seedUserData = async (userId: string, name: string, userRole: string) => {
-    await supabase.from("profiles").upsert({ user_id: userId, display_name: name || email });
-    const assignRole = userRole === "teacher" || userRole === "parent" ? userRole : "student";
-    await supabase.from("user_roles").upsert({ user_id: userId, role: assignRole });
-    await supabase.from("user_stats").upsert({ user_id: userId });
+  const seedUserData = async (userId: string, name: string) => {
+    // Only create profile and student role — admin must manually assign teacher/parent/admin roles
+    await supabase.from("profiles").upsert({ user_id: userId, display_name: name || email }, { onConflict: "user_id" });
+    await supabase.from("user_roles").upsert({ user_id: userId, role: "student" }, { onConflict: "user_id,role" });
+    await supabase.from("user_stats").upsert({ user_id: userId }, { onConflict: "user_id" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +50,7 @@ export default function Auth() {
         if (error) throw error;
 
         if (signUpData?.user && signUpData.session) {
-          await seedUserData(signUpData.user.id, displayName, role);
+          await seedUserData(signUpData.user.id, displayName);
           navigate("/onboarding");
           return;
         }
@@ -74,7 +74,7 @@ export default function Auth() {
 
         if (!existingProfile) {
           const meta = user.user_metadata || {};
-          await seedUserData(user.id, meta.display_name || user.email || "", meta.requested_role || "student");
+          await seedUserData(user.id, meta.display_name || user.email || "");
         }
 
         const { data: prefs } = await supabase
