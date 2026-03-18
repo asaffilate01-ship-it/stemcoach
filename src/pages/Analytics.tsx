@@ -44,6 +44,7 @@ interface TopicBreakdown {
 }
 
 export default function Analytics() {
+  useDocumentTitle("Analytics");
   const { user } = useAuth();
   const [attempts, setAttempts] = useState<AttemptWithQuestion[]>([]);
   const [loading, setLoading] = useState(true);
