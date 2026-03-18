@@ -26,6 +26,8 @@ const QUICK_PROMPTS: Record<string, string[]> = {
 export default function AITutor() {
   useDocumentTitle("AI Tutor");
   const { user } = useAuth();
+  const { canUseAITutor, loading: quotaLoading } = useQuotaGate();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
