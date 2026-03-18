@@ -51,6 +51,7 @@ export default function Practice() {
   const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
+  useDocumentTitle(subject ? `Practice ${subject.name}` : "Practice");
 
   const [questions, setQuestions] = useState<DBQuestion[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
