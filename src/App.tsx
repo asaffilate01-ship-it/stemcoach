@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
