@@ -12,7 +12,7 @@ export function CTASection() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/6 via-transparent to-primary/3" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
       <div className="container relative mx-auto px-4">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid items-center gap-12 md:grid-cols-2">
           {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
