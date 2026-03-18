@@ -2,7 +2,9 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { subjects, curricula, difficultyLabels, type Difficulty } from "@/data/questions";
 import { ChevronRight, Filter } from "lucide-react";
 
