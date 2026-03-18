@@ -663,6 +663,37 @@ export default function Practice() {
                     <p className="text-sm leading-relaxed">{question.exam_tip}</p>
                   </div>
                 )}
+
+                {/* Why other answers are wrong — distractor reasoning */}
+                {!isCorrect && parsedOptions.length > 0 && (
+                  <div className="rounded-2xl border border-border/60 bg-card p-6">
+                    <div className="mb-4 flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10">
+                        <Lightbulb className="h-4 w-4 text-amber-500" />
+                      </div>
+                      <span className="text-sm font-semibold">Why each answer is right or wrong</span>
+                    </div>
+                    <div className="space-y-3">
+                      {parsedOptions.map((opt) => {
+                        const isRight = opt === question.correct_answer;
+                        // Check for distractor reasoning from DB (JSON object) or local data
+                        const dbDistractors = (question as any).distractor_reasoning;
+                        const reasoning = dbDistractors?.[opt] || null;
+                        return (
+                          <div key={opt} className={`rounded-xl border p-3 ${isRight ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/40 bg-muted/20"}`}>
+                            <div className="mb-1 flex items-center gap-2">
+                              {isRight ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                              <span className={`text-sm font-medium ${isRight ? "text-emerald-600 dark:text-emerald-400" : ""}`}>{opt}</span>
+                            </div>
+                            {isRight && <p className="ml-5.5 text-xs leading-relaxed text-emerald-600/80 dark:text-emerald-400/80">✓ This is correct. {question.explanation}</p>}
+                            {!isRight && reasoning && <p className="ml-5.5 text-xs leading-relaxed text-muted-foreground">{reasoning}</p>}
+                            {!isRight && !reasoning && <p className="ml-5.5 text-xs leading-relaxed text-muted-foreground">This is incorrect.</p>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
 
