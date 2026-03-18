@@ -173,14 +173,40 @@ export default function Dashboard() {
   const correctQ = stats?.correct_answers || 0;
   const accuracy = totalQ > 0 ? Math.round((correctQ / totalQ) * 100) : 0;
 
+  const quickActions = [
+    { label: "Practice", icon: BookOpen, to: "/subjects", color: "bg-primary/10 text-primary" },
+    { label: "Weak Drills", icon: Brain, to: "/weak-drills", color: "bg-warning/10 text-warning" },
+    { label: "Flashcards", icon: Layers, to: "/flashcards", color: "bg-success/10 text-success" },
+    { label: "Analytics", icon: BarChart3, to: "/analytics", color: "bg-accent text-accent-foreground" },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
-        <main className="container mx-auto px-4 py-8">
+        <main id="main-content" className="container mx-auto px-4 py-8 flex-1">
           <div className="mb-8">
             <div className="stem-label mb-2">Student Dashboard</div>
             <h1 className="stem-heading text-3xl">Your Progress</h1>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {quickActions.map((action, i) => (
+              <motion.button
+                key={action.label}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={() => navigate(action.to)}
+                className="stem-card flex items-center gap-3 rounded-xl p-3 text-left"
+              >
+                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${action.color}`}>
+                  <action.icon className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-semibold">{action.label}</span>
+              </motion.button>
+            ))}
           </div>
 
           {/* Stats Grid */}
