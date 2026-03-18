@@ -74,7 +74,7 @@ export default function Auth() {
 
         if (!existingProfile) {
           const meta = user.user_metadata || {};
-          await seedUserData(user.id, meta.display_name || user.email || "", meta.requested_role || "student");
+          await seedUserData(user.id, meta.display_name || user.email || "");
         }
 
         const { data: prefs } = await supabase
