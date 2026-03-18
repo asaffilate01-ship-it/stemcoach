@@ -89,6 +89,45 @@ export default function Practice() {
     loadQuestions();
   }, [subjectId]);
 
+  // Keyboard shortcuts: 1-4 for options, Enter to submit/next, → for next
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (questions.length === 0 || dbLoading) return;
+      const q = questions[currentIndex];
+      if (!q) return;
+      const isEssayQ = q.question_type === "essay";
+      const opts: string[] = typeof q.options === "string" ? JSON.parse(q.options) : (Array.isArray(q.options) ? q.options : []);
+
+      // Don't intercept keys when typing in textarea
+      if (isEssayQ && document.activeElement?.tagName === "TEXTAREA") return;
+
+      if (!showFeedback && !isEssayQ && opts.length > 0) {
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= opts.length) {
+          e.preventDefault();
+          setSelectedAnswer(opts[num - 1]);
+          return;
+        }
+      }
+
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (showFeedback) {
+          handleNext();
+        } else if (selectedAnswer || selectedAnswers.size > 0 || (isEssayQ && essayAnswer.trim())) {
+          handleSubmit();
+        }
+      }
+
+      if ((e.key === "ArrowRight" || e.key === "n") && showFeedback) {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [questions, currentIndex, showFeedback, selectedAnswer, selectedAnswers, essayAnswer, dbLoading]);
+
   // Empty / loading states
   if (!subject) {
     return (
