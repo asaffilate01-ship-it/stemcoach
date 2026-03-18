@@ -137,6 +137,7 @@ export function AppHeader() {
           {user && <GroupDropdown label="Study" items={studyItems} />}
           <GroupDropdown label="Rewards" items={socialItems} />
           {classItems.length > 0 && <GroupDropdown label="Classes" items={classItems} />}
+          <GroupDropdown label="Resources" items={resourceItems} />
         </nav>
 
         {/* Right actions */}
