@@ -38,6 +38,7 @@ import LiveClassroom from "./pages/LiveClassroom";
 import ProgressReports from "./pages/ProgressReports";
 import Flashcards from "./pages/Flashcards";
 import Onboarding from "./pages/Onboarding";
+import SelectSubjects from "./pages/SelectSubjects";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
