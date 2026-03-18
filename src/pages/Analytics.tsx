@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
@@ -42,6 +44,7 @@ interface TopicBreakdown {
 }
 
 export default function Analytics() {
+  useDocumentTitle("Analytics");
   const { user } = useAuth();
   const [attempts, setAttempts] = useState<AttemptWithQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -177,7 +180,7 @@ export default function Analytics() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
         <main className="container mx-auto px-4 py-8">
@@ -329,6 +332,7 @@ export default function Analytics() {
           )}
         </main>
       </PageTransition>
+      <Footer />
     </div>
   );
 }

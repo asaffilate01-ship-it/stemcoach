@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -50,6 +51,7 @@ export default function Practice() {
   const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
+  useDocumentTitle(subject ? `Practice ${subject.name}` : "Practice");
 
   const [questions, setQuestions] = useState<DBQuestion[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
@@ -86,6 +88,45 @@ export default function Practice() {
     };
     loadQuestions();
   }, [subjectId]);
+
+  // Keyboard shortcuts: 1-4 for options, Enter to submit/next, → for next
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (questions.length === 0 || dbLoading) return;
+      const q = questions[currentIndex];
+      if (!q) return;
+      const isEssayQ = q.question_type === "essay";
+      const opts: string[] = typeof q.options === "string" ? JSON.parse(q.options) : (Array.isArray(q.options) ? q.options : []);
+
+      // Don't intercept keys when typing in textarea
+      if (isEssayQ && document.activeElement?.tagName === "TEXTAREA") return;
+
+      if (!showFeedback && !isEssayQ && opts.length > 0) {
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= opts.length) {
+          e.preventDefault();
+          setSelectedAnswer(opts[num - 1]);
+          return;
+        }
+      }
+
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (showFeedback) {
+          handleNext();
+        } else if (selectedAnswer || selectedAnswers.size > 0 || (isEssayQ && essayAnswer.trim())) {
+          handleSubmit();
+        }
+      }
+
+      if ((e.key === "ArrowRight" || e.key === "n") && showFeedback) {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [questions, currentIndex, showFeedback, selectedAnswer, selectedAnswers, essayAnswer, dbLoading]);
 
   // Empty / loading states
   if (!subject) {

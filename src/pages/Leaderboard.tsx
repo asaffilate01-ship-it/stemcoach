@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { motion } from "framer-motion";
 import { Trophy, Flame, Zap, Target, Users, Calendar } from "lucide-react";
 
@@ -20,6 +22,7 @@ type Tab = "xp" | "streak" | "accuracy";
 type TimeFrame = "all" | "weekly";
 
 export default function Leaderboard() {
+  useDocumentTitle("Leaderboard");
   const { user } = useAuth();
   const [entries, setEntries] = useState<LeaderEntry[]>([]);
   const [tab, setTab] = useState<Tab>("xp");
@@ -111,7 +114,7 @@ export default function Leaderboard() {
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
       <main className="container mx-auto max-w-2xl px-4 py-8">
@@ -250,6 +253,7 @@ export default function Leaderboard() {
         </div>
         </main>
       </PageTransition>
+      <Footer />
     </div>
   );
 }

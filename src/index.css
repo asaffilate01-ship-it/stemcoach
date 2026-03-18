@@ -167,4 +167,7 @@
   .stem-section-heading {
     @apply text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl;
   }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
