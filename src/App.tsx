@@ -76,13 +76,13 @@ const App = () => (
                 <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
                 <Route path="/select-subjects" element={<ProtectedRoute><P><SelectSubjects /></P></ProtectedRoute>} />
 
-                {/* Student */}
-                <Route path="/subjects" element={<P><Subjects /></P>} />
-                <Route path="/practice/:subjectId" element={<P><Practice /></P>} />
-                <Route path="/mock-exam" element={<P><MockExam /></P>} />
-                <Route path="/badges" element={<P><Badges /></P>} />
-                <Route path="/leaderboard" element={<P><Leaderboard /></P>} />
-                <Route path="/weak-drills" element={<P><WeakTopicDrill /></P>} />
+                {/* Student — require auth + quota */}
+                <Route path="/subjects" element={<ProtectedRoute><P><Subjects /></P></ProtectedRoute>} />
+                <Route path="/practice/:subjectId" element={<ProtectedRoute><P><Practice /></P></ProtectedRoute>} />
+                <Route path="/mock-exam" element={<ProtectedRoute><P><MockExam /></P></ProtectedRoute>} />
+                <Route path="/badges" element={<ProtectedRoute><P><Badges /></P></ProtectedRoute>} />
+                <Route path="/leaderboard" element={<ProtectedRoute><P><Leaderboard /></P></ProtectedRoute>} />
+                <Route path="/weak-drills" element={<ProtectedRoute><P><WeakTopicDrill /></P></ProtectedRoute>} />
                 <Route path="/flashcards" element={<ProtectedRoute><P><Flashcards /></P></ProtectedRoute>} />
                 <Route path="/live-classroom" element={<ProtectedRoute><P><LiveClassroom /></P></ProtectedRoute>} />
 
