@@ -214,7 +214,7 @@ export default function Dashboard() {
           </div>
 
           {/* Quota Widget */}
-          <div className="mb-8">
+          <div className="mb-5 md:mb-8">
             <QuotaWidget />
           </div>
 
