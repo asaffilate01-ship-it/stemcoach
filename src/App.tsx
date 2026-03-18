@@ -38,6 +38,7 @@ import LiveClassroom from "./pages/LiveClassroom";
 import ProgressReports from "./pages/ProgressReports";
 import Flashcards from "./pages/Flashcards";
 import Onboarding from "./pages/Onboarding";
+import SelectSubjects from "./pages/SelectSubjects";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/install" element={<P><InstallApp /></P>} />
                 <Route path="/terms" element={<P><TermsOfService /></P>} />
                 <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
+                <Route path="/select-subjects" element={<ProtectedRoute><P><SelectSubjects /></P></ProtectedRoute>} />
 
                 {/* Student */}
                 <Route path="/subjects" element={<P><Subjects /></P>} />
