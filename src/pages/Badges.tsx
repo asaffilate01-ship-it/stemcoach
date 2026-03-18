@@ -60,7 +60,7 @@ export default function Badges() {
   const categories = [...new Set(badges.map((b) => b.category))];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
       <main className="container mx-auto px-4 py-8">
