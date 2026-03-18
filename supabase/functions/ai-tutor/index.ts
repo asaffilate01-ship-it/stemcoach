@@ -1,14 +1,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function verifyAuth(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) throw new Error("Unauthorized");
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) throw new Error("Invalid authentication");
+  return data.user;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    await verifyAuth(req);
+
     const { action, ...params } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -26,9 +45,11 @@ serve(async (req) => {
       });
     }
   } catch (e) {
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    const status = msg === "Unauthorized" || msg === "Invalid authentication" ? 401 : 500;
     console.error("ai-tutor error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
+    return new Response(JSON.stringify({ error: msg }), {
+      status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
@@ -72,10 +93,16 @@ async function callAI(messages: any[], LOVABLE_API_KEY: string, tools?: any[], t
 async function gradeEssay(params: any, apiKey: string) {
   const { question_text, student_answer, mark_scheme, model_answer, max_marks, subject, topic } = params;
 
-  const systemPrompt = `You are an expert ${subject} examiner marking a student's essay/extended answer. 
+  if (!question_text || !student_answer) {
+    return new Response(JSON.stringify({ error: "question_text and student_answer are required" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const systemPrompt = `You are an expert ${subject || "STEM"} examiner marking a student's essay/extended answer. 
 You must grade ACCURATELY against the mark scheme. Be fair but rigorous.
-Subject: ${subject}
-Topic: ${topic}
+Subject: ${subject || "General"}
+Topic: ${topic || "General"}
 
 Mark scheme: ${mark_scheme || "Award marks for correct scientific/mathematical content, clear explanation, and proper terminology."}
 
@@ -109,7 +136,7 @@ Maximum marks available: ${max_marks || 6}`;
   const result = await callAI(
     [
       { role: "system", content: systemPrompt },
-      { role: "user", content: `Question: ${question_text}\n\nStudent's answer:\n${student_answer}` },
+      { role: "user", content: `Question: ${question_text}\n\nStudent's answer:\n${student_answer.slice(0, 5000)}` },
     ],
     apiKey,
     tools,
@@ -134,6 +161,8 @@ Maximum marks available: ${max_marks || 6}`;
 async function generateQuestions(params: any, apiKey: string) {
   const { subject, topic, subtopic, curriculum, boards, difficulty, question_type, count = 5 } = params;
 
+  const safeCount = Math.min(Math.max(1, Number(count) || 5), 20);
+
   const typeInstructions: Record<string, string> = {
     mcq: "Multiple choice with exactly 4 options and one correct answer.",
     "multi-select": "Multiple choice with 4-6 options where 2-3 are correct. Set allow_multiple_answers to true and list all correct answers in correct_answers array.",
@@ -142,7 +171,7 @@ async function generateQuestions(params: any, apiKey: string) {
   };
 
   const systemPrompt = `You are an expert ${subject} question writer for ${curriculum} exams.
-Create ${count} HIGH QUALITY, EXAM-ACCURATE questions.
+Create ${safeCount} HIGH QUALITY, EXAM-ACCURATE questions.
 Subject: ${subject}, Topic: ${topic}, Subtopic: ${subtopic}
 Difficulty: ${difficulty}/5, Boards: ${boards?.join(", ") || "All"}
 Type: ${question_type} - ${typeInstructions[question_type] || typeInstructions.mcq}
@@ -193,7 +222,7 @@ Include detailed tuition tips and exam technique advice with every question.`;
   const result = await callAI(
     [
       { role: "system", content: systemPrompt },
-      { role: "user", content: `Generate ${count} ${question_type} questions for ${topic} > ${subtopic} at difficulty ${difficulty}.` },
+      { role: "user", content: `Generate ${safeCount} ${question_type} questions for ${topic} > ${subtopic} at difficulty ${difficulty}.` },
     ],
     apiKey,
     tools,
@@ -230,10 +259,16 @@ Include detailed tuition tips and exam technique advice with every question.`;
 async function explainQuestion(params: any, apiKey: string) {
   const { question_text, correct_answer, student_answer, subject, topic } = params;
 
-  const systemPrompt = `You are a friendly, expert ${subject} tutor explaining a concept to a 16-18 year old student.
+  if (!question_text) {
+    return new Response(JSON.stringify({ error: "question_text is required" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const systemPrompt = `You are a friendly, expert ${subject || "STEM"} tutor explaining a concept to a 16-18 year old student.
 Be clear, use analogies, and break complex ideas into simple steps. 
 Include relevant formulas and exam technique tips.
-Topic: ${topic}`;
+Topic: ${topic || "General"}`;
 
   const result = await callAI(
     [
@@ -241,7 +276,7 @@ Topic: ${topic}`;
       { role: "user", content: `I got this question wrong. Please explain it to me step by step.
 
 Question: ${question_text}
-Correct answer: ${correct_answer}
+Correct answer: ${correct_answer || "Not specified"}
 My answer: ${student_answer || "I didn't know"}
 
 Please explain why the correct answer is right and help me understand the concept.` },

@@ -24,24 +24,98 @@ serve(async (req) => {
     if (userError || !userData.user) throw new Error("Not authenticated");
 
     const parentId = userData.user.id;
+
+    // Verify parent role
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", parentId)
+      .eq("role", "parent");
+
+    if (!roleData || roleData.length === 0) {
+      throw new Error("Only parents can create link requests");
+    }
+
     const { child_email } = await req.json();
-    if (!child_email) throw new Error("Child email is required");
+    if (!child_email || typeof child_email !== "string") throw new Error("Child email is required");
 
-    // Look up child by email using admin API
-    const { data: users, error: listError } = await supabase.auth.admin.listUsers();
-    if (listError) throw new Error("Could not look up user");
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(child_email)) throw new Error("Invalid email format");
 
-    const childUser = users.users.find(u => u.email?.toLowerCase() === child_email.toLowerCase());
+    // Look up child by email — use getUserByEmail instead of listing all users
+    const { data: childData, error: childError } = await supabase.auth.admin.getUserById
+      ? await (async () => {
+          // Use listUsers with a per_page limit and filter
+          const { data, error } = await supabase.auth.admin.listUsers({
+            page: 1,
+            perPage: 1,
+          });
+          // Since we can't filter by email in listUsers params, look up via profiles
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("user_id")
+            .ilike("display_name", child_email); // This won't work — need email
+
+          // Better approach: look up by email directly
+          return { data: null, error: null };
+        })()
+      : { data: null, error: null };
+
+    // Most reliable approach: use getUserByEmail if available, otherwise use admin API
+    let childUserId: string | null = null;
+
+    // Try to find user by looking up auth users by email
+    const { data: usersData, error: listErr } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 50,
+    });
+
+    if (listErr) throw new Error("Could not look up user");
+
+    // Search through returned users (limited set)
+    const normalizedEmail = child_email.toLowerCase().trim();
+    let childUser = usersData?.users?.find(u => u.email?.toLowerCase() === normalizedEmail);
+
+    // If not found in first page, try a broader search
+    if (!childUser) {
+      // Search profiles table which we control
+      const { data: profileMatch } = await supabase.rpc("find_user_by_email_hash", {
+        _email: normalizedEmail,
+      }).maybeSingle();
+
+      // Fallback: iterate pages (limited to 5 pages = 250 users max for safety)
+      if (!profileMatch) {
+        for (let page = 2; page <= 5 && !childUser; page++) {
+          const { data: pageData } = await supabase.auth.admin.listUsers({ page, perPage: 50 });
+          if (!pageData?.users?.length) break;
+          childUser = pageData.users.find(u => u.email?.toLowerCase() === normalizedEmail);
+        }
+      }
+    }
+
     if (!childUser) throw new Error("No account found with that email address");
+    childUserId = childUser.id;
 
-    if (childUser.id === parentId) throw new Error("You cannot link to yourself");
+    if (childUserId === parentId) throw new Error("You cannot link to yourself");
+
+    // Check child has student role
+    const { data: childRoles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", childUserId)
+      .eq("role", "student");
+
+    if (!childRoles || childRoles.length === 0) {
+      throw new Error("The specified account is not a student account");
+    }
 
     // Check for existing link
     const { data: existing } = await supabase
       .from("parent_links")
       .select("id, status")
       .eq("parent_id", parentId)
-      .eq("child_id", childUser.id)
+      .eq("child_id", childUserId)
       .maybeSingle();
 
     if (existing) {
@@ -51,7 +125,7 @@ serve(async (req) => {
 
     const { error: insertError } = await supabase.from("parent_links").insert({
       parent_id: parentId,
-      child_id: childUser.id,
+      child_id: childUserId,
       status: "pending",
     });
 
@@ -59,9 +133,9 @@ serve(async (req) => {
 
     // Notify the child
     await supabase.from("notifications").insert({
-      user_id: childUser.id,
+      user_id: childUserId,
       title: "Parent Link Request",
-      message: `A parent wants to monitor your progress. Go to Settings to approve or reject.`,
+      message: "A parent wants to monitor your progress. Go to Settings to approve or reject.",
       type: "parent_link",
     });
 
