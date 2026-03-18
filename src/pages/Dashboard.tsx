@@ -219,7 +219,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats Grid */}
-          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4 md:mb-8">
             {[
               { label: "Questions", value: totalQ, icon: Target, color: "bg-primary/10 text-primary", gradient: false },
               { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]", gradient: false },
