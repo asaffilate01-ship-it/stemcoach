@@ -161,7 +161,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
       <main className="container mx-auto max-w-2xl px-4 py-8">
