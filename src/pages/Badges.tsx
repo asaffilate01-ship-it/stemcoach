@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useGameStats } from "@/hooks/useGameStats";
 import { StreakBar } from "@/components/gamification/StreakBar";
 import { motion } from "framer-motion";
