@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SessionGuard } from "@/components/SessionGuard";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -57,6 +58,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <SessionGuard />
             <SkipToContent />
             <ScrollToTop />
             <div className="pb-16 lg:pb-0">

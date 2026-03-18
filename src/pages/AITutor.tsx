@@ -4,9 +4,11 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Bot, Send, User, Loader2, Trash2, Sparkles } from "lucide-react";
+import { Bot, Send, User, Loader2, Trash2, Sparkles, Lock, CreditCard } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuotaGate } from "@/hooks/useQuotaGate";
+import { useNavigate } from "react-router-dom";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -26,6 +28,8 @@ const QUICK_PROMPTS: Record<string, string[]> = {
 export default function AITutor() {
   useDocumentTitle("AI Tutor");
   const { user } = useAuth();
+  const { canUseAITutor, loading: quotaLoading } = useQuotaGate();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -114,6 +118,28 @@ export default function AITutor() {
     }
     setIsLoading(false);
   };
+
+  if (!quotaLoading && !canUseAITutor) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <AppHeader />
+        <PageTransition>
+          <main className="container mx-auto flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+              <Lock className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="mb-2 text-2xl font-bold">AI Tutor — Premium Feature</h2>
+            <p className="mb-6 max-w-md text-muted-foreground">
+              Purchase a question pack to unlock the AI Tutor. Get personalised explanations, exam tips, and essay grading.
+            </p>
+            <Button onClick={() => navigate("/pricing")} className="gap-2 rounded-xl">
+              <CreditCard className="h-4 w-4" /> View Plans
+            </Button>
+          </main>
+        </PageTransition>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

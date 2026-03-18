@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, BookOpen, Brain, Layers, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { QuotaWidget } from "@/components/dashboard/QuotaWidget";
 
 interface SubjectProgress {
   subject: string;
@@ -220,6 +221,11 @@ export default function Dashboard() {
                 <span className="text-sm font-semibold">{action.label}</span>
               </motion.button>
             ))}
+          </div>
+
+          {/* Quota Widget */}
+          <div className="mb-8">
+            <QuotaWidget />
           </div>
 
           {/* Stats Grid */}
