@@ -15,16 +15,16 @@ export interface QuestionPack {
 
 export const PACKS: Record<string, QuestionPack> = {
   standard: {
-    name: "Standard Pack",
+    name: "Ultimate Pack",
     product_id: "prod_UAj58fkEwB0P8O",
-    questions: 5000,
+    questions: 100000,
     features: [
-      "5,000 curriculum-aligned questions",
+      "100,000 curriculum-aligned questions",
       "Choose your subjects & levels",
-      "AI Tutor chat",
+      "AI Tutor chat — unlimited",
       "Mock exams & certificates",
-      "Streaks, XP & leaderboards",
-      "Detailed analytics",
+      "Streaks, XP, levels & leaderboards",
+      "Detailed analytics & weak-topic drills",
       "Offline mode (PWA)",
     ],
     regional: {
@@ -38,9 +38,9 @@ export const PACKS: Record<string, QuestionPack> = {
   topup: {
     name: "Top-Up Pack",
     product_id: "prod_UAj5MWyj4cFOgT",
-    questions: 2000,
+    questions: 20000,
     features: [
-      "2,000 extra questions",
+      "20,000 extra questions",
       "Add more subjects anytime",
       "Stack with existing pack",
       "Instant access",
