@@ -196,16 +196,17 @@ export default function Practice() {
   }
 
   if (questions.length === 0) {
+    const mascot = getMascot(subjectId || "");
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="mx-auto max-w-md">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-              <BookOpen className="h-8 w-8 text-primary" />
+            <div className="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-2xl shadow-md">
+              <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">No questions yet</h2>
-            <p className="mb-8 text-muted-foreground">Questions for {subject.name} are being prepared. Check back soon!</p>
+            <p className="mb-8 text-muted-foreground">{mascot.name} is preparing questions for {subject.name}. Check back soon!</p>
             <Button onClick={() => navigate("/subjects")} className="gap-2">
               <ChevronLeft className="h-4 w-4" /> Back to Subjects
             </Button>
