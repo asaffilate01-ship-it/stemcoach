@@ -215,8 +215,8 @@ export default function AITutor() {
                 className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
               >
                 {msg.role === "assistant" && (
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <GraduationCap className="h-4 w-4" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg overflow-hidden">
+                    <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
                   </div>
                 )}
                 <div
