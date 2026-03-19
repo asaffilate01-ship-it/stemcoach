@@ -758,7 +758,7 @@ export default function Practice() {
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
                     <MessageSquare className="h-4 w-4 text-primary" />
                   </div>
-                  AI Tutor Explanation
+                  STEMcoach Explanation
                 </div>
                 <div className="prose prose-sm dark:prose-invert max-w-none">
                   <ReactMarkdown>{aiExplanation}</ReactMarkdown>

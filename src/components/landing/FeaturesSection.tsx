@@ -66,7 +66,7 @@ export function FeaturesSection() {
             <span className="stem-gradient-text"> — in an app</span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
-            Built by teachers and tutors, powered by AI. From practice questions to live classrooms, everything you need to ace your exams.
+            Built by teachers and tutors. From practice questions to live classrooms, everything you need to ace your exams.
           </p>
         </div>
 

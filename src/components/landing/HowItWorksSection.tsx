@@ -12,7 +12,7 @@ const steps = [
     icon: BookOpen,
     step: "02",
     title: "Practise & Learn",
-    description: "Work through exam-style questions with instant feedback, worked solutions, and AI coaching when you get stuck.",
+    description: "Work through exam-style questions with instant feedback, worked solutions, and STEMcoach coaching when you get stuck.",
   },
   {
     icon: Trophy,
