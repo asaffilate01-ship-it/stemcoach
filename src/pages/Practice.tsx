@@ -705,7 +705,7 @@ export default function Practice() {
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-4 space-y-4">
                 <div className={`rounded-2xl border p-6 ${aiGrading.score >= aiGrading.max_marks * 0.7 ? "bg-emerald-500/5 border-emerald-500/20" : aiGrading.score >= aiGrading.max_marks * 0.4 ? "bg-amber-500/5 border-amber-500/20" : "bg-destructive/5 border-destructive/20"}`}>
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="font-semibold">AI Score: {aiGrading.score}/{aiGrading.max_marks}</span>
+                    <span className="font-semibold">Score: {aiGrading.score}/{aiGrading.max_marks}</span>
                     <span className="rounded-lg bg-muted/60 px-2.5 py-1 text-xs font-semibold">{Math.round((aiGrading.score / aiGrading.max_marks) * 100)}%</span>
                   </div>
                   <p className="text-sm leading-relaxed text-muted-foreground">{aiGrading.feedback}</p>
