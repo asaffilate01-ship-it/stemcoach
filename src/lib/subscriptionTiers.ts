@@ -29,10 +29,10 @@ export const PACKS: Record<string, QuestionPack> = {
     ],
     regional: {
       uk: { price: "£14.99", price_id: "price_1TCNddFFogsDQVs4QyDkGoa6" },
-      us: { price: "$19.99", price_id: "price_1TCNdhFFogsDQVs4QJcncX1T" },
-      ae: { price: "AED 99", price_id: "price_1TCNdjFFogsDQVs4VVGK1Ncx" },
-      in: { price: "₹899", price_id: "price_1TCNdkFFogsDQVs4ZeZ8ikLB" },
-      pk: { price: "PKR 4,999", price_id: "price_1TCNdmFFogsDQVs4WszzaaSM" },
+      us: { price: "$19.99", price_id: "price_1TCYoCFFogsDQVs4n5EaIpC4" },
+      ae: { price: "AED 99", price_id: "price_1TCYoDFFogsDQVs4a7IAliJs" },
+      in: { price: "₹899", price_id: "price_1TCYoEFFogsDQVs43ZduOOov" },
+      pk: { price: "PKR 4,999", price_id: "price_1TCYoEFFogsDQVs45swS26PC" },
     },
   },
   topup: {
@@ -47,10 +47,10 @@ export const PACKS: Record<string, QuestionPack> = {
     ],
     regional: {
       uk: { price: "£4.99", price_id: "price_1TCNdeFFogsDQVs4WutIKPQw" },
-      us: { price: "$7.99", price_id: "price_1TCNdiFFogsDQVs4Kek0zoTb" },
-      ae: { price: "AED 39", price_id: "price_1TCNdkFFogsDQVs4Xdwg4abI" },
-      in: { price: "₹399", price_id: "price_1TCNdlFFogsDQVs4PSOP1So1" },
-      pk: { price: "PKR 999", price_id: "price_1TCNdmFFogsDQVs4Hju7qgvO" },
+      us: { price: "$7.99", price_id: "price_1TCYoFFFogsDQVs4Klbw5WCw" },
+      ae: { price: "AED 39", price_id: "price_1TCYoGFFogsDQVs4ZGx96zs9" },
+      in: { price: "₹399", price_id: "price_1TCYoGFFogsDQVs4MzY6cjyN" },
+      pk: { price: "PKR 999", price_id: "price_1TCYoHFFogsDQVs4tHGNLjSv" },
     },
   },
 } as const;
