@@ -12,16 +12,16 @@ const faqs = [
     a: "We support 30+ curricula including UK GCSE & A-Level (AQA, Edexcel, OCR, WJEC), IB (SL & HL), US AP & SAT, Indian CBSE, ICSE, JEE & NEET, Pakistani FSC, Matric & ECAT/MDCAT, and more. New curricula are added regularly.",
   },
   {
-    q: "How does the AI Tutor work?",
-    a: "Our AI Tutor provides step-by-step explanations, solves problems interactively, and adapts to your level. It's like having a private tutor available 24/7. You can ask follow-up questions, request alternative explanations, and get exam technique advice.",
+    q: "How does STEMcoach coaching work?",
+    a: "STEMcoach provides step-by-step explanations, solves problems interactively, and adapts to your level. It's like having a private tutor available 24/7. You can ask follow-up questions, request alternative explanations, and get exam technique advice.",
   },
   {
     q: "Is there a free plan?",
-    a: "Yes! The free plan gives you 5 practice questions per day, access to all subjects, and basic analytics. Upgrade to Pro or School plans for unlimited questions, mock exams, AI tutoring, and advanced analytics.",
+    a: "Yes! The free plan gives you 5 practice questions per subject, access to all subjects, and basic analytics. Purchase a question pack for unlimited questions, mock exams, STEMcoach coaching, and advanced analytics.",
   },
   {
     q: "How accurate are the questions?",
-    a: "Every question is curriculum-aligned and reviewed for accuracy. Our AI-generated questions go through validation pipelines, and we work with subject-matter experts to ensure answers match exam board specifications.",
+    a: "Every question is curriculum-aligned and reviewed for accuracy. Our questions go through validation pipelines, and we work with subject-matter experts to ensure answers match exam board specifications.",
   },
   {
     q: "Can schools and tuition centres use STEMCoach?",

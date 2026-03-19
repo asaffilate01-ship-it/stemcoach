@@ -6,6 +6,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useQuotaGate } from "@/hooks/useQuotaGate";
 import { subjects } from "@/data/questions";
 import { type MockExamTemplate } from "@/data/mockExamTemplates";
 import { ExamBrowse } from "@/components/mock-exam/ExamBrowse";
@@ -32,6 +33,7 @@ export default function MockExam() {
   useDocumentTitle("Mock Exam");
   const { user } = useAuth();
   const { toast } = useToast();
+  const { canTakeMockExam, mockExamsRemaining, mockExamsTotal, hasPurchased, loading: quotaLoading, incrementMockExam } = useQuotaGate();
   const [state, setState] = useState<ExamState>("browse");
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentQ, setCurrentQ] = useState(0);
@@ -83,6 +85,9 @@ export default function MockExam() {
       await supabase.from("attempts").insert(insertData);
     }
 
+    // Decrement mock exam quota
+    await incrementMockExam();
+
     if (percent >= 60) {
       const examName =
         selectedTemplate?.name ||
@@ -101,7 +106,7 @@ export default function MockExam() {
       });
     }
     setSubmitting(false);
-  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast]);
+  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast, incrementMockExam]);
 
   useEffect(() => {
     if (state !== "active") return;
@@ -118,6 +123,17 @@ export default function MockExam() {
   }, [state, handleSubmitExam]);
 
   const startExam = async () => {
+    if (!canTakeMockExam) {
+      toast({
+        title: "Mock exam limit reached",
+        description: hasPurchased
+          ? "You've used all your mock exams. Purchase a Top-Up pack for more."
+          : "Purchase a question pack to unlock mock exams.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const subj = selectedTemplate ? selectedTemplate.subject : examSubject;
     const curr = selectedTemplate ? selectedTemplate.curriculum : examCurriculum;
     const qCount = selectedTemplate ? selectedTemplate.questionCount : questionCount;
@@ -216,6 +232,9 @@ export default function MockExam() {
               setState("browse");
               setSelectedTemplate(null);
             }}
+            mockExamsRemaining={mockExamsRemaining}
+            mockExamsTotal={mockExamsTotal}
+            canTakeMockExam={canTakeMockExam}
           />
         </PageTransition>
       </div>

@@ -17,7 +17,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-xl font-semibold">2. Description of Service</h2>
-            <p>STEMCoach is an online educational platform providing practice questions, mock exams, AI tutoring, flashcards, and progress tracking across multiple curricula and subjects. The Platform is available via web browser.</p>
+            <p>STEMCoach is an online educational platform providing practice questions, mock exams, STEMcoach coaching, flashcards, and progress tracking across multiple curricula and subjects. The Platform is available via web browser.</p>
           </section>
 
           <section>
@@ -33,9 +33,9 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold">4. Subscription & Payments</h2>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Free tier users are limited to 5 practice questions per day.</li>
-              <li>Paid subscriptions (Pro, School) are billed monthly via Stripe.</li>
-              <li>You may cancel at any time through the subscription management portal.</li>
+              <li>Free tier users are limited to 5 practice questions per subject.</li>
+              <li>Question packs are one-time purchases processed via Stripe.</li>
+              <li>Refunds are handled on a case-by-case basis within 14 days of purchase.</li>
               <li>Refunds are handled on a case-by-case basis within 14 days of purchase.</li>
               <li>Prices vary by region and are displayed in local currency.</li>
             </ul>
@@ -55,12 +55,12 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-xl font-semibold">6. Intellectual Property</h2>
-            <p>All questions, explanations, worked solutions, and AI-generated content on the Platform are the intellectual property of STEMCoach. You may not reproduce, distribute, or commercially exploit this content without written permission.</p>
+            <p>All questions, explanations, worked solutions, and generated content on the Platform are the intellectual property of STEMCoach. You may not reproduce, distribute, or commercially exploit this content without written permission.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">7. AI-Generated Content</h2>
-            <p>Some content on the Platform is generated or graded using AI. While we strive for accuracy, AI-generated content may contain errors. We recommend cross-referencing with official textbooks and mark schemes for critical exam preparation.</p>
+            <h2 className="text-xl font-semibold">7. Generated Content</h2>
+            <p>Some content on the Platform is generated or graded using automated systems. While we strive for accuracy, generated content may contain errors. We recommend cross-referencing with official textbooks and mark schemes for critical exam preparation.</p>
           </section>
 
           <section>

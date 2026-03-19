@@ -17,6 +17,9 @@ interface ExamSetupProps {
   isLoading: boolean;
   onStart: () => void;
   onBack: () => void;
+  mockExamsRemaining?: number;
+  mockExamsTotal?: number;
+  canTakeMockExam?: boolean;
 }
 
 export function ExamSetup({
@@ -32,6 +35,9 @@ export function ExamSetup({
   isLoading,
   onStart,
   onBack,
+  mockExamsRemaining,
+  mockExamsTotal,
+  canTakeMockExam = true,
 }: ExamSetupProps) {
   const subjectInfo = selectedTemplate
     ? subjects.find((s) => s.id === selectedTemplate.subject)
@@ -168,6 +174,18 @@ export function ExamSetup({
               </>
             )}
 
+            {/* Mock exam quota notice */}
+            {mockExamsTotal != null && mockExamsTotal > 0 && (
+              <div className={`flex items-center gap-3 rounded-xl px-4 py-3 ring-1 ${canTakeMockExam ? 'bg-success/[0.04] ring-success/10' : 'bg-destructive/[0.04] ring-destructive/10'}`}>
+                <Target className={`h-4 w-4 shrink-0 ${canTakeMockExam ? 'text-success/60' : 'text-destructive/60'}`} />
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  {canTakeMockExam
+                    ? `${mockExamsRemaining} of ${mockExamsTotal} mock exams remaining`
+                    : "No mock exams remaining. Purchase a Top-Up pack for more."}
+                </p>
+              </div>
+            )}
+
             {/* Exam conditions notice */}
             <div className="flex items-center gap-3 rounded-xl bg-primary/[0.04] px-4 py-3 ring-1 ring-primary/10">
               <Shield className="h-4 w-4 text-primary/60 shrink-0" />
@@ -180,11 +198,15 @@ export function ExamSetup({
               onClick={onStart}
               size="lg"
               className="w-full gap-2.5 rounded-xl text-base font-bold shadow-lg shadow-primary/20 h-13 transition-all hover:shadow-xl hover:shadow-primary/25"
-              disabled={isLoading}
+              disabled={isLoading || !canTakeMockExam}
             >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" /> Loading Questions…
+                </>
+              ) : !canTakeMockExam ? (
+                <>
+                  <Shield className="h-4 w-4" /> No Exams Remaining
                 </>
               ) : (
                 <>

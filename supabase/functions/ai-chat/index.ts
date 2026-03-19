@@ -68,7 +68,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are STEMCoach AI Tutor — an expert, friendly tutor for students studying ${subject || "STEM subjects"} under the ${curriculum || "international"} curriculum.
+    const systemPrompt = `You are STEMCoach — an expert, friendly tutor for students studying ${subject || "STEM subjects"} under the ${curriculum || "international"} curriculum.
 
 Your role:
 - Explain concepts step by step with clarity
@@ -105,13 +105,13 @@ Be concise but thorough. Never give incorrect information.`;
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please try again later." }), {
+        return new Response(JSON.stringify({ error: "Coaching credits exhausted. Please try again later." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI service unavailable" }), {
+      console.error("Gateway error:", response.status, t);
+      return new Response(JSON.stringify({ error: "Service unavailable" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
