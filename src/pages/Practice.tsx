@@ -264,7 +264,10 @@ export default function Practice() {
         const passed = data.grading?.score >= data.grading?.max_marks * 0.6;
         setLastCorrect(passed);
         setShowCorrectAnim(true);
+        setMascotCorrect(passed);
+        setShowMascotReaction(true);
         setTimeout(() => setShowCorrectAnim(false), 2000);
+        setTimeout(() => setShowMascotReaction(false), 3000);
         setScore((prev) => ({ correct: prev.correct + (passed ? 1 : 0), total: prev.total + 1 }));
         if (user) {
           await supabase.from("attempts").insert({
