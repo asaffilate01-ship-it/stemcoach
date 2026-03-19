@@ -120,6 +120,17 @@ export default function MockExam() {
   }, [state, handleSubmitExam]);
 
   const startExam = async () => {
+    if (!canTakeMockExam) {
+      toast({
+        title: "Mock exam limit reached",
+        description: hasPurchased
+          ? "You've used all your mock exams. Purchase a Top-Up pack for more."
+          : "Purchase a question pack to unlock mock exams.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const subj = selectedTemplate ? selectedTemplate.subject : examSubject;
     const curr = selectedTemplate ? selectedTemplate.curriculum : examCurriculum;
     const qCount = selectedTemplate ? selectedTemplate.questionCount : questionCount;
