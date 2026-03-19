@@ -1,68 +1,79 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
+
+// Generate a stable session ID per browser tab
+function getTabSessionId(): string {
+  let id = sessionStorage.getItem("stem_session_id");
+  if (!id) {
+    id = crypto.randomUUID();
+    sessionStorage.setItem("stem_session_id", id);
+  }
+  return id;
+}
 
 export function useSession() {
   const { user, session } = useAuth();
   const { toast } = useToast();
   const [sessionValid, setSessionValid] = useState(true);
+  const registeredRef = useRef(false);
+
+  const tabSessionId = useRef(getTabSessionId());
 
   const registerSession = useCallback(async () => {
-    if (!user || !session) return;
+    if (!user || registeredRef.current) return;
+    registeredRef.current = true;
 
-    const token = session.access_token.slice(-16); // last 16 chars as identifier
     const deviceInfo = navigator.userAgent.slice(0, 100);
 
-    // Upsert — unique on user_id means old session is replaced
-    const { error } = await supabase
-      .from("active_sessions")
-      .upsert({
-        user_id: user.id,
-        session_token: token,
-        device_info: deviceInfo,
-        last_active: new Date().toISOString(),
-      }, { onConflict: "user_id" });
-
-    if (error) console.error("Session register error:", error);
-  }, [user, session]);
+    await supabase.rpc("register_session", {
+      _user_id: user.id,
+      _session_token: tabSessionId.current,
+      _device_info: deviceInfo,
+    });
+  }, [user]);
 
   const validateSession = useCallback(async () => {
-    if (!user || !session) return true;
+    if (!user) return true;
 
-    const token = session.access_token.slice(-16);
-    const { data } = await supabase
-      .from("active_sessions")
-      .select("session_token")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data: isValid } = await supabase.rpc("validate_session", {
+      _user_id: user.id,
+      _session_token: tabSessionId.current,
+    });
 
-    if (data && data.session_token !== token) {
+    if (isValid === false) {
       setSessionValid(false);
       toast({
         title: "Signed out",
-        description: "You've been signed in on another device. Only one session is allowed.",
+        description: "You've been signed in on another device. Only one session is allowed at a time.",
         variant: "destructive",
       });
+      // Clear the session ID so re-login generates a new one
+      sessionStorage.removeItem("stem_session_id");
       await supabase.auth.signOut();
       return false;
     }
     return true;
-  }, [user, session, toast]);
+  }, [user, toast]);
 
   // Register on login
   useEffect(() => {
-    registerSession();
-  }, [registerSession]);
+    if (user) {
+      registeredRef.current = false;
+      tabSessionId.current = getTabSessionId();
+      registerSession();
+    }
+  }, [user, registerSession]);
 
-  // Periodic validation every 30 seconds
+  // Validate every 15 seconds
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(validateSession, 30000);
+    const interval = setInterval(validateSession, 15000);
     return () => clearInterval(interval);
   }, [user, validateSession]);
 
-  // Update last_active periodically
+  // Update last_active every 60 seconds
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(async () => {

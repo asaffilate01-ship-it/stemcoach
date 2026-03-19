@@ -1120,6 +1120,18 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      register_session: {
+        Args: {
+          _device_info?: string
+          _session_token: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      validate_session: {
+        Args: { _session_token: string; _user_id: string }
+        Returns: boolean
+      }
       verify_certificate: {
         Args: { _code: string }
         Returns: {
