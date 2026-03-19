@@ -85,6 +85,9 @@ export default function MockExam() {
       await supabase.from("attempts").insert(insertData);
     }
 
+    // Decrement mock exam quota
+    await incrementMockExam();
+
     if (percent >= 60) {
       const examName =
         selectedTemplate?.name ||
