@@ -3,10 +3,12 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { FileText, TrendingUp, Target, Calendar, Download, BookOpen, Clock } from "lucide-react";
+import {
+  FileText, TrendingUp, Target, Calendar, Download,
+  BookOpen, Clock, Flame, Zap, Star, ChevronRight,
+} from "lucide-react";
 
 interface DailyData {
   date: string;
@@ -48,7 +50,6 @@ export default function ProgressReports() {
         .eq("user_id", user.id)
         .single(),
     ]);
-
     setAttempts(attRes.data || []);
     setStudyGoals(goalsRes.data || []);
     setStats(statsRes.data);
@@ -80,9 +81,10 @@ export default function ProgressReports() {
     return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
   }, [filteredAttempts, studyGoals]);
 
-  const overallAccuracy = filteredAttempts.length > 0
-    ? Math.round((filteredAttempts.filter((a) => a.correct).length / filteredAttempts.length) * 100)
-    : 0;
+  const overallAccuracy =
+    filteredAttempts.length > 0
+      ? Math.round((filteredAttempts.filter((a) => a.correct).length / filteredAttempts.length) * 100)
+      : 0;
 
   const totalStudyMin = dailyData.reduce((s, d) => s + d.studyMinutes, 0);
   const activeDays = dailyData.filter((d) => d.total > 0).length;
@@ -118,11 +120,44 @@ export default function ProgressReports() {
     URL.revokeObjectURL(url);
   };
 
+  // Accuracy ring SVG helper
+  const AccuracyRing = ({ value, size = 88 }: { value: number; size?: number }) => {
+    const stroke = 6;
+    const r = (size - stroke) / 2;
+    const circ = 2 * Math.PI * r;
+    const offset = circ - (value / 100) * circ;
+    const color =
+      value >= 80 ? "hsl(var(--success))" : value >= 60 ? "hsl(226, 70%, 45%)" : "hsl(var(--destructive))";
+    return (
+      <svg width={size} height={size} className="rotate-[-90deg]">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="hsl(var(--border))" strokeWidth={stroke} opacity={0.3} />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          initial={{ strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+        />
+      </svg>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="flex items-center justify-center py-20 text-muted-foreground">Loading report...</div>
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+          <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center animate-pulse">
+            <TrendingUp className="h-5 w-5 text-primary" />
+          </div>
+          <span className="text-sm text-muted-foreground">Loading report…</span>
+        </div>
       </div>
     );
   }
@@ -131,135 +166,276 @@ export default function ProgressReports() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <PageTransition>
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="stem-label mb-1">Reports</div>
-            <h1 className="stem-heading text-3xl">Progress Report</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {(["week", "month", "all"] as const).map((p) => (
-              <Button
-                key={p}
-                size="sm"
-                variant={period === p ? "default" : "outline"}
-                onClick={() => setPeriod(p)}
-                className="rounded-xl capitalize"
-              >
-                {p === "all" ? "All Time" : `Last ${p === "week" ? "7 Days" : "30 Days"}`}
-              </Button>
-            ))}
-            <Button size="sm" variant="outline" onClick={exportReport} className="gap-1.5 rounded-xl">
-              <Download className="h-3.5 w-3.5" /> Export CSV
-            </Button>
-          </div>
-        </div>
+        <main className="container mx-auto max-w-4xl px-4 py-6 pb-24 md:py-10">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6"
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="mb-1 flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                    <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                    Progress
+                  </span>
+                </div>
+                <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">Your Report</h1>
+              </div>
 
-        <div ref={reportRef}>
-          {/* Summary Cards */}
-          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { icon: Target, label: "Accuracy", value: `${overallAccuracy}%`, color: overallAccuracy >= 70 ? "text-success" : "text-primary" },
-              { icon: BookOpen, label: "Questions", value: filteredAttempts.length.toString(), color: "text-primary" },
-              { icon: Clock, label: "Study Time", value: `${totalStudyMin}m`, color: "text-primary" },
-              { icon: Calendar, label: "Active Days", value: activeDays.toString(), color: "text-primary" },
-            ].map((card, i) => (
+              <div className="flex items-center gap-2">
+                {/* Period tabs - pill style */}
+                <div className="flex rounded-2xl bg-muted/40 p-1 ring-1 ring-border/20">
+                  {(["week", "month", "all"] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPeriod(p)}
+                      className={`rounded-xl px-3 py-1.5 text-[11px] font-bold transition-all ${
+                        period === p
+                          ? "bg-card text-foreground shadow-sm ring-1 ring-border/30"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {p === "week" ? "7D" : p === "month" ? "30D" : "All"}
+                    </button>
+                  ))}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={exportReport}
+                  className="gap-1.5 rounded-xl border-border/40 text-xs font-bold h-8"
+                >
+                  <Download className="h-3 w-3" /> CSV
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          <div ref={reportRef}>
+            {/* Hero Stats Card - Accuracy Ring + Key Metrics */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="mb-5 rounded-2xl border border-border/30 bg-card p-5 md:p-7 shadow-[var(--stem-card-shadow)]"
+            >
+              <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
+                {/* Accuracy Ring */}
+                <div className="relative flex shrink-0 items-center justify-center">
+                  <AccuracyRing value={overallAccuracy} size={96} />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-extrabold tracking-tight">{overallAccuracy}%</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                      Accuracy
+                    </span>
+                  </div>
+                </div>
+
+                {/* Key metrics grid */}
+                <div className="grid flex-1 grid-cols-3 gap-4 w-full">
+                  {[
+                    {
+                      icon: BookOpen,
+                      label: "Questions",
+                      value: filteredAttempts.length.toLocaleString(),
+                      color: "text-primary",
+                      bg: "bg-primary/8",
+                    },
+                    {
+                      icon: Clock,
+                      label: "Study Time",
+                      value: totalStudyMin >= 60 ? `${Math.floor(totalStudyMin / 60)}h ${totalStudyMin % 60}m` : `${totalStudyMin}m`,
+                      color: "text-amber-500",
+                      bg: "bg-amber-500/8",
+                    },
+                    {
+                      icon: Calendar,
+                      label: "Active Days",
+                      value: activeDays.toString(),
+                      color: "text-emerald-500",
+                      bg: "bg-emerald-500/8",
+                    },
+                  ].map((m, i) => (
+                    <motion.div
+                      key={m.label}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 + i * 0.05 }}
+                      className="text-center"
+                    >
+                      <div className={`mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl ${m.bg}`}>
+                        <m.icon className={`h-4 w-4 ${m.color}`} />
+                      </div>
+                      <div className="text-lg font-extrabold tracking-tight md:text-xl">{m.value}</div>
+                      <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground mt-0.5">
+                        {m.label}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Gamification Stats */}
+            {stats && (
               <motion.div
-                key={card.label}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="stem-card rounded-xl p-5"
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="mb-5 grid grid-cols-3 gap-3"
               >
-                <div className="mb-2 flex items-center gap-2">
-                  <card.icon className={`h-4 w-4 ${card.color}`} />
-                  <span className="text-xs font-medium text-muted-foreground">{card.label}</span>
-                </div>
-                <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
+                {[
+                  { icon: Zap, label: "XP", value: stats.xp?.toLocaleString() || "0", gradient: "from-primary/10 to-primary/5", color: "text-primary" },
+                  { icon: Star, label: "Level", value: `Lv.${stats.level || 1}`, gradient: "from-violet-500/10 to-violet-500/5", color: "text-violet-500" },
+                  { icon: Flame, label: "Streak", value: `${stats.streak || 0}`, gradient: "from-amber-500/10 to-amber-500/5", color: "text-amber-500" },
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.label}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.25 + i * 0.05 }}
+                    className={`rounded-2xl bg-gradient-to-br ${s.gradient} p-4 ring-1 ring-border/15 text-center`}
+                  >
+                    <s.icon className={`mx-auto mb-1.5 h-5 w-5 ${s.color}`} />
+                    <div className="text-xl font-extrabold tracking-tight">{s.value}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground mt-0.5">
+                      {s.label}
+                    </div>
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
+            )}
+
+            {/* Activity Chart */}
+            {dailyData.length > 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mb-5 rounded-2xl border border-border/30 bg-card p-5 md:p-6 shadow-[var(--stem-card-shadow)]"
+              >
+                <div className="mb-5 flex items-center justify-between">
+                  <h3 className="flex items-center gap-2 text-sm font-bold">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                      <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    Daily Activity
+                  </h3>
+                  <div className="flex gap-3 text-[9px] font-bold text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-primary" /> ≥70%
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-primary/50" /> 50–69%
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-destructive/50" /> &lt;50%
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-end gap-[3px] overflow-x-auto pb-2" style={{ minHeight: 110 }}>
+                  {dailyData.map((d, i) => {
+                    const h = Math.max((d.total / maxDaily) * 100, 6);
+                    const acc = d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0;
+                    const barColor =
+                      acc >= 70
+                        ? "bg-primary"
+                        : acc >= 50
+                        ? "bg-primary/50"
+                        : "bg-destructive/50";
+                    return (
+                      <motion.div
+                        key={d.date}
+                        initial={{ scaleY: 0 }}
+                        animate={{ scaleY: 1 }}
+                        transition={{ delay: 0.4 + i * 0.02, duration: 0.3 }}
+                        className="group relative flex flex-col items-center origin-bottom"
+                        style={{ minWidth: 18 }}
+                      >
+                        {/* Tooltip */}
+                        <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 rounded-lg bg-foreground/90 px-2 py-1 text-[9px] font-bold text-background opacity-0 transition-opacity group-hover:opacity-100 whitespace-nowrap">
+                          {d.total}q · {acc}%
+                        </div>
+                        <div
+                          className={`w-3.5 rounded-t-md ${barColor} transition-all`}
+                          style={{ height: `${h}%` }}
+                        />
+                        <span className="mt-1.5 text-[7px] font-medium text-muted-foreground/70">
+                          {d.date.slice(8)}
+                        </span>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mb-5 rounded-2xl border border-border/30 bg-card p-14 text-center shadow-[var(--stem-card-shadow)]"
+              >
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-muted/30 ring-1 ring-border/20">
+                  <FileText className="h-8 w-8 text-muted-foreground/40" />
+                </div>
+                <h3 className="mb-1.5 text-base font-bold">No data yet</h3>
+                <p className="text-xs text-muted-foreground">Practice some questions to see your report.</p>
+              </motion.div>
+            )}
+
+            {/* Study Time chart */}
+            {dailyData.some((d) => d.studyMinutes > 0) && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="rounded-2xl border border-border/30 bg-card p-5 md:p-6 shadow-[var(--stem-card-shadow)]"
+              >
+                <h3 className="mb-5 flex items-center gap-2 text-sm font-bold">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Clock className="h-3.5 w-3.5 text-amber-500" />
+                  </div>
+                  Study Time
+                </h3>
+                <div className="flex items-end gap-[3px] overflow-x-auto pb-2" style={{ minHeight: 80 }}>
+                  {dailyData
+                    .filter((d) => d.studyMinutes > 0)
+                    .map((d, i) => {
+                      const maxMin = Math.max(...dailyData.map((x) => x.studyMinutes), 1);
+                      const h = Math.max((d.studyMinutes / maxMin) * 100, 6);
+                      return (
+                        <motion.div
+                          key={d.date}
+                          initial={{ scaleY: 0 }}
+                          animate={{ scaleY: 1 }}
+                          transition={{ delay: 0.5 + i * 0.02, duration: 0.3 }}
+                          className="group relative flex flex-col items-center origin-bottom"
+                          style={{ minWidth: 18 }}
+                        >
+                          <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 rounded-lg bg-foreground/90 px-2 py-1 text-[9px] font-bold text-background opacity-0 transition-opacity group-hover:opacity-100 whitespace-nowrap">
+                            {d.studyMinutes}m
+                          </div>
+                          <div
+                            className="w-3.5 rounded-t-md bg-amber-500/60"
+                            style={{ height: `${h}%` }}
+                          />
+                          <span className="mt-1.5 text-[7px] font-medium text-muted-foreground/70">
+                            {d.date.slice(8)}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
+                </div>
+              </motion.div>
+            )}
           </div>
-
-          {/* Stats row */}
-          {stats && (
-            <div className="mb-6 grid gap-4 sm:grid-cols-3">
-              <div className="stem-card rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-primary">{stats.xp}</div>
-                <div className="text-xs text-muted-foreground">Total XP</div>
-              </div>
-              <div className="stem-card rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-primary">Lv.{stats.level}</div>
-                <div className="text-xs text-muted-foreground">Level</div>
-              </div>
-              <div className="stem-card rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-primary">{stats.streak}🔥</div>
-                <div className="text-xs text-muted-foreground">Current Streak</div>
-              </div>
-            </div>
-          )}
-
-          {/* Activity Chart */}
-          {dailyData.length > 0 ? (
-            <div className="stem-card mb-6 rounded-xl p-6">
-              <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                <TrendingUp className="h-4 w-4 text-primary" /> Daily Activity
-              </h3>
-              <div className="flex items-end gap-1 overflow-x-auto pb-2" style={{ minHeight: 120 }}>
-                {dailyData.map((d) => {
-                  const h = Math.max((d.total / maxDaily) * 100, 4);
-                  const acc = d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0;
-                  return (
-                    <div key={d.date} className="group relative flex flex-col items-center" style={{ minWidth: 20 }}>
-                      <div
-                        className={`w-4 rounded-t transition-all ${acc >= 70 ? "bg-primary" : acc >= 50 ? "bg-primary/60" : "bg-destructive/60"}`}
-                        style={{ height: `${h}%` }}
-                        title={`${d.date}: ${d.total}q, ${acc}% accuracy`}
-                      />
-                      <span className="mt-1 text-[8px] text-muted-foreground">{d.date.slice(5)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mt-2 flex gap-4 text-[10px] text-muted-foreground">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary" /> ≥70%</span>
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary/60" /> 50-69%</span>
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive/60" /> &lt;50%</span>
-              </div>
-            </div>
-          ) : (
-            <div className="stem-card mb-6 rounded-xl p-12 text-center">
-              <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-              <h3 className="mb-2 text-lg font-semibold">No data for this period</h3>
-              <p className="text-sm text-muted-foreground">Practice some questions to generate your report.</p>
-            </div>
-          )}
-
-          {/* Study time chart */}
-          {dailyData.some((d) => d.studyMinutes > 0) && (
-            <div className="stem-card rounded-xl p-6">
-              <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                <Clock className="h-4 w-4 text-primary" /> Study Time (minutes)
-              </h3>
-              <div className="flex items-end gap-1 overflow-x-auto pb-2" style={{ minHeight: 80 }}>
-                {dailyData.filter((d) => d.studyMinutes > 0).map((d) => {
-                  const maxMin = Math.max(...dailyData.map((x) => x.studyMinutes), 1);
-                  const h = Math.max((d.studyMinutes / maxMin) * 100, 4);
-                  return (
-                    <div key={d.date} className="flex flex-col items-center" style={{ minWidth: 20 }}>
-                      <div
-                        className="w-4 rounded-t bg-accent"
-                        style={{ height: `${h}%` }}
-                        title={`${d.date}: ${d.studyMinutes}min`}
-                      />
-                      <span className="mt-1 text-[8px] text-muted-foreground">{d.date.slice(5)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
+        </main>
       </PageTransition>
     </div>
   );
