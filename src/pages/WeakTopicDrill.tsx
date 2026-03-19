@@ -117,9 +117,9 @@ export default function WeakTopicDrill() {
       <PageTransition>
       <main className="container mx-auto max-w-3xl px-4 py-8">
         <div className="mb-8">
-          <div className="stem-label mb-2">AI-Powered Practice</div>
+          <div className="stem-label mb-2">STEMcoach Practice</div>
           <h1 className="stem-heading text-3xl">Weak Topic Drills</h1>
-          <p className="mt-2 text-sm text-muted-foreground">AI analyzes your performance and creates targeted practice sets for your weakest areas.</p>
+          <p className="mt-2 text-sm text-muted-foreground">STEMcoach analyzes your performance and creates targeted practice sets for your weakest areas.</p>
         </div>
 
         {!analyzed && (
