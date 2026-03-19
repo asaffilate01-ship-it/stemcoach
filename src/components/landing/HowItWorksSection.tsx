@@ -27,7 +27,12 @@ export function HowItWorksSection() {
     <section className="relative border-t border-border/30 py-20 md:py-28">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.03),transparent_60%)]" />
       <div className="container relative mx-auto px-4">
-        <div className="mb-16 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-16 text-center"
+        >
           <div className="stem-label mb-3">How It Works</div>
           <h2 className="stem-section-heading">
             Three steps to <span className="stem-gradient-text">exam success</span>
@@ -35,7 +40,7 @@ export function HowItWorksSection() {
           <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">
             No complicated setup. No textbooks. Just focused practice that actually works.
           </p>
-        </div>
+        </motion.div>
 
         <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
           {steps.map((step, i) => (
@@ -45,6 +50,7 @@ export function HowItWorksSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -4, transition: { duration: 0.25 } }}
               className="relative text-center"
             >
               {/* Connector line */}
@@ -56,10 +62,13 @@ export function HowItWorksSection() {
               )}
 
               <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/8 to-primary/[0.02]" />
-                <div className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-bold text-white shadow-lg shadow-primary/30">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/8 to-primary/[0.02] transition-all duration-300" />
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-bold text-white shadow-lg shadow-primary/30"
+                >
                   {step.step}
-                </div>
+                </motion.div>
                 <step.icon className="relative h-8 w-8 text-primary" />
               </div>
 

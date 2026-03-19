@@ -31,6 +31,18 @@ export function HeroSection() {
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }} />
 
+      {/* Floating orbs */}
+      <motion.div
+        animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-20 left-[15%] h-48 w-48 rounded-full bg-primary/[0.04] blur-3xl"
+      />
+      <motion.div
+        animate={{ y: [0, 15, 0], x: [0, -15, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-20 right-[10%] h-64 w-64 rounded-full bg-[hsl(258_60%_52%/0.03)] blur-3xl"
+      />
+
       <div className="container relative mx-auto px-4 pt-20 pb-12 md:pt-28 md:pb-20 lg:pt-36 lg:pb-28">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <motion.div
@@ -38,9 +50,14 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-primary backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-primary backdrop-blur-sm"
+            >
               <Sparkles className="h-3.5 w-3.5" /> Virtual Tuition Centre
-            </div>
+            </motion.div>
             <h1 className="mb-6 text-[2rem] font-extrabold tracking-tight leading-[1.12] sm:text-4xl md:text-5xl lg:text-[3.5rem]">
               Master your exams{" "}
               <br className="hidden md:block" />
@@ -55,12 +72,18 @@ export function HeroSection() {
             </p>
 
             {/* Highlights */}
-            <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:gap-6">
-              {highlights.map((h) => (
-                <div key={h} className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="mb-8 flex flex-col gap-2.5 sm:flex-row sm:gap-6">
+              {highlights.map((h, i) => (
+                <motion.div
+                  key={h}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
+                >
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                   <span>{h}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
 
@@ -89,11 +112,11 @@ export function HeroSection() {
                   key={stat.label}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.1 }}
-                  className="text-center"
+                  transition={{ delay: 0.5 + i * 0.1 }}
+                  className="group text-center"
                 >
                   <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <stat.icon className="h-4 w-4 text-primary/50" />
+                    <stat.icon className="h-4 w-4 text-primary/50 transition-colors group-hover:text-primary" />
                     <span className="text-xl font-extrabold tracking-tight sm:text-2xl">{stat.value}</span>
                   </div>
                   <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground sm:text-[11px]">{stat.label}</div>
@@ -104,9 +127,9 @@ export function HeroSection() {
 
           {/* Hero image */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="relative mx-auto max-w-md lg:max-w-none">
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/8 via-transparent to-[hsl(258_60%_52%/0.06)] blur-3xl" />
@@ -118,7 +141,7 @@ export function HeroSection() {
               />
               {/* Floating badge */}
               <motion.div
-                animate={{ y: [0, -6, 0] }}
+                animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute -bottom-4 -left-4 hidden rounded-xl bg-card px-4 py-3 shadow-premium-lg ring-1 ring-border/30 md:flex items-center gap-3"
               >
@@ -128,6 +151,21 @@ export function HeroSection() {
                 <div>
                   <div className="text-sm font-bold">94% Pass Rate</div>
                   <div className="text-[11px] text-muted-foreground">Among active students</div>
+                </div>
+              </motion.div>
+
+              {/* Second floating badge */}
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                className="absolute -top-3 -right-3 hidden rounded-xl bg-card px-3 py-2.5 shadow-premium-lg ring-1 ring-border/30 md:flex items-center gap-2.5"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold">1M+ Questions</div>
+                  <div className="text-[10px] text-muted-foreground">All subjects</div>
                 </div>
               </motion.div>
             </div>
