@@ -17,8 +17,10 @@ import { XPPopup } from "@/components/gamification/XPPopup";
 import { BadgeUnlock } from "@/components/gamification/BadgeUnlock";
 import { CorrectAnimation } from "@/components/gamification/CorrectAnimation";
 import { QuizTimer } from "@/components/gamification/QuizTimer";
+import { MascotReaction } from "@/components/gamification/MascotReaction";
 import ReactMarkdown from "react-markdown";
 import { getCachedQuestions, cacheQuestions } from "@/lib/questionCache";
+import { getMascot } from "@/lib/mascots";
 
 interface DBQuestion {
   id: string;
