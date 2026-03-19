@@ -31,7 +31,7 @@ export const PACKS: Record<string, QuestionPack> = {
       uk: { price: "£14.99", price_id: "price_1TCNddFFogsDQVs4QyDkGoa6" },
       us: { price: "$19.99", price_id: "price_1TCNdhFFogsDQVs4QJcncX1T" },
       ae: { price: "AED 99", price_id: "price_1TCNdjFFogsDQVs4VVGK1Ncx" },
-      in: { price: "₹499", price_id: "price_1TCNdkFFogsDQVs4ZeZ8ikLB" },
+      in: { price: "₹899", price_id: "price_1TCNdkFFogsDQVs4ZeZ8ikLB" },
       pk: { price: "PKR 4,999", price_id: "price_1TCNdmFFogsDQVs4WszzaaSM" },
     },
   },
@@ -49,7 +49,7 @@ export const PACKS: Record<string, QuestionPack> = {
       uk: { price: "£4.99", price_id: "price_1TCNdeFFogsDQVs4WutIKPQw" },
       us: { price: "$7.99", price_id: "price_1TCNdiFFogsDQVs4Kek0zoTb" },
       ae: { price: "AED 39", price_id: "price_1TCNdkFFogsDQVs4Xdwg4abI" },
-      in: { price: "₹199", price_id: "price_1TCNdlFFogsDQVs4PSOP1So1" },
+      in: { price: "₹399", price_id: "price_1TCNdlFFogsDQVs4PSOP1So1" },
       pk: { price: "PKR 999", price_id: "price_1TCNdmFFogsDQVs4Hju7qgvO" },
     },
   },
@@ -76,11 +76,6 @@ export function calculateQuestionAllocation(
 ): { perSubject: number; perLevel: number } {
   const subjectCount = Math.max(1, subjects.length);
   const levelCount = Math.max(1, levels.length);
-
-  // 1 subject + 1 level = 20K questions (bonus)
-  if (subjectCount === 1 && levelCount === 1) {
-    return { perSubject: totalQuestions * 2, perLevel: totalQuestions * 2 };
-  }
 
   const perSubject = Math.floor(totalQuestions / subjectCount);
   const perLevel = Math.floor(perSubject / levelCount);

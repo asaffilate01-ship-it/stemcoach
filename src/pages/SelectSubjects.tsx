@@ -81,9 +81,6 @@ export default function SelectSubjects() {
   const allocationSummary = () => {
     if (!quota) return "";
     const alloc = calculateQuestionAllocation(quota.total_questions, selectedSubjects, selectedLevels);
-    const s = selectedSubjects.length || 1;
-    const l = selectedLevels.length || 1;
-    if (s === 1 && l === 1) return `${(quota.total_questions * 2).toLocaleString()} questions (2× bonus!)`;
     return `${alloc.perSubject.toLocaleString()} questions per subject, ${alloc.perLevel.toLocaleString()} per level`;
   };
 
@@ -153,12 +150,6 @@ export default function SelectSubjects() {
                 ))}
               </div>
 
-              <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <div className="flex items-center gap-2 text-xs font-medium text-primary">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Tip: Selecting 1 subject + 1 level gives you a 2× bonus!
-                </div>
-              </div>
 
               <Button
                 onClick={() => setStep("levels")}

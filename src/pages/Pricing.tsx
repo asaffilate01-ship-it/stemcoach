@@ -17,7 +17,7 @@ const packIcons: Record<PackKey, typeof Zap> = {
 };
 
 const faqs = [
-  { q: "How does question allocation work?", a: "Choose 1 subject & 1 level = 20,000 questions. Multiple subjects split your 10,000 question pack evenly." },
+  { q: "How does question allocation work?", a: "Your 10,000 questions are split evenly across the subjects and levels you choose." },
   { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 2,000 more questions to new or existing subjects." },
   { q: "Is this a one-time purchase?", a: "Yes — pay once, access forever. No subscriptions or recurring charges." },
   { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
@@ -162,11 +162,7 @@ export default function Pricing() {
               <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">1 subject, 1 level</strong> → 20,000 questions</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Multiple subjects</strong> → Split evenly across subjects</span>
+                  <span><strong className="text-foreground">10,000 questions</strong> → Split across your chosen subjects & levels</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
@@ -175,6 +171,10 @@ export default function Pricing() {
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
                   <span><strong className="text-foreground">Add subjects</strong> → Top-Up lets you expand anytime</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                  <span><strong className="text-foreground">Pay once</strong> → Access your questions forever</span>
                 </div>
               </div>
             </motion.div>
