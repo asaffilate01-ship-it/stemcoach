@@ -33,9 +33,9 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold">4. Subscription & Payments</h2>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Free tier users are limited to 5 practice questions per day.</li>
-              <li>Paid subscriptions (Pro, School) are billed monthly via Stripe.</li>
-              <li>You may cancel at any time through the subscription management portal.</li>
+              <li>Free tier users are limited to 5 practice questions per subject.</li>
+              <li>Question packs are one-time purchases processed via Stripe.</li>
+              <li>Refunds are handled on a case-by-case basis within 14 days of purchase.</li>
               <li>Refunds are handled on a case-by-case basis within 14 days of purchase.</li>
               <li>Prices vary by region and are displayed in local currency.</li>
             </ul>
