@@ -177,15 +177,19 @@ export default function Practice() {
   }
 
   if (dbLoading) {
+    const mascot = getMascot(subjectId || "");
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
         <div className="flex flex-col items-center justify-center gap-4 py-32">
-          <div className="relative">
-            <div className="h-12 w-12 rounded-2xl bg-primary/10 animate-pulse" />
-            <Loader2 className="absolute inset-0 m-auto h-6 w-6 animate-spin text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">Loading questions…</p>
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="h-16 w-16 overflow-hidden rounded-2xl shadow-md"
+          >
+            <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+          </motion.div>
+          <p className="text-sm text-muted-foreground">{mascot.name} is loading your questions…</p>
         </div>
       </div>
     );
