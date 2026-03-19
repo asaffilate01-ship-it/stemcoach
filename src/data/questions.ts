@@ -75,6 +75,7 @@ export const subjects: SubjectInfo[] = [
     color: "0 84% 60%",
     questionCount: 4000,
     topics: ["Programming", "Algorithms", "Data Structures", "Databases", "Networking", "Cybersecurity", "Operating Systems", "AI"],
+    mascotImage: "/assets/codey.png",
   },
   {
     id: "ielts",
