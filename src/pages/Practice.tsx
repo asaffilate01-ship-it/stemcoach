@@ -228,8 +228,8 @@ export default function Practice() {
   };
 
   const handleSubmit = async () => {
-    if (!canPractice) {
-      toast({ title: "Question limit reached", description: "Purchase more questions to continue practicing.", variant: "destructive" });
+    if (!canPractice && !canPracticeSubjectFree(subjectId || "")) {
+      toast({ title: "Question limit reached", description: "Purchase a pack to continue practicing.", variant: "destructive" });
       return;
     }
     if (isEssay) {
