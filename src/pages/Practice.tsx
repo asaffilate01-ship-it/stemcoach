@@ -401,11 +401,13 @@ export default function Practice() {
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <span className="font-medium">
-                Purchase a question pack to start practicing
+                {canPracticeSubjectFree(subjectId || "") 
+                  ? `${getFreeRemainingForSubject(subjectId || "")} free questions remaining for this subject`
+                  : "Free trial used — purchase to continue"}
               </span>
             </div>
             <Button size="sm" onClick={() => navigate("/pricing")} className="rounded-xl text-xs">
-              Get Started
+              Get Full Access
             </Button>
           </motion.div>
         )}
