@@ -17,6 +17,9 @@ interface ExamSetupProps {
   isLoading: boolean;
   onStart: () => void;
   onBack: () => void;
+  mockExamsRemaining?: number;
+  mockExamsTotal?: number;
+  canTakeMockExam?: boolean;
 }
 
 export function ExamSetup({
