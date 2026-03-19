@@ -181,8 +181,8 @@ export default function AITutor() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                    <GraduationCap className="h-8 w-8 text-primary" />
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
+                    <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
                   </div>
                   <h3 className="text-lg font-semibold">STEMcoach</h3>
                   <p className="mt-1 max-w-md text-sm text-muted-foreground">
