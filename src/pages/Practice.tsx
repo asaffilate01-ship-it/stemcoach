@@ -700,7 +700,7 @@ export default function Practice() {
               </motion.div>
             )}
 
-            {/* Essay AI Grading */}
+            {/* Essay STEMcoach Grading */}
             {showFeedback && isEssay && aiGrading && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-4 space-y-4">
                 <div className={`rounded-2xl border p-6 ${aiGrading.score >= aiGrading.max_marks * 0.7 ? "bg-emerald-500/5 border-emerald-500/20" : aiGrading.score >= aiGrading.max_marks * 0.4 ? "bg-amber-500/5 border-amber-500/20" : "bg-destructive/5 border-destructive/20"}`}>
