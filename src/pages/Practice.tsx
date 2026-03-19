@@ -500,7 +500,6 @@ export default function Practice() {
                   <Sparkles className="h-3.5 w-3.5" />
                   Extended response · STEMcoach graded
                 </div>
-                </div>
               )}
 
               {/* Question text */}
