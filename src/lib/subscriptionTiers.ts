@@ -29,10 +29,10 @@ export const PACKS: Record<string, QuestionPack> = {
     ],
     regional: {
       uk: { price: "£14.99", price_id: "price_1TCNddFFogsDQVs4QyDkGoa6" },
-      us: { price: "$19.99", price_id: "price_1TCNdhFFogsDQVs4QJcncX1T" },
-      ae: { price: "AED 99", price_id: "price_1TCNdjFFogsDQVs4VVGK1Ncx" },
-      in: { price: "₹899", price_id: "price_1TCNdkFFogsDQVs4ZeZ8ikLB" },
-      pk: { price: "PKR 4,999", price_id: "price_1TCNdmFFogsDQVs4WszzaaSM" },
+      us: { price: "$19.99", price_id: "price_1TCYoCFFogsDQVs4n5EaIpC4" },
+      ae: { price: "AED 99", price_id: "price_1TCYoDFFogsDQVs4a7IAliJs" },
+      in: { price: "₹899", price_id: "price_1TCYoEFFogsDQVs43ZduOOov" },
+      pk: { price: "PKR 4,999", price_id: "price_1TCYoEFFogsDQVs45swS26PC" },
     },
   },
   topup: {
