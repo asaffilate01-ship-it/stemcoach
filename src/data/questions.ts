@@ -27,6 +27,7 @@ export interface SubjectInfo {
   id: Subject;
   name: string;
   icon: string;
+  mascotImage?: string;
   color: string;
   questionCount: number;
   topics: string[];
