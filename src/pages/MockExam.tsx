@@ -106,7 +106,7 @@ export default function MockExam() {
       });
     }
     setSubmitting(false);
-  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast]);
+  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast, incrementMockExam]);
 
   useEffect(() => {
     if (state !== "active") return;
