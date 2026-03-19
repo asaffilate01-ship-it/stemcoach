@@ -46,8 +46,10 @@ export default function SelectSubjects() {
         if (data?.quota?.total_questions > 0) {
           setQuota(data.quota);
 
-          // If subjects already selected, go to dashboard
-          if (data.quota.subjects?.length > 0) {
+          // For top-ups: if subjects already selected, allow re-selection
+          // For first purchase: go to subject selection
+          // If already selected AND not a new purchase, go to dashboard
+          if (data.quota.subjects?.length > 0 && !data?.granted) {
             navigate("/dashboard", { replace: true });
             return;
           }

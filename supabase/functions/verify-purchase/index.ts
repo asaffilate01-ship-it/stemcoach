@@ -7,23 +7,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Map of valid price IDs to their question grants for server-side validation
-const VALID_PRICES: Record<string, { questions: number; pack: string }> = {
-  // Standard pack (Ultimate Pack)
-  "price_1TCNddFFogsDQVs4QyDkGoa6": { questions: 10000, pack: "standard" }, // GBP
-  "price_1TCYoCFFogsDQVs4n5EaIpC4": { questions: 10000, pack: "standard" }, // USD
-  "price_1TCYoDFFogsDQVs4a7IAliJs": { questions: 10000, pack: "standard" }, // AED
-  "price_1TCYoEFFogsDQVs43ZduOOov": { questions: 10000, pack: "standard" }, // INR
-  "price_1TCYoEFFogsDQVs45swS26PC": { questions: 10000, pack: "standard" }, // PKR
-  // Top-up pack
-  "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 2000, pack: "topup" }, // GBP
-  "price_1TCYoFFFogsDQVs4Klbw5WCw": { questions: 2000, pack: "topup" }, // USD
-  "price_1TCYoGFFogsDQVs4ZGx96zs9": { questions: 2000, pack: "topup" }, // AED
-  "price_1TCYoGFFogsDQVs4MzY6cjyN": { questions: 2000, pack: "topup" }, // INR
-  "price_1TCYoHFFogsDQVs4tHGNLjSv": { questions: 2000, pack: "topup" }, // PKR
+// Map of valid price IDs to their grants for server-side validation
+const VALID_PRICES: Record<string, { questions: number; mock_exams: number; pack: string }> = {
+  // Standard pack (Ultimate Pack) — 5,000 questions + 20 mock exams
+  "price_1TCNddFFogsDQVs4QyDkGoa6": { questions: 5000, mock_exams: 20, pack: "standard" }, // GBP
+  "price_1TCYoCFFogsDQVs4n5EaIpC4": { questions: 5000, mock_exams: 20, pack: "standard" }, // USD
+  "price_1TCYoDFFogsDQVs4a7IAliJs": { questions: 5000, mock_exams: 20, pack: "standard" }, // AED
+  "price_1TCYoEFFogsDQVs43ZduOOov": { questions: 5000, mock_exams: 20, pack: "standard" }, // INR
+  "price_1TCYoEFFogsDQVs45swS26PC": { questions: 5000, mock_exams: 20, pack: "standard" }, // PKR
+  // Top-up pack — 1,000 questions + 5 mock exams
+  "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 1000, mock_exams: 5, pack: "topup" }, // GBP
+  "price_1TCZCNFFogsDQVs4dhoer5AL": { questions: 1000, mock_exams: 5, pack: "topup" }, // USD
+  "price_1TCZCRFFogsDQVs4vHB63taY": { questions: 1000, mock_exams: 5, pack: "topup" }, // AED
+  "price_1TCZCSFFogsDQVs4eBhjzG9k": { questions: 1000, mock_exams: 5, pack: "topup" }, // INR
+  "price_1TCZCSFFogsDQVs4hueexI5c": { questions: 1000, mock_exams: 5, pack: "topup" }, // PKR
 };
 
-// Detect region from Stripe currency
 function currencyToRegion(currency: string | null): string {
   switch (currency?.toLowerCase()) {
     case "gbp": return "uk";
@@ -58,7 +57,6 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Find completed checkout sessions for this user
     const customers = await stripe.customers.list({ email: user.email!, limit: 1 });
     if (customers.data.length === 0) {
       return new Response(JSON.stringify({ granted: false, message: "No purchases found" }), {
@@ -72,7 +70,6 @@ serve(async (req) => {
       limit: 50,
     });
 
-    // Check which sessions haven't been recorded yet
     const { data: existingPurchases } = await supabaseClient
       .from("purchases")
       .select("stripe_session_id")
@@ -80,33 +77,39 @@ serve(async (req) => {
 
     const existingIds = new Set((existingPurchases || []).map((p: any) => p.stripe_session_id));
     let totalNewQuestions = 0;
+    let totalNewMockExams = 0;
 
     for (const session of sessions.data) {
       if (existingIds.has(session.id)) continue;
       if (session.payment_status !== "paid") continue;
 
-      // Server-side validation: resolve questions from the actual Stripe line items
       let questionsGranted = 0;
+      let mockExamsGranted = 0;
       let packType = "standard";
       const region = currencyToRegion(session.currency);
 
-      // Expand line items to get actual price ID
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 5 });
       for (const item of lineItems.data) {
         const priceId = item.price?.id;
         if (priceId && VALID_PRICES[priceId]) {
-          questionsGranted += VALID_PRICES[priceId].questions * (item.quantity || 1);
+          const qty = item.quantity || 1;
+          questionsGranted += VALID_PRICES[priceId].questions * qty;
+          mockExamsGranted += VALID_PRICES[priceId].mock_exams * qty;
           packType = VALID_PRICES[priceId].pack;
         }
       }
 
-      // Fallback: if no valid price ID found but metadata exists (legacy sessions)
+      // Fallback for legacy sessions
       if (questionsGranted === 0) {
         const metaQuestions = parseInt(session.metadata?.questions_granted || "0");
         const metaPack = session.metadata?.pack_type || "standard";
-        // Only accept known amounts to prevent tampering
-        if (metaQuestions === 10000 || metaQuestions === 2000) {
-          questionsGranted = metaQuestions;
+        if (metaQuestions === 5000) {
+          questionsGranted = 5000;
+          mockExamsGranted = 20;
+          packType = metaPack;
+        } else if (metaQuestions === 1000) {
+          questionsGranted = 1000;
+          mockExamsGranted = 5;
           packType = metaPack;
         }
       }
@@ -122,14 +125,14 @@ serve(async (req) => {
           region: region,
         });
         totalNewQuestions += questionsGranted;
+        totalNewMockExams += mockExamsGranted;
       }
     }
 
     if (totalNewQuestions > 0) {
-      // Upsert user_quotas
       const { data: existing } = await supabaseClient
         .from("user_quotas")
-        .select("total_questions")
+        .select("total_questions, mock_exams_total")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -138,6 +141,7 @@ serve(async (req) => {
           .from("user_quotas")
           .update({
             total_questions: existing.total_questions + totalNewQuestions,
+            mock_exams_total: (existing.mock_exams_total || 0) + totalNewMockExams,
             updated_at: new Date().toISOString(),
           })
           .eq("user_id", user.id);
@@ -147,11 +151,11 @@ serve(async (req) => {
           .insert({
             user_id: user.id,
             total_questions: totalNewQuestions,
+            mock_exams_total: totalNewMockExams,
           });
       }
     }
 
-    // Get current quota
     const { data: quota } = await supabaseClient
       .from("user_quotas")
       .select("*")
@@ -161,7 +165,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       granted: totalNewQuestions > 0,
       new_questions: totalNewQuestions,
-      quota: quota || { total_questions: 0, used_questions: 0 },
+      new_mock_exams: totalNewMockExams,
+      quota: quota || { total_questions: 0, used_questions: 0, mock_exams_total: 0, mock_exams_used: 0 },
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

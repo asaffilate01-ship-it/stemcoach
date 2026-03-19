@@ -4,7 +4,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Bot, Send, User, Loader2, Trash2, Sparkles, Lock, CreditCard } from "lucide-react";
+import { Send, User, Loader2, Trash2, Sparkles, Lock, CreditCard, GraduationCap } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
@@ -26,9 +26,9 @@ const QUICK_PROMPTS: Record<string, string[]> = {
 };
 
 export default function AITutor() {
-  useDocumentTitle("AI Tutor");
+  useDocumentTitle("STEMcoach");
   const { user } = useAuth();
-  const { canUseAITutor, loading: quotaLoading } = useQuotaGate();
+  const { canUseCoaching, loading: quotaLoading } = useQuotaGate();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -76,7 +76,7 @@ export default function AITutor() {
         if (resp.status === 429) {
           upsertAssistant("⏳ Rate limit reached. Please wait a moment and try again.");
         } else if (resp.status === 402) {
-          upsertAssistant("💳 AI credits exhausted. Please contact support.");
+          upsertAssistant("💳 Coaching credits exhausted. Please contact support.");
         } else {
           upsertAssistant(errData.error || "Sorry, something went wrong. Please try again.");
         }
@@ -119,7 +119,7 @@ export default function AITutor() {
     setIsLoading(false);
   };
 
-  if (!quotaLoading && !canUseAITutor) {
+  if (!quotaLoading && !canUseCoaching) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <AppHeader />
@@ -128,9 +128,9 @@ export default function AITutor() {
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
               <Lock className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">AI Tutor — Premium Feature</h2>
+            <h2 className="mb-2 text-2xl font-bold">STEMcoach Coaching — Premium Feature</h2>
             <p className="mb-6 max-w-md text-muted-foreground">
-              Purchase a question pack to unlock the AI Tutor. Get personalised explanations, exam tips, and essay grading.
+              Purchase a question pack to unlock STEMcoach coaching. Get personalised explanations, exam tips, and essay grading from your virtual tutor.
             </p>
             <Button onClick={() => navigate("/pricing")} className="gap-2 rounded-xl">
               <CreditCard className="h-4 w-4" /> View Plans
@@ -182,11 +182,11 @@ export default function AITutor() {
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                    <Bot className="h-8 w-8 text-primary" />
+                    <GraduationCap className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold">STEMCoach AI Tutor</h3>
+                  <h3 className="text-lg font-semibold">STEMcoach</h3>
                   <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                    Ask me anything about {subject}. I'll explain concepts, solve problems, and give you exam tips.
+                    Ask me anything about {subject}. I'll explain concepts, solve problems, and give you exam tips — like a private tutor.
                   </p>
 
                   {/* Quick prompts */}
@@ -216,7 +216,7 @@ export default function AITutor() {
               >
                 {msg.role === "assistant" && (
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <Bot className="h-4 w-4" />
+                    <GraduationCap className="h-4 w-4" />
                   </div>
                 )}
                 <div
@@ -238,7 +238,7 @@ export default function AITutor() {
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Bot className="h-4 w-4" />
+                  <GraduationCap className="h-4 w-4" />
                 </div>
                 <div className="rounded-xl bg-muted px-4 py-2.5">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

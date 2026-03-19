@@ -50,7 +50,7 @@ export default function Practice() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
-  const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor } = useSubscriptionGate();
+  const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
   useDocumentTitle(subject ? `Practice ${subject.name}` : "Practice");
 
@@ -228,8 +228,8 @@ export default function Practice() {
   };
 
   const handleSubmit = async () => {
-    if (!canPractice) {
-      toast({ title: "Question limit reached", description: "Purchase more questions to continue practicing.", variant: "destructive" });
+    if (!canPractice && !canPracticeSubjectFree(subjectId || "")) {
+      toast({ title: "Question limit reached", description: "Purchase a pack to continue practicing.", variant: "destructive" });
       return;
     }
     if (isEssay) {
@@ -325,12 +325,13 @@ export default function Practice() {
           student_answer: selectedAnswer || essayAnswer || "",
           subject: question.subject,
           topic: question.topic,
+          question_id: question.id,
         },
       });
       if (error) throw error;
       setAiExplanation(data.explanation);
     } catch (e: any) {
-      toast({ title: "AI explanation failed", description: e.message, variant: "destructive" });
+      toast({ title: "Coaching failed", description: e.message, variant: "destructive" });
     } finally {
       setLoadingAI(false);
     }
@@ -401,11 +402,13 @@ export default function Practice() {
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <span className="font-medium">
-                Purchase a question pack to start practicing
+                {canPracticeSubjectFree(subjectId || "") 
+                  ? `${getFreeRemainingForSubject(subjectId || "")} free questions remaining for this subject`
+                  : "Free trial used — purchase to continue"}
               </span>
             </div>
             <Button size="sm" onClick={() => navigate("/pricing")} className="rounded-xl text-xs">
-              Get Started
+              Get Full Access
             </Button>
           </motion.div>
         )}
@@ -496,7 +499,7 @@ export default function Practice() {
               {isEssay && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-medium text-primary">
                   <Sparkles className="h-3.5 w-3.5" />
-                  Extended response · AI graded
+                  Extended response · STEMcoach graded
                 </div>
               )}
 
@@ -578,16 +581,16 @@ export default function Practice() {
                 {!showFeedback ? (
                   <Button
                     onClick={handleSubmit}
-                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI || (isFree && !canPractice)}
+                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI || (isFree && !canPracticeSubjectFree(subjectId || ""))}
                     className="rounded-xl px-6"
                     size="lg"
                   >
                     {loadingAI ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Grading…</>
-                    ) : isFree && !canPractice ? (
-                      <><Lock className="mr-2 h-4 w-4" /> Limit Reached</>
+                    ) : isFree && !canPracticeSubjectFree(subjectId || "") ? (
+                      <><Lock className="mr-2 h-4 w-4" /> Free Limit Reached</>
                     ) : isEssay ? (
-                      "Submit for AI Grading"
+                      "Submit for Grading"
                     ) : (
                       "Check Answer"
                     )}
@@ -600,14 +603,14 @@ export default function Practice() {
                     <Button variant="outline" onClick={() => setShowTips(!showTips)} className="gap-2 rounded-xl">
                       <Lightbulb className="h-4 w-4" /> {showTips ? "Hide Tips" : "Tips"}
                     </Button>
-                    {canUseAITutor ? (
+                    {canUseCoaching ? (
                       <Button variant="outline" onClick={handleAskAI} disabled={loadingAI} className="gap-2 rounded-xl">
                         {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                        AI Tutor
+                        Ask STEMcoach
                       </Button>
                     ) : (
                       <Button variant="outline" onClick={() => navigate("/pricing")} className="gap-2 rounded-xl text-muted-foreground">
-                        <Lock className="h-4 w-4" /> AI Tutor (Pro)
+                        <Lock className="h-4 w-4" /> Coaching (Pro)
                       </Button>
                     )}
                   </>
@@ -702,7 +705,7 @@ export default function Practice() {
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-4 space-y-4">
                 <div className={`rounded-2xl border p-6 ${aiGrading.score >= aiGrading.max_marks * 0.7 ? "bg-emerald-500/5 border-emerald-500/20" : aiGrading.score >= aiGrading.max_marks * 0.4 ? "bg-amber-500/5 border-amber-500/20" : "bg-destructive/5 border-destructive/20"}`}>
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="font-semibold">AI Score: {aiGrading.score}/{aiGrading.max_marks}</span>
+                    <span className="font-semibold">Score: {aiGrading.score}/{aiGrading.max_marks}</span>
                     <span className="rounded-lg bg-muted/60 px-2.5 py-1 text-xs font-semibold">{Math.round((aiGrading.score / aiGrading.max_marks) * 100)}%</span>
                   </div>
                   <p className="text-sm leading-relaxed text-muted-foreground">{aiGrading.feedback}</p>
@@ -755,7 +758,7 @@ export default function Practice() {
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
                     <MessageSquare className="h-4 w-4 text-primary" />
                   </div>
-                  AI Tutor Explanation
+                  STEMcoach Explanation
                 </div>
                 <div className="prose prose-sm dark:prose-invert max-w-none">
                   <ReactMarkdown>{aiExplanation}</ReactMarkdown>

@@ -21,7 +21,7 @@ const testimonials = [
   {
     name: "Priya S.",
     role: "JEE Aspirant, Mumbai",
-    text: "The difficulty levels match actual JEE papers perfectly. The AI tutor explains concepts better than YouTube.",
+    text: "The difficulty levels match actual JEE papers perfectly. STEMcoach explains concepts better than YouTube.",
     rating: 5,
     initials: "PS",
     color: "from-success/12 to-success/4",

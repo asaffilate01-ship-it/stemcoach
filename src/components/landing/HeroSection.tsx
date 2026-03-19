@@ -12,7 +12,7 @@ const stats = [
 
 const highlights = [
   "Step-by-step worked solutions",
-  "AI coaching when you're stuck",
+  "STEMcoach coaching when you're stuck",
   "Real exam simulations",
 ];
 
@@ -51,7 +51,7 @@ export function HeroSection() {
             </h1>
             <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-[1.125rem]">
               A private tutor in your pocket. 1,000,000+ exam-style questions with step-by-step
-              solutions, AI coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
+              solutions, STEMcoach coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
             </p>
 
             {/* Highlights */}

@@ -5,7 +5,7 @@ const footerLinks = {
   Product: [
     { label: "Subjects", to: "/subjects" },
     { label: "Mock Exams", to: "/mock-exam" },
-    { label: "AI Tutor", to: "/ai-tutor" },
+    { label: "STEMcoach", to: "/ai-tutor" },
     { label: "Pricing", to: "/pricing" },
     { label: "Install App", to: "/install" },
   ],

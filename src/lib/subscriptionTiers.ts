@@ -9,6 +9,7 @@ export interface QuestionPack {
   name: string;
   product_id: string;
   questions: number;
+  mock_exams: number;
   features: string[];
   regional: Record<RegionKey, RegionalPrice>;
 }
@@ -17,12 +18,14 @@ export const PACKS: Record<string, QuestionPack> = {
   standard: {
     name: "Ultimate Pack",
     product_id: "prod_UAj58fkEwB0P8O",
-    questions: 10000,
+    questions: 5000,
+    mock_exams: 20,
     features: [
-      "10,000 curriculum-aligned questions",
-      "Choose your subjects & levels",
-      "AI Tutor chat — unlimited",
-      "Mock exams & certificates",
+      "5,000 curriculum-aligned questions",
+      "20 mock exams with certificates",
+      "Choose your subjects, boards & levels",
+      "STEMcoach coaching when you're stuck",
+      "Full tutorial explanations on every answer",
       "Streaks, XP, levels & leaderboards",
       "Detailed analytics & weak-topic drills",
       "Offline mode (PWA)",
@@ -38,19 +41,21 @@ export const PACKS: Record<string, QuestionPack> = {
   topup: {
     name: "Top-Up Pack",
     product_id: "prod_UAj5MWyj4cFOgT",
-    questions: 2000,
+    questions: 1000,
+    mock_exams: 5,
     features: [
-      "2,000 extra questions",
-      "Add more subjects anytime",
+      "1,000 extra questions",
+      "5 additional mock exams",
+      "Add more subjects & levels anytime",
       "Stack with existing pack",
       "Instant access",
     ],
     regional: {
       uk: { price: "£4.99", price_id: "price_1TCNdeFFogsDQVs4WutIKPQw" },
-      us: { price: "$7.99", price_id: "price_1TCYoFFFogsDQVs4Klbw5WCw" },
-      ae: { price: "AED 39", price_id: "price_1TCYoGFFogsDQVs4ZGx96zs9" },
-      in: { price: "₹399", price_id: "price_1TCYoGFFogsDQVs4MzY6cjyN" },
-      pk: { price: "PKR 999", price_id: "price_1TCYoHFFogsDQVs4tHGNLjSv" },
+      us: { price: "$6.99", price_id: "price_1TCZCNFFogsDQVs4dhoer5AL" },
+      ae: { price: "AED 29", price_id: "price_1TCZCRFFogsDQVs4vHB63taY" },
+      in: { price: "₹299", price_id: "price_1TCZCSFFogsDQVs4eBhjzG9k" },
+      pk: { price: "PKR 1,999", price_id: "price_1TCZCSFFogsDQVs4hueexI5c" },
     },
   },
 } as const;
@@ -89,3 +94,6 @@ export const regionLabels: Record<RegionKey, string> = {
   in: "🇮🇳 India",
   pk: "🇵🇰 Pakistan",
 };
+
+/** Free tier: questions per subject before paywall */
+export const FREE_QUESTIONS_PER_SUBJECT = 5;
