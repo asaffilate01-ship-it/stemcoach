@@ -59,6 +59,7 @@ export const subjects: SubjectInfo[] = [
     color: "142 71% 45%",
     questionCount: 6000,
     topics: ["Atomic Structure", "Bonding", "Stoichiometry", "Organic Chemistry", "Thermochemistry", "Kinetics", "Equilibrium", "Electrochemistry"],
+    mascotImage: "/assets/chemi.png",
   },
   {
     id: "biology",
