@@ -55,12 +55,12 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-xl font-semibold">6. Intellectual Property</h2>
-            <p>All questions, explanations, worked solutions, and AI-generated content on the Platform are the intellectual property of STEMCoach. You may not reproduce, distribute, or commercially exploit this content without written permission.</p>
+            <p>All questions, explanations, worked solutions, and generated content on the Platform are the intellectual property of STEMCoach. You may not reproduce, distribute, or commercially exploit this content without written permission.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">7. AI-Generated Content</h2>
-            <p>Some content on the Platform is generated or graded using AI. While we strive for accuracy, AI-generated content may contain errors. We recommend cross-referencing with official textbooks and mark schemes for critical exam preparation.</p>
+            <h2 className="text-xl font-semibold">7. Generated Content</h2>
+            <p>Some content on the Platform is generated or graded using automated systems. While we strive for accuracy, generated content may contain errors. We recommend cross-referencing with official textbooks and mark schemes for critical exam preparation.</p>
           </section>
 
           <section>

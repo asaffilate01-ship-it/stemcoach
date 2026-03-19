@@ -105,13 +105,13 @@ Be concise but thorough. Never give incorrect information.`;
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please try again later." }), {
+        return new Response(JSON.stringify({ error: "Coaching credits exhausted. Please try again later." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI service unavailable" }), {
+      console.error("Gateway error:", response.status, t);
+      return new Response(JSON.stringify({ error: "Service unavailable" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
