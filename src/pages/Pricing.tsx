@@ -17,8 +17,7 @@ const packIcons: Record<PackKey, typeof Zap> = {
 };
 
 const faqs = [
-  { q: "How does question allocation work?", a: "Choose 1 subject & 1 level = 20,000 questions. Multiple subjects split your 10,000 question pack evenly." },
-  { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 2,000 more questions to new or existing subjects." },
+  { q: "How does question allocation work?", a: "Your 10,000 questions are split evenly across the subjects and levels you choose." },
   { q: "Is this a one-time purchase?", a: "Yes — pay once, access forever. No subscriptions or recurring charges." },
   { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
 ];
