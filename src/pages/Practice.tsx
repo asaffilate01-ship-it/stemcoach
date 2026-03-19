@@ -269,7 +269,7 @@ export default function Practice() {
         showXPPopup(result.xpGained);
         incrementCount();
       } catch (e: any) {
-        toast({ title: "AI grading failed", description: e.message, variant: "destructive" });
+        toast({ title: "Grading failed", description: e.message, variant: "destructive" });
       } finally {
         setLoadingAI(false);
       }
