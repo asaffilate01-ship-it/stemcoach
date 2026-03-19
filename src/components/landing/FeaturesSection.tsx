@@ -17,8 +17,8 @@ const features = [
   },
   {
     icon: Brain,
-    title: "AI Tutor",
-    description: "Chat with an AI coach that explains concepts, solves problems step-by-step, and adapts to your learning style.",
+    title: "STEMcoach Coaching",
+    description: "Chat with STEMcoach — get step-by-step explanations, problem solving, and personalised coaching that adapts to your learning style.",
     iconBg: "bg-[hsl(258_60%_52%/0.08)] text-[hsl(258_60%_52%)]",
   },
   {
