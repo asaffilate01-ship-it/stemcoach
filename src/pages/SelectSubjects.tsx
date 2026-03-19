@@ -81,9 +81,6 @@ export default function SelectSubjects() {
   const allocationSummary = () => {
     if (!quota) return "";
     const alloc = calculateQuestionAllocation(quota.total_questions, selectedSubjects, selectedLevels);
-    const s = selectedSubjects.length || 1;
-    const l = selectedLevels.length || 1;
-    if (s === 1 && l === 1) return `${(quota.total_questions * 2).toLocaleString()} questions (2× bonus!)`;
     return `${alloc.perSubject.toLocaleString()} questions per subject, ${alloc.perLevel.toLocaleString()} per level`;
   };
 
