@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGeoRegion } from "@/hooks/useGeoRegion";
-import { PACKS, type PackKey, type RegionKey, regionLabels } from "@/lib/subscriptionTiers";
+import { PACKS, type PackKey, regionLabels } from "@/lib/subscriptionTiers";
 import { Check, Zap, Plus, Globe, ArrowRight, Shield, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
