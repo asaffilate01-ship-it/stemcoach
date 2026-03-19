@@ -56,7 +56,7 @@ export function HeroSection() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-primary backdrop-blur-sm"
             >
-              <Sparkles className="h-3.5 w-3.5" /> Virtual Tuition Centre
+              <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-5 w-5 rounded-full object-cover" /> Virtual Tuition Centre
             </motion.div>
             <h1 className="mb-6 text-[2rem] font-extrabold tracking-tight leading-[1.12] sm:text-4xl md:text-5xl lg:text-[3.5rem]">
               Master your exams{" "}

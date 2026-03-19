@@ -123,9 +123,11 @@ export function AppHeader() {
       <div className="container mx-auto flex h-12 items-center justify-between px-4 sm:h-14">
         {/* Logo */}
         <Link to="/" className="group flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-extrabold text-white shadow-sm shadow-primary/20 transition-transform duration-300 group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-xl sm:text-sm">
-            S
-          </span>
+          <img
+            src="/assets/coach-stem.png"
+            alt="Coach Stem"
+            className="h-7 w-7 rounded-lg shadow-sm shadow-primary/20 transition-transform duration-300 group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-xl object-cover"
+          />
           <span className="font-bold tracking-tight text-foreground text-sm sm:text-base">
             STEM<span className="text-primary">Coach</span>
           </span>
