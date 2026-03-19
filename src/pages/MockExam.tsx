@@ -33,6 +33,7 @@ export default function MockExam() {
   useDocumentTitle("Mock Exam");
   const { user } = useAuth();
   const { toast } = useToast();
+  const { canTakeMockExam, mockExamsRemaining, mockExamsTotal, hasPurchased, loading: quotaLoading, incrementMockExam } = useQuotaGate();
   const [state, setState] = useState<ExamState>("browse");
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentQ, setCurrentQ] = useState(0);
