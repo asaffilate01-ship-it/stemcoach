@@ -32,7 +32,7 @@ export function Footer() {
               </span>
             </div>
             <p className="max-w-sm text-sm text-muted-foreground leading-relaxed">
-              The virtual tuition centre helping students ace STEM exams worldwide with AI-powered practice and expert-crafted solutions.
+              The virtual tuition centre helping students ace STEM exams worldwide with expert-crafted practice and step-by-step solutions.
             </p>
           </div>
 
