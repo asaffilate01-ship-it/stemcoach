@@ -9,10 +9,16 @@ interface BadgeUnlockProps {
 }
 
 export function BadgeUnlock({ badge, onDismiss }: BadgeUnlockProps) {
-  // Try to match badge to a subject mascot, fall back to Coach Stem
-  const mascot = badge?.requirement_subject
-    ? getMascot(badge.requirement_subject)
-    : getCoachStem();
+  // Try to match badge to a subject mascot via name, fall back to Coach Stem
+  const subjectGuess = badge?.name?.toLowerCase().includes("math") ? "mathematics"
+    : badge?.name?.toLowerCase().includes("phys") ? "physics"
+    : badge?.name?.toLowerCase().includes("chem") ? "chemistry"
+    : badge?.name?.toLowerCase().includes("bio") ? "biology"
+    : badge?.name?.toLowerCase().includes("comp") || badge?.name?.toLowerCase().includes("code") ? "computer-science"
+    : badge?.name?.toLowerCase().includes("ielts") ? "ielts"
+    : badge?.name?.toLowerCase().includes("celta") ? "celta"
+    : null;
+  const mascot = subjectGuess ? getMascot(subjectGuess) : getCoachStem();
 
   return (
     <AnimatePresence>
