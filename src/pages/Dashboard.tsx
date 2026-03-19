@@ -12,6 +12,7 @@ import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, Bo
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { QuotaWidget } from "@/components/dashboard/QuotaWidget";
+import { getCoachStem, getDailyMotivation } from "@/lib/mascots";
 
 interface SubjectProgress {
   subject: string;
