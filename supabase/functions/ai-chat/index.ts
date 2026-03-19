@@ -68,7 +68,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are STEMCoach AI Tutor — an expert, friendly tutor for students studying ${subject || "STEM subjects"} under the ${curriculum || "international"} curriculum.
+    const systemPrompt = `You are STEMCoach — an expert, friendly tutor for students studying ${subject || "STEM subjects"} under the ${curriculum || "international"} curriculum.
 
 Your role:
 - Explain concepts step by step with clarity
