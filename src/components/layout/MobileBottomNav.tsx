@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, Trophy, LayoutDashboard, Bot } from "lucide-react";
+import { Home, BookOpen, Trophy, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 
 const items = [
   { to: "/", label: "Home", icon: Home },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
-  { to: "/ai-tutor", label: "STEMcoach", icon: Bot },
+  { to: "/ai-tutor", label: "STEMcoach", icon: null, image: "/assets/coach-stem.png" },
   { to: "/mock-exam", label: "Exam", icon: Trophy },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, auth: true },
 ];
@@ -31,9 +31,13 @@ export function MobileBottomNav() {
               <div className={`relative flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-300 ${
                 active ? "bg-primary/12 scale-110" : ""
               }`}>
-                <item.icon className={`h-[18px] w-[18px] transition-all duration-300 ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`} strokeWidth={active ? 2.5 : 2} />
+                {item.image ? (
+                  <img src={item.image} alt={item.label} className={`h-[18px] w-[18px] rounded-sm object-cover transition-all duration-300 ${active ? "scale-110" : "opacity-70"}`} />
+                ) : item.icon ? (
+                  <item.icon className={`h-[18px] w-[18px] transition-all duration-300 ${
+                    active ? "text-primary" : "text-muted-foreground"
+                  }`} strokeWidth={active ? 2.5 : 2} />
+                ) : null}
                 {active && (
                   <motion.div
                     layoutId="bottomNavIndicator"
