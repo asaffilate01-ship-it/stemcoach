@@ -498,7 +498,8 @@ export default function Practice() {
               {isEssay && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-medium text-primary">
                   <Sparkles className="h-3.5 w-3.5" />
-                  Extended response · AI graded
+                  Extended response · STEMcoach graded
+                </div>
                 </div>
               )}
 
