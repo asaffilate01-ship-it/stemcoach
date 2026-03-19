@@ -27,6 +27,7 @@ export interface SubjectInfo {
   id: Subject;
   name: string;
   icon: string;
+  mascotImage?: string;
   color: string;
   questionCount: number;
   topics: string[];
@@ -37,6 +38,7 @@ export const subjects: SubjectInfo[] = [
     id: "mathematics",
     name: "Mathematics",
     icon: "∑",
+    mascotImage: "/assets/mathmax.png",
     color: "221 83% 53%",
     questionCount: 7000,
     topics: ["Algebra", "Calculus", "Trigonometry", "Statistics", "Geometry", "Vectors", "Matrices", "Differential Equations"],

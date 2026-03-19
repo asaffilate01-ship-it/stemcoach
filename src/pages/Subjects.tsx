@@ -302,8 +302,12 @@ export default function Subjects() {
 
                       <div className="flex items-center gap-4 p-4 md:block md:p-6">
                         {/* Mobile: horizontal layout */}
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br md:mb-5 md:h-12 md:w-12 md:rounded-2xl ${subjectGradients[subject.id] || "from-primary to-primary/70"} text-base font-bold text-white shadow-md md:text-lg md:shadow-lg`}>
-                          {subject.icon}
+                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br md:mb-5 md:h-12 md:w-12 md:rounded-2xl ${subjectGradients[subject.id] || "from-primary to-primary/70"} text-base font-bold text-white shadow-md md:text-lg md:shadow-lg overflow-hidden`}>
+                          {subject.mascotImage ? (
+                            <img src={subject.mascotImage} alt={`${subject.name} mascot`} className="h-full w-full object-cover" />
+                          ) : (
+                            subject.icon
+                          )}
                         </div>
 
                         <div className="min-w-0 flex-1">
