@@ -77,21 +77,12 @@ export default function Pricing() {
                 Get thousands of exam-ready questions. No subscriptions, no hidden fees.
               </p>
 
-              <div className="mt-8 flex items-center justify-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <Select value={region} onValueChange={(v) => setRegion(v as RegionKey)}>
-                  <SelectTrigger className="w-[200px] rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(Object.entries(regionLabels) as [RegionKey, string][]).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {!geoLoading && (
+                <div className="mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Globe className="h-4 w-4" />
+                  <span>Showing prices for {regionLabels[region]}</span>
+                </div>
+              )}
             </motion.div>
           </div>
         </section>

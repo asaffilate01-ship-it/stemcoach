@@ -147,8 +147,8 @@ export default function Onboarding() {
 
               <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
                 <Sparkles className="mx-auto mb-2 h-5 w-5 text-primary" />
-                <p className="text-sm font-semibold text-primary">100,000 questions per pack</p>
-                <p className="text-xs text-muted-foreground">Choose 1 subject + 1 level = 200,000 questions (2× bonus!)</p>
+                <p className="text-sm font-semibold text-primary">10,000 questions per pack</p>
+                <p className="text-xs text-muted-foreground">Choose 1 subject + 1 level = 20,000 questions (2× bonus!)</p>
               </div>
 
               <Button
