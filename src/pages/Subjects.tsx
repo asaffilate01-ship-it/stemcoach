@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -6,18 +6,69 @@ import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { subjects, curricula, difficultyLabels, type Difficulty } from "@/data/questions";
-import { ChevronRight, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X } from "lucide-react";
+import { ChevronRight, ChevronDown, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X, Check, Globe } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+/* ───────────────── Country & Board Data ───────────────── */
+
 const countryGroups = [
-  { label: "United Kingdom", flag: "🇬🇧", keys: ["uk-gcse", "uk-alevel", "uk-btec", "uk-scottish-nat5", "uk-scottish-higher", "uk-scottish-adv-higher"] },
-  { label: "International UK", flag: "🌍", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u"] },
-  { label: "IB Programme", flag: "🌍", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl", "ib-dp-further"] },
-  { label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act"] },
-  { label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad"] },
-  { label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat"] },
+  { id: "uk", label: "United Kingdom", flag: "🇬🇧", keys: ["uk-gcse", "uk-alevel", "uk-btec", "uk-scottish-nat5", "uk-scottish-higher", "uk-scottish-adv-higher"] },
+  { id: "intl", label: "International", flag: "🌍", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u"] },
+  { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl", "ib-dp-further"] },
+  { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act"] },
+  { id: "in", label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad"] },
+  { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat"] },
+  { id: "lang", label: "Language Certs", flag: "📝", keys: ["ielts-academic", "ielts-general", "celta"] },
 ];
+
+/** Exam board visual identity — short code + brand color */
+const boardBranding: Record<string, { abbr: string; color: string }> = {
+  "AQA": { abbr: "AQA", color: "hsl(268,65%,50%)" },
+  "Edexcel (Pearson)": { abbr: "EDX", color: "hsl(340,75%,45%)" },
+  "OCR": { abbr: "OCR", color: "hsl(200,80%,45%)" },
+  "WJEC/Eduqas": { abbr: "WJEC", color: "hsl(145,60%,38%)" },
+  "CCEA": { abbr: "CCEA", color: "hsl(25,85%,50%)" },
+  "Cambridge (CAIE)": { abbr: "CIE", color: "hsl(0,70%,48%)" },
+  "Edexcel International": { abbr: "EDXi", color: "hsl(340,75%,45%)" },
+  "Edexcel International (IAL)": { abbr: "IAL", color: "hsl(340,75%,45%)" },
+  "Oxford AQA": { abbr: "OAQA", color: "hsl(210,60%,45%)" },
+  "Oxford AQA International": { abbr: "OAQA", color: "hsl(210,60%,45%)" },
+  "Cambridge Pre-U": { abbr: "PreU", color: "hsl(0,70%,48%)" },
+  "SQA": { abbr: "SQA", color: "hsl(220,65%,42%)" },
+  "Pearson BTEC Level 2": { abbr: "BT2", color: "hsl(285,60%,45%)" },
+  "Pearson BTEC Level 3": { abbr: "BT3", color: "hsl(285,60%,45%)" },
+  "IB MYP": { abbr: "MYP", color: "hsl(200,70%,45%)" },
+  "IB SL": { abbr: "SL", color: "hsl(200,70%,45%)" },
+  "IB HL": { abbr: "HL", color: "hsl(200,70%,45%)" },
+  "IB Further Maths": { abbr: "FM", color: "hsl(200,70%,45%)" },
+  "IB HL Options": { abbr: "HLO", color: "hsl(200,70%,45%)" },
+  "Common Core": { abbr: "CC", color: "hsl(220,60%,50%)" },
+  "NGSS": { abbr: "NGSS", color: "hsl(160,50%,42%)" },
+  "State Standards": { abbr: "SS", color: "hsl(35,70%,48%)" },
+  "CBSE": { abbr: "CBSE", color: "hsl(120,50%,38%)" },
+  "ICSE (CISCE)": { abbr: "ICSE", color: "hsl(30,70%,45%)" },
+  "ISC (CISCE)": { abbr: "ISC", color: "hsl(30,70%,45%)" },
+  "JEE Main": { abbr: "JEE", color: "hsl(15,80%,48%)" },
+  "JEE Advanced": { abbr: "JEEa", color: "hsl(0,75%,45%)" },
+  "NEET UG": { abbr: "NEET", color: "hsl(170,60%,38%)" },
+  "Punjab Board (Lahore)": { abbr: "PB", color: "hsl(130,55%,38%)" },
+  "Federal Board (FBISE)": { abbr: "FED", color: "hsl(210,60%,42%)" },
+  "Sindh Board (Karachi)": { abbr: "SB", color: "hsl(35,65%,45%)" },
+  "KPK Board (Peshawar)": { abbr: "KPK", color: "hsl(355,60%,45%)" },
+  "Balochistan Board (Quetta)": { abbr: "BB", color: "hsl(280,50%,42%)" },
+  "AJK Board (Mirpur)": { abbr: "AJK", color: "hsl(160,55%,38%)" },
+  "ECAT (Engineering)": { abbr: "ECAT", color: "hsl(220,65%,48%)" },
+  "MDCAT (Medical)": { abbr: "MDCAT", color: "hsl(145,60%,38%)" },
+  "British Council": { abbr: "BC", color: "hsl(220,70%,45%)" },
+  "IDP": { abbr: "IDP", color: "hsl(0,70%,50%)" },
+  "Cambridge": { abbr: "CAM", color: "hsl(0,70%,48%)" },
+  "Cambridge CELTA": { abbr: "CELTA", color: "hsl(0,70%,48%)" },
+};
+
+function getBoardBrand(board: string) {
+  return boardBranding[board] || { abbr: board.slice(0, 3).toUpperCase(), color: "hsl(var(--primary))" };
+}
 
 const subjectGradients: Record<string, string> = {
   mathematics: "from-[hsl(226,70%,50%)] to-[hsl(258,60%,52%)]",
@@ -29,196 +80,410 @@ const subjectGradients: Record<string, string> = {
   celta: "from-[hsl(280,70%,50%)] to-[hsl(310,60%,50%)]",
 };
 
+/* ───────────────── Board Logo Chip ───────────────── */
+
+function BoardChip({ board, selected, onClick }: { board: string; selected: boolean; onClick: () => void }) {
+  const brand = getBoardBrand(board);
+  return (
+    <button
+      onClick={onClick}
+      className={`group relative flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition-all duration-200 ${
+        selected
+          ? "border-primary/30 bg-primary/5 shadow-sm"
+          : "border-border/40 bg-card hover:border-primary/20 hover:bg-muted/30"
+      }`}
+    >
+      <div
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[9px] font-extrabold text-white shadow-sm"
+        style={{ backgroundColor: brand.color }}
+      >
+        {brand.abbr.slice(0, 3)}
+      </div>
+      <span className={`text-xs font-semibold transition-colors ${selected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>
+        {board}
+      </span>
+      {selected && (
+        <Check className="ml-auto h-3.5 w-3.5 text-primary" />
+      )}
+    </button>
+  );
+}
+
+/* ───────────────── Filter Panel ───────────────── */
+
 function FilterPanel({
-  selectedCurriculum,
-  setSelectedCurriculum,
-  selectedBoard,
-  setSelectedBoard,
+  selectedCountries,
+  toggleCountry,
+  selectedLevels,
+  toggleLevel,
+  selectedBoards,
+  toggleBoard,
+  selectAllBoards,
+  clearAllBoards,
   selectedDifficulty,
   setSelectedDifficulty,
-  expandedCountry,
-  setExpandedCountry,
-  currentCurriculum,
   availableBoards,
-}: any) {
+  activeLevelOptions,
+}: {
+  selectedCountries: Set<string>;
+  toggleCountry: (id: string) => void;
+  selectedLevels: Set<string>;
+  toggleLevel: (id: string) => void;
+  selectedBoards: Set<string>;
+  toggleBoard: (board: string) => void;
+  selectAllBoards: () => void;
+  clearAllBoards: () => void;
+  selectedDifficulty: Difficulty | null;
+  setSelectedDifficulty: (d: Difficulty | null) => void;
+  availableBoards: string[];
+  activeLevelOptions: typeof curricula;
+}) {
+  const [expandedSection, setExpandedSection] = useState<string | null>("countries");
+
   return (
-    <div className="space-y-5">
-      {/* Curriculum picker */}
-      <div>
-        <div className="mb-3 flex items-center gap-2">
+    <div className="space-y-3">
+      {/* 1. Country Selection */}
+      <div className="overflow-hidden rounded-xl border border-border/40">
+        <button
+          onClick={() => setExpandedSection(expandedSection === "countries" ? null : "countries")}
+          className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
+        >
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-            <Layers className="h-3.5 w-3.5 text-primary" />
+            <Globe className="h-3.5 w-3.5 text-primary" />
           </div>
-          <span className="text-sm font-bold">Curriculum</span>
-        </div>
-        <div className="space-y-1.5">
-          {countryGroups.map((group) => (
-            <div key={group.label} className="overflow-hidden rounded-xl border border-border/40">
-              <button
-                onClick={() => setExpandedCountry(expandedCountry === group.label ? null : group.label)}
-                className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors ${
-                  expandedCountry === group.label ? "bg-primary/5" : "hover:bg-muted/50"
-                }`}
-              >
-                <span className="text-base">{group.flag}</span>
-                <span className="flex-1 text-xs font-semibold">{group.label}</span>
-                <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${
-                  expandedCountry === group.label ? "rotate-90" : ""
-                }`} />
-              </button>
-              <AnimatePresence>
-                {expandedCountry === group.label && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden border-t border-border/30 bg-muted/20"
-                  >
-                    <div className="flex flex-wrap gap-1.5 p-3">
-                      {group.keys.map((key) => {
-                        const c = curricula.find(cu => cu.id === key);
-                        if (!c) return null;
-                        return (
-                          <button
-                            key={c.id}
-                            onClick={() => { setSelectedCurriculum(c.id); setSelectedBoard(null); }}
-                            className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
-                              selectedCurriculum === c.id
-                                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                                : "bg-background text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                            }`}
-                          >
-                            {c.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </div>
+          <span className="flex-1 text-sm font-bold">Country / Region</span>
+          {selectedCountries.size > 0 && (
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+              {selectedCountries.size}
+            </span>
+          )}
+          <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${expandedSection === "countries" ? "rotate-180" : ""}`} />
+        </button>
+        <AnimatePresence>
+          {expandedSection === "countries" && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden border-t border-border/30"
+            >
+              <div className="grid grid-cols-2 gap-1.5 p-3">
+                {countryGroups.map((group) => {
+                  const isSelected = selectedCountries.has(group.id);
+                  return (
+                    <button
+                      key={group.id}
+                      onClick={() => toggleCountry(group.id)}
+                      className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ${
+                        isSelected
+                          ? "bg-primary/10 ring-1 ring-primary/25"
+                          : "bg-muted/30 hover:bg-muted/50"
+                      }`}
+                    >
+                      <span className="text-base">{group.flag}</span>
+                      <span className={`flex-1 text-[11px] font-semibold ${isSelected ? "text-primary" : "text-muted-foreground"}`}>
+                        {group.label}
+                      </span>
+                      {isSelected && <Check className="h-3 w-3 text-primary" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Board filter */}
-      {availableBoards.length > 1 && (
-        <div>
-          <div className="mb-3 flex items-center gap-2">
+      {/* 2. Level / Curriculum */}
+      {activeLevelOptions.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-border/40">
+          <button
+            onClick={() => setExpandedSection(expandedSection === "levels" ? null : "levels")}
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
+          >
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-              <Filter className="h-3.5 w-3.5 text-primary" />
+              <Layers className="h-3.5 w-3.5 text-primary" />
             </div>
-            <span className="text-sm font-bold">Exam Board</span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              onClick={() => setSelectedBoard(null)}
-              className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
-                selectedBoard === null
-                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                  : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-              }`}
-            >
-              All Boards
-            </button>
-            {availableBoards.map((board: string) => (
-              <button
-                key={board}
-                onClick={() => setSelectedBoard(board)}
-                className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
-                  selectedBoard === board
-                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                    : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                }`}
+            <span className="flex-1 text-sm font-bold">Level</span>
+            {selectedLevels.size > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+                {selectedLevels.size}
+              </span>
+            )}
+            <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${expandedSection === "levels" ? "rotate-180" : ""}`} />
+          </button>
+          <AnimatePresence>
+            {expandedSection === "levels" && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden border-t border-border/30"
               >
-                {board}
-              </button>
-            ))}
-          </div>
+                <div className="flex flex-wrap gap-1.5 p-3">
+                  {activeLevelOptions.map((c) => {
+                    const isSelected = selectedLevels.has(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => toggleLevel(c.id)}
+                        className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                            : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 
-      {/* Difficulty filter */}
-      <div>
-        <div className="mb-3 flex items-center gap-2">
+      {/* 3. Exam Board */}
+      {availableBoards.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-border/40">
+          <button
+            onClick={() => setExpandedSection(expandedSection === "boards" ? null : "boards")}
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+              <Filter className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <span className="flex-1 text-sm font-bold">Exam Board</span>
+            {selectedBoards.size > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+                {selectedBoards.size}
+              </span>
+            )}
+            <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${expandedSection === "boards" ? "rotate-180" : ""}`} />
+          </button>
+          <AnimatePresence>
+            {expandedSection === "boards" && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden border-t border-border/30"
+              >
+                <div className="p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <button onClick={selectAllBoards} className="text-[11px] font-semibold text-primary hover:underline">
+                      Select All
+                    </button>
+                    <button onClick={clearAllBoards} className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline">
+                      Clear
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                    {availableBoards.map((board) => (
+                      <BoardChip
+                        key={board}
+                        board={board}
+                        selected={selectedBoards.has(board)}
+                        onClick={() => toggleBoard(board)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* 4. Difficulty */}
+      <div className="overflow-hidden rounded-xl border border-border/40">
+        <button
+          onClick={() => setExpandedSection(expandedSection === "difficulty" ? null : "difficulty")}
+          className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
+        >
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
             <Zap className="h-3.5 w-3.5 text-primary" />
           </div>
-          <span className="text-sm font-bold">Difficulty</span>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          <button
-            onClick={() => setSelectedDifficulty(null)}
-            className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
-              selectedDifficulty === null
-                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-            }`}
-          >
-            All
-          </button>
-          {([1, 2, 3, 4, 5] as Difficulty[]).map((d) => (
-            <button
-              key={d}
-              onClick={() => setSelectedDifficulty(d)}
-              className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
-                selectedDifficulty === d
-                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                  : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-              }`}
+          <span className="flex-1 text-sm font-bold">Difficulty</span>
+          {selectedDifficulty && (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+              {difficultyLabels[selectedDifficulty]}
+            </span>
+          )}
+          <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${expandedSection === "difficulty" ? "rotate-180" : ""}`} />
+        </button>
+        <AnimatePresence>
+          {expandedSection === "difficulty" && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden border-t border-border/30"
             >
-              {difficultyLabels[d]}
-            </button>
-          ))}
-        </div>
+              <div className="flex flex-wrap gap-1.5 p-3">
+                <button
+                  onClick={() => setSelectedDifficulty(null)}
+                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
+                    selectedDifficulty === null
+                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                      : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                  }`}
+                >
+                  All
+                </button>
+                {([1, 2, 3, 4, 5] as Difficulty[]).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setSelectedDifficulty(d)}
+                    className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
+                      selectedDifficulty === d
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                        : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    {difficultyLabels[d]}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Active selection summary */}
       <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-3">
-        <div className="mb-1 flex items-center gap-1.5">
+        <div className="mb-1.5 flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span className="text-xs font-bold text-primary">Active Selection</span>
+          <span className="text-xs font-bold text-primary">Active Filters</span>
         </div>
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          <span className="font-semibold text-foreground">{currentCurriculum?.label}</span>
-          {selectedBoard && <> · {selectedBoard}</>}
-          {selectedDifficulty && <> · {difficultyLabels[selectedDifficulty]}</>}
-        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {selectedCountries.size === 0 && (
+            <span className="text-[11px] text-muted-foreground">All countries</span>
+          )}
+          {[...selectedCountries].map(id => {
+            const g = countryGroups.find(c => c.id === id);
+            return g ? (
+              <span key={id} className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                {g.flag} {g.label}
+                <button onClick={() => toggleCountry(id)} className="ml-0.5 hover:text-destructive"><X className="h-2.5 w-2.5" /></button>
+              </span>
+            ) : null;
+          })}
+          {[...selectedBoards].slice(0, 3).map(b => (
+            <span key={b} className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              {b}
+              <button onClick={() => toggleBoard(b)} className="ml-0.5 hover:text-destructive"><X className="h-2.5 w-2.5" /></button>
+            </span>
+          ))}
+          {selectedBoards.size > 3 && (
+            <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              +{selectedBoards.size - 3} more
+            </span>
+          )}
+          {selectedDifficulty && (
+            <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              {difficultyLabels[selectedDifficulty]}
+              <button onClick={() => setSelectedDifficulty(null)} className="ml-0.5 hover:text-destructive"><X className="h-2.5 w-2.5" /></button>
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
+/* ───────────────── Main Page ───────────────── */
+
 export default function Subjects() {
   useDocumentTitle("Subjects");
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [selectedCurriculum, setSelectedCurriculum] = useState("uk-alevel");
-  const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
+  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set(["uk"]));
+  const [selectedLevels, setSelectedLevels] = useState<Set<string>>(new Set());
+  const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set());
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
-  const [expandedCountry, setExpandedCountry] = useState<string | null>("United Kingdom");
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const currentCurriculum = curricula.find(c => c.id === selectedCurriculum);
-  const availableBoards = currentCurriculum?.boards || [];
-
-  const filterProps = {
-    selectedCurriculum, setSelectedCurriculum,
-    selectedBoard, setSelectedBoard,
-    selectedDifficulty, setSelectedDifficulty,
-    expandedCountry, setExpandedCountry,
-    currentCurriculum, availableBoards,
+  const toggleCountry = (id: string) => {
+    setSelectedCountries(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+    // Reset levels and boards when countries change
+    setSelectedLevels(new Set());
+    setSelectedBoards(new Set());
   };
 
-  const activeFilterCount = (selectedBoard ? 1 : 0) + (selectedDifficulty ? 1 : 0);
+  // Get curricula for selected countries
+  const activeLevelOptions = useMemo(() => {
+    if (selectedCountries.size === 0) return curricula;
+    const activeKeys = new Set<string>();
+    countryGroups
+      .filter(g => selectedCountries.has(g.id))
+      .forEach(g => g.keys.forEach(k => activeKeys.add(k)));
+    return curricula.filter(c => activeKeys.has(c.id));
+  }, [selectedCountries]);
+
+  const toggleLevel = (id: string) => {
+    setSelectedLevels(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+    setSelectedBoards(new Set());
+  };
+
+  // Boards from selected levels (or all levels if none selected)
+  const availableBoards = useMemo(() => {
+    const relevantCurricula = selectedLevels.size > 0
+      ? activeLevelOptions.filter(c => selectedLevels.has(c.id))
+      : activeLevelOptions;
+    const boardSet = new Set<string>();
+    relevantCurricula.forEach(c => c.boards.forEach(b => boardSet.add(b)));
+    return [...boardSet].sort();
+  }, [activeLevelOptions, selectedLevels]);
+
+  const toggleBoard = (board: string) => {
+    setSelectedBoards(prev => {
+      const next = new Set(prev);
+      next.has(board) ? next.delete(board) : next.add(board);
+      return next;
+    });
+  };
+
+  const selectAllBoards = () => setSelectedBoards(new Set(availableBoards));
+  const clearAllBoards = () => setSelectedBoards(new Set());
+
+  const activeFilterCount = selectedCountries.size + selectedLevels.size + selectedBoards.size + (selectedDifficulty ? 1 : 0);
+
+  // Summary label
+  const summaryLabel = useMemo(() => {
+    if (selectedCountries.size === 0) return "All curricula";
+    const names = [...selectedCountries].map(id => countryGroups.find(g => g.id === id)?.label).filter(Boolean);
+    return names.join(", ");
+  }, [selectedCountries]);
+
+  const filterProps = {
+    selectedCountries, toggleCountry,
+    selectedLevels, toggleLevel,
+    selectedBoards, toggleBoard,
+    selectAllBoards, clearAllBoards,
+    selectedDifficulty, setSelectedDifficulty,
+    availableBoards, activeLevelOptions,
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
       <PageTransition>
         <main className="container mx-auto max-w-7xl px-4 py-6 pb-28 md:py-12">
-          {/* Compact mobile hero */}
+          {/* Hero banner */}
           <div className="relative mb-6 overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-[hsl(258,60%,52%)] px-5 py-6 text-primary-foreground md:mb-10 md:rounded-3xl md:px-12 md:py-14">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,rgba(255,255,255,0.12),transparent_60%)]" />
             <div className="relative z-10">
@@ -232,16 +497,16 @@ export default function Subjects() {
                 Choose your subject
               </h1>
               <p className="max-w-lg text-xs leading-relaxed opacity-75 md:text-base">
-                Select your curriculum, board, and difficulty to start practising.
+                Select your country, level, exam board, and difficulty to start practising.
               </p>
             </div>
           </div>
 
-          {/* Mobile: Sticky filter bar + subject label */}
+          {/* Mobile: Sticky filter bar */}
           <div className="mb-4 flex items-center justify-between gap-3 md:hidden">
             <div>
               <h2 className="text-base font-bold tracking-tight">{subjects.length} Subjects</h2>
-              <p className="text-[11px] text-muted-foreground">{currentCurriculum?.label}</p>
+              <p className="text-[11px] text-muted-foreground">{summaryLabel}</p>
             </div>
             <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
               <SheetTrigger asChild>
@@ -281,7 +546,7 @@ export default function Subjects() {
               <div className="mb-5 hidden items-center justify-between md:flex">
                 <div>
                   <h2 className="text-lg font-bold tracking-tight md:text-xl">Subjects</h2>
-                  <p className="text-xs text-muted-foreground">{subjects.length} subjects available for {currentCurriculum?.label}</p>
+                  <p className="text-xs text-muted-foreground">{subjects.length} subjects available · {summaryLabel}</p>
                 </div>
               </div>
 
@@ -301,7 +566,6 @@ export default function Subjects() {
                       <div className={`h-1 w-full bg-gradient-to-r md:h-1.5 ${subjectGradients[subject.id] || "from-primary to-primary/70"}`} />
 
                       <div className="flex items-center gap-4 p-4 md:block md:p-6">
-                        {/* Mobile: horizontal layout */}
                         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br md:mb-5 md:h-12 md:w-12 md:rounded-2xl ${subjectGradients[subject.id] || "from-primary to-primary/70"} text-base font-bold text-white shadow-md md:text-lg md:shadow-lg overflow-hidden`}>
                           {subject.mascotImage ? (
                             <img src={subject.mascotImage} alt={`${subject.name} mascot`} className="h-full w-full object-cover" />
