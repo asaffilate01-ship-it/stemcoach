@@ -50,7 +50,7 @@ export default function Practice() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
-  const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor } = useSubscriptionGate();
+  const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
   useDocumentTitle(subject ? `Practice ${subject.name}` : "Practice");
 
