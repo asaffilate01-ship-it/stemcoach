@@ -12,6 +12,7 @@ import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, Bo
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { QuotaWidget } from "@/components/dashboard/QuotaWidget";
+import { getCoachStem, getDailyMotivation } from "@/lib/mascots";
 
 interface SubjectProgress {
   subject: string;
@@ -191,22 +192,42 @@ export default function Dashboard() {
       <AppHeader />
       <PageTransition>
         <main id="main-content" className="container mx-auto px-4 py-5 pb-28 flex-1 md:py-8">
-          {/* Welcome header */}
+          {/* Welcome header with Coach Stem */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-5 md:mb-8"
           >
-            <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">Student Dashboard</div>
-            <h1 className="stem-heading text-2xl md:text-3xl">
-              {greeting}, <span className="stem-gradient-text capitalize">{displayName}</span>
-            </h1>
-            {stats?.streak > 0 && (
-              <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Flame className="h-4 w-4 text-warning" />
-                {stats.streak}-day streak — keep it going!
-              </p>
-            )}
+            <div className="flex items-start gap-4">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1, type: "spring", damping: 15 }}
+                className="hidden sm:block h-14 w-14 shrink-0 overflow-hidden rounded-2xl shadow-md ring-1 ring-border/30"
+              >
+                <img src={getCoachStem().image} alt="Coach Stem" className="h-full w-full object-cover" />
+              </motion.div>
+              <div>
+                <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">Student Dashboard</div>
+                <h1 className="stem-heading text-2xl md:text-3xl">
+                  {greeting}, <span className="stem-gradient-text capitalize">{displayName}</span>
+                </h1>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="mt-1.5 text-sm text-muted-foreground"
+                >
+                  {getDailyMotivation()}
+                </motion.p>
+                {stats?.streak > 0 && (
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Flame className="h-4 w-4 text-warning" />
+                    {stats.streak}-day streak — keep it going!
+                  </p>
+                )}
+              </div>
+            </div>
           </motion.div>
 
           {/* Quick Actions */}

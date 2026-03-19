@@ -17,8 +17,10 @@ import { XPPopup } from "@/components/gamification/XPPopup";
 import { BadgeUnlock } from "@/components/gamification/BadgeUnlock";
 import { CorrectAnimation } from "@/components/gamification/CorrectAnimation";
 import { QuizTimer } from "@/components/gamification/QuizTimer";
+import { MascotReaction } from "@/components/gamification/MascotReaction";
 import ReactMarkdown from "react-markdown";
 import { getCachedQuestions, cacheQuestions } from "@/lib/questionCache";
+import { getMascot } from "@/lib/mascots";
 
 interface DBQuestion {
   id: string;
@@ -70,6 +72,8 @@ export default function Practice() {
   const [showXP, setShowXP] = useState(false);
   const [showCorrectAnim, setShowCorrectAnim] = useState(false);
   const [lastCorrect, setLastCorrect] = useState(false);
+  const [showMascotReaction, setShowMascotReaction] = useState(false);
+  const [mascotCorrect, setMascotCorrect] = useState<boolean | null>(null);
   const [timerRunning, setTimerRunning] = useState(true);
   const [timeTaken, setTimeTaken] = useState(0);
 
@@ -173,31 +177,36 @@ export default function Practice() {
   }
 
   if (dbLoading) {
+    const mascot = getMascot(subjectId || "");
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
         <div className="flex flex-col items-center justify-center gap-4 py-32">
-          <div className="relative">
-            <div className="h-12 w-12 rounded-2xl bg-primary/10 animate-pulse" />
-            <Loader2 className="absolute inset-0 m-auto h-6 w-6 animate-spin text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">Loading questions…</p>
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="h-16 w-16 overflow-hidden rounded-2xl shadow-md"
+          >
+            <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+          </motion.div>
+          <p className="text-sm text-muted-foreground">{mascot.name} is loading your questions…</p>
         </div>
       </div>
     );
   }
 
   if (questions.length === 0) {
+    const mascot = getMascot(subjectId || "");
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="mx-auto max-w-md">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-              <BookOpen className="h-8 w-8 text-primary" />
+            <div className="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-2xl shadow-md">
+              <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">No questions yet</h2>
-            <p className="mb-8 text-muted-foreground">Questions for {subject.name} are being prepared. Check back soon!</p>
+            <p className="mb-8 text-muted-foreground">{mascot.name} is preparing questions for {subject.name}. Check back soon!</p>
             <Button onClick={() => navigate("/subjects")} className="gap-2">
               <ChevronLeft className="h-4 w-4" /> Back to Subjects
             </Button>
@@ -255,7 +264,10 @@ export default function Practice() {
         const passed = data.grading?.score >= data.grading?.max_marks * 0.6;
         setLastCorrect(passed);
         setShowCorrectAnim(true);
+        setMascotCorrect(passed);
+        setShowMascotReaction(true);
         setTimeout(() => setShowCorrectAnim(false), 2000);
+        setTimeout(() => setShowMascotReaction(false), 3000);
         setScore((prev) => ({ correct: prev.correct + (passed ? 1 : 0), total: prev.total + 1 }));
         if (user) {
           await supabase.from("attempts").insert({
@@ -287,7 +299,10 @@ export default function Practice() {
       : selectedAnswer === question.correct_answer;
     setLastCorrect(correct);
     setShowCorrectAnim(true);
+    setMascotCorrect(correct);
+    setShowMascotReaction(true);
     setTimeout(() => setShowCorrectAnim(false), 2000);
+    setTimeout(() => setShowMascotReaction(false), 3000);
     setScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
     if (user) {
       await supabase.from("attempts").insert({
@@ -311,6 +326,8 @@ export default function Practice() {
     setAiGrading(null);
     setTimerRunning(true);
     setTimeTaken(0);
+    setShowMascotReaction(false);
+    setMascotCorrect(null);
     setCurrentIndex((prev) => (prev + 1) % questions.length);
   };
 
@@ -769,6 +786,16 @@ export default function Practice() {
         </AnimatePresence>
 
         <XPPopup xp={xpGained} show={showXP} />
+
+        {/* Mascot reaction */}
+        <AnimatePresence>
+          {showMascotReaction && (
+            <div className="fixed bottom-20 left-4 right-4 z-40 flex justify-center lg:bottom-8 lg:left-auto lg:right-8">
+              <MascotReaction subjectId={subjectId || ""} correct={mascotCorrect} show={showMascotReaction} />
+            </div>
+          )}
+        </AnimatePresence>
+
         {newBadges.map((badge) => (
           <BadgeUnlock key={badge.id} badge={badge} onDismiss={() => dismissBadge(badge.id)} />
         ))}
