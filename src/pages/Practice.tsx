@@ -326,6 +326,8 @@ export default function Practice() {
     setAiGrading(null);
     setTimerRunning(true);
     setTimeTaken(0);
+    setShowMascotReaction(false);
+    setMascotCorrect(null);
     setCurrentIndex((prev) => (prev + 1) % questions.length);
   };
 
