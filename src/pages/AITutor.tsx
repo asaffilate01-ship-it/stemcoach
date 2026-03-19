@@ -181,8 +181,8 @@ export default function AITutor() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                    <GraduationCap className="h-8 w-8 text-primary" />
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
+                    <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
                   </div>
                   <h3 className="text-lg font-semibold">STEMcoach</h3>
                   <p className="mt-1 max-w-md text-sm text-muted-foreground">
@@ -215,8 +215,8 @@ export default function AITutor() {
                 className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
               >
                 {msg.role === "assistant" && (
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <GraduationCap className="h-4 w-4" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg overflow-hidden">
+                    <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
                   </div>
                 )}
                 <div
@@ -237,8 +237,8 @@ export default function AITutor() {
             ))}
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <GraduationCap className="h-4 w-4" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
+                  <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
                 </div>
                 <div className="rounded-xl bg-muted px-4 py-2.5">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
