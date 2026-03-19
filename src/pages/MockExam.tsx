@@ -6,6 +6,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useQuotaGate } from "@/hooks/useQuotaGate";
 import { subjects } from "@/data/questions";
 import { type MockExamTemplate } from "@/data/mockExamTemplates";
 import { ExamBrowse } from "@/components/mock-exam/ExamBrowse";
