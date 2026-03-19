@@ -63,11 +63,8 @@ export function useQuotaGate() {
       remainingQuestions: Math.max(0, prev.remainingQuestions - 1),
     }));
 
-    await supabase
-      .from("user_quotas")
-      .update({ used_questions: state.usedQuestions + 1, updated_at: new Date().toISOString() })
-      .eq("user_id", user.id);
-  }, [user, state.usedQuestions]);
+    await supabase.rpc("increment_used_questions", { _user_id: user.id });
+  }, [user]);
 
   const canPractice = state.hasPurchased && state.remainingQuestions > 0;
   const canUseAITutor = state.hasPurchased;

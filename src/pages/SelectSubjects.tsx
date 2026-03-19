@@ -92,35 +92,16 @@ export default function SelectSubjects() {
     setSaving(true);
 
     try {
-      // Update quota with selected subjects & levels (RLS allows UPDATE on own row)
-      const { error: quotaError } = await supabase
-        .from("user_quotas")
-        .update({
-          subjects: selectedSubjects,
-          levels: selectedLevels,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
+      const { data, error } = await supabase.rpc("confirm_subject_selection", {
+        _user_id: user.id,
+        _subjects: selectedSubjects,
+        _levels: selectedLevels,
+      });
 
-      if (quotaError) throw quotaError;
+      if (error) throw error;
 
-      // Save preferences
-      await supabase.from("user_preferences").upsert({
-        user_id: user.id,
-        subjects: selectedSubjects,
-        onboarding_complete: true,
-      } as any);
-
-      // Ensure user_stats exists
-      const { data: existingStats } = await supabase
-        .from("user_stats")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!existingStats) {
-        await supabase.from("user_stats").insert({ user_id: user.id });
-      }
+      const result = data as any;
+      if (result?.error) throw new Error(result.error);
 
       setStep("done");
     } catch (err: any) {
