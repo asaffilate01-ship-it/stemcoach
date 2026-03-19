@@ -72,6 +72,8 @@ export default function Practice() {
   const [showXP, setShowXP] = useState(false);
   const [showCorrectAnim, setShowCorrectAnim] = useState(false);
   const [lastCorrect, setLastCorrect] = useState(false);
+  const [showMascotReaction, setShowMascotReaction] = useState(false);
+  const [mascotCorrect, setMascotCorrect] = useState<boolean | null>(null);
   const [timerRunning, setTimerRunning] = useState(true);
   const [timeTaken, setTimeTaken] = useState(0);
 
