@@ -20,20 +20,62 @@ function rateLimit(key: string, max: number, windowMs: number): boolean {
   return true;
 }
 
-async function verifyAuth(req: Request) {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) throw new Error("Unauthorized");
-
-  const supabase = createClient(
+function getSupabaseAdmin() {
+  return createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     { auth: { persistSession: false } }
   );
+}
 
+async function verifyAuth(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) throw new Error("Unauthorized");
+  const supabase = getSupabaseAdmin();
   const token = authHeader.replace("Bearer ", "");
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data.user) throw new Error("Invalid authentication");
   return data.user;
+}
+
+// Generate a stable cache key from params
+function makeCacheKey(params: Record<string, any>): string {
+  const sorted = Object.keys(params).sort().reduce((acc: any, k) => {
+    const v = params[k];
+    if (v !== undefined && v !== null) acc[k] = v;
+    return acc;
+  }, {});
+  return btoa(JSON.stringify(sorted)).slice(0, 200);
+}
+
+// Try to get cached response
+async function getCache(action: string, questionId?: string, cacheKey?: string): Promise<string | null> {
+  const sb = getSupabaseAdmin();
+  let query = sb.from("coaching_cache").select("response_text, hit_count, id").eq("action", action);
+  if (questionId) query = query.eq("question_id", questionId);
+  else query = query.is("question_id", null);
+  if (cacheKey) query = query.eq("cache_key", cacheKey);
+  else query = query.is("cache_key", null);
+
+  const { data } = await query.maybeSingle();
+  if (data) {
+    // Increment hit count in background
+    sb.from("coaching_cache").update({ hit_count: (data.hit_count || 0) + 1 } as any).eq("id", data.id).then(() => {});
+    return data.response_text;
+  }
+  return null;
+}
+
+// Store response in cache
+async function setCache(responseText: string, action: string, questionId?: string, cacheKey?: string) {
+  const sb = getSupabaseAdmin();
+  const row: any = { action, response_text: responseText };
+  if (questionId) row.question_id = questionId;
+  if (cacheKey) row.cache_key = cacheKey;
+  await sb.from("coaching_cache").upsert(row, {
+    onConflict: "coaching_cache_flexible_key_idx",
+    ignoreDuplicates: false,
+  }).then(() => {});
 }
 
 serve(async (req) => {
@@ -42,7 +84,6 @@ serve(async (req) => {
   try {
     const user = await verifyAuth(req);
 
-    // Rate limit: 30 requests per minute per user
     if (!rateLimit(user.id, 30, 60_000)) {
       return new Response(JSON.stringify({ error: "Too many requests. Please slow down." }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "30" },
@@ -61,8 +102,7 @@ serve(async (req) => {
       return await explainQuestion(params, LOVABLE_API_KEY);
     } else {
       return new Response(JSON.stringify({ error: "Unknown action" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
   } catch (e) {
@@ -70,54 +110,52 @@ serve(async (req) => {
     const status = msg === "Unauthorized" || msg === "Invalid authentication" ? 401 : 500;
     console.error("ai-tutor error:", e);
     return new Response(JSON.stringify({ error: msg }), {
-      status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
 
 async function callAI(messages: any[], LOVABLE_API_KEY: string, tools?: any[], tool_choice?: any) {
-  const body: any = {
-    model: "google/gemini-3-flash-preview",
-    messages,
-  };
-  if (tools) {
-    body.tools = tools;
-    body.tool_choice = tool_choice;
-  }
+  const body: any = { model: "google/gemini-3-flash-preview", messages };
+  if (tools) { body.tools = tools; body.tool_choice = tool_choice; }
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 
-  if (response.status === 429) {
-    return { error: "Rate limit exceeded. Please try again in a moment.", status: 429 };
-  }
-  if (response.status === 402) {
-    return { error: "AI credits exhausted. Please add funds.", status: 402 };
-  }
+  if (response.status === 429) return { error: "Rate limit exceeded. Please try again in a moment.", status: 429 };
+  if (response.status === 402) return { error: "AI credits exhausted. Please add funds.", status: 402 };
   if (!response.ok) {
     const t = await response.text();
     console.error("AI error:", response.status, t);
     return { error: "AI service unavailable", status: 500 };
   }
-
-  const data = await response.json();
-  return { data };
+  return { data: await response.json() };
 }
 
+function jsonRes(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+// ── GRADE ESSAY ──
 async function gradeEssay(params: any, apiKey: string) {
-  const { question_text, student_answer, mark_scheme, model_answer, max_marks, subject, topic } = params;
+  const { question_text, student_answer, mark_scheme, model_answer, max_marks, subject, topic, question_id } = params;
 
   if (!question_text || !student_answer) {
-    return new Response(JSON.stringify({ error: "question_text and student_answer are required" }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonRes({ error: "question_text and student_answer are required" }, 400);
+  }
+
+  // Cache key: question + normalized student answer
+  const cacheKey = makeCacheKey({ q: question_text.slice(0, 500), a: student_answer.slice(0, 500) });
+
+  // Check cache
+  const cached = await getCache("grade-essay", question_id, cacheKey);
+  if (cached) {
+    return jsonRes({ grading: JSON.parse(cached) });
   }
 
   const systemPrompt = `You are an expert ${subject || "STEM"} examiner marking a student's essay/extended answer. 
@@ -159,30 +197,36 @@ Maximum marks available: ${max_marks || 6}`;
       { role: "system", content: systemPrompt },
       { role: "user", content: `Question: ${question_text}\n\nStudent's answer:\n${student_answer.slice(0, 5000)}` },
     ],
-    apiKey,
-    tools,
+    apiKey, tools,
     { type: "function", function: { name: "grade_response" } }
   );
 
-  if (result.error) {
-    return new Response(JSON.stringify({ error: result.error }), {
-      status: result.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  if (result.error) return jsonRes({ error: result.error }, result.status);
 
   const toolCall = result.data.choices[0]?.message?.tool_calls?.[0];
   const grading = toolCall ? JSON.parse(toolCall.function.arguments) : null;
 
-  return new Response(JSON.stringify({ grading }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  // Cache the grading result
+  if (grading) {
+    setCache(JSON.stringify(grading), "grade-essay", question_id, cacheKey);
+  }
+
+  return jsonRes({ grading });
 }
 
+// ── GENERATE QUESTIONS ──
 async function generateQuestions(params: any, apiKey: string) {
   const { subject, topic, subtopic, curriculum, boards, difficulty, question_type, count = 5 } = params;
-
   const safeCount = Math.min(Math.max(1, Number(count) || 5), 20);
+
+  // Cache key based on generation params
+  const cacheKey = makeCacheKey({ subject, topic, subtopic, curriculum, boards, difficulty, question_type, count: safeCount });
+
+  // Check cache for previously generated questions
+  const cached = await getCache("generate-questions", undefined, cacheKey);
+  if (cached) {
+    return jsonRes({ questions: JSON.parse(cached) });
+  }
 
   const typeInstructions: Record<string, string> = {
     mcq: "Multiple choice with exactly 4 options and one correct answer.",
@@ -245,68 +289,39 @@ Include detailed tuition tips and exam technique advice with every question.`;
       { role: "system", content: systemPrompt },
       { role: "user", content: `Generate ${safeCount} ${question_type} questions for ${topic} > ${subtopic} at difficulty ${difficulty}.` },
     ],
-    apiKey,
-    tools,
+    apiKey, tools,
     { type: "function", function: { name: "submit_questions" } }
   );
 
-  if (result.error) {
-    return new Response(JSON.stringify({ error: result.error }), {
-      status: result.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  if (result.error) return jsonRes({ error: result.error }, result.status);
 
   const toolCall = result.data.choices[0]?.message?.tool_calls?.[0];
   const generated = toolCall ? JSON.parse(toolCall.function.arguments) : { questions: [] };
 
-  // Attach metadata to each question
   const questions = generated.questions.map((q: any) => ({
-    ...q,
-    subject,
-    topic,
-    subtopic,
-    curriculum,
-    boards: boards || [],
-    difficulty,
-    question_type,
+    ...q, subject, topic, subtopic, curriculum, boards: boards || [], difficulty, question_type,
   }));
 
-  return new Response(JSON.stringify({ questions }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  // Cache the generated questions
+  if (questions.length > 0) {
+    setCache(JSON.stringify(questions), "generate-questions", undefined, cacheKey);
+  }
+
+  return jsonRes({ questions });
 }
 
+// ── EXPLAIN QUESTION ──
 async function explainQuestion(params: any, apiKey: string) {
   const { question_text, correct_answer, student_answer, subject, topic, question_id } = params;
 
   if (!question_text) {
-    return new Response(JSON.stringify({ error: "question_text is required" }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonRes({ error: "question_text is required" }, 400);
   }
 
-  // Check cache first
+  // Check cache
   if (question_id) {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-    const { data: cached } = await supabase
-      .from("coaching_cache")
-      .select("response_text")
-      .eq("question_id", question_id)
-      .eq("action", "explain")
-      .maybeSingle();
-
-    if (cached) {
-      // Increment hit count in background
-      supabase.from("coaching_cache").update({ hit_count: cached.hit_count + 1 } as any).eq("question_id", question_id).eq("action", "explain").then(() => {});
-      return new Response(JSON.stringify({ explanation: cached.response_text }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const cached = await getCache("explain", question_id);
+    if (cached) return jsonRes({ explanation: cached });
   }
 
   const systemPrompt = `You are a friendly, expert ${subject || "STEM"} tutor explaining a concept to a 16-18 year old student.
@@ -328,30 +343,14 @@ Please explain why the correct answer is right and help me understand the concep
     apiKey
   );
 
-  if (result.error) {
-    return new Response(JSON.stringify({ error: result.error }), {
-      status: result.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  if (result.error) return jsonRes({ error: result.error }, result.status);
 
   const explanation = result.data.choices[0]?.message?.content || "Unable to generate explanation.";
 
-  // Cache the response for future use
+  // Cache the response
   if (question_id) {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-    await supabase.from("coaching_cache").upsert({
-      question_id,
-      action: "explain",
-      response_text: explanation,
-    } as any, { onConflict: "question_id,action" }).then(() => {});
+    setCache(explanation, "explain", question_id);
   }
 
-  return new Response(JSON.stringify({ explanation }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonRes({ explanation });
 }

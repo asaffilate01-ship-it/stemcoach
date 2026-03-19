@@ -388,26 +388,29 @@ export type Database = {
       coaching_cache: {
         Row: {
           action: string
+          cache_key: string | null
           created_at: string
           hit_count: number
           id: string
-          question_id: string
+          question_id: string | null
           response_text: string
         }
         Insert: {
           action?: string
+          cache_key?: string | null
           created_at?: string
           hit_count?: number
           id?: string
-          question_id: string
+          question_id?: string | null
           response_text: string
         }
         Update: {
           action?: string
+          cache_key?: string | null
           created_at?: string
           hit_count?: number
           id?: string
-          question_id?: string
+          question_id?: string | null
           response_text?: string
         }
         Relationships: []
