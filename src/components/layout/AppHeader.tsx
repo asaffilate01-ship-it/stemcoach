@@ -20,6 +20,7 @@ interface NavItem {
   icon: typeof BookOpen;
   roles?: string[];
   group?: string;
+  image?: string;
 }
 
 const navItems: NavItem[] = [
