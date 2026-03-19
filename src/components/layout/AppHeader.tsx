@@ -20,13 +20,14 @@ interface NavItem {
   icon: typeof BookOpen;
   roles?: string[];
   group?: string;
+  image?: string;
 }
 
 const navItems: NavItem[] = [
   { to: "/", label: "Home", icon: BookOpen },
   { to: "/subjects", label: "Subjects", icon: GraduationCap },
   { to: "/mock-exam", label: "Exam", icon: Trophy },
-  { to: "/ai-tutor", label: "STEMcoach", icon: Bot },
+  { to: "/ai-tutor", label: "STEMcoach", icon: Bot, image: "/assets/coach-stem.png" },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study" },
   { to: "/flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study" },
   { to: "/weak-drills", label: "Drills", icon: Brain, group: "study" },
@@ -89,7 +90,11 @@ export function AppHeader() {
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
-      <item.icon className="h-3.5 w-3.5" />
+      {item.image ? (
+        <img src={item.image} alt={item.label} className="h-4 w-4 rounded-sm object-cover" />
+      ) : (
+        <item.icon className="h-3.5 w-3.5" />
+      )}
       {item.label}
     </Link>
   );
