@@ -47,6 +47,7 @@ export const subjects: SubjectInfo[] = [
     id: "physics",
     name: "Physics",
     icon: "⚛",
+    mascotImage: "/assets/physix.png",
     color: "250 80% 60%",
     questionCount: 6000,
     topics: ["Mechanics", "Electricity", "Waves", "Thermodynamics", "Magnetism", "Nuclear Physics", "Quantum Physics", "Optics"],
