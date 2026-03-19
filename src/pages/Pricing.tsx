@@ -5,18 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGeoRegion } from "@/hooks/useGeoRegion";
-import { PACKS, type PackKey, type RegionKey, regionLabels } from "@/lib/subscriptionTiers";
+import { PACKS, type PackKey, regionLabels } from "@/lib/subscriptionTiers";
 import { Check, Zap, Plus, Globe, ArrowRight, Shield, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const packIcons: Record<PackKey, typeof Zap> = {
   standard: Package,
@@ -77,21 +70,12 @@ export default function Pricing() {
                 Get thousands of exam-ready questions. No subscriptions, no hidden fees.
               </p>
 
-              <div className="mt-8 flex items-center justify-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <Select value={region} onValueChange={(v) => setRegion(v as RegionKey)}>
-                  <SelectTrigger className="w-[200px] rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(Object.entries(regionLabels) as [RegionKey, string][]).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {!geoLoading && (
+                <div className="mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Globe className="h-4 w-4" />
+                  <span>Showing prices for {regionLabels[region]}</span>
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
