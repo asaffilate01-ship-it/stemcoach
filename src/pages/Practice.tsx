@@ -299,7 +299,10 @@ export default function Practice() {
       : selectedAnswer === question.correct_answer;
     setLastCorrect(correct);
     setShowCorrectAnim(true);
+    setMascotCorrect(correct);
+    setShowMascotReaction(true);
     setTimeout(() => setShowCorrectAnim(false), 2000);
+    setTimeout(() => setShowMascotReaction(false), 3000);
     setScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
     if (user) {
       await supabase.from("attempts").insert({
