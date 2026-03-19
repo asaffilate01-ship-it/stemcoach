@@ -12,7 +12,7 @@ const stats = [
 
 const highlights = [
   "Step-by-step worked solutions",
-  "AI coaching when you're stuck",
+  "STEMcoach coaching when you're stuck",
   "Real exam simulations",
 ];
 
