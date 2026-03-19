@@ -35,6 +35,9 @@ export function ExamSetup({
   isLoading,
   onStart,
   onBack,
+  mockExamsRemaining,
+  mockExamsTotal,
+  canTakeMockExam = true,
 }: ExamSetupProps) {
   const subjectInfo = selectedTemplate
     ? subjects.find((s) => s.id === selectedTemplate.subject)
