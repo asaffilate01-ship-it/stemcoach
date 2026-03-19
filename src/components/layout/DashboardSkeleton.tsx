@@ -8,8 +8,20 @@ export function DashboardSkeleton() {
       animate={{ opacity: 1 }}
       className="container mx-auto px-4 py-5 md:py-8"
     >
-      <Skeleton className="mb-1 h-3 w-20 rounded-lg" />
-      <Skeleton className="mb-6 h-8 w-44 rounded-xl md:mb-8" />
+      <div className="mb-6 flex items-start gap-4 md:mb-8">
+        <motion.div
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="hidden sm:block h-14 w-14 shrink-0 overflow-hidden rounded-2xl shadow-md"
+        >
+          <img src="/assets/coach-stem.png" alt="Loading..." className="h-full w-full object-cover" />
+        </motion.div>
+        <div>
+          <Skeleton className="mb-1 h-3 w-20 rounded-lg" />
+          <Skeleton className="mb-2 h-8 w-44 rounded-xl" />
+          <Skeleton className="h-4 w-64 rounded-lg" />
+        </div>
+      </div>
 
       {/* Quick actions */}
       <div className="mb-5 flex gap-2.5 overflow-hidden sm:grid sm:grid-cols-4 sm:gap-3 md:mb-8">

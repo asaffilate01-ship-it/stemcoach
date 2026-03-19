@@ -786,6 +786,16 @@ export default function Practice() {
         </AnimatePresence>
 
         <XPPopup xp={xpGained} show={showXP} />
+
+        {/* Mascot reaction */}
+        <AnimatePresence>
+          {showMascotReaction && (
+            <div className="fixed bottom-20 left-4 right-4 z-40 flex justify-center lg:bottom-8 lg:left-auto lg:right-8">
+              <MascotReaction subjectId={subjectId || ""} correct={mascotCorrect} show={showMascotReaction} />
+            </div>
+          )}
+        </AnimatePresence>
+
         {newBadges.map((badge) => (
           <BadgeUnlock key={badge.id} badge={badge} onDismiss={() => dismissBadge(badge.id)} />
         ))}
