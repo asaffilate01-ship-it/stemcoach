@@ -8,6 +8,7 @@ import { useGeoRegion } from "@/hooks/useGeoRegion";
 import { PACKS, type PackKey, regionLabels } from "@/lib/subscriptionTiers";
 import { Check, Zap, Plus, Globe, ArrowRight, Shield, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
 const packIcons: Record<PackKey, typeof Zap> = {
