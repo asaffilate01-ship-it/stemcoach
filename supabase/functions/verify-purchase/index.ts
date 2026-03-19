@@ -9,18 +9,18 @@ const corsHeaders = {
 
 // Map of valid price IDs to their question grants for server-side validation
 const VALID_PRICES: Record<string, { questions: number; pack: string }> = {
-  // Standard pack
-  "price_1TCNddFFogsDQVs4QyDkGoa6": { questions: 10000, pack: "standard" },
-  "price_1TCNdhFFogsDQVs4QJcncX1T": { questions: 10000, pack: "standard" },
-  "price_1TCNdjFFogsDQVs4VVGK1Ncx": { questions: 10000, pack: "standard" },
-  "price_1TCNdkFFogsDQVs4ZeZ8ikLB": { questions: 10000, pack: "standard" },
-  "price_1TCNdmFFogsDQVs4WszzaaSM": { questions: 10000, pack: "standard" },
+  // Standard pack (Ultimate Pack)
+  "price_1TCNddFFogsDQVs4QyDkGoa6": { questions: 10000, pack: "standard" }, // GBP
+  "price_1TCYoCFFogsDQVs4n5EaIpC4": { questions: 10000, pack: "standard" }, // USD
+  "price_1TCYoDFFogsDQVs4a7IAliJs": { questions: 10000, pack: "standard" }, // AED
+  "price_1TCYoEFFogsDQVs43ZduOOov": { questions: 10000, pack: "standard" }, // INR
+  "price_1TCYoEFFogsDQVs45swS26PC": { questions: 10000, pack: "standard" }, // PKR
   // Top-up pack
-  "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 2000, pack: "topup" },
-  "price_1TCNdiFFogsDQVs4Kek0zoTb": { questions: 2000, pack: "topup" },
-  "price_1TCNdkFFogsDQVs4Xdwg4abI": { questions: 2000, pack: "topup" },
-  "price_1TCNdlFFogsDQVs4PSOP1So1": { questions: 2000, pack: "topup" },
-  "price_1TCNdmFFogsDQVs4Hju7qgvO": { questions: 2000, pack: "topup" },
+  "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 2000, pack: "topup" }, // GBP
+  "price_1TCYoFFFogsDQVs4Klbw5WCw": { questions: 2000, pack: "topup" }, // USD
+  "price_1TCYoGFFogsDQVs4ZGx96zs9": { questions: 2000, pack: "topup" }, // AED
+  "price_1TCYoGFFogsDQVs4MzY6cjyN": { questions: 2000, pack: "topup" }, // INR
+  "price_1TCYoHFFogsDQVs4tHGNLjSv": { questions: 2000, pack: "topup" }, // PKR
 };
 
 // Detect region from Stripe currency
