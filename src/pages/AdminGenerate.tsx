@@ -242,7 +242,7 @@ export default function AdminGenerate() {
           <div className="stem-label mb-2">Admin Panel</div>
           <h1 className="stem-heading text-3xl">Question Generator</h1>
           <p className="mt-2 text-muted-foreground">
-            Generate exam-accurate questions using AI. Target: 1,000,000 questions.
+            Generate exam-accurate questions using STEMcoach. Target: 1,000,000 questions.
           </p>
         </div>
 

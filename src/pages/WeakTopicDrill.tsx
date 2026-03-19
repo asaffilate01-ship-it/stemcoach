@@ -104,7 +104,7 @@ export default function WeakTopicDrill() {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">Sign in to access AI-powered drills.</div>
+        <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">Sign in to access STEMcoach-powered drills.</div>
       </div>
     );
   }
@@ -117,16 +117,16 @@ export default function WeakTopicDrill() {
       <PageTransition>
       <main className="container mx-auto max-w-3xl px-4 py-8">
         <div className="mb-8">
-          <div className="stem-label mb-2">AI-Powered Practice</div>
+          <div className="stem-label mb-2">STEMcoach Practice</div>
           <h1 className="stem-heading text-3xl">Weak Topic Drills</h1>
-          <p className="mt-2 text-sm text-muted-foreground">AI analyzes your performance and creates targeted practice sets for your weakest areas.</p>
+          <p className="mt-2 text-sm text-muted-foreground">STEMcoach analyzes your performance and creates targeted practice sets for your weakest areas.</p>
         </div>
 
         {!analyzed && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-8 text-center">
             <Brain className="mx-auto mb-4 h-12 w-12 text-primary" />
             <h3 className="mb-2 text-lg font-semibold">Analyze Your Performance</h3>
-            <p className="mb-6 text-sm text-muted-foreground">AI will review your past answers to identify weak areas and generate targeted practice questions.</p>
+            <p className="mb-6 text-sm text-muted-foreground">STEMcoach will review your past answers to identify weak areas and generate targeted practice questions.</p>
             <Button onClick={analyze} disabled={loading} className="gap-2 rounded-xl">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</> : <><Sparkles className="h-4 w-4" /> Start Analysis</>}
             </Button>
