@@ -119,11 +119,11 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/30 bg-background/70 backdrop-blur-2xl backdrop-saturate-150">
-      <div className="container mx-auto flex h-12 items-center justify-between px-4 sm:h-16">
+    <header className="sticky top-0 z-50 border-b border-border/20 bg-background/70 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300">
+      <div className="container mx-auto flex h-12 items-center justify-between px-4 sm:h-14">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-extrabold text-white shadow-sm shadow-primary/20 sm:h-8 sm:w-8 sm:rounded-xl sm:text-sm">
+        <Link to="/" className="group flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-extrabold text-white shadow-sm shadow-primary/20 transition-transform duration-300 group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-xl sm:text-sm">
             S
           </span>
           <span className="font-bold tracking-tight text-foreground text-sm sm:text-base">

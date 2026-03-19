@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, BookOpen, Brain, Layers, BarChart3, Trophy, Star, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -41,7 +41,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-
     loadDashboard();
   }, [user]);
 
@@ -77,11 +76,9 @@ export default function Dashboard() {
 
       const qMap = new Map(questions?.map((q) => [q.id, q]) || []);
 
-      // Subject breakdown
       const subjectMap = new Map<string, { total: number; correct: number }>();
       const topicMap = new Map<string, { subject: string; total: number; correct: number }>();
 
-      // Daily chart data (last 14 days)
       const dayMap = new Map<string, { total: number; correct: number }>();
       for (let i = 13; i >= 0; i--) {
         const d = new Date();
@@ -174,12 +171,19 @@ export default function Dashboard() {
   const totalQ = stats?.total_questions || 0;
   const correctQ = stats?.correct_answers || 0;
   const accuracy = totalQ > 0 ? Math.round((correctQ / totalQ) * 100) : 0;
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  })();
+  const displayName = user?.email?.split("@")[0] || "Student";
 
   const quickActions = [
-    { label: "Practice", icon: BookOpen, to: "/subjects", color: "bg-primary/10 text-primary" },
-    { label: "Weak Drills", icon: Brain, to: "/weak-drills", color: "bg-warning/10 text-warning" },
-    { label: "Flashcards", icon: Layers, to: "/flashcards", color: "bg-success/10 text-success" },
-    { label: "Analytics", icon: BarChart3, to: "/analytics", color: "bg-accent text-accent-foreground" },
+    { label: "Practice", icon: BookOpen, to: "/subjects", color: "bg-primary/10 text-primary", hoverColor: "group-hover:bg-primary/15" },
+    { label: "Weak Drills", icon: Brain, to: "/weak-drills", color: "bg-warning/10 text-warning", hoverColor: "group-hover:bg-warning/15" },
+    { label: "Flashcards", icon: Layers, to: "/flashcards", color: "bg-success/10 text-success", hoverColor: "group-hover:bg-success/15" },
+    { label: "Analytics", icon: BarChart3, to: "/analytics", color: "bg-accent text-accent-foreground", hoverColor: "group-hover:bg-accent/80" },
   ];
 
   return (
@@ -187,12 +191,25 @@ export default function Dashboard() {
       <AppHeader />
       <PageTransition>
         <main id="main-content" className="container mx-auto px-4 py-5 pb-28 flex-1 md:py-8">
-          <div className="mb-5 md:mb-8">
+          {/* Welcome header */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-5 md:mb-8"
+          >
             <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">Student Dashboard</div>
-            <h1 className="stem-heading text-2xl md:text-3xl">Your Progress</h1>
-          </div>
+            <h1 className="stem-heading text-2xl md:text-3xl">
+              {greeting}, <span className="stem-gradient-text capitalize">{displayName}</span>
+            </h1>
+            {stats?.streak > 0 && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Flame className="h-4 w-4 text-warning" />
+                {stats.streak}-day streak — keep it going!
+              </p>
+            )}
+          </motion.div>
 
-          {/* Quick Actions - horizontal scroll on mobile */}
+          {/* Quick Actions */}
           <div className="mb-5 md:mb-8">
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none sm:grid sm:grid-cols-4 sm:gap-3 sm:overflow-visible">
               {quickActions.map((action, i) => (
@@ -202,12 +219,13 @@ export default function Dashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   onClick={() => navigate(action.to)}
-                  className="stem-card flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left sm:gap-3 sm:p-3"
+                  className="group stem-card flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left sm:gap-3 sm:p-3"
                 >
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${action.color}`}>
-                    <action.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 sm:h-9 sm:w-9 ${action.color} ${action.hoverColor}`}>
+                    <action.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:scale-110" />
                   </div>
                   <span className="text-xs font-semibold whitespace-nowrap sm:text-sm">{action.label}</span>
+                  <ArrowRight className="ml-auto h-3 w-3 text-muted-foreground/0 transition-all duration-300 group-hover:text-muted-foreground/60 group-hover:translate-x-0.5 hidden sm:block" />
                 </motion.button>
               ))}
             </div>
@@ -221,20 +239,21 @@ export default function Dashboard() {
           {/* Stats Grid */}
           <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4 md:mb-8">
             {[
-              { label: "Questions", value: totalQ, icon: Target, color: "bg-primary/10 text-primary", gradient: false },
-              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]", gradient: false },
-              { label: "Streak", value: `${stats?.streak || 0}`, icon: Flame, color: "bg-warning/10 text-warning", suffix: " days", gradient: false },
-              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, color: "bg-primary/10 text-primary", gradient: true },
+              { label: "Questions", value: totalQ, icon: Target, color: "bg-primary/10 text-primary" },
+              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "bg-success/10 text-success" },
+              { label: "Streak", value: `${stats?.streak || 0}`, icon: Flame, color: "bg-warning/10 text-warning", suffix: " days" },
+              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, color: "bg-primary/10 text-primary" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="rounded-xl border border-border/40 bg-card p-3 sm:rounded-2xl sm:p-5"
+                initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                className="group rounded-xl border border-border/40 bg-card p-3 transition-shadow hover:shadow-premium sm:rounded-2xl sm:p-5"
                 style={{ boxShadow: "var(--stem-card-shadow)" }}
               >
-                <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg sm:mb-3 sm:h-10 sm:w-10 sm:rounded-xl ${stat.color}`}>
+                <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110 sm:mb-3 sm:h-10 sm:w-10 sm:rounded-xl ${stat.color}`}>
                   <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <div className="text-xl font-extrabold tracking-tight sm:text-2xl">
@@ -247,21 +266,38 @@ export default function Dashboard() {
           </div>
 
           {totalQ === 0 ? (
-            <div className="stem-card rounded-xl p-12 text-center">
-              <Target className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-              <h3 className="mb-2 text-lg font-semibold">Start practicing!</h3>
-              <p className="mb-4 text-sm text-muted-foreground">Answer some questions to see your progress here.</p>
-              <button onClick={() => navigate("/subjects")} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-                Browse Subjects
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="stem-card rounded-xl p-12 text-center"
+            >
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                <Target className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="mb-2 text-lg font-bold">Start practicing!</h3>
+              <p className="mb-6 text-sm text-muted-foreground">Answer some questions to see your progress here.</p>
+              <button
+                onClick={() => navigate("/subjects")}
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98]"
+              >
+                Browse Subjects <ArrowRight className="h-4 w-4" />
               </button>
-            </div>
+            </motion.div>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
               {/* Activity Chart */}
               {dailyData.some(d => d.questions > 0) && (
-                <div className="stem-card rounded-xl p-6 lg:col-span-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="stem-card rounded-xl p-5 sm:p-6 lg:col-span-2"
+                >
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <Calendar className="h-4 w-4 text-primary" /> 14-Day Activity
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                      <Calendar className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    14-Day Activity
                   </h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <AreaChart data={dailyData}>
@@ -279,19 +315,30 @@ export default function Dashboard() {
                           border: "1px solid hsl(var(--border))",
                           borderRadius: "0.75rem",
                           fontSize: "0.75rem",
+                          boxShadow: "var(--stem-card-shadow)",
                         }}
                       />
-                      <Area type="monotone" dataKey="questions" stroke="hsl(var(--primary))" fill="url(#colorQ)" strokeWidth={2} name="Questions" />
+                      <Area type="monotone" dataKey="questions" stroke="hsl(var(--primary))" fill="url(#colorQ)" strokeWidth={2.5} name="Questions" dot={false} activeDot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))" }} />
                     </AreaChart>
                   </ResponsiveContainer>
-                </div>
+                </motion.div>
               )}
 
               {/* Subject Progress */}
-              <div className="stem-card rounded-xl p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="stem-card rounded-xl p-5 sm:p-6"
+              >
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="font-semibold">Subject Readiness</h3>
-                  <button onClick={() => navigate("/analytics")} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                  <h3 className="flex items-center gap-2 font-semibold">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                      <BookOpen className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    Subject Readiness
+                  </h3>
+                  <button onClick={() => navigate("/analytics")} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline transition-colors">
                     View details <ArrowRight className="h-3 w-3" />
                   </button>
                 </div>
@@ -300,10 +347,10 @@ export default function Dashboard() {
                 ) : (
                   <div className="space-y-4">
                     {subjectProgress.map((sp) => (
-                      <div key={sp.subject}>
+                      <div key={sp.subject} className="group">
                         <div className="mb-1.5 flex items-center justify-between text-sm">
                           <span className="font-medium capitalize">{sp.subject}</span>
-                          <span className="text-muted-foreground">{sp.accuracy}%</span>
+                          <span className={`font-semibold tabular-nums ${sp.accuracy >= 80 ? "text-success" : sp.accuracy >= 60 ? "text-warning" : "text-destructive"}`}>{sp.accuracy}%</span>
                         </div>
                         <Progress value={sp.accuracy} className="h-2" />
                         <div className="mt-1 flex justify-between text-xs text-muted-foreground">
@@ -314,72 +361,123 @@ export default function Dashboard() {
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {/* Weak Topics */}
-              <div className="stem-card rounded-xl p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="stem-card rounded-xl p-5 sm:p-6"
+              >
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                  <AlertTriangle className="h-4 w-4 text-warning" /> Focus Areas
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10">
+                    <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+                  </div>
+                  Focus Areas
                 </h3>
                 {weakTopics.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No weak areas identified yet. Keep practicing!</p>
+                  <div className="rounded-xl border border-dashed border-border/60 p-6 text-center">
+                    <Sparkles className="mx-auto mb-2 h-6 w-6 text-muted-foreground/30" />
+                    <p className="text-sm text-muted-foreground">No weak areas identified yet. Keep practicing!</p>
+                  </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {weakTopics.map((wt) => (
-                      <div key={`${wt.subject}-${wt.topic}`} className="rounded-lg border p-3">
+                      <motion.div
+                        key={`${wt.subject}-${wt.topic}`}
+                        whileHover={{ x: 2 }}
+                        className="group cursor-pointer rounded-xl border border-border/50 p-3 transition-all hover:border-warning/20 hover:bg-warning/[0.02]"
+                        onClick={() => navigate("/weak-drills")}
+                      >
                         <div className="mb-1 flex items-center justify-between">
                           <span className="text-sm font-medium">{wt.topic}</span>
-                          <span className="text-xs font-semibold text-destructive">{wt.accuracy}%</span>
+                          <span className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${wt.accuracy < 40 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>{wt.accuracy}%</span>
                         </div>
                         <div className="text-xs capitalize text-muted-foreground">{wt.subject} · {wt.total} attempts</div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {/* Recent Activity */}
               {recentActivity.length > 0 && (
-                <div className="stem-card rounded-xl p-6">
-                  <h3 className="mb-4 font-semibold">Recent Activity</h3>
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="stem-card rounded-xl p-5 sm:p-6"
+                >
+                  <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent">
+                      <TrendingUp className="h-3.5 w-3.5 text-accent-foreground" />
+                    </div>
+                    Recent Activity
+                  </h3>
                   <div className="space-y-2">
-                    {recentActivity.map((a, i) => (
-                      <div key={i} className="flex items-center justify-between rounded-lg border px-3 py-2">
-                        <div>
-                          <div className="text-sm font-medium">{a.topic}</div>
-                          <div className="text-xs capitalize text-muted-foreground">{a.subject} · {a.date}</div>
-                        </div>
-                        <div className={`text-sm font-semibold ${a.score / a.total >= 0.8 ? "text-success" : a.score / a.total >= 0.6 ? "text-warning" : "text-destructive"}`}>
-                          {a.score}/{a.total}
-                        </div>
-                      </div>
-                    ))}
+                    {recentActivity.map((a, i) => {
+                      const ratio = a.score / a.total;
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.3 + i * 0.04 }}
+                          className="flex items-center justify-between rounded-xl border border-border/40 px-3 py-2.5 transition-all hover:bg-muted/30"
+                        >
+                          <div>
+                            <div className="text-sm font-medium">{a.topic}</div>
+                            <div className="text-xs capitalize text-muted-foreground">{a.subject} · {a.date}</div>
+                          </div>
+                          <div className={`rounded-lg px-2 py-0.5 text-sm font-bold tabular-nums ${ratio >= 0.8 ? "bg-success/10 text-success" : ratio >= 0.6 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"}`}>
+                            {a.score}/{a.total}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Badges */}
               {badges.length > 0 && (
-                <div className="stem-card rounded-xl p-6">
-                  <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <Trophy className="h-4 w-4 text-primary" /> Recent Badges
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {badges.map((ub: any) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="stem-card rounded-xl p-5 sm:p-6"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="flex items-center gap-2 font-semibold">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                        <Trophy className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      Recent Badges
+                    </h3>
+                    <button onClick={() => navigate("/badges")} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                      View all <ArrowRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
+                    {badges.map((ub: any, i: number) => (
                       <motion.div
                         key={ub.id}
-                        whileHover={{ scale: 1.03, y: -2 }}
-                        className="rounded-xl border border-primary/15 bg-gradient-to-br from-primary/5 to-transparent p-3 text-center transition-shadow hover:shadow-lg"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.35 + i * 0.05 }}
+                        whileHover={{ scale: 1.04, y: -2 }}
+                        className="rounded-xl border border-primary/10 bg-gradient-to-br from-primary/5 to-transparent p-3 text-center transition-shadow hover:shadow-premium"
                       >
                         <div className="mb-1.5 text-2xl">{ub.badges?.icon || "🏆"}</div>
-                        <div className="text-xs font-bold">{ub.badges?.name || "Badge"}</div>
+                        <div className="text-xs font-bold leading-tight">{ub.badges?.name || "Badge"}</div>
                         <div className="mt-1 text-[10px] text-muted-foreground">
                           {new Date(ub.earned_at).toLocaleDateString()}
                         </div>
                       </motion.div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           )}

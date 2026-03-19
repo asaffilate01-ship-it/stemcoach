@@ -58,7 +58,12 @@ export function FeaturesSection() {
     <section className="relative border-t border-border/30 py-20 md:py-28">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.02),transparent_70%)]" />
       <div className="container relative mx-auto px-4">
-        <div className="mb-16 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-16 text-center"
+        >
           <div className="stem-label mb-3">Platform Features</div>
           <h2 className="stem-section-heading">
             Everything a tuition centre offers
@@ -68,12 +73,12 @@ export function FeaturesSection() {
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
             Built by teachers and tutors. From practice questions to live classrooms, everything you need to ace your exams.
           </p>
-        </div>
+        </motion.div>
 
         {/* Dashboard preview image */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto mb-20 max-w-4xl"
@@ -83,13 +88,13 @@ export function FeaturesSection() {
             <img
               src={dashboardImg}
               alt="STEMCoach dashboard showing exam analytics, progress tracking, and achievement badges"
-              className="relative w-full rounded-2xl shadow-2xl shadow-primary/8 ring-1 ring-border/30"
+              className="relative w-full rounded-2xl shadow-2xl shadow-primary/8 ring-1 ring-border/30 transition-transform duration-700 hover:scale-[1.01]"
               loading="lazy"
             />
           </div>
         </motion.div>
 
-        <div className="mx-auto grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -97,7 +102,8 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-              className="group stem-card p-6"
+              whileHover={{ y: -4, transition: { duration: 0.25 } }}
+              className="group stem-card p-5 sm:p-6"
             >
               <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${feature.iconBg} transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
                 <feature.icon className="h-5 w-5" />

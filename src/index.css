@@ -156,12 +156,15 @@
   .stem-card {
     @apply bg-card rounded-2xl border border-border/40;
     box-shadow: var(--stem-card-shadow);
-    transition: box-shadow 300ms var(--stem-ease), transform 300ms var(--stem-ease), border-color 300ms var(--stem-ease);
+    transition: box-shadow 400ms var(--stem-ease), transform 400ms var(--stem-ease), border-color 400ms var(--stem-ease);
   }
   .stem-card:hover {
     box-shadow: var(--stem-card-hover);
-    transform: translateY(-2px);
-    border-color: hsl(var(--border));
+    transform: translateY(-3px);
+    border-color: hsl(var(--primary) / 0.15);
+  }
+  .stem-card:active {
+    transform: translateY(-1px);
   }
   .stem-label {
     @apply text-[11px] font-bold uppercase tracking-[0.15em] text-primary;
@@ -226,5 +229,28 @@
     content: '';
     @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-[2px] rounded-full;
     background: var(--gradient-hero);
+  }
+
+  /* Staggered entrance for grid children */
+  .stem-stagger > * {
+    animation: staggerFadeIn 0.4s var(--stem-ease) both;
+  }
+  .stem-stagger > *:nth-child(1) { animation-delay: 0s; }
+  .stem-stagger > *:nth-child(2) { animation-delay: 0.06s; }
+  .stem-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+  .stem-stagger > *:nth-child(4) { animation-delay: 0.18s; }
+  .stem-stagger > *:nth-child(5) { animation-delay: 0.24s; }
+  .stem-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+  .stem-stagger > *:nth-child(7) { animation-delay: 0.36s; }
+  .stem-stagger > *:nth-child(8) { animation-delay: 0.42s; }
+  @keyframes staggerFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Smooth focus ring */
+  .stem-focus-ring:focus-visible {
+    @apply outline-none ring-2 ring-primary/40 ring-offset-2 ring-offset-background;
+    transition: box-shadow 200ms ease;
   }
 }

@@ -18,32 +18,32 @@ export function MobileBottomNav() {
   const visible = items.filter(i => !i.auth || user);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/20 bg-background/85 backdrop-blur-2xl backdrop-saturate-150 lg:hidden safe-area-bottom">
-      <div className="flex items-center justify-around px-2 py-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/15 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 lg:hidden safe-area-bottom">
+      <div className="flex items-center justify-around px-2 py-1.5">
         {visible.map((item) => {
           const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to));
           return (
             <Link
               key={item.to}
               to={item.to}
-              className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-semibold transition-all"
+              className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-semibold transition-all active:scale-95"
             >
-              <div className={`relative flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-200 ${
-                active ? "bg-primary/12" : ""
+              <div className={`relative flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-300 ${
+                active ? "bg-primary/12 scale-110" : ""
               }`}>
-                <item.icon className={`h-[18px] w-[18px] transition-colors duration-200 ${
+                <item.icon className={`h-[18px] w-[18px] transition-all duration-300 ${
                   active ? "text-primary" : "text-muted-foreground"
-                }`} />
+                }`} strokeWidth={active ? 2.5 : 2} />
                 {active && (
                   <motion.div
                     layoutId="bottomNavIndicator"
-                    className="absolute -bottom-1 h-0.5 w-4 rounded-full bg-primary"
+                    className="absolute -bottom-1 h-[3px] w-4 rounded-full bg-primary"
                     transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   />
                 )}
               </div>
-              <span className={`transition-colors duration-200 ${
-                active ? "text-primary" : "text-muted-foreground"
+              <span className={`transition-all duration-300 ${
+                active ? "text-primary font-bold" : "text-muted-foreground"
               }`}>
                 {item.label}
               </span>
