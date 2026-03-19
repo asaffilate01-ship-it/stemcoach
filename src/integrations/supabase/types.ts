@@ -385,6 +385,33 @@ export type Database = {
         }
         Relationships: []
       }
+      coaching_cache: {
+        Row: {
+          action: string
+          created_at: string
+          hit_count: number
+          id: string
+          question_id: string
+          response_text: string
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          hit_count?: number
+          id?: string
+          question_id: string
+          response_text: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          hit_count?: number
+          id?: string
+          question_id?: string
+          response_text?: string
+        }
+        Relationships: []
+      }
       daily_challenge_attempts: {
         Row: {
           challenge_id: string
@@ -1012,6 +1039,8 @@ export type Database = {
           created_at: string
           id: string
           levels: string[]
+          mock_exams_total: number
+          mock_exams_used: number
           subjects: string[]
           total_questions: number
           updated_at: string
@@ -1022,6 +1051,8 @@ export type Database = {
           created_at?: string
           id?: string
           levels?: string[]
+          mock_exams_total?: number
+          mock_exams_used?: number
           subjects?: string[]
           total_questions?: number
           updated_at?: string
@@ -1032,6 +1063,8 @@ export type Database = {
           created_at?: string
           id?: string
           levels?: string[]
+          mock_exams_total?: number
+          mock_exams_used?: number
           subjects?: string[]
           total_questions?: number
           updated_at?: string
@@ -1109,12 +1142,23 @@ export type Database = {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
       }
+      get_free_usage: {
+        Args: { _user_id: string }
+        Returns: {
+          attempt_count: number
+          subject: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_mock_exams_used: {
+        Args: { _user_id: string }
+        Returns: undefined
       }
       increment_used_questions: {
         Args: { _user_id: string }
