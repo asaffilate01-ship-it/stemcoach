@@ -232,6 +232,9 @@ export default function MockExam() {
               setState("browse");
               setSelectedTemplate(null);
             }}
+            mockExamsRemaining={mockExamsRemaining}
+            mockExamsTotal={mockExamsTotal}
+            canTakeMockExam={canTakeMockExam}
           />
         </PageTransition>
       </div>
