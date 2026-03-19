@@ -581,16 +581,16 @@ export default function Practice() {
                 {!showFeedback ? (
                   <Button
                     onClick={handleSubmit}
-                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI || (isFree && !canPractice)}
+                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI || (isFree && !canPracticeSubjectFree(subjectId || ""))}
                     className="rounded-xl px-6"
                     size="lg"
                   >
                     {loadingAI ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Grading…</>
-                    ) : isFree && !canPractice ? (
-                      <><Lock className="mr-2 h-4 w-4" /> Limit Reached</>
+                    ) : isFree && !canPracticeSubjectFree(subjectId || "") ? (
+                      <><Lock className="mr-2 h-4 w-4" /> Free Limit Reached</>
                     ) : isEssay ? (
-                      "Submit for AI Grading"
+                      "Submit for Grading"
                     ) : (
                       "Check Answer"
                     )}
@@ -603,14 +603,14 @@ export default function Practice() {
                     <Button variant="outline" onClick={() => setShowTips(!showTips)} className="gap-2 rounded-xl">
                       <Lightbulb className="h-4 w-4" /> {showTips ? "Hide Tips" : "Tips"}
                     </Button>
-                    {canUseAITutor ? (
+                    {canUseCoaching ? (
                       <Button variant="outline" onClick={handleAskAI} disabled={loadingAI} className="gap-2 rounded-xl">
                         {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                        AI Tutor
+                        Ask STEMcoach
                       </Button>
                     ) : (
                       <Button variant="outline" onClick={() => navigate("/pricing")} className="gap-2 rounded-xl text-muted-foreground">
-                        <Lock className="h-4 w-4" /> AI Tutor (Pro)
+                        <Lock className="h-4 w-4" /> Coaching (Pro)
                       </Button>
                     )}
                   </>
