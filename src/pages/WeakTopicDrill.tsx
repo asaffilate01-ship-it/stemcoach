@@ -104,7 +104,7 @@ export default function WeakTopicDrill() {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">Sign in to access AI-powered drills.</div>
+        <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">Sign in to access STEMcoach-powered drills.</div>
       </div>
     );
   }
