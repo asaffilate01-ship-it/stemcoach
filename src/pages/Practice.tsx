@@ -751,7 +751,7 @@ export default function Practice() {
               </motion.div>
             )}
 
-            {/* AI Explanation */}
+            {/* STEMcoach Explanation */}
             {aiExplanation && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-2xl border border-border/60 bg-card p-6">
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold">

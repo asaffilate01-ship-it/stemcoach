@@ -126,7 +126,7 @@ export default function WeakTopicDrill() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-8 text-center">
             <Brain className="mx-auto mb-4 h-12 w-12 text-primary" />
             <h3 className="mb-2 text-lg font-semibold">Analyze Your Performance</h3>
-            <p className="mb-6 text-sm text-muted-foreground">AI will review your past answers to identify weak areas and generate targeted practice questions.</p>
+            <p className="mb-6 text-sm text-muted-foreground">STEMcoach will review your past answers to identify weak areas and generate targeted practice questions.</p>
             <Button onClick={analyze} disabled={loading} className="gap-2 rounded-xl">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</> : <><Sparkles className="h-4 w-4" /> Start Analysis</>}
             </Button>

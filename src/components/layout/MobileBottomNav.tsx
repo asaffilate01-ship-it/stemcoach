@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 const items = [
   { to: "/", label: "Home", icon: Home },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
-  { to: "/ai-tutor", label: "AI Tutor", icon: Bot },
+  { to: "/ai-tutor", label: "STEMcoach", icon: Bot },
   { to: "/mock-exam", label: "Exam", icon: Trophy },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, auth: true },
 ];
