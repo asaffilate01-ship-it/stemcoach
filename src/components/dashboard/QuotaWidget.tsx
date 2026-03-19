@@ -3,16 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { CreditCard, Zap, BookOpen, Layers, Sparkles, Shield } from "lucide-react";
+import { CreditCard, Zap, BookOpen, Layers, Sparkles, Shield, FileText } from "lucide-react";
 
 export function QuotaWidget() {
-  const { totalQuestions, usedQuestions, remainingQuestions, subjects, levels, hasPurchased, loading } = useQuotaGate();
+  const {
+    totalQuestions, usedQuestions, remainingQuestions,
+    mockExamsTotal, mockExamsUsed, mockExamsRemaining,
+    subjects, levels, hasPurchased, loading,
+  } = useQuotaGate();
   const navigate = useNavigate();
 
   if (loading) return null;
 
   const usagePercent = totalQuestions > 0 ? Math.round((usedQuestions / totalQuestions) * 100) : 0;
-  const isLow = remainingQuestions < 5000 && hasPurchased;
+  const isLow = remainingQuestions < 500 && hasPurchased;
   const progressVariant = isLow ? "warning" : "gradient";
 
   return (
@@ -45,7 +49,18 @@ export function QuotaWidget() {
             </div>
             <span className="text-xs text-muted-foreground">of {totalQuestions.toLocaleString()}</span>
           </div>
-          <Progress value={100 - usagePercent} variant={progressVariant} className="mb-5 h-2.5" />
+          <Progress value={100 - usagePercent} variant={progressVariant} className="mb-4 h-2.5" />
+
+          {/* Mock exams */}
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-border/40 bg-muted/30 p-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold">Mock Exams</div>
+              <div className="text-xs text-muted-foreground">{mockExamsRemaining} remaining of {mockExamsTotal}</div>
+            </div>
+          </div>
 
           <div className="space-y-2 mb-4">
             {subjects.length > 0 && (
@@ -77,7 +92,7 @@ export function QuotaWidget() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
             <Sparkles className="h-7 w-7 text-primary" />
           </div>
-          <p className="mb-1 text-sm font-semibold">Unlock 100,000+ questions</p>
+          <p className="mb-1 text-sm font-semibold">Unlock 5,000+ questions & 20 mock exams</p>
           <p className="mb-4 text-xs text-muted-foreground">One-time purchase. No subscriptions.</p>
           <Button onClick={() => navigate("/pricing")} className="gap-2 rounded-xl bg-gradient-to-r from-primary to-[hsl(258_60%_52%)] hover:opacity-90 transition-opacity">
             <CreditCard className="h-4 w-4" /> Get Started

@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGeoRegion } from "@/hooks/useGeoRegion";
-import { PACKS, type PackKey, regionLabels } from "@/lib/subscriptionTiers";
-import { Check, Zap, Plus, Globe, ArrowRight, Shield, Package } from "lucide-react";
+import { PACKS, type PackKey, regionLabels, FREE_QUESTIONS_PER_SUBJECT } from "@/lib/subscriptionTiers";
+import { Check, Zap, Plus, Globe, ArrowRight, Shield, Package, Gift } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -17,10 +17,12 @@ const packIcons: Record<PackKey, typeof Zap> = {
 };
 
 const faqs = [
-  { q: "How does question allocation work?", a: "Your 10,000 questions are split evenly across the subjects and levels you choose." },
-  { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 2,000 more questions to new or existing subjects." },
+  { q: "How does question allocation work?", a: "Your 5,000 questions are split evenly across the subjects and levels you choose after purchase." },
+  { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 1,000 more questions and 5 mock exams to new or existing subjects." },
   { q: "Is this a one-time purchase?", a: "Yes — pay once, access forever. No subscriptions or recurring charges." },
   { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
+  { q: "What do I get for free?", a: `You get ${FREE_QUESTIONS_PER_SUBJECT} free questions per subject to try before purchasing. Full tutorial explanations included.` },
+  { q: "What is STEMcoach coaching?", a: "When you're stuck on a question, STEMcoach explains the concept step-by-step — like having a private tutor on demand." },
 ];
 
 export default function Pricing() {
@@ -67,11 +69,17 @@ export default function Pricing() {
                 <span className="stem-gradient-text">learn forever</span>
               </h1>
               <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-                Get thousands of exam-ready questions. No subscriptions, no hidden fees.
+                Get thousands of exam-ready questions with full tutorial explanations. No subscriptions, no hidden fees.
               </p>
 
+              {/* Free tier callout */}
+              <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--success)/0.3)] bg-[hsl(var(--success)/0.05)] px-4 py-2 text-sm font-medium text-[hsl(var(--success))]">
+                <Gift className="h-4 w-4" />
+                Try {FREE_QUESTIONS_PER_SUBJECT} free questions per subject — no payment required
+              </div>
+
               {!geoLoading && (
-                <div className="mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Globe className="h-4 w-4" />
                   <span>Showing prices for {regionLabels[region]}</span>
                 </div>
@@ -115,7 +123,9 @@ export default function Pricing() {
                       </div>
                       <div>
                         <h3 className="text-lg font-bold">{pack.name}</h3>
-                        <p className="text-xs text-muted-foreground">{pack.questions.toLocaleString()} questions</p>
+                        <p className="text-xs text-muted-foreground">
+                          {pack.questions.toLocaleString()} questions · {pack.mock_exams} mock exams
+                        </p>
                       </div>
                     </div>
 
@@ -158,23 +168,23 @@ export default function Pricing() {
               transition={{ delay: 0.3 }}
               className="mx-auto mt-10 max-w-2xl rounded-xl border border-primary/10 bg-primary/5 p-6"
             >
-              <h3 className="mb-3 text-center text-sm font-bold text-primary">How Question Allocation Works</h3>
+              <h3 className="mb-3 text-center text-sm font-bold text-primary">How It Works</h3>
               <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">10,000 questions</strong> → Split across your chosen subjects & levels</span>
+                  <span><strong className="text-foreground">Try free</strong> → {FREE_QUESTIONS_PER_SUBJECT} questions per subject, no card needed</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Need more?</strong> → Buy Top-Up for 2,000 extra questions</span>
+                  <span><strong className="text-foreground">5,000 questions</strong> → Split across your chosen subjects & levels</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Add subjects</strong> → Top-Up lets you expand anytime</span>
+                  <span><strong className="text-foreground">Need more?</strong> → Buy Top-Up for 1,000 extra questions + 5 exams</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Pay once</strong> → Access your questions forever</span>
+                  <span><strong className="text-foreground">Pay once</strong> → Access your questions & results forever</span>
                 </div>
               </div>
             </motion.div>
