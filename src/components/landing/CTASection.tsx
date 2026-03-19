@@ -25,7 +25,7 @@ export function CTASection() {
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
               <img
                 src={aiTutorImg}
-                alt="Student using AI tutor for step-by-step math solutions"
+                alt="Student using STEMcoach for step-by-step math solutions"
                 className="relative w-full rounded-2xl shadow-2xl shadow-primary/8 ring-1 ring-border/30"
                 loading="lazy"
               />
