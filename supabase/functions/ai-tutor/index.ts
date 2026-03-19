@@ -278,12 +278,35 @@ Include detailed tuition tips and exam technique advice with every question.`;
 }
 
 async function explainQuestion(params: any, apiKey: string) {
-  const { question_text, correct_answer, student_answer, subject, topic } = params;
+  const { question_text, correct_answer, student_answer, subject, topic, question_id } = params;
 
   if (!question_text) {
     return new Response(JSON.stringify({ error: "question_text is required" }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // Check cache first
+  if (question_id) {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+    const { data: cached } = await supabase
+      .from("coaching_cache")
+      .select("response_text")
+      .eq("question_id", question_id)
+      .eq("action", "explain")
+      .maybeSingle();
+
+    if (cached) {
+      // Increment hit count in background
+      supabase.from("coaching_cache").update({ hit_count: cached.hit_count + 1 } as any).eq("question_id", question_id).eq("action", "explain").then(() => {});
+      return new Response(JSON.stringify({ explanation: cached.response_text }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   const systemPrompt = `You are a friendly, expert ${subject || "STEM"} tutor explaining a concept to a 16-18 year old student.
@@ -313,6 +336,20 @@ Please explain why the correct answer is right and help me understand the concep
   }
 
   const explanation = result.data.choices[0]?.message?.content || "Unable to generate explanation.";
+
+  // Cache the response for future use
+  if (question_id) {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+    await supabase.from("coaching_cache").upsert({
+      question_id,
+      action: "explain",
+      response_text: explanation,
+    } as any, { onConflict: "question_id,action" }).then(() => {});
+  }
 
   return new Response(JSON.stringify({ explanation }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },

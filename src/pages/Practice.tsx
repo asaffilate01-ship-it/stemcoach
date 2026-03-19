@@ -325,12 +325,13 @@ export default function Practice() {
           student_answer: selectedAnswer || essayAnswer || "",
           subject: question.subject,
           topic: question.topic,
+          question_id: question.id,
         },
       });
       if (error) throw error;
       setAiExplanation(data.explanation);
     } catch (e: any) {
-      toast({ title: "AI explanation failed", description: e.message, variant: "destructive" });
+      toast({ title: "Coaching failed", description: e.message, variant: "destructive" });
     } finally {
       setLoadingAI(false);
     }
