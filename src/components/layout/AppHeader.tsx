@@ -90,7 +90,11 @@ export function AppHeader() {
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
-      <item.icon className="h-3.5 w-3.5" />
+      {item.image ? (
+        <img src={item.image} alt={item.label} className="h-4 w-4 rounded-sm object-cover" />
+      ) : (
+        <item.icon className="h-3.5 w-3.5" />
+      )}
       {item.label}
     </Link>
   );
