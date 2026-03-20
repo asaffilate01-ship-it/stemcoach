@@ -66,7 +66,7 @@ export const subjects: SubjectInfo[] = [
     name: "Biology",
     icon: "🧬",
     color: "38 92% 50%",
-    questionCount: 200000,
+    questionCount: 250000,
     topics: ["Cell Biology", "Genetics", "Evolution", "Human Physiology", "Plant Biology", "Ecology", "Biotechnology", "Microbiology"],
     mascotImage: "/assets/biobee.png",
   },
