@@ -37,7 +37,7 @@ export function MobileBottomNav() {
                 <img
                   src={item.image}
                   alt={item.label}
-                  className={`h-6 w-6 object-contain transition-all duration-300 ${
+                  className={`h-7 w-7 object-contain transition-all duration-300 ${
                     active ? "scale-110 drop-shadow-md" : "opacity-60 grayscale-[30%]"
                   }`}
                 />
