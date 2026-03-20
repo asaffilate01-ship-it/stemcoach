@@ -90,12 +90,19 @@ export default function MeetTheSquad() {
                   </div>
                 </div>
                 <div className="border-t border-border/30 px-5 py-4">
-                  <p className="mb-4 text-xs leading-relaxed text-muted-foreground">{member.bio}</p>
+                  <p className="mb-3 text-xs leading-relaxed text-muted-foreground">{member.bio}</p>
 
-                  {/* Top tip */}
+                  {/* Traits */}
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {member.traits.map(t => (
+                      <span key={t} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{t}</span>
+                    ))}
+                  </div>
+
+                  {/* Catchphrase */}
                   <div className="mb-3 flex items-start gap-2 rounded-xl bg-primary/5 px-3 py-2.5">
                     <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                    <p className="text-[11px] font-medium text-primary">{member.tips[0]}</p>
+                    <p className="text-[11px] font-medium italic text-primary">"{member.catchphrase}"</p>
                   </div>
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
