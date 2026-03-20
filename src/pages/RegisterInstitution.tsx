@@ -185,9 +185,6 @@ export default function RegisterInstitution() {
                   Want to join an existing institution instead?
                 </button>
               </div>
-                {loading ? "Registering…" : "Register Institution"}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
             </motion.form>
           </div>
         </div>
