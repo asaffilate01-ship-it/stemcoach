@@ -710,8 +710,7 @@ export default function Practice() {
                     </div>
                     <div className="space-y-3">
                       {parsedOptions.map((opt) => {
-                        const isRight = opt === question.correct_answer;
-                        // Check for distractor reasoning from DB (JSON object) or local data
+                        const isRight = opt === revealedAnswer?.correct_answer;
                         const dbDistractors = (question as any).distractor_reasoning;
                         const reasoning = dbDistractors?.[opt] || null;
                         return (
@@ -720,7 +719,7 @@ export default function Practice() {
                               {isRight ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground/60" />}
                               <span className={`text-sm font-medium ${isRight ? "text-emerald-600 dark:text-emerald-400" : ""}`}>{opt}</span>
                             </div>
-                            {isRight && <p className="ml-5.5 text-xs leading-relaxed text-emerald-600/80 dark:text-emerald-400/80">✓ This is correct. {question.explanation}</p>}
+                            {isRight && <p className="ml-5.5 text-xs leading-relaxed text-emerald-600/80 dark:text-emerald-400/80">✓ This is correct. {revealedAnswer?.explanation}</p>}
                             {!isRight && reasoning && <p className="ml-5.5 text-xs leading-relaxed text-muted-foreground">{reasoning}</p>}
                             {!isRight && !reasoning && <p className="ml-5.5 text-xs leading-relaxed text-muted-foreground">This is incorrect.</p>}
                           </div>
