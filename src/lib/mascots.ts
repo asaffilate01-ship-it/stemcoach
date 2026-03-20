@@ -1,22 +1,151 @@
-import { subjects } from "@/data/questions";
-
-/** Map of subject id → mascot image path */
-const mascotMap: Record<string, { image: string; name: string }> = {
-  mathematics: { image: "/assets/mathmax.png", name: "MathMax" },
-  physics: { image: "/assets/physix.png", name: "PhysiX" },
-  chemistry: { image: "/assets/chemi.png", name: "Chemi" },
-  biology: { image: "/assets/biobee.png", name: "BioBee" },
-  "computer-science": { image: "/assets/codey.png", name: "Codey" },
-  ielts: { image: "/assets/lexi.png", name: "Lexi" },
-  celta: { image: "/assets/lexi.png", name: "Lexi" },
-};
-
-export function getMascot(subjectId: string) {
-  return mascotMap[subjectId] || { image: "/assets/coach-stem.png", name: "Coach Stem" };
+/** Map of subject id → mascot image path, name, and personality */
+export interface MascotInfo {
+  image: string;
+  name: string;
+  emoji: string;
+  personality: string;
+  bio: string;
+  tips: string[];
+  streakLostMessage: string;
+  cheerMessage: string;
 }
 
-export function getCoachStem() {
-  return { image: "/assets/coach-stem.png", name: "Coach Stem" };
+const mascotMap: Record<string, MascotInfo> = {
+  mathematics: {
+    image: "/assets/mathmax.png",
+    name: "MathMax",
+    emoji: "🧮",
+    personality: "The logical problem-solver who loves patterns",
+    bio: "MathMax lives and breathes numbers. From algebra to calculus, he's your go-to guide for breaking down complex problems into simple, step-by-step solutions. His motto: 'Every problem has a pattern — let's find it!'",
+    tips: [
+      "Always show your working — examiners award method marks!",
+      "Check your answer by substituting it back into the equation",
+      "Draw a diagram whenever the question involves shapes or graphs",
+      "Practice mental maths daily to speed up your calculations",
+    ],
+    streakLostMessage: "Hey, no worries! Even the best mathematicians take breaks. Let's pick up where we left off — I've got some fun problems waiting!",
+    cheerMessage: "Your maths skills are adding up! 🎉",
+  },
+  physics: {
+    image: "/assets/physix.png",
+    name: "PhysiX",
+    emoji: "⚡",
+    personality: "The energetic force of nature who makes physics exciting",
+    bio: "PhysiX brings energy to everything — literally! Whether it's forces, waves, or electricity, he'll help you understand how the universe works with real-world examples and explosive demonstrations.",
+    tips: [
+      "Always include units in your answers — it's free marks!",
+      "Draw force diagrams before attempting mechanics questions",
+      "Learn your key equations — but also understand what they mean",
+      "Use SUVAT equations systematically for kinematics problems",
+    ],
+    streakLostMessage: "A body at rest stays at rest unless acted upon… Let me be that force! Come back and let's get moving again! ⚡",
+    cheerMessage: "You're an unstoppable force! ⚡",
+  },
+  chemistry: {
+    image: "/assets/chemi.png",
+    name: "Chemi",
+    emoji: "🧪",
+    personality: "The curious scientist who loves reactions and discoveries",
+    bio: "Chemi is always mixing things up! She'll guide you through organic, inorganic, and physical chemistry with crystal-clear explanations. Her lab coat has seen a few explosions, but that's how the best discoveries happen!",
+    tips: [
+      "Balance your equations before doing any calculations",
+      "Learn functional groups — they're the key to organic chemistry",
+      "Use mnemonic devices for the reactivity series",
+      "Always consider state symbols in your equations",
+    ],
+    streakLostMessage: "Every great reaction needs a catalyst — let me be yours! Come back and let's create some chemistry! 🧪",
+    cheerMessage: "You've got perfect chemistry with this subject! 🧪",
+  },
+  biology: {
+    image: "/assets/biobee.png",
+    name: "BioBee",
+    emoji: "🐝",
+    personality: "The nature-loving explorer who buzzes with curiosity",
+    bio: "BioBee pollinates knowledge across all areas of biology! From cells to ecosystems, she'll help you understand the living world. She's always buzzing with facts and loves making connections between topics.",
+    tips: [
+      "Draw and label diagrams — they're worth loads of marks!",
+      "Learn key definitions word-for-word for definition questions",
+      "Understand processes step-by-step, not just the end result",
+      "Link structure to function — examiners love this!",
+    ],
+    streakLostMessage: "The hive misses you! 🐝 Every bee counts, and so does every study session. Let's get buzzing again!",
+    cheerMessage: "You're buzzing through biology! 🐝",
+  },
+  "computer-science": {
+    image: "/assets/codey.png",
+    name: "Codey",
+    emoji: "💻",
+    personality: "The tech-savvy coder who speaks in algorithms",
+    bio: "Codey can debug anything! From Python to data structures, he'll help you think like a programmer. He believes every bug is just an undiscovered feature and every problem can be solved with the right algorithm.",
+    tips: [
+      "Trace through your code line by line to find logic errors",
+      "Break complex problems into smaller sub-problems",
+      "Learn Big O notation — it comes up in almost every exam",
+      "Practice pseudocode — it helps structure your thinking",
+    ],
+    streakLostMessage: "Error 404: Streak not found! 😄 But don't worry — let's reboot and start a new one together!",
+    cheerMessage: "Your code is compiling perfectly! 💻",
+  },
+  ielts: {
+    image: "/assets/lexi.png",
+    name: "Lexi",
+    emoji: "📚",
+    personality: "The wordsmith who makes language learning fun",
+    bio: "Lexi is a language enthusiast who's mastered the art of communication. She'll help you ace your IELTS with vocabulary tricks, grammar hacks, and speaking confidence boosters.",
+    tips: [
+      "Read the questions before the passage in Reading tasks",
+      "Use a range of sentence structures in Writing Task 2",
+      "Practice speaking for 2 minutes on random topics daily",
+      "Learn collocations, not just individual vocabulary words",
+    ],
+    streakLostMessage: "Words are waiting to be discovered! 📚 Let's get back to building your vocabulary and confidence!",
+    cheerMessage: "Your language skills are eloquent! 📚",
+  },
+  celta: {
+    image: "/assets/lexi.png",
+    name: "Lexi",
+    emoji: "🎓",
+    personality: "The teaching expert who helps you help others",
+    bio: "Lexi also coaches future teachers! From lesson planning to classroom management, she knows exactly what it takes to become an outstanding English language teacher.",
+    tips: [
+      "Always plan your concept checking questions in advance",
+      "Reduce your Teacher Talking Time — let students discover!",
+      "Grade your language to match your learners' level",
+      "Reflect on every lesson — what worked and what didn't?",
+    ],
+    streakLostMessage: "The best teachers never stop learning! Come back and let's polish those teaching skills! 🎓",
+    cheerMessage: "You're becoming an amazing teacher! 🎓",
+  },
+};
+
+export function getMascot(subjectId: string): MascotInfo {
+  return mascotMap[subjectId] || getCoachStem();
+}
+
+export function getCoachStem(): MascotInfo {
+  return {
+    image: "/assets/coach-stem.png",
+    name: "Coach Stem",
+    emoji: "🧑‍🔬",
+    personality: "The wise mentor who leads the STEM Squad",
+    bio: "Coach Stem is the mastermind behind the STEM Squad. With years of experience across all STEM subjects, he guides each mascot and every student towards exam success. He believes everyone can excel with the right support.",
+    tips: [
+      "Consistency beats cramming — study a little every day",
+      "Teach what you've learned to someone else — it's the best test",
+      "Take breaks — your brain needs time to consolidate",
+      "Focus on understanding, not just memorising",
+    ],
+    streakLostMessage: "The whole Squad is waiting for you! Let's get back on track together — one question at a time! 🚀",
+    cheerMessage: "The Squad is proud of you! 🌟",
+  };
+}
+
+export function getAllMascots(): MascotInfo[] {
+  return [...Object.values(mascotMap), getCoachStem()];
+}
+
+export function getSquadMembers(): (MascotInfo & { subjectId: string })[] {
+  return Object.entries(mascotMap).map(([id, info]) => ({ ...info, subjectId: id }));
 }
 
 const motivationalMessages = [
@@ -38,4 +167,17 @@ export function getDailyMotivation(): string {
     (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
   );
   return motivationalMessages[dayOfYear % motivationalMessages.length];
+}
+
+/** Get a mascot by guessing the subject from text (badge name, notification, etc.) */
+export function guessMascotFromText(text: string): MascotInfo {
+  const lower = text.toLowerCase();
+  if (lower.includes("math") || lower.includes("algebra") || lower.includes("calculus")) return getMascot("mathematics");
+  if (lower.includes("physics") || lower.includes("force") || lower.includes("energy")) return getMascot("physics");
+  if (lower.includes("chem") || lower.includes("reaction") || lower.includes("element")) return getMascot("chemistry");
+  if (lower.includes("bio") || lower.includes("cell") || lower.includes("organism")) return getMascot("biology");
+  if (lower.includes("code") || lower.includes("comput") || lower.includes("program")) return getMascot("computer-science");
+  if (lower.includes("ielts") || lower.includes("english") || lower.includes("language")) return getMascot("ielts");
+  if (lower.includes("celta") || lower.includes("teach")) return getMascot("celta");
+  return getCoachStem();
 }

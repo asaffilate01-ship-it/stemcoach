@@ -20,8 +20,8 @@ export function usePushNotifications() {
       if (permission !== "granted") return;
       new Notification(title, {
         body,
-        icon: icon || "/favicon.ico",
-        badge: "/favicon.ico",
+        icon: icon || "/assets/coach-stem.png",
+        badge: "/assets/coach-stem.png",
       });
     },
     [permission]

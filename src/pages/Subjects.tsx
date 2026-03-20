@@ -6,9 +6,10 @@ import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { subjects, curricula, difficultyLabels, type Difficulty } from "@/data/questions";
-import { ChevronRight, ChevronDown, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X, Check, Globe } from "lucide-react";
+import { ChevronRight, ChevronDown, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X, Check, Globe, Lightbulb } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getMascot } from "@/lib/mascots";
 
 /* ───────────────── Country & Board Data ───────────────── */
 
@@ -579,12 +580,23 @@ export default function Subjects() {
                             <h3 className="text-sm font-bold tracking-tight md:text-base lg:text-lg">{subject.name}</h3>
                             <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary md:hidden" />
                           </div>
-                          <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground md:mb-4 md:text-xs">
+                          <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground md:mb-3 md:text-xs">
                             <BookOpen className="h-3 w-3" />
                             {subject.questionCount.toLocaleString()} Qs
                             <span className="h-2.5 w-px bg-border" />
                             {subject.topics.length} topics
                           </div>
+
+                          {/* Mascot tip - desktop only */}
+                          {(() => {
+                            const mascot = getMascot(subject.id);
+                            return mascot.tips?.[0] ? (
+                              <div className="hidden md:flex items-start gap-2 rounded-lg bg-primary/5 px-2.5 py-2 mb-3">
+                                <img src={mascot.image} alt={mascot.name} className="h-5 w-5 rounded-full object-cover mt-0.5 shrink-0" />
+                                <p className="text-[10px] leading-relaxed text-primary font-medium">{mascot.tips[0]}</p>
+                              </div>
+                            ) : null;
+                          })()}
 
                           {/* Topic pills - desktop only */}
                           <div className="hidden flex-wrap gap-1.5 md:flex">

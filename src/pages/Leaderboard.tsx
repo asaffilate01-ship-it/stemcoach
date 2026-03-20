@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { motion } from "framer-motion";
 import { Trophy, Flame, Zap, Target, Users, Calendar } from "lucide-react";
+import { getSquadMembers, getCoachStem } from "@/lib/mascots";
 
 interface LeaderEntry {
   user_id: string;
@@ -113,14 +114,30 @@ export default function Leaderboard() {
 
   const medals = ["🥇", "🥈", "🥉"];
 
+  // Pick a random cheerleader mascot for the top section
+  const squadMembers = getSquadMembers();
+  const cheerMascot = squadMembers.length > 0
+    ? squadMembers[Math.floor(Date.now() / 86400000) % squadMembers.length]
+    : getCoachStem();
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <PageTransition>
       <main className="container mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-6">
-          <div className="stem-label mb-2">Competition</div>
-          <h1 className="stem-heading text-3xl">Leaderboard</h1>
+        <div className="mb-6 flex items-center gap-4">
+          <motion.div
+            animate={{ y: [0, -4, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 shadow-md"
+          >
+            <img src={cheerMascot.image} alt={cheerMascot.name} className="h-full w-full object-cover" />
+          </motion.div>
+          <div>
+            <div className="stem-label mb-1">Competition</div>
+            <h1 className="stem-heading text-3xl">Leaderboard</h1>
+            <p className="text-[11px] text-muted-foreground italic">"{cheerMascot.cheerMessage}"</p>
+          </div>
         </div>
 
         {/* Filters */}
