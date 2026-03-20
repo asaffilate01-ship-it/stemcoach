@@ -194,4 +194,14 @@ export const examBoardGroups = [
   { label: "Bangladesh HSC", boards: ["Dhaka Board"], curriculum: "bd-hsc" },
   { label: "Sri Lanka A/L", boards: ["NIE Sri Lanka"], curriculum: "lk-al" },
   { label: "IELTS", boards: ["British Council"], curriculum: "ielts-academic" },
+  // ── University / Degree ──
+  { label: "UK University", boards: ["Russell Group"], curriculum: "uni-uk" },
+  { label: "US College", boards: ["US University"], curriculum: "uni-us" },
+  { label: "Australian University", boards: ["Go8 (Group of Eight)"], curriculum: "uni-au" },
+  { label: "NZ University", boards: ["NZ University"], curriculum: "uni-nz" },
+  { label: "Canadian University", boards: ["U15 (Group of Canadian Research Universities)"], curriculum: "uni-ca" },
+  { label: "Indian University", boards: ["IIT", "NIT"], curriculum: "uni-in" },
+  { label: "Pakistan University", boards: ["NUST", "LUMS"], curriculum: "uni-pk" },
+  { label: "Bangladesh University", boards: ["BUET"], curriculum: "uni-bd" },
+  { label: "Sri Lanka University", boards: ["University of Colombo"], curriculum: "uni-lk" },
 ];
