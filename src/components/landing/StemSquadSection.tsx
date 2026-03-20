@@ -13,6 +13,8 @@ const squad = [
   { name: "Pysche", subject: "Psychology", image: "/assets/pysche.png" },
   { name: "Geo", subject: "Geography", image: "/assets/geo.png" },
   { name: "BizPro", subject: "Business Studies", image: "/assets/bizpro.png" },
+  { name: "François", subject: "Français", image: "/assets/francois.png" },
+  { name: "Hans", subject: "Deutsch", image: "/assets/hans.png" },
 ];
 
 export function StemSquadSection() {
