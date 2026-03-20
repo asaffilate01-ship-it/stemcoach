@@ -192,8 +192,41 @@ const mascotMap: Record<string, MascotInfo> = {
     streakLostMessage: "Every successful business pivots — let's pivot back to studying! 💼",
     cheerMessage: "You're a business mastermind! 💼",
   },
+  french: {
+    image: "/assets/francois.png",
+    name: "François",
+    emoji: "🇫🇷",
+    personality: "The Artiste",
+    bio: "François brings the beauty of French language and culture to life. From grammar to literature, he helps you express yourself with elegance, precision, and a touch of Parisian flair.",
+    catchphrase: "Allons-y — let's master it with style.",
+    traits: ["Charming", "Cultured", "Expressive"],
+    tips: [
+      "Learn verb conjugations in groups — patterns make it easier",
+      "Read French texts aloud to improve pronunciation and flow",
+      "Use connecting words (cependant, néanmoins) to elevate your writing",
+      "Practice dictée regularly — it sharpens spelling and listening",
+    ],
+    streakLostMessage: "La langue française t'attend! Come back and let's make your French magnifique! 🇫🇷",
+    cheerMessage: "Ton français est magnifique! 🇫🇷",
+  },
+  german: {
+    image: "/assets/hans.png",
+    name: "Hans",
+    emoji: "🇩🇪",
+    personality: "The Engineer",
+    bio: "Hans approaches German with structure and precision. From grammar cases to essay writing, he breaks down the language systematically so you can build fluency with confidence.",
+    catchphrase: "Schritt für Schritt — step by step to fluency.",
+    traits: ["Precise", "Methodical", "Encouraging"],
+    tips: [
+      "Master the four cases (Nominativ, Akkusativ, Dativ, Genitiv) early",
+      "Learn nouns with their articles — der, die, das matter!",
+      "Practice word order rules — the verb position is key",
+      "Use compound words to expand your vocabulary quickly",
+    ],
+    streakLostMessage: "Übung macht den Meister! Practice makes perfect — let's get back to it! 🇩🇪",
+    cheerMessage: "Dein Deutsch ist ausgezeichnet! 🇩🇪",
+  },
 };
-
 export function getMascot(subjectId: string): MascotInfo {
   return mascotMap[subjectId] || getCoachStem();
 }
