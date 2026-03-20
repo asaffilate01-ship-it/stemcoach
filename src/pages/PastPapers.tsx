@@ -23,6 +23,7 @@ const boards = [
   { id: "emsat", name: "EmSAT", country: "🇦🇪" },
   { id: "ednat", name: "Éducation Nationale (France)", country: "🇫🇷" },
   { id: "deped", name: "DepEd Philippines", country: "🇵🇭" },
+  { id: "kmk", name: "Kultusministerkonferenz (Deutschland)", country: "🇩🇪" },
 ];
 
 const subjects = [

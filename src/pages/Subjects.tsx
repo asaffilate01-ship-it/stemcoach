@@ -114,6 +114,8 @@ const boardBranding: Record<string, { abbr: string; color: string }> = {
   "Éducation Nationale": { abbr: "ÉN", color: "hsl(220,70%,45%)" },
   // Philippines
   "DepEd Philippines": { abbr: "DepEd", color: "hsl(210,65%,45%)" },
+  // Germany
+  "Kultusministerkonferenz": { abbr: "KMK", color: "hsl(0,0%,15%)" },
   // New Zealand
   "NZQA": { abbr: "NZQA", color: "hsl(0,0%,20%)" },
   // Canada

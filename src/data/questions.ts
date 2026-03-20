@@ -228,6 +228,11 @@ export const curricula = [
   { id: "ph-stem", label: "SHS STEM Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
   { id: "ph-abm", label: "SHS ABM Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
   { id: "ph-humss", label: "SHS HUMSS Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
+  // ─── Germany ───
+  { id: "de-mittlerer", label: "Mittlerer Schulabschluss (Klasse 10)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
+  { id: "de-oberstufe", label: "Gymnasiale Oberstufe (Klasse 11–12)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
+  { id: "de-abitur", label: "Abitur (Allgemeine Hochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
+  { id: "de-fachabitur", label: "Fachabitur (Fachhochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
   // ─── Language Certs ───
   { id: "ielts-academic", label: "IELTS Academic", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
   { id: "ielts-general", label: "IELTS General Training", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
