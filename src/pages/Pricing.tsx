@@ -65,11 +65,11 @@ export default function Pricing() {
                 <Zap className="h-3.5 w-3.5" /> No Subscription · Pay As You Go
               </div>
               <h1 className="stem-section-heading mb-4">
-                Pay once,{" "}
-                <span className="stem-gradient-text">learn forever</span>
+                Buy what you need,{" "}
+                <span className="stem-gradient-text">keep it forever</span>
               </h1>
               <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-                Get thousands of exam-ready questions with full tutorial explanations. No subscriptions, no hidden fees.
+                No subscriptions, no recurring fees. Purchase question packs and top up whenever you need more.
               </p>
 
               {/* Free tier callout */}
