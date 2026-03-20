@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, Target, BookOpen, AlertTriangle } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
