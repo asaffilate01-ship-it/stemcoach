@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Heart } from "lucide-react";
 
 const footerLinks = {
   Product: [
@@ -8,6 +8,11 @@ const footerLinks = {
     { label: "STEMcoach", to: "/ai-tutor" },
     { label: "Pricing", to: "/pricing" },
     { label: "Install App", to: "/install" },
+  ],
+  Resources: [
+    { label: "Formula Sheets", to: "/formulas" },
+    { label: "Blog", to: "/blog" },
+    { label: "Meet the Squad", to: "/meet-the-squad" },
   ],
   Company: [
     { label: "Privacy Policy", to: "/privacy" },
@@ -20,13 +25,15 @@ export function Footer() {
   return (
     <footer className="hidden border-t border-border/30 bg-muted/10 py-14 lg:block">
       <div className="container mx-auto px-4">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-sm font-extrabold text-white shadow-md shadow-primary/20">
-                S
-              </span>
+              <img
+                src="/assets/coach-stem.png"
+                alt="Coach Stem"
+                className="h-9 w-9 rounded-xl object-cover shadow-md shadow-primary/20"
+              />
               <span className="text-lg font-bold tracking-tight text-foreground">
                 STEM<span className="text-primary">Coach</span>
               </span>
@@ -34,6 +41,17 @@ export function Footer() {
             <p className="max-w-sm text-sm text-muted-foreground leading-relaxed">
               The virtual tuition centre helping students ace STEM exams worldwide with expert-crafted practice and step-by-step solutions.
             </p>
+            <div className="mt-6 flex items-center gap-2">
+              {["/assets/mathmax.png", "/assets/physix.png", "/assets/chemi.png", "/assets/biobee.png", "/assets/codey.png", "/assets/lexi.png"].map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt=""
+                  className="h-7 w-7 rounded-lg object-cover ring-1 ring-border/20 transition-transform duration-300 hover:scale-110"
+                  loading="lazy"
+                />
+              ))}
+            </div>
           </div>
 
           {/* Links */}
@@ -61,8 +79,10 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-border/30 pt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-          <p className="text-xs text-muted-foreground/70">
-            © {new Date().getFullYear()} STEMCoach — Virtual Tuition Centre. All rights reserved.
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
+            © {new Date().getFullYear()} STEMCoach — Virtual Tuition Centre. Made with
+            <Heart className="h-3 w-3 text-destructive fill-destructive" />
+            for students everywhere.
           </p>
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">Privacy</Link>

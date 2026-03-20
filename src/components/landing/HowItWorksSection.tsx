@@ -53,8 +53,7 @@ export function HowItWorksSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ y: -4, transition: { duration: 0.25 } }}
-              className="relative text-center"
+              className="group relative text-center"
             >
               {/* Connector line */}
               {i < steps.length - 1 && (
@@ -71,7 +70,11 @@ export function HowItWorksSection() {
                 >
                   {step.step}
                 </motion.div>
-                <img src={step.image} alt={step.title} className="h-full w-full object-contain drop-shadow-lg" />
+                <motion.img 
+                  src={step.image} 
+                  alt={step.title} 
+                  className="h-full w-full object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-110" 
+                />
               </div>
 
               <h3 className="mb-3 text-lg font-bold text-foreground">{step.title}</h3>

@@ -53,10 +53,10 @@ export function TestimonialsSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -4, transition: { duration: 0.25 } }}
-              className="stem-card relative overflow-hidden p-6"
+              className="group stem-card relative overflow-hidden p-6"
             >
               <div className={`absolute top-0 right-0 h-32 w-32 rounded-bl-full bg-gradient-to-bl ${t.color} opacity-50 transition-opacity duration-300 group-hover:opacity-70`} />
-              <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/[0.06]" />
+              <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/[0.06] transition-colors duration-300 group-hover:text-primary/[0.12]" />
               <div className="relative">
                 <div className="mb-4 flex gap-0.5">
                   {Array.from({ length: t.rating }).map((_, j) => (
@@ -65,7 +65,7 @@ export function TestimonialsSection() {
                 </div>
                 <p className="mb-6 text-sm leading-relaxed text-muted-foreground italic">"{t.text}"</p>
                 <div className="flex items-center gap-3 border-t border-border/40 pt-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${t.color} text-sm font-bold text-foreground ring-2 ring-background`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${t.color} text-sm font-bold text-foreground ring-2 ring-background transition-shadow duration-300 group-hover:ring-primary/20`}>
                     {t.initials}
                   </div>
                   <div>
