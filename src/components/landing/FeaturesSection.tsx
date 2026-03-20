@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { BookOpen, Brain, Clock, GraduationCap, LineChart, Shield, Users, Zap } from "lucide-react";
-import dashboardImg from "@/assets/dashboard-preview.png";
+import stemsquadImg from "@/assets/stemsquad.png";
 
 const features = [
   {
@@ -75,22 +75,30 @@ export function FeaturesSection() {
           </p>
         </motion.div>
 
-        {/* Dashboard preview image */}
+        {/* STEM Squad showcase */}
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.97 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto mb-20 max-w-4xl"
+          className="mx-auto mb-20 max-w-3xl"
         >
-          <div className="relative">
+          <div className="relative flex flex-col items-center">
             <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
             <img
-              src={dashboardImg}
-              alt="STEMCoach dashboard showing exam analytics, progress tracking, and achievement badges"
-              className="relative w-full rounded-2xl shadow-2xl shadow-primary/8 ring-1 ring-border/30 transition-transform duration-700 hover:scale-[1.01]"
+              src={stemsquadImg}
+              alt="The STEM Squad — 7 subject mascots guiding your learning journey"
+              className="relative w-full max-w-lg transition-transform duration-700 hover:scale-[1.02]"
               loading="lazy"
             />
+            <motion.div
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              className="mt-3 rounded-xl bg-card px-5 py-2.5 shadow-lg ring-1 ring-border/30 text-center"
+            >
+              <p className="text-sm font-bold">Meet your learning squad 🚀</p>
+              <p className="text-[11px] text-muted-foreground">Each mascot specialises in a different subject</p>
+            </motion.div>
           </div>
         </motion.div>
 
