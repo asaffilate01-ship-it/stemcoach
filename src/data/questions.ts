@@ -49,7 +49,7 @@ export const subjects: SubjectInfo[] = [
     icon: "⚛",
     mascotImage: "/assets/physix.png",
     color: "250 80% 60%",
-    questionCount: 200000,
+    questionCount: 250000,
     topics: ["Mechanics", "Electricity", "Waves", "Thermodynamics", "Magnetism", "Nuclear Physics", "Quantum Physics", "Optics"],
   },
   {
