@@ -7,7 +7,7 @@ import stemsquadImg from "@/assets/stemsquad.png";
 
 const stats = [
   { label: "Questions", value: "2M+", icon: BookOpen },
-  { label: "Curricula", value: "30+", icon: Users },
+  { label: "Curricula", value: "50+", icon: Users },
   { label: "Pass Rate", value: "94%", icon: Trophy },
 ];
 
