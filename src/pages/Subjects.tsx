@@ -106,6 +106,13 @@ const boardBranding: Record<string, { abbr: string; color: string }> = {
   "University of Peradeniya": { abbr: "UoP", color: "hsl(145,50%,38%)" },
   "Sri Lanka University": { abbr: "LKU", color: "hsl(200,55%,42%)" },
   "International University": { abbr: "INTL", color: "hsl(270,50%,45%)" },
+  // UAE
+  "UAE MoE": { abbr: "MoE", color: "hsl(145,60%,38%)" },
+  "EmSAT": { abbr: "EmSAT", color: "hsl(210,65%,42%)" },
+  // France
+  "Éducation Nationale": { abbr: "ÉN", color: "hsl(220,70%,45%)" },
+  // Philippines
+  "DepEd Philippines": { abbr: "DepEd", color: "hsl(210,65%,45%)" },
   // New Zealand
   "NZQA": { abbr: "NZQA", color: "hsl(0,0%,20%)" },
   // Canada

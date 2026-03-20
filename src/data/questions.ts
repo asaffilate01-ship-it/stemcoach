@@ -209,6 +209,25 @@ export const curricula = [
   { id: "uni-bd", label: "Bangladesh University (Degree)", country: "🇧🇩", boards: ["Dhaka University", "BUET", "Bangladesh University"] },
   { id: "uni-lk", label: "Sri Lanka University (Degree)", country: "🇱🇰", boards: ["University of Colombo", "University of Peradeniya", "Sri Lanka University"] },
   { id: "uni-intl", label: "International University (Degree)", country: "🌍", boards: ["International University"] },
+  // ─── UAE ───
+  { id: "uae-moe-9", label: "UAE MoE Grade 9", country: "🇦🇪", boards: ["UAE MoE"] },
+  { id: "uae-moe-10", label: "UAE MoE Grade 10", country: "🇦🇪", boards: ["UAE MoE"] },
+  { id: "uae-moe-11", label: "UAE MoE Grade 11", country: "🇦🇪", boards: ["UAE MoE"] },
+  { id: "uae-moe-12", label: "UAE MoE Grade 12 (Thanawiya)", country: "🇦🇪", boards: ["UAE MoE"] },
+  { id: "uae-emsat", label: "EmSAT (UAE Standard Test)", country: "🇦🇪", boards: ["EmSAT"] },
+  // ─── France ───
+  { id: "fr-seconde", label: "Seconde (Year 10)", country: "🇫🇷", boards: ["Éducation Nationale"] },
+  { id: "fr-premiere", label: "Première (Year 11)", country: "🇫🇷", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-general", label: "Baccalauréat Général", country: "🇫🇷", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-techno", label: "Baccalauréat Technologique", country: "🇫🇷", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-pro", label: "Baccalauréat Professionnel", country: "🇫🇷", boards: ["Éducation Nationale"] },
+  // ─── Philippines ───
+  { id: "ph-grade10", label: "DepEd Grade 10", country: "🇵🇭", boards: ["DepEd Philippines"] },
+  { id: "ph-grade11", label: "DepEd Grade 11 (SHS)", country: "🇵🇭", boards: ["DepEd Philippines"] },
+  { id: "ph-grade12", label: "DepEd Grade 12 (SHS)", country: "🇵🇭", boards: ["DepEd Philippines"] },
+  { id: "ph-stem", label: "SHS STEM Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
+  { id: "ph-abm", label: "SHS ABM Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
+  { id: "ph-humss", label: "SHS HUMSS Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
   // ─── Language Certs ───
   { id: "ielts-academic", label: "IELTS Academic", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
   { id: "ielts-general", label: "IELTS General Training", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
