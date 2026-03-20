@@ -1,0 +1,1 @@
+DELETE FROM questions WHERE question_type = 'mcq' AND (options IS NULL OR jsonb_typeof(options) != 'array');
