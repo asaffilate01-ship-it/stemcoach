@@ -137,6 +137,22 @@ export const subjects: SubjectInfo[] = [
     questionCount: 50000,
     topics: ["Language Analysis", "Teaching Methodology", "Classroom Management", "Lesson Planning", "Phonology", "Grammar Teaching", "Skills Teaching", "Error Correction"],
   },
+  {
+    id: "french",
+    name: "Français",
+    icon: "🇫🇷",
+    color: "220 70% 45%",
+    questionCount: 100000,
+    topics: ["Grammaire", "Conjugaison", "Compréhension écrite", "Expression écrite", "Littérature française", "Commentaire de texte", "Dissertation", "Oral"],
+  },
+  {
+    id: "german",
+    name: "Deutsch",
+    icon: "🇩🇪",
+    color: "0 0% 20%",
+    questionCount: 100000,
+    topics: ["Grammatik", "Leseverstehen", "Schriftlicher Ausdruck", "Textanalyse", "Deutsche Literatur", "Erörterung", "Hörverständnis", "Mündliche Prüfung"],
+  },
 ];
 
 export const curricula = [
