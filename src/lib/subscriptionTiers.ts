@@ -43,6 +43,7 @@ export const PACKS: Record<string, QuestionPack> = {
       lk: { price: "LKR 4,999", price_id: "price_1TCxyzFFogsDQVs4r94WHEqY" },
       fr: { price: "€14.99", price_id: "price_fr_standard" },
       ph: { price: "₱899", price_id: "price_ph_standard" },
+      de: { price: "€14.99", price_id: "price_de_standard" },
     },
   },
   topup: {
