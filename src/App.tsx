@@ -103,6 +103,7 @@ const App = () => (
                     <Route path="/blog" element={<P><Blog /></P>} />
                     <Route path="/blog/:slug" element={<P><Blog /></P>} />
                     <Route path="/meet-the-squad" element={<P><MeetTheSquad /></P>} />
+                    <Route path="/register-institution" element={<P><RegisterInstitution /></P>} />
                     <Route path="/formulas" element={<P><FormulaSheets /></P>} />
 
                     {/* Auth-required public */}
