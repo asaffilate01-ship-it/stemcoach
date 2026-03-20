@@ -680,7 +680,7 @@ export default function Practice() {
                   <p className="text-sm leading-relaxed text-muted-foreground">{revealedAnswer?.explanation}</p>
                 </div>
 
-                {question.worked_solution && (
+                {revealedAnswer?.worked_solution && (
                   <div className="rounded-2xl border border-border/60 bg-card p-6">
                     <div className="mb-3 flex items-center gap-2">
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
@@ -688,7 +688,7 @@ export default function Practice() {
                       </div>
                       <span className="text-sm font-semibold">Worked Solution</span>
                     </div>
-                    <div className="whitespace-pre-line font-mono text-sm leading-relaxed text-muted-foreground">{question.worked_solution}</div>
+                    <div className="whitespace-pre-line font-mono text-sm leading-relaxed text-muted-foreground">{revealedAnswer.worked_solution}</div>
                   </div>
                 )}
 
