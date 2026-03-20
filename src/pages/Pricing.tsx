@@ -19,7 +19,7 @@ const packIcons: Record<PackKey, typeof Zap> = {
 const faqs = [
   { q: "How does question allocation work?", a: "Your 5,000 questions are split evenly across the subjects and levels you choose after purchase." },
   { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 1,000 more questions and 5 mock exams to new or existing subjects." },
-  { q: "Is this a one-time purchase?", a: "Yes — pay once, access forever. No subscriptions or recurring charges." },
+  { q: "Is this a subscription?", a: "No! Pay only when you need more questions. No recurring charges, no auto-renewals — your credits never expire." },
   { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
   { q: "What do I get for free?", a: `You get ${FREE_QUESTIONS_PER_SUBJECT} free questions per subject to try before purchasing. Full tutorial explanations included.` },
   { q: "What is STEMcoach coaching?", a: "When you're stuck on a question, STEMcoach explains the concept step-by-step — like having a private tutor on demand." },
