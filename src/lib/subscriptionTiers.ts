@@ -41,6 +41,8 @@ export const PACKS: Record<string, QuestionPack> = {
       ca: { price: "C$24.99", price_id: "price_1TCxywFFogsDQVs4rI3DVCmN" },
       bd: { price: "৳1,499", price_id: "price_1TCxyyFFogsDQVs43c1p47T9" },
       lk: { price: "LKR 4,999", price_id: "price_1TCxyzFFogsDQVs4r94WHEqY" },
+      fr: { price: "€14.99", price_id: "price_fr_standard" },
+      ph: { price: "₱899", price_id: "price_ph_standard" },
     },
   },
   topup: {
