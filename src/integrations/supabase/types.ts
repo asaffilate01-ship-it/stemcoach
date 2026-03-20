@@ -1394,6 +1394,14 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      is_tenant_admin: {
+        Args: { _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_tenant_teacher: {
+        Args: { _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
       issue_certificate: {
         Args: {
           _achievement_type: string
