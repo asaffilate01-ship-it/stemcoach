@@ -42,7 +42,7 @@ export function Footer() {
               The virtual tuition centre helping students ace STEM exams worldwide with expert-crafted practice and step-by-step solutions.
             </p>
             <div className="mt-6 flex items-center gap-2">
-              {["/assets/mathmax.png", "/assets/physix.png", "/assets/chemi.png", "/assets/biobee.png", "/assets/codey.png", "/assets/lexi.png"].map((src, i) => (
+              {["/assets/mathmax.png", "/assets/physix.png", "/assets/chemi.png", "/assets/biobee.png", "/assets/codey.png", "/assets/lexi.png", "/assets/econiq.png", "/assets/litera.png", "/assets/pysche.png", "/assets/geo.png", "/assets/bizpro.png"].map((src, i) => (
                 <img
                   key={i}
                   src={src}
