@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { motion } from "framer-motion";
 import { Trophy, Flame, Zap, Target, Users, Calendar } from "lucide-react";
+import { getSquadMembers, getCoachStem } from "@/lib/mascots";
 
 interface LeaderEntry {
   user_id: string;
