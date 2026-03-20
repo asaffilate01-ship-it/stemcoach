@@ -301,9 +301,7 @@ function FilterPanel({
           onClick={() => setExpandedSection(expandedSection === "difficulty" ? null : "difficulty")}
           className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-            <Zap className="h-3.5 w-3.5 text-primary" />
-          </div>
+          <Icon3D icon={Zap} variant="success" size="sm" />
           <span className="flex-1 text-sm font-bold">Difficulty</span>
           {selectedDifficulty && (
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
