@@ -93,12 +93,12 @@ export default function MockExam() {
         selectedTemplate?.name ||
         subjects.find((s) => s.id === examSubject)?.name ||
         examSubject;
-      await supabase.from("certificates").insert({
-        user_id: user.id,
-        title: `${examName} — ${percent}%`,
-        subject: selectedTemplate?.subject || examSubject,
-        achievement_type: "mock_exam",
-        score_percent: percent,
+      await supabase.rpc("issue_certificate", {
+        _user_id: user.id,
+        _title: `${examName} — ${percent}%`,
+        _subject: selectedTemplate?.subject || examSubject,
+        _achievement_type: "mock_exam",
+        _score_percent: percent,
       });
       toast({
         title: "🏆 Certificate earned!",
