@@ -28,12 +28,17 @@ export function CTASection() {
               <div className="relative grid grid-cols-4 gap-3 max-w-sm">
                 {[
                   { src: "/assets/mathmax.png", name: "MathMax", delay: 0 },
-                  { src: "/assets/physix.png", name: "PhysiX", delay: 0.1 },
-                  { src: "/assets/chemi.png", name: "Chemi", delay: 0.2 },
-                  { src: "/assets/biobee.png", name: "BioBee", delay: 0.3 },
-                  { src: "/assets/codey.png", name: "Codey", delay: 0.15 },
+                  { src: "/assets/physix.png", name: "PhysiX", delay: 0.05 },
+                  { src: "/assets/chemi.png", name: "Chemi", delay: 0.1 },
+                  { src: "/assets/biobee.png", name: "BioBee", delay: 0.15 },
+                  { src: "/assets/codey.png", name: "Codey", delay: 0.2 },
                   { src: "/assets/lexi.png", name: "Lexi", delay: 0.25 },
-                  { src: "/assets/coach-stem.png", name: "Coach Stem", delay: 0.05, span: true },
+                  { src: "/assets/econiq.png", name: "EconiQ", delay: 0.1 },
+                  { src: "/assets/litera.png", name: "Litera", delay: 0.15 },
+                  { src: "/assets/pysche.png", name: "Pysche", delay: 0.2 },
+                  { src: "/assets/geo.png", name: "Geo", delay: 0.25 },
+                  { src: "/assets/bizpro.png", name: "BizPro", delay: 0.3 },
+                  { src: "/assets/coach-stem.png", name: "Coach Stem", delay: 0.05 },
                 ].map((m) => (
                   <motion.div
                     key={m.name}
@@ -42,10 +47,10 @@ export function CTASection() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: m.delay, ease: [0.16, 1, 0.3, 1] }}
                     whileHover={{ y: -6, scale: 1.1 }}
-                    className={`flex flex-col items-center ${m.span ? "col-span-2 col-start-2" : ""}`}
+                    className="flex flex-col items-center"
                   >
                     <div className="rounded-2xl bg-card p-2 shadow-md ring-1 ring-border/20">
-                      <img src={m.src} alt={m.name} className="h-16 w-16 object-contain" loading="lazy" />
+                      <img src={m.src} alt={m.name} className="h-14 w-14 object-contain" loading="lazy" />
                     </div>
                     <span className="mt-1 text-[10px] font-semibold text-muted-foreground">{m.name}</span>
                   </motion.div>
@@ -58,7 +63,7 @@ export function CTASection() {
                 className="mt-4 rounded-xl bg-card px-5 py-3 shadow-lg ring-1 ring-border/30 text-center"
               >
                 <p className="text-sm font-bold">The Squad is rooting for you! 🎉</p>
-                <p className="text-[11px] text-muted-foreground">7 mascots · 7 subjects · 1 mission</p>
+                <p className="text-[11px] text-muted-foreground">12 mascots · 12 subjects · 1 mission</p>
               </motion.div>
             </div>
           </motion.div>

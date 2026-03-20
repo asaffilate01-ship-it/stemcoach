@@ -91,7 +91,7 @@ export function FeaturesSection() {
             <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
             <img
               src={stemsquadImg}
-              alt="The STEM Squad — 7 subject mascots guiding your learning journey"
+              alt="The STEM Squad — 12 subject mascots guiding your learning journey"
               className="relative w-full max-w-lg transition-transform duration-700 hover:scale-[1.02]"
               loading="lazy"
             />
