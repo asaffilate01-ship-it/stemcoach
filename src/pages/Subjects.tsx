@@ -7,6 +7,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { subjects, curricula, difficultyLabels, type Difficulty } from "@/data/questions";
 import { ChevronRight, ChevronDown, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X, Check, Globe, Lightbulb } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getMascot } from "@/lib/mascots";
@@ -149,9 +150,7 @@ function FilterPanel({
           onClick={() => setExpandedSection(expandedSection === "countries" ? null : "countries")}
           className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-            <Globe className="h-3.5 w-3.5 text-primary" />
-          </div>
+          <Icon3D icon={Globe} variant="primary" size="sm" />
           <span className="flex-1 text-sm font-bold">Country / Region</span>
           {selectedCountries.size > 0 && (
             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
@@ -203,9 +202,7 @@ function FilterPanel({
             onClick={() => setExpandedSection(expandedSection === "levels" ? null : "levels")}
             className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-              <Layers className="h-3.5 w-3.5 text-primary" />
-            </div>
+          <Icon3D icon={Layers} variant="purple" size="sm" />
             <span className="flex-1 text-sm font-bold">Level</span>
             {selectedLevels.size > 0 && (
               <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
@@ -254,9 +251,7 @@ function FilterPanel({
             onClick={() => setExpandedSection(expandedSection === "boards" ? null : "boards")}
             className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-              <Filter className="h-3.5 w-3.5 text-primary" />
-            </div>
+          <Icon3D icon={Filter} variant="warning" size="sm" />
             <span className="flex-1 text-sm font-bold">Exam Board</span>
             {selectedBoards.size > 0 && (
               <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
@@ -306,9 +301,7 @@ function FilterPanel({
           onClick={() => setExpandedSection(expandedSection === "difficulty" ? null : "difficulty")}
           className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-muted/30"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-            <Zap className="h-3.5 w-3.5 text-primary" />
-          </div>
+          <Icon3D icon={Zap} variant="success" size="sm" />
           <span className="flex-1 text-sm font-bold">Difficulty</span>
           {selectedDifficulty && (
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">

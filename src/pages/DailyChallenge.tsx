@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Clock, Trophy, Zap, Star, Users, Target, ArrowRight } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { motion, AnimatePresence } from "framer-motion";
 
 const challengeSubjects = [
@@ -57,9 +58,7 @@ export default function DailyChallenge() {
         {/* Hero */}
         <div className="mb-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/10 p-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
-              <Flame className="h-5 w-5 text-primary" />
-            </div>
+            <Icon3D icon={Flame} variant="warning" size="md" />
             <div>
               <h1 className="text-xl font-bold text-foreground sm:text-2xl">Daily Challenge</h1>
               <p className="text-xs text-muted-foreground">New challenges every day · Compete for the top spot</p>

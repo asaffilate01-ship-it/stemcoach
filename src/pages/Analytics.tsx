@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, Target, BookOpen, AlertTriangle } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -191,7 +192,7 @@ export default function Analytics() {
 
           {attempts.length === 0 ? (
             <div className="stem-card rounded-xl p-12 text-center">
-              <BarChart3 className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+              <Icon3D icon={BarChart3} variant="primary" size="xl" className="mx-auto" />
               <h3 className="mb-2 text-lg font-semibold">No data yet</h3>
               <p className="text-sm text-muted-foreground">Practice some questions to see your analytics.</p>
             </div>
@@ -200,7 +201,7 @@ export default function Analytics() {
               {/* Subject Cards */}
               <div className="space-y-4 lg:col-span-1">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <BookOpen className="h-4 w-4 text-primary" /> By Subject
+                  <Icon3D icon={BookOpen} variant="primary" size="sm" /> By Subject
                 </h3>
                 {subjectBreakdowns.map((s, i) => (
                   <motion.button
@@ -250,7 +251,7 @@ export default function Analytics() {
                 {/* Weekly Trend Chart */}
                 <div className="stem-card rounded-xl p-6">
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <TrendingUp className="h-4 w-4 text-primary" /> Weekly Trend
+                    <Icon3D icon={TrendingUp} variant="success" size="sm" /> Weekly Trend
                   </h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={weeklyTrend}>
@@ -282,7 +283,7 @@ export default function Analytics() {
                     className="stem-card rounded-xl p-6"
                   >
                     <h3 className="mb-4 flex items-center gap-2 font-semibold capitalize">
-                      <Target className="h-4 w-4 text-primary" /> {selected.subject} — Topics
+                      <Icon3D icon={Target} variant="primary" size="sm" /> {selected.subject} — Topics
                     </h3>
                     <div className="space-y-3">
                       {selected.topics.map((t) => (
@@ -312,7 +313,7 @@ export default function Analytics() {
                 {weakTopics.length > 0 && (
                   <div className="stem-card rounded-xl p-6">
                     <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                      <AlertTriangle className="h-4 w-4 text-warning" /> Focus Areas
+                      <Icon3D icon={AlertTriangle} variant="warning" size="sm" /> Focus Areas
                     </h3>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {weakTopics.map((t) => (

@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePushNotifications } from "@/hooks/useNotifications";
 import { motion } from "framer-motion";
 import { User, Shield, Bell, Link2, Check, X, BellRing, Download, Trash2, Loader2 } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
@@ -174,7 +175,7 @@ export default function Settings() {
           {/* Profile Section */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <User className="h-4 w-4 text-primary" /> Profile
+              <Icon3D icon={User} variant="primary" size="sm" /> Profile
             </h3>
             <div className="space-y-4">
               <div>
@@ -194,7 +195,7 @@ export default function Settings() {
           {/* Parent Link Requests */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <Link2 className="h-4 w-4 text-primary" /> Parent Link Requests
+              <Icon3D icon={Link2} variant="purple" size="sm" /> Parent Link Requests
             </h3>
             {pendingLinks.length === 0 ? (
               <p className="text-sm text-muted-foreground">No pending requests.</p>
@@ -223,7 +224,7 @@ export default function Settings() {
           {/* Notification Preferences */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <Bell className="h-4 w-4 text-primary" /> Notification Preferences
+              <Icon3D icon={Bell} variant="warning" size="sm" /> Notification Preferences
             </h3>
             <div className="space-y-4">
               {[
@@ -248,7 +249,7 @@ export default function Settings() {
           {/* Security */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <Shield className="h-4 w-4 text-primary" /> Security
+              <Icon3D icon={Shield} variant="success" size="sm" /> Security
             </h3>
             <Button
               variant="outline"
@@ -270,7 +271,7 @@ export default function Settings() {
           {/* Data & Privacy (GDPR) */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <Download className="h-4 w-4 text-primary" /> Data & Privacy
+              <Icon3D icon={Download} variant="accent" size="sm" /> Data & Privacy
             </h3>
             <p className="mb-4 text-sm text-muted-foreground">
               Under GDPR and data protection law, you have the right to export or delete all your personal data.
@@ -318,7 +319,7 @@ function PushNotificationCard() {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="stem-card rounded-xl p-6">
       <h3 className="mb-4 flex items-center gap-2 font-semibold">
-        <BellRing className="h-4 w-4 text-primary" /> Browser Push Notifications
+        <Icon3D icon={BellRing} variant="primary" size="sm" /> Browser Push Notifications
       </h3>
       <div className="flex items-center justify-between rounded-lg border p-3">
         <div>

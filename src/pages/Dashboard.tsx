@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, BookOpen, Brain, Layers, BarChart3, Trophy, Star, Sparkles } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { QuotaWidget } from "@/components/dashboard/QuotaWidget";
@@ -181,10 +182,10 @@ export default function Dashboard() {
   const displayName = user?.email?.split("@")[0] || "Student";
 
   const quickActions = [
-    { label: "Practice", icon: BookOpen, to: "/subjects", color: "bg-primary/10 text-primary", hoverColor: "group-hover:bg-primary/15" },
-    { label: "Weak Drills", icon: Brain, to: "/weak-drills", color: "bg-warning/10 text-warning", hoverColor: "group-hover:bg-warning/15" },
-    { label: "Flashcards", icon: Layers, to: "/flashcards", color: "bg-success/10 text-success", hoverColor: "group-hover:bg-success/15" },
-    { label: "Analytics", icon: BarChart3, to: "/analytics", color: "bg-accent text-accent-foreground", hoverColor: "group-hover:bg-accent/80" },
+    { label: "Practice", icon: BookOpen, to: "/subjects", variant: "primary" as const },
+    { label: "Weak Drills", icon: Brain, to: "/weak-drills", variant: "warning" as const },
+    { label: "Flashcards", icon: Layers, to: "/flashcards", variant: "success" as const },
+    { label: "Analytics", icon: BarChart3, to: "/analytics", variant: "accent" as const },
   ];
 
   return (
@@ -242,9 +243,7 @@ export default function Dashboard() {
                   onClick={() => navigate(action.to)}
                   className="group stem-card flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left sm:gap-3 sm:p-3"
                 >
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 sm:h-9 sm:w-9 ${action.color} ${action.hoverColor}`}>
-                    <action.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:scale-110" />
-                  </div>
+                  <Icon3D icon={action.icon} variant={action.variant} size="md" />
                   <span className="text-xs font-semibold whitespace-nowrap sm:text-sm">{action.label}</span>
                   <ArrowRight className="ml-auto h-3 w-3 text-muted-foreground/0 transition-all duration-300 group-hover:text-muted-foreground/60 group-hover:translate-x-0.5 hidden sm:block" />
                 </motion.button>
@@ -260,10 +259,10 @@ export default function Dashboard() {
           {/* Stats Grid */}
           <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4 md:mb-8">
             {[
-              { label: "Questions", value: totalQ, icon: Target, color: "bg-primary/10 text-primary" },
-              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, color: "bg-success/10 text-success" },
-              { label: "Streak", value: `${stats?.streak || 0}`, icon: Flame, color: "bg-warning/10 text-warning", suffix: " days" },
-              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, color: "bg-primary/10 text-primary" },
+              { label: "Questions", value: totalQ, icon: Target, variant: "primary" as const },
+              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, variant: "success" as const },
+              { label: "Streak", value: `${stats?.streak || 0}`, icon: Flame, variant: "warning" as const, suffix: " days" },
+              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, variant: "primary" as const },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -274,8 +273,8 @@ export default function Dashboard() {
                 className="group rounded-xl border border-border/40 bg-card p-3 transition-shadow hover:shadow-premium sm:rounded-2xl sm:p-5"
                 style={{ boxShadow: "var(--stem-card-shadow)" }}
               >
-                <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110 sm:mb-3 sm:h-10 sm:w-10 sm:rounded-xl ${stat.color}`}>
-                  <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <div className="mb-2 sm:mb-3">
+                  <Icon3D icon={stat.icon} variant={stat.variant} size="md" />
                 </div>
                 <div className="text-xl font-extrabold tracking-tight sm:text-2xl">
                   {stat.value}
@@ -292,8 +291,8 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               className="stem-card rounded-xl p-12 text-center"
             >
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                <Target className="h-8 w-8 text-primary" />
+              <div className="mx-auto mb-5">
+                <Icon3D icon={Target} variant="primary" size="xl" className="mx-auto" />
               </div>
               <h3 className="mb-2 text-lg font-bold">Start practicing!</h3>
               <p className="mb-6 text-sm text-muted-foreground">Answer some questions to see your progress here.</p>
@@ -315,9 +314,7 @@ export default function Dashboard() {
                   className="stem-card rounded-xl p-5 sm:p-6 lg:col-span-2"
                 >
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                      <Calendar className="h-3.5 w-3.5 text-primary" />
-                    </div>
+                    <Icon3D icon={Calendar} variant="primary" size="sm" />
                     14-Day Activity
                   </h3>
                   <ResponsiveContainer width="100%" height={180}>
@@ -354,9 +351,7 @@ export default function Dashboard() {
               >
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 font-semibold">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                      <BookOpen className="h-3.5 w-3.5 text-primary" />
-                    </div>
+                    <Icon3D icon={BookOpen} variant="primary" size="sm" />
                     Subject Readiness
                   </h3>
                   <button onClick={() => navigate("/analytics")} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline transition-colors">
@@ -392,9 +387,7 @@ export default function Dashboard() {
                 className="stem-card rounded-xl p-5 sm:p-6"
               >
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10">
-                    <AlertTriangle className="h-3.5 w-3.5 text-warning" />
-                  </div>
+                  <Icon3D icon={AlertTriangle} variant="warning" size="sm" />
                   Focus Areas
                 </h3>
                 {weakTopics.length === 0 ? (
@@ -431,9 +424,7 @@ export default function Dashboard() {
                   className="stem-card rounded-xl p-5 sm:p-6"
                 >
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent">
-                      <TrendingUp className="h-3.5 w-3.5 text-accent-foreground" />
-                    </div>
+                    <Icon3D icon={TrendingUp} variant="accent" size="sm" />
                     Recent Activity
                   </h3>
                   <div className="space-y-2">
@@ -471,9 +462,7 @@ export default function Dashboard() {
                 >
                   <div className="mb-4 flex items-center justify-between">
                     <h3 className="flex items-center gap-2 font-semibold">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                        <Trophy className="h-3.5 w-3.5 text-primary" />
-                      </div>
+                      <Icon3D icon={Trophy} variant="primary" size="sm" />
                       Recent Badges
                     </h3>
                     <button onClick={() => navigate("/badges")} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
