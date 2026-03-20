@@ -7,13 +7,6 @@ const counters = [
   { value: "6", label: "AI Mascot Tutors" },
 ];
 
-const trustedBy = [
-  { name: "Dubai Academy", location: "UAE" },
-  { name: "Lahore Grammar School", location: "Pakistan" },
-  { name: "DPS International", location: "India" },
-  { name: "Westminster Academy", location: "UK" },
-  { name: "GEMS Education", location: "UAE" },
-];
 
 export function SocialProofBar() {
   return (
