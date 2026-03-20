@@ -19,7 +19,7 @@ const packIcons: Record<PackKey, typeof Zap> = {
 const faqs = [
   { q: "How does question allocation work?", a: "Your 5,000 questions are split evenly across the subjects and levels you choose after purchase." },
   { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 1,000 more questions and 5 mock exams to new or existing subjects." },
-  { q: "Is this a one-time purchase?", a: "Yes — pay once, access forever. No subscriptions or recurring charges." },
+  { q: "Is this a subscription?", a: "No! Pay only when you need more questions. No recurring charges, no auto-renewals — your credits never expire." },
   { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
   { q: "What do I get for free?", a: `You get ${FREE_QUESTIONS_PER_SUBJECT} free questions per subject to try before purchasing. Full tutorial explanations included.` },
   { q: "What is STEMcoach coaching?", a: "When you're stuck on a question, STEMcoach explains the concept step-by-step — like having a private tutor on demand." },
@@ -62,14 +62,14 @@ export default function Pricing() {
               transition={{ duration: 0.5 }}
             >
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Zap className="h-3.5 w-3.5" /> One-Time Purchase
+                <Zap className="h-3.5 w-3.5" /> No Subscription · Pay As You Go
               </div>
               <h1 className="stem-section-heading mb-4">
-                Pay once,{" "}
-                <span className="stem-gradient-text">learn forever</span>
+                Buy what you need,{" "}
+                <span className="stem-gradient-text">keep it forever</span>
               </h1>
               <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-                Get thousands of exam-ready questions with full tutorial explanations. No subscriptions, no hidden fees.
+                No subscriptions, no recurring fees. Purchase question packs and top up whenever you need more.
               </p>
 
               {/* Free tier callout */}
@@ -131,7 +131,7 @@ export default function Pricing() {
 
                     <div className="mb-6">
                       <span className="text-4xl font-extrabold tracking-tight">{regionalPrice.price}</span>
-                      <span className="ml-2 text-sm text-muted-foreground">{isMain ? "one-time" : "per top-up"}</span>
+                      <span className="ml-2 text-sm text-muted-foreground">{isMain ? "no subscription" : "per top-up"}</span>
                     </div>
 
                     <ul className="mb-8 space-y-3">
@@ -184,7 +184,7 @@ export default function Pricing() {
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Pay once</strong> → Access your questions & results forever</span>
+                  <span><strong className="text-foreground">No subscription</strong> → Buy credits, keep them forever, top up anytime</span>
                 </div>
               </div>
             </motion.div>
