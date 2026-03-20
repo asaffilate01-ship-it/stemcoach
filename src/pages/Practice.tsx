@@ -92,8 +92,8 @@ export default function Practice() {
           .select("*")
           .eq("subject", subjectId)
           .limit(50);
-        if (data && data.length > 0) {
-          const shuffled = (data as DBQuestion[]).sort(() => Math.random() - 0.5);
+        if (data && (data as any[]).length > 0) {
+          const shuffled = (data as unknown as DBQuestion[]).sort(() => Math.random() - 0.5);
           setQuestions(shuffled);
           // Cache for offline use
           cacheQuestions(subjectId, shuffled);
