@@ -73,53 +73,45 @@ export function useGameStats() {
   const recordAnswer = useCallback(async (correct: boolean, pointsEarned: number) => {
     if (!user) return { xpGained: 0, newBadges: [] };
 
-    const today = new Date().toISOString().split("T")[0];
     const xpGain = correct ? pointsEarned * 10 : Math.max(pointsEarned * 2, 5);
 
-    // Upsert stats
-    const { data: existing } = await supabase
-      .from("user_stats")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const isNewDay = existing?.last_active_date !== today;
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const wasYesterday = existing?.last_active_date === yesterday.toISOString().split("T")[0];
-    const newStreak = isNewDay ? (wasYesterday ? (existing?.streak || 0) + 1 : 1) : (existing?.streak || 1);
-
-    const updatedStats = {
-      user_id: user.id,
-      xp: (existing?.xp || 0) + xpGain,
-      level: calcLevel((existing?.xp || 0) + xpGain),
-      streak: newStreak,
-      longest_streak: Math.max(newStreak, existing?.longest_streak || 0),
-      total_questions: (existing?.total_questions || 0) + 1,
-      correct_answers: (existing?.correct_answers || 0) + (correct ? 1 : 0),
-      perfect_scores: existing?.perfect_scores || 0,
-      last_active_date: today,
-      updated_at: new Date().toISOString(),
-    };
-
-    if (existing) {
-      await supabase.from("user_stats").update(updatedStats).eq("user_id", user.id);
-    } else {
-      await supabase.from("user_stats").insert(updatedStats);
-    }
-
-    setStats({
-      xp: updatedStats.xp,
-      level: updatedStats.level,
-      streak: updatedStats.streak,
-      longestStreak: updatedStats.longest_streak,
-      totalQuestions: updatedStats.total_questions,
-      correctAnswers: updatedStats.correct_answers,
-      perfectScores: updatedStats.perfect_scores,
+    // Use server-side SECURITY DEFINER function
+    const { data: result } = await supabase.rpc("record_answer_stats", {
+      _user_id: user.id,
+      _correct: correct,
+      _xp_gain: xpGain,
     });
 
-    // Check for new badges
-    const earned = await checkBadges(updatedStats);
+    if (result) {
+      setStats(prev => ({
+        ...prev,
+        xp: result.xp,
+        level: result.level,
+        streak: result.streak,
+        longestStreak: result.longest_streak,
+        totalQuestions: prev.totalQuestions + 1,
+        correctAnswers: prev.correctAnswers + (correct ? 1 : 0),
+      }));
+    }
+
+    // Check for new badges via server-side function
+    const { data: allBadges } = await supabase.from("badges").select("*");
+    const earned: EarnedBadge[] = [];
+    for (const badge of allBadges || []) {
+      const { data: awarded } = await supabase.rpc("award_badge", {
+        _user_id: user.id,
+        _badge_id: badge.id,
+      });
+      if (awarded) {
+        earned.push({
+          id: badge.id,
+          name: badge.name,
+          icon: badge.icon,
+          description: badge.description,
+          earnedAt: new Date().toISOString(),
+        });
+      }
+    }
     if (earned.length > 0) setNewBadges(prev => [...prev, ...earned]);
 
     return { xpGained: xpGain, newBadges: earned };
