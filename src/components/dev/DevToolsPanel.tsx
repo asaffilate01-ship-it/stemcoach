@@ -35,7 +35,7 @@ export function DevToolsPanel() {
         password: account.password,
       });
       if (error) {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: account.email,
           password: account.password,
           options: {
@@ -43,9 +43,13 @@ export function DevToolsPanel() {
           },
         });
         if (signUpError) throw signUpError;
+        // Grant 10 questions per subject (110 total) for the new dev account
+        if (signUpData?.user) {
+          await supabase.rpc("grant_dev_quota", { _user_id: signUpData.user.id });
+        }
         toast({
-          title: `Dev ${account.label} created`,
-          description: "Account created. Email confirmation may be required in production.",
+          title: `Dev ${account.label} created + 110 questions unlocked`,
+          description: "10 questions per subject across all 11 subjects.",
         });
       } else {
         toast({ title: `Signed in as ${account.label}` });
