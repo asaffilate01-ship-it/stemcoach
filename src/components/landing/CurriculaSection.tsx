@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { curricula } from "@/data/questions";
 import { ChevronRight } from "lucide-react";
 
-// Group curricula by country flag
 const countryMeta: Record<string, { label: string; flag: string }> = {
   "🇬🇧": { label: "United Kingdom", flag: "🇬🇧" },
   "🏴󠁧󠁢󠁳󠁣󠁴󠁿": { label: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
@@ -26,7 +26,6 @@ const countryMeta: Record<string, { label: string; flag: string }> = {
 function groupByCountry() {
   const groups: { key: string; label: string; flag: string; items: typeof curricula }[] = [];
   const seen = new Set<string>();
-
   for (const c of curricula) {
     if (!seen.has(c.country)) {
       seen.add(c.country);
@@ -39,9 +38,9 @@ function groupByCountry() {
 }
 
 export function CurriculaSection() {
+  const { t } = useTranslation();
   const groups = useMemo(groupByCountry, []);
   const [activeKey, setActiveKey] = useState(groups[0]?.key || "");
-
   const activeGroup = groups.find(g => g.key === activeKey);
 
   return (
@@ -49,17 +48,16 @@ export function CurriculaSection() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.04),transparent_60%)]" />
       <div className="container relative mx-auto px-4">
         <div className="mb-10 text-center">
-          <div className="stem-label mb-3">Global Coverage</div>
+          <div className="stem-label mb-3">{t("landing.globalCoverage")}</div>
           <h2 className="stem-section-heading">
-            Supports every <span className="stem-gradient-text">major exam board</span>
+            {t("landing.supportsEveryBoard")} <span className="stem-gradient-text">{t("landing.majorExamBoard")}</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            From UK GCSEs to the French Baccalauréat, deutsches Abitur, Philippine DepEd, UAE EmSAT, and university degrees — one platform, every curriculum, every level.
+            {t("landing.curriculaDesc")}
           </p>
         </div>
 
         <div className="mx-auto max-w-4xl">
-          {/* Country tabs — horizontally scrollable */}
           <div className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide">
             <div className="flex gap-2 min-w-max pb-1">
               {groups.map((g) => {
@@ -87,7 +85,6 @@ export function CurriculaSection() {
             </div>
           </div>
 
-          {/* Curriculum cards for active country */}
           <AnimatePresence mode="wait">
             {activeGroup && (
               <motion.div
@@ -117,21 +114,20 @@ export function CurriculaSection() {
             )}
           </AnimatePresence>
 
-          {/* Summary stat */}
           <div className="mt-6 flex items-center justify-center gap-6 text-center">
             <div>
               <div className="text-2xl font-extrabold">{groups.length}</div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Countries</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("common.countries")}</div>
             </div>
             <div className="h-8 w-px bg-border/50" />
             <div>
               <div className="text-2xl font-extrabold">{curricula.length}</div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Curricula</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("common.curricula")}</div>
             </div>
             <div className="h-8 w-px bg-border/50" />
             <div>
               <div className="text-2xl font-extrabold">{new Set(curricula.flatMap(c => c.boards)).size}+</div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Exam Boards</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("common.examBoards")}</div>
             </div>
           </div>
         </div>

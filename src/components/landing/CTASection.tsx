@@ -2,10 +2,11 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import stemsquadImg from "@/assets/stemsquad-hero.png";
+import { useTranslation } from "react-i18next";
 
 export function CTASection() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <section className="relative overflow-hidden border-t border-border/30 py-10 md:py-14">
@@ -24,7 +25,6 @@ export function CTASection() {
             <div className="relative flex flex-col items-center">
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
               
-              {/* Individual mascot images in a grid */}
               <div className="relative grid grid-cols-4 gap-3 max-w-sm">
                 {[
                   { src: "/assets/mathmax.png", name: "MathMax", delay: 0 },
@@ -62,8 +62,8 @@ export function CTASection() {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="mt-4 rounded-xl bg-card px-5 py-3 shadow-lg ring-1 ring-border/30 text-center"
               >
-                <p className="text-sm font-bold">The Squad is rooting for you! 🎉</p>
-                <p className="text-[11px] text-muted-foreground">12 mascots · 12 subjects · 1 mission</p>
+                <p className="text-sm font-bold">{t("landing.squadRooting")}</p>
+                <p className="text-[11px] text-muted-foreground">{t("landing.squadStats")}</p>
               </motion.div>
             </div>
           </motion.div>
@@ -77,13 +77,13 @@ export function CTASection() {
             className="text-center lg:text-left"
           >
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-primary">
-              <Sparkles className="h-3.5 w-3.5" /> Get Started Today
+              <Sparkles className="h-3.5 w-3.5" /> {t("landing.getStartedToday")}
             </div>
             <h2 className="mb-5 stem-section-heading">
-              Ready to <span className="stem-gradient-text">ace your exams</span>?
+              {t("landing.readyToAce")} <span className="stem-gradient-text">{t("landing.aceYourExams")}</span>?
             </h2>
             <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground lg:mx-0">
-              Join thousands of students already using STEMCoach to boost their grades. Start free — no credit card required.
+              {t("landing.ctaDesc")}
             </p>
             <div className="flex flex-col items-center gap-3 sm:flex-row lg:justify-start sm:justify-center">
               <Button
@@ -92,7 +92,7 @@ export function CTASection() {
                 className="gap-2 px-10"
                 onClick={() => navigate("/auth")}
               >
-                Sign Up Free <ArrowRight className="h-4 w-4" />
+                {t("landing.signUpFree")} <ArrowRight className="h-4 w-4" />
               </Button>
               <Button
                 variant="outline"
@@ -100,11 +100,11 @@ export function CTASection() {
                 className="gap-2 px-10"
                 onClick={() => navigate("/pricing")}
               >
-                Compare Plans
+                {t("landing.comparePlans")}
               </Button>
             </div>
             <p className="mt-8 text-sm text-muted-foreground">
-              Free tier includes 5 questions/day · No credit card needed · Cancel anytime
+              {t("landing.ctaFooter")}
             </p>
           </motion.div>
         </div>

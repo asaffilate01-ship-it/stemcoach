@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const squad = [
   { name: "MathMax", subject: "Mathematics", image: "/assets/mathmax.png" },
@@ -15,13 +16,13 @@ const squad = [
 ];
 
 export function StemSquadSection() {
+  const { t } = useTranslation();
+
   return (
     <section className="relative overflow-hidden py-10 md:py-14">
-      {/* Background accents */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,hsl(var(--primary)/0.06),transparent)]" />
 
       <div className="container relative mx-auto px-4">
-        {/* Header with Coach Stem */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -43,17 +44,16 @@ export function StemSquadSection() {
             />
           </motion.div>
           <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-primary">
-            Meet Your Tutors
+            {t("landing.meetYourTutors")}
           </div>
           <h2 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl md:text-4xl">
-            The <span className="stem-gradient-text">STEM Squad</span>
+            {t("landing.theStemSquad").split("STEM Squad")[0]}<span className="stem-gradient-text">STEM Squad</span>
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-muted-foreground sm:text-base">
-            Led by <strong className="text-foreground">Coach Stem</strong>, each subject has a dedicated mascot guiding you through every topic, question, and exam tip.
+            {t("landing.stemSquadDesc")}
           </p>
         </motion.div>
 
-        {/* Squad grid */}
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-6">
           {squad.map((member, i) => (
             <motion.div

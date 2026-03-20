@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Accordion,
   AccordionContent,
@@ -6,41 +7,25 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const faqs = [
-  {
-    q: "What curricula and exam boards do you support?",
-    a: "We support 30+ curricula including UK GCSE & A-Level (AQA, Edexcel, OCR, WJEC), IB (SL & HL), US AP & SAT, Indian CBSE, ICSE, JEE & NEET, Pakistani FSC, Matric & ECAT/MDCAT, and more. New curricula are added regularly.",
-  },
-  {
-    q: "How does STEMcoach coaching work?",
-    a: "STEMcoach provides step-by-step explanations, solves problems interactively, and adapts to your level. It's like having a private tutor available 24/7. You can ask follow-up questions, request alternative explanations, and get exam technique advice.",
-  },
-  {
-    q: "Is there a free plan?",
-    a: "Yes! The free plan gives you 5 practice questions per subject, access to all subjects, and basic analytics. Purchase a question pack for unlimited questions, mock exams, STEMcoach coaching, and advanced analytics.",
-  },
-  {
-    q: "How accurate are the questions?",
-    a: "Every question is curriculum-aligned and reviewed for accuracy. Our questions go through validation pipelines, and we work with subject-matter experts to ensure answers match exam board specifications.",
-  },
-  {
-    q: "Can schools and tuition centres use STEMCoach?",
-    a: "Absolutely! Our School and Institution plans include class management, assignment setting, student progress tracking, parent portals, and optional white-label branding with your own logo and colours.",
-  },
-  {
-    q: "What subjects do you cover?",
-    a: "We cover Physics, Chemistry, Biology, Mathematics, Further Maths, Computer Science, Economics, English Language (including IELTS & CELTA), and more. Each subject includes topic-by-topic breakdown with thousands of questions.",
-  },
-];
-
 export function FAQSection() {
+  const { t } = useTranslation();
+
+  const faqs = [
+    { q: t("landing.faq1q"), a: t("landing.faq1a") },
+    { q: t("landing.faq2q"), a: t("landing.faq2a") },
+    { q: t("landing.faq3q"), a: t("landing.faq3a") },
+    { q: t("landing.faq4q"), a: t("landing.faq4a") },
+    { q: t("landing.faq5q"), a: t("landing.faq5a") },
+    { q: t("landing.faq6q"), a: t("landing.faq6a") },
+  ];
+
   return (
     <section className="relative border-t py-10 md:py-14">
       <div className="container relative mx-auto px-4">
         <div className="mb-14 text-center">
-          <div className="stem-label mb-3">FAQ</div>
+          <div className="stem-label mb-3">{t("landing.faqLabel")}</div>
           <h2 className="stem-section-heading">
-            Frequently asked <span className="stem-gradient-text">questions</span>
+            {t("landing.faqHeading")} <span className="stem-gradient-text">{t("landing.faqQuestionsSuffix")}</span>
           </h2>
         </div>
 
