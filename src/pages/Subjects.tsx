@@ -83,6 +83,11 @@ const subjectGradients: Record<string, string> = {
   chemistry: "from-[hsl(142,71%,40%)] to-[hsl(160,60%,38%)]",
   biology: "from-[hsl(38,92%,45%)] to-[hsl(25,85%,50%)]",
   "computer-science": "from-[hsl(340,75%,50%)] to-[hsl(0,84%,55%)]",
+  economics: "from-[hsl(340,75%,50%)] to-[hsl(360,80%,55%)]",
+  "english-literature": "from-[hsl(210,70%,45%)] to-[hsl(230,65%,50%)]",
+  psychology: "from-[hsl(30,80%,50%)] to-[hsl(45,75%,45%)]",
+  geography: "from-[hsl(160,60%,38%)] to-[hsl(180,50%,35%)]",
+  "business-studies": "from-[hsl(270,60%,50%)] to-[hsl(290,55%,45%)]",
   ielts: "from-[hsl(200,80%,45%)] to-[hsl(220,70%,50%)]",
   celta: "from-[hsl(280,70%,50%)] to-[hsl(310,60%,50%)]",
 };

@@ -15,12 +15,22 @@ const VALID_PRICES: Record<string, { questions: number; mock_exams: number; pack
   "price_1TCYoDFFogsDQVs4a7IAliJs": { questions: 5000, mock_exams: 20, pack: "standard" }, // AED
   "price_1TCYoEFFogsDQVs43ZduOOov": { questions: 5000, mock_exams: 20, pack: "standard" }, // INR
   "price_1TCYoEFFogsDQVs45swS26PC": { questions: 5000, mock_exams: 20, pack: "standard" }, // PKR
+  "price_1TCxysFFogsDQVs4yklywQ3W": { questions: 5000, mock_exams: 20, pack: "standard" }, // AUD
+  "price_1TCxyuFFogsDQVs4tS6qul6W": { questions: 5000, mock_exams: 20, pack: "standard" }, // NZD
+  "price_1TCxywFFogsDQVs4rI3DVCmN": { questions: 5000, mock_exams: 20, pack: "standard" }, // CAD
+  "price_1TCxyyFFogsDQVs43c1p47T9": { questions: 5000, mock_exams: 20, pack: "standard" }, // BDT
+  "price_1TCxyzFFogsDQVs4r94WHEqY": { questions: 5000, mock_exams: 20, pack: "standard" }, // LKR
   // Top-up pack — 1,000 questions + 5 mock exams
   "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 1000, mock_exams: 5, pack: "topup" }, // GBP
   "price_1TCZCNFFogsDQVs4dhoer5AL": { questions: 1000, mock_exams: 5, pack: "topup" }, // USD
   "price_1TCZCRFFogsDQVs4vHB63taY": { questions: 1000, mock_exams: 5, pack: "topup" }, // AED
   "price_1TCZCSFFogsDQVs4eBhjzG9k": { questions: 1000, mock_exams: 5, pack: "topup" }, // INR
   "price_1TCZCSFFogsDQVs4hueexI5c": { questions: 1000, mock_exams: 5, pack: "topup" }, // PKR
+  "price_1TCxytFFogsDQVs4bGUZPFnj": { questions: 1000, mock_exams: 5, pack: "topup" }, // AUD
+  "price_1TCxyvFFogsDQVs4D3w5jslB": { questions: 1000, mock_exams: 5, pack: "topup" }, // NZD
+  "price_1TCxyyFFogsDQVs4XlzjR3xR": { questions: 1000, mock_exams: 5, pack: "topup" }, // CAD
+  "price_1TCxyyFFogsDQVs4AemajlYo": { questions: 1000, mock_exams: 5, pack: "topup" }, // BDT
+  "price_1TCxz0FFogsDQVs4bwezp7QL": { questions: 1000, mock_exams: 5, pack: "topup" }, // LKR
 };
 
 function currencyToRegion(currency: string | null): string {
@@ -30,6 +40,11 @@ function currencyToRegion(currency: string | null): string {
     case "aed": return "ae";
     case "inr": return "in";
     case "pkr": return "pk";
+    case "aud": return "au";
+    case "nzd": return "nz";
+    case "cad": return "ca";
+    case "bdt": return "bd";
+    case "lkr": return "lk";
     default: return "uk";
   }
 }

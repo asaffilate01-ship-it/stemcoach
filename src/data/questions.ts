@@ -1,6 +1,6 @@
 export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
-export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta";
+export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies";
 
 export interface Question {
   id: string;
@@ -40,7 +40,7 @@ export const subjects: SubjectInfo[] = [
     icon: "∑",
     mascotImage: "/assets/mathmax.png",
     color: "221 83% 53%",
-    questionCount: 7000,
+    questionCount: 250000,
     topics: ["Algebra", "Calculus", "Trigonometry", "Statistics", "Geometry", "Vectors", "Matrices", "Differential Equations"],
   },
   {
@@ -49,7 +49,7 @@ export const subjects: SubjectInfo[] = [
     icon: "⚛",
     mascotImage: "/assets/physix.png",
     color: "250 80% 60%",
-    questionCount: 6000,
+    questionCount: 200000,
     topics: ["Mechanics", "Electricity", "Waves", "Thermodynamics", "Magnetism", "Nuclear Physics", "Quantum Physics", "Optics"],
   },
   {
@@ -57,7 +57,7 @@ export const subjects: SubjectInfo[] = [
     name: "Chemistry",
     icon: "⚗",
     color: "142 71% 45%",
-    questionCount: 6000,
+    questionCount: 200000,
     topics: ["Atomic Structure", "Bonding", "Stoichiometry", "Organic Chemistry", "Thermochemistry", "Kinetics", "Equilibrium", "Electrochemistry"],
     mascotImage: "/assets/chemi.png",
   },
@@ -66,7 +66,7 @@ export const subjects: SubjectInfo[] = [
     name: "Biology",
     icon: "🧬",
     color: "38 92% 50%",
-    questionCount: 5500,
+    questionCount: 200000,
     topics: ["Cell Biology", "Genetics", "Evolution", "Human Physiology", "Plant Biology", "Ecology", "Biotechnology", "Microbiology"],
     mascotImage: "/assets/biobee.png",
   },
@@ -75,9 +75,49 @@ export const subjects: SubjectInfo[] = [
     name: "Computer Science",
     icon: "⟨⟩",
     color: "0 84% 60%",
-    questionCount: 4000,
+    questionCount: 150000,
     topics: ["Programming", "Algorithms", "Data Structures", "Databases", "Networking", "Cybersecurity", "Operating Systems", "AI"],
     mascotImage: "/assets/codey.png",
+  },
+  {
+    id: "economics",
+    name: "Economics",
+    icon: "📈",
+    color: "340 75% 50%",
+    questionCount: 120000,
+    topics: ["Microeconomics", "Macroeconomics", "International Trade", "Development Economics", "Market Structures", "Fiscal Policy", "Monetary Policy", "Behavioural Economics"],
+  },
+  {
+    id: "english-literature",
+    name: "English Literature",
+    icon: "📖",
+    color: "210 70% 50%",
+    questionCount: 120000,
+    topics: ["Poetry Analysis", "Prose Fiction", "Drama", "Shakespeare", "Modern Literature", "Comparative Analysis", "Unseen Poetry", "Creative Writing"],
+  },
+  {
+    id: "psychology",
+    name: "Psychology",
+    icon: "🧠",
+    color: "30 80% 50%",
+    questionCount: 120000,
+    topics: ["Social Psychology", "Cognitive Psychology", "Developmental Psychology", "Biological Psychology", "Psychopathology", "Research Methods", "Memory", "Attachment"],
+  },
+  {
+    id: "geography",
+    name: "Geography",
+    icon: "🌍",
+    color: "160 60% 40%",
+    questionCount: 120000,
+    topics: ["Physical Geography", "Human Geography", "Plate Tectonics", "Weather & Climate", "Rivers & Coasts", "Urbanisation", "Globalisation", "Fieldwork & Statistical Skills"],
+  },
+  {
+    id: "business-studies",
+    name: "Business Studies",
+    icon: "💼",
+    color: "270 60% 50%",
+    questionCount: 120000,
+    topics: ["Marketing", "Finance & Accounting", "Operations", "Human Resources", "Business Strategy", "Enterprise", "External Environment", "Decision Making"],
   },
   {
     id: "ielts",
@@ -85,7 +125,7 @@ export const subjects: SubjectInfo[] = [
     icon: "🌐",
     mascotImage: "/assets/lexi.png",
     color: "200 80% 50%",
-    questionCount: 5000,
+    questionCount: 100000,
     topics: ["Reading Comprehension", "Writing Task 1", "Writing Task 2", "Listening", "Speaking Part 1", "Speaking Part 2", "Speaking Part 3", "Academic Vocabulary", "Grammar for IELTS"],
   },
   {
@@ -94,7 +134,7 @@ export const subjects: SubjectInfo[] = [
     icon: "📝",
     mascotImage: "/assets/lexi.png",
     color: "330 70% 55%",
-    questionCount: 3000,
+    questionCount: 50000,
     topics: ["Language Analysis", "Teaching Methodology", "Classroom Management", "Lesson Planning", "Phonology", "Grammar Teaching", "Skills Teaching", "Error Correction"],
   },
 ];
@@ -120,6 +160,30 @@ export const curricula = [
   { id: "us-ap", label: "AP (Advanced Placement)", country: "🇺🇸", boards: ["AP Physics 1", "AP Physics 2", "AP Physics C", "AP Chemistry", "AP Biology", "AP Calculus AB", "AP Calculus BC", "AP Statistics", "AP Computer Science A", "AP Computer Science Principles"] },
   { id: "us-sat", label: "SAT / SAT Subject", country: "🇺🇸", boards: ["SAT Math", "SAT Subject Physics", "SAT Subject Chemistry", "SAT Subject Biology"] },
   { id: "us-act", label: "ACT", country: "🇺🇸", boards: ["ACT Math", "ACT Science"] },
+  // ─── Australia ───
+  { id: "au-hsc", label: "HSC (NSW Year 12)", country: "🇦🇺", boards: ["NESA"] },
+  { id: "au-vce", label: "VCE (Victoria Year 12)", country: "🇦🇺", boards: ["VCAA"] },
+  { id: "au-qce", label: "QCE (Queensland Year 12)", country: "🇦🇺", boards: ["QCAA"] },
+  { id: "au-wace", label: "WACE (WA Year 12)", country: "🇦🇺", boards: ["SCSA"] },
+  { id: "au-sace", label: "SACE (SA Year 12)", country: "🇦🇺", boards: ["SACE Board"] },
+  { id: "au-atar", label: "ATAR Preparation", country: "🇦🇺", boards: ["NESA", "VCAA", "QCAA", "SCSA", "SACE Board"] },
+  // ─── New Zealand ───
+  { id: "nz-ncea-1", label: "NCEA Level 1", country: "🇳🇿", boards: ["NZQA"] },
+  { id: "nz-ncea-2", label: "NCEA Level 2", country: "🇳🇿", boards: ["NZQA"] },
+  { id: "nz-ncea-3", label: "NCEA Level 3", country: "🇳🇿", boards: ["NZQA"] },
+  { id: "nz-scholarship", label: "NZ Scholarship", country: "🇳🇿", boards: ["NZQA"] },
+  // ─── Canada ───
+  { id: "ca-ontario-12", label: "Ontario Grade 12", country: "🇨🇦", boards: ["Ontario Ministry"] },
+  { id: "ca-bc-12", label: "BC Grade 12", country: "🇨🇦", boards: ["BC Ministry"] },
+  { id: "ca-alberta-12", label: "Alberta Grade 12 Diploma", country: "🇨🇦", boards: ["Alberta Education"] },
+  { id: "ca-quebec-cegep", label: "Quebec CEGEP", country: "🇨🇦", boards: ["Quebec Ministry"] },
+  // ─── Bangladesh ───
+  { id: "bd-hsc", label: "HSC (Higher Secondary)", country: "🇧🇩", boards: ["Dhaka Board", "Rajshahi Board", "Chittagong Board", "Comilla Board", "Jessore Board", "Sylhet Board", "Dinajpur Board", "Barisal Board", "Madrasa Board", "Technical Board"] },
+  { id: "bd-ssc", label: "SSC (Secondary School)", country: "🇧🇩", boards: ["Dhaka Board", "Rajshahi Board", "Chittagong Board", "Comilla Board", "Jessore Board", "Sylhet Board", "Dinajpur Board", "Barisal Board"] },
+  // ─── Sri Lanka ───
+  { id: "lk-al", label: "GCE A/L (Sri Lanka)", country: "🇱🇰", boards: ["NIE Sri Lanka"] },
+  { id: "lk-ol", label: "GCE O/L (Sri Lanka)", country: "🇱🇰", boards: ["NIE Sri Lanka"] },
+  // ─── India ───
   { id: "india-cbse-10", label: "CBSE Class 10", country: "🇮🇳", boards: ["CBSE"] },
   { id: "india-cbse-12", label: "CBSE Class 12", country: "🇮🇳", boards: ["CBSE"] },
   { id: "india-icse-10", label: "ICSE Class 10", country: "🇮🇳", boards: ["ICSE (CISCE)"] },
@@ -128,11 +192,13 @@ export const curricula = [
   { id: "india-jee", label: "JEE Main & Advanced", country: "🇮🇳", boards: ["JEE Main", "JEE Advanced"] },
   { id: "india-neet", label: "NEET", country: "🇮🇳", boards: ["NEET UG"] },
   { id: "india-olympiad", label: "India Olympiad", country: "🇮🇳", boards: ["NSEP", "NSEC", "NSEB", "RMO/INMO", "INPhO", "INChO", "INBO"] },
+  // ─── Pakistan ───
   { id: "pakistan-matric", label: "Matric (SSC)", country: "🇵🇰", boards: ["Punjab Board (Lahore)", "Federal Board (FBISE)", "Sindh Board (Karachi)", "KPK Board (Peshawar)", "Balochistan Board (Quetta)", "AJK Board (Mirpur)"] },
   { id: "pakistan-fsc", label: "FSC / Intermediate (HSSC)", country: "🇵🇰", boards: ["Punjab Board (Lahore)", "Federal Board (FBISE)", "Sindh Board (Karachi)", "KPK Board (Peshawar)", "Balochistan Board (Quetta)", "AJK Board (Mirpur)"] },
   { id: "pakistan-olevel", label: "Pakistan O-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International"] },
   { id: "pakistan-alevel", label: "Pakistan A-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International (IAL)"] },
   { id: "pakistan-ecat-mdcat", label: "ECAT / MDCAT", country: "🇵🇰", boards: ["ECAT (Engineering)", "MDCAT (Medical)"] },
+  // ─── Language Certs ───
   { id: "ielts-academic", label: "IELTS Academic", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
   { id: "ielts-general", label: "IELTS General Training", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
   { id: "celta", label: "CELTA", country: "🌍", boards: ["Cambridge CELTA"] },

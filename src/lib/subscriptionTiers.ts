@@ -1,4 +1,4 @@
-export type RegionKey = "uk" | "us" | "ae" | "in" | "pk";
+export type RegionKey = "uk" | "us" | "ae" | "in" | "pk" | "au" | "nz" | "ca" | "bd" | "lk";
 
 export interface RegionalPrice {
   price: string;
@@ -36,6 +36,11 @@ export const PACKS: Record<string, QuestionPack> = {
       ae: { price: "AED 99", price_id: "price_1TCYoDFFogsDQVs4a7IAliJs" },
       in: { price: "₹899", price_id: "price_1TCYoEFFogsDQVs43ZduOOov" },
       pk: { price: "PKR 4,999", price_id: "price_1TCYoEFFogsDQVs45swS26PC" },
+      au: { price: "A$29.99", price_id: "price_1TCxysFFogsDQVs4yklywQ3W" },
+      nz: { price: "NZ$34.99", price_id: "price_1TCxyuFFogsDQVs4tS6qul6W" },
+      ca: { price: "C$24.99", price_id: "price_1TCxywFFogsDQVs4rI3DVCmN" },
+      bd: { price: "৳1,499", price_id: "price_1TCxyyFFogsDQVs43c1p47T9" },
+      lk: { price: "LKR 4,999", price_id: "price_1TCxyzFFogsDQVs4r94WHEqY" },
     },
   },
   topup: {
@@ -56,6 +61,11 @@ export const PACKS: Record<string, QuestionPack> = {
       ae: { price: "AED 29", price_id: "price_1TCZCRFFogsDQVs4vHB63taY" },
       in: { price: "₹299", price_id: "price_1TCZCSFFogsDQVs4eBhjzG9k" },
       pk: { price: "PKR 1,999", price_id: "price_1TCZCSFFogsDQVs4hueexI5c" },
+      au: { price: "A$9.99", price_id: "price_1TCxytFFogsDQVs4bGUZPFnj" },
+      nz: { price: "NZ$11.99", price_id: "price_1TCxyvFFogsDQVs4D3w5jslB" },
+      ca: { price: "C$8.99", price_id: "price_1TCxyyFFogsDQVs4XlzjR3xR" },
+      bd: { price: "৳499", price_id: "price_1TCxyyFFogsDQVs4AemajlYo" },
+      lk: { price: "LKR 1,499", price_id: "price_1TCxz0FFogsDQVs4bwezp7QL" },
     },
   },
 } as const;
@@ -93,6 +103,11 @@ export const regionLabels: Record<RegionKey, string> = {
   ae: "🇦🇪 UAE",
   in: "🇮🇳 India",
   pk: "🇵🇰 Pakistan",
+  au: "🇦🇺 Australia",
+  nz: "🇳🇿 New Zealand",
+  ca: "🇨🇦 Canada",
+  bd: "🇧🇩 Bangladesh",
+  lk: "🇱🇰 Sri Lanka",
 };
 
 /** Free tier: questions per subject before paywall */

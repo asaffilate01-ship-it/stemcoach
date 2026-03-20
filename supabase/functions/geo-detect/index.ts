@@ -11,6 +11,11 @@ const COUNTRY_TO_REGION: Record<string, string> = {
   AE: "ae",
   IN: "in",
   PK: "pk",
+  AU: "au",
+  NZ: "nz",
+  CA: "ca",
+  BD: "bd",
+  LK: "lk",
 };
 
 serve(async (req) => {
@@ -19,7 +24,6 @@ serve(async (req) => {
   }
 
   try {
-    // Deno Deploy / Supabase edge functions expose geo info via headers
     const country =
       req.headers.get("x-country") ||
       req.headers.get("cf-ipcountry") ||
