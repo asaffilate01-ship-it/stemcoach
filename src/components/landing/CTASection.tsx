@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import stemsquadImg from "@/assets/stemsquad.png";
+import stemsquadClassroomImg from "@/assets/stemsquad-classroom.png";
 
 export function CTASection() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export function CTASection() {
             <div className="relative flex flex-col items-center">
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
               <img
-                src={stemsquadImg}
+                src={stemsquadClassroomImg}
                 alt="The STEM Squad — your personal tutoring team"
                 className="relative w-full max-w-md"
                 loading="lazy"
