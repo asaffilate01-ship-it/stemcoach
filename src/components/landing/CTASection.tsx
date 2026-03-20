@@ -35,7 +35,7 @@ export function CTASection() {
                   { src: "/assets/lexi.png", name: "Lexi", delay: 0.25 },
                   { src: "/assets/econiq.png", name: "EconiQ", delay: 0.1 },
                   { src: "/assets/litera.png", name: "Litera", delay: 0.15 },
-                  { src: "/assets/psyche-cutout.png", name: "Pysche", delay: 0.2 },
+                  { src: "/assets/pysche.png", name: "Pysche", delay: 0.2 },
                   { src: "/assets/geo.png", name: "Geo", delay: 0.25 },
                   { src: "/assets/bizpro.png", name: "BizPro", delay: 0.3 },
                   { src: "/assets/francois.png", name: "François", delay: 0.15 },
