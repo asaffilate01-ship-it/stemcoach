@@ -4,7 +4,7 @@ const counters = [
   { value: "2M+", label: "Exam Questions" },
   { value: "50+", label: "Curricula Covered" },
   { value: "12", label: "Subjects" },
-  { value: "6", label: "AI Mascot Tutors" },
+  { value: "12", label: "AI Mascot Tutors" },
 ];
 
 
