@@ -75,7 +75,7 @@ export const subjects: SubjectInfo[] = [
     name: "Computer Science",
     icon: "⟨⟩",
     color: "0 84% 60%",
-    questionCount: 150000,
+    questionCount: 200000,
     topics: ["Programming", "Algorithms", "Data Structures", "Databases", "Networking", "Cybersecurity", "Operating Systems", "AI"],
     mascotImage: "/assets/codey.png",
   },
