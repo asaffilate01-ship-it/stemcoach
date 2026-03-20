@@ -57,9 +57,14 @@ export default function MeetTheSquad() {
                 <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
               </div>
               <div className="text-center md:text-left">
-                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">Squad Leader</div>
+                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">Squad Leader · {coach.personality}</div>
                 <h2 className="mb-2 text-2xl font-extrabold">{coach.name} {coach.emoji}</h2>
-                <p className="mb-3 text-sm italic text-muted-foreground">"{coach.personality}"</p>
+                <p className="mb-2 text-sm italic text-primary/80">"{coach.catchphrase}"</p>
+                <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                  {coach.traits.map(t => (
+                    <span key={t} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold text-primary">{t}</span>
+                  ))}
+                </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">{coach.bio}</p>
               </div>
             </div>
