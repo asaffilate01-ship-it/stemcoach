@@ -15,17 +15,17 @@ import { getMascot } from "@/lib/mascots";
 /* ───────────────── Country & Board Data ───────────────── */
 
 const countryGroups = [
-  { id: "uk", label: "United Kingdom", flag: "🇬🇧", keys: ["uk-gcse", "uk-alevel", "uk-btec", "uk-scottish-nat5", "uk-scottish-higher", "uk-scottish-adv-higher"] },
-  { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u"] },
+  { id: "uk", label: "United Kingdom", flag: "🇬🇧", keys: ["uk-gcse", "uk-alevel", "uk-btec", "uk-scottish-nat5", "uk-scottish-higher", "uk-scottish-adv-higher", "uni-uk"] },
+  { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u", "uni-intl"] },
   { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl", "ib-dp-further"] },
-  { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act"] },
-  { id: "au", label: "Australia", flag: "🇦🇺", keys: ["au-hsc", "au-vce", "au-qce", "au-wace", "au-sace", "au-atar"] },
-  { id: "nz", label: "New Zealand", flag: "🇳🇿", keys: ["nz-ncea-1", "nz-ncea-2", "nz-ncea-3", "nz-scholarship"] },
-  { id: "ca", label: "Canada", flag: "🇨🇦", keys: ["ca-ontario-12", "ca-bc-12", "ca-alberta-12", "ca-quebec-cegep"] },
-  { id: "in", label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad"] },
-  { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat"] },
-  { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc"] },
-  { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol"] },
+  { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act", "uni-us"] },
+  { id: "au", label: "Australia", flag: "🇦🇺", keys: ["au-hsc", "au-vce", "au-qce", "au-wace", "au-sace", "au-atar", "uni-au"] },
+  { id: "nz", label: "New Zealand", flag: "🇳🇿", keys: ["nz-ncea-1", "nz-ncea-2", "nz-ncea-3", "nz-scholarship", "uni-nz"] },
+  { id: "ca", label: "Canada", flag: "🇨🇦", keys: ["ca-ontario-12", "ca-bc-12", "ca-alberta-12", "ca-quebec-cegep", "uni-ca"] },
+  { id: "in", label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad", "uni-in"] },
+  { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat", "uni-pk"] },
+  { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc", "uni-bd"] },
+  { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol", "uni-lk"] },
   { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
 ];
 
