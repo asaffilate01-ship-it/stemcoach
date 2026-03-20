@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import stemsquadClassroomImg from "@/assets/stemsquad-classroom.png";
+import stemsquadImg from "@/assets/stemsquad.png";
 
 export function CTASection() {
   const navigate = useNavigate();
