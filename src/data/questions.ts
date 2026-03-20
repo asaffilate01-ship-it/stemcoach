@@ -40,7 +40,7 @@ export const subjects: SubjectInfo[] = [
     icon: "∑",
     mascotImage: "/assets/mathmax.png",
     color: "221 83% 53%",
-    questionCount: 250000,
+    questionCount: 300000,
     topics: ["Algebra", "Calculus", "Trigonometry", "Statistics", "Geometry", "Vectors", "Matrices", "Differential Equations"],
   },
   {
