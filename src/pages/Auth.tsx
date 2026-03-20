@@ -127,7 +127,7 @@ export default function Auth() {
               always available.
             </h2>
             <p className="mb-10 text-base leading-relaxed opacity-80">
-              1,000,000+ exam-style questions, STEMcoach coaching, and real exam simulations across 30+ curricula worldwide.
+              2,000,000+ exam-style questions, STEMcoach coaching, and real exam simulations across 40+ curricula worldwide.
             </p>
             
             <div className="space-y-4">
