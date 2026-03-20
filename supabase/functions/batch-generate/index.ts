@@ -221,10 +221,24 @@ const SUBJECTS = [
   { id: "ielts-academic", boards: ["British Council", "IDP"] },
   { id: "ielts-general", boards: ["British Council", "IDP"] },
   { id: "celta", boards: ["Cambridge CELTA"] },
+  // France
+  { id: "fr-seconde", boards: ["Éducation Nationale"] },
+  { id: "fr-premiere", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-general", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-techno", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-pro", boards: ["Éducation Nationale"] },
+  { id: "fr-bts", boards: ["Éducation Nationale", "Rectorat"] },
+  { id: "fr-cpge", boards: ["Concours CCP", "Concours Mines-Ponts", "Concours X-ENS", "Concours Centrale-Supélec", "BCE", "Ecricome"] },
+  { id: "fr-dut-but", boards: ["IUT / Éducation Nationale"] },
+  { id: "uni-fr", boards: ["Sorbonne Université", "Université de Paris", "Grande École"] },
+  // Germany
+  { id: "de-mittlerer", boards: ["Kultusministerkonferenz"] },
+  { id: "de-oberstufe", boards: ["Kultusministerkonferenz"] },
+  { id: "de-abitur", boards: ["Kultusministerkonferenz", "Bayern Abitur", "NRW Abitur", "Baden-Württemberg Abitur", "Niedersachsen Abitur", "Hessen Abitur", "Sachsen Abitur", "Berlin Abitur", "Hamburg Abitur"] },
+  { id: "de-fachabitur", boards: ["Kultusministerkonferenz", "FOS Bayern", "FOS NRW", "FOS Hessen"] },
+  { id: "de-berufliches-gym", boards: ["Kultusministerkonferenz", "BG Baden-Württemberg", "BG NRW"] },
+  { id: "uni-de", boards: ["TU9 Universitäten", "Universität München (LMU)", "TU München", "Universität Heidelberg", "RWTH Aachen", "Fachhochschule"] },
 ];
-
-// Question type distribution optimised for variety and accuracy
-const QUESTION_TYPES = [
   { type: "mcq", count: 20, weight: "Single correct answer from 4 options" },
   { type: "multi-select", count: 15, weight: "2-3 correct answers from 4-6 options" },
   { type: "essay", count: 8, weight: "Extended written response with mark scheme" },
