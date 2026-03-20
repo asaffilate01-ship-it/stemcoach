@@ -6,6 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Detect output language from curriculum
+function getLanguageForCurriculum(curriculum: string): { lang: string; instruction: string } {
+  if (curriculum?.startsWith("fr-") || curriculum === "uni-fr") {
+    return { lang: "fr", instruction: "IMPORTANT: Write ALL content in FRENCH (question_text, options, explanation, worked_solution, tuition_tips, exam_tip, mark_scheme, model_answer — everything must be in French)." };
+  }
+  if (curriculum?.startsWith("de-") || curriculum === "uni-de") {
+    return { lang: "de", instruction: "IMPORTANT: Write ALL content in GERMAN (question_text, options, explanation, worked_solution, tuition_tips, exam_tip, mark_scheme, model_answer — everything must be in German)." };
+  }
+  return { lang: "en", instruction: "" };
+}
+
 // Expanded subjects with granular subtopics for 1M+ question coverage
 const SUBJECTS = [
   {
