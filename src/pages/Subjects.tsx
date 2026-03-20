@@ -19,8 +19,13 @@ const countryGroups = [
   { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u"] },
   { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl", "ib-dp-further"] },
   { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act"] },
+  { id: "au", label: "Australia", flag: "🇦🇺", keys: ["au-hsc", "au-vce", "au-qce", "au-wace", "au-sace", "au-atar"] },
+  { id: "nz", label: "New Zealand", flag: "🇳🇿", keys: ["nz-ncea-1", "nz-ncea-2", "nz-ncea-3", "nz-scholarship"] },
+  { id: "ca", label: "Canada", flag: "🇨🇦", keys: ["ca-ontario-12", "ca-bc-12", "ca-alberta-12", "ca-quebec-cegep"] },
   { id: "in", label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad"] },
   { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat"] },
+  { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc"] },
+  { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol"] },
   { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
 ];
 
@@ -66,6 +71,32 @@ const boardBranding: Record<string, { abbr: string; color: string }> = {
   "IDP": { abbr: "IDP", color: "hsl(0,70%,50%)" },
   "Cambridge": { abbr: "CAM", color: "hsl(0,70%,48%)" },
   "Cambridge CELTA": { abbr: "CELTA", color: "hsl(0,70%,48%)" },
+  // Australia
+  "NESA": { abbr: "NESA", color: "hsl(210,65%,45%)" },
+  "VCAA": { abbr: "VCAA", color: "hsl(220,60%,42%)" },
+  "QCAA": { abbr: "QCAA", color: "hsl(340,65%,45%)" },
+  "SCSA": { abbr: "SCSA", color: "hsl(35,70%,45%)" },
+  "SACE Board": { abbr: "SACE", color: "hsl(160,55%,40%)" },
+  // New Zealand
+  "NZQA": { abbr: "NZQA", color: "hsl(0,0%,20%)" },
+  // Canada
+  "Ontario Ministry": { abbr: "ONT", color: "hsl(0,70%,48%)" },
+  "BC Ministry": { abbr: "BC", color: "hsl(210,65%,42%)" },
+  "Alberta Education": { abbr: "ALB", color: "hsl(210,60%,45%)" },
+  "Quebec Ministry": { abbr: "QC", color: "hsl(220,65%,48%)" },
+  // Bangladesh
+  "Dhaka Board": { abbr: "DHK", color: "hsl(130,55%,38%)" },
+  "Rajshahi Board": { abbr: "RAJ", color: "hsl(200,60%,42%)" },
+  "Chittagong Board": { abbr: "CTG", color: "hsl(340,65%,45%)" },
+  "Comilla Board": { abbr: "COM", color: "hsl(25,70%,48%)" },
+  "Jessore Board": { abbr: "JES", color: "hsl(160,55%,38%)" },
+  "Sylhet Board": { abbr: "SYL", color: "hsl(280,50%,45%)" },
+  "Dinajpur Board": { abbr: "DIN", color: "hsl(35,65%,45%)" },
+  "Barisal Board": { abbr: "BAR", color: "hsl(220,55%,42%)" },
+  "Madrasa Board": { abbr: "MAD", color: "hsl(145,50%,38%)" },
+  "Technical Board": { abbr: "TEC", color: "hsl(200,50%,42%)" },
+  // Sri Lanka
+  "NIE Sri Lanka": { abbr: "NIE", color: "hsl(25,70%,45%)" },
 };
 
 function getBoardBrand(board: string) {
@@ -78,6 +109,11 @@ const subjectGradients: Record<string, string> = {
   chemistry: "from-[hsl(142,71%,40%)] to-[hsl(160,60%,38%)]",
   biology: "from-[hsl(38,92%,45%)] to-[hsl(25,85%,50%)]",
   "computer-science": "from-[hsl(340,75%,50%)] to-[hsl(0,84%,55%)]",
+  economics: "from-[hsl(340,75%,50%)] to-[hsl(360,80%,55%)]",
+  "english-literature": "from-[hsl(210,70%,45%)] to-[hsl(230,65%,50%)]",
+  psychology: "from-[hsl(30,80%,50%)] to-[hsl(45,75%,45%)]",
+  geography: "from-[hsl(160,60%,38%)] to-[hsl(180,50%,35%)]",
+  "business-studies": "from-[hsl(270,60%,50%)] to-[hsl(290,55%,45%)]",
   ielts: "from-[hsl(200,80%,45%)] to-[hsl(220,70%,50%)]",
   celta: "from-[hsl(280,70%,50%)] to-[hsl(310,60%,50%)]",
 };
