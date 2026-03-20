@@ -18,6 +18,7 @@ const COUNTRY_TO_REGION: Record<string, string> = {
   LK: "lk",
   FR: "fr",
   PH: "ph",
+  DE: "de",
 };
 
 serve(async (req) => {

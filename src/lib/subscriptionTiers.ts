@@ -1,4 +1,4 @@
-export type RegionKey = "uk" | "us" | "ae" | "in" | "pk" | "au" | "nz" | "ca" | "bd" | "lk" | "fr" | "ph";
+export type RegionKey = "uk" | "us" | "ae" | "in" | "pk" | "au" | "nz" | "ca" | "bd" | "lk" | "fr" | "ph" | "de";
 
 export interface RegionalPrice {
   price: string;
@@ -43,6 +43,7 @@ export const PACKS: Record<string, QuestionPack> = {
       lk: { price: "LKR 4,999", price_id: "price_1TCxyzFFogsDQVs4r94WHEqY" },
       fr: { price: "€14.99", price_id: "price_fr_standard" },
       ph: { price: "₱899", price_id: "price_ph_standard" },
+      de: { price: "€14.99", price_id: "price_de_standard" },
     },
   },
   topup: {
@@ -70,6 +71,7 @@ export const PACKS: Record<string, QuestionPack> = {
       lk: { price: "LKR 1,499", price_id: "price_1TCxz0FFogsDQVs4bwezp7QL" },
       fr: { price: "€4.99", price_id: "price_fr_topup" },
       ph: { price: "₱299", price_id: "price_ph_topup" },
+      de: { price: "€4.99", price_id: "price_de_topup" },
     },
   },
 } as const;
@@ -114,6 +116,7 @@ export const regionLabels: Record<RegionKey, string> = {
   lk: "🇱🇰 Sri Lanka",
   fr: "🇫🇷 France",
   ph: "🇵🇭 Philippines",
+  de: "🇩🇪 Deutschland",
 };
 
 /** Free tier: questions per subject before paywall */
