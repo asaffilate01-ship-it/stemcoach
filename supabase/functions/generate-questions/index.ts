@@ -77,14 +77,14 @@ serve(async (req) => {
       numerical: "Numerical calculation question. The answer should be a specific number with units.",
     };
 
+    const { instruction: langInstruction } = getLanguageForCurriculum(curriculum);
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      const { instruction: langInstruction } = getLanguageForCurriculum(curriculum);
-
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
