@@ -41,6 +41,7 @@ const features = [
     title: "White-Label Portal",
     description: "Colleges and tuition centres get branded portals with class management, assignments, and parent monitoring.",
     variant: "purple" as const,
+    link: "/register-institution",
   },
   {
     icon: Users,
