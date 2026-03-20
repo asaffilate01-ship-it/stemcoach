@@ -54,7 +54,7 @@ export function StemSquadSection() {
         </motion.div>
 
         {/* Squad grid */}
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-6">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-6">
           {squad.map((member, i) => (
             <motion.div
               key={member.name}
