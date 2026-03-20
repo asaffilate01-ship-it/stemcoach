@@ -2,62 +2,24 @@ import { motion } from "framer-motion";
 import { BookOpen, Brain, Clock, GraduationCap, LineChart, Shield, Users, Zap } from "lucide-react";
 import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import stemsquadImg from "@/assets/stemsquad-hero.png";
-
-const features = [
-  {
-    icon: BookOpen,
-    title: "Practice Mode",
-    description: "Unlimited topic-based questions with instant feedback, step-by-step worked solutions, and tuition tips from expert tutors.",
-    variant: "primary" as const,
-  },
-  {
-    icon: Clock,
-    title: "Mock Exams",
-    description: "Timed exam simulations matching real paper formats — MCQ, numerical, structured, and essay. Get certified on completion.",
-    variant: "warning" as const,
-  },
-  {
-    icon: Brain,
-    title: "STEMcoach Coaching",
-    description: "Chat with STEMcoach — get step-by-step explanations, problem solving, and personalised coaching that adapts to your learning style.",
-    variant: "purple" as const,
-  },
-  {
-    icon: GraduationCap,
-    title: "30+ Curricula",
-    description: "GCSE, A-Level, IB, AP, JEE, NEET, FSC, IELTS, CELTA — every major exam board in 5 countries.",
-    variant: "success" as const,
-  },
-  {
-    icon: LineChart,
-    title: "Smart Analytics",
-    description: "Track accuracy, exam readiness scores, weak topics, study streaks, and XP progress in real time.",
-    variant: "primary" as const,
-  },
-  {
-    icon: Shield,
-    title: "White-Label Portal",
-    description: "Colleges and tuition centres get branded portals with class management, assignments, and parent monitoring.",
-    variant: "purple" as const,
-    link: "/register-institution",
-  },
-  {
-    icon: Users,
-    title: "Teacher Dashboard",
-    description: "Create classes, set assignments, track student progress, and manage live classroom sessions.",
-    variant: "warning" as const,
-  },
-  {
-    icon: Zap,
-    title: "Gamified Learning",
-    description: "Earn XP, unlock badges, climb leaderboards, and maintain streaks to stay motivated every day.",
-    variant: "success" as const,
-  },
-];
 
 export function FeaturesSection() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const features = [
+    { icon: BookOpen, title: t("landing.featurePractice"), description: t("landing.featurePracticeDesc"), variant: "primary" as const },
+    { icon: Clock, title: t("landing.featureMock"), description: t("landing.featureMockDesc"), variant: "warning" as const },
+    { icon: Brain, title: t("landing.featureCoach"), description: t("landing.featureCoachDesc"), variant: "purple" as const },
+    { icon: GraduationCap, title: t("landing.featureCurricula"), description: t("landing.featureCurriculaDesc"), variant: "success" as const },
+    { icon: LineChart, title: t("landing.featureAnalytics"), description: t("landing.featureAnalyticsDesc"), variant: "primary" as const },
+    { icon: Shield, title: t("landing.featureWhiteLabel"), description: t("landing.featureWhiteLabelDesc"), variant: "purple" as const, link: "/register-institution" },
+    { icon: Users, title: t("landing.featureTeacher"), description: t("landing.featureTeacherDesc"), variant: "warning" as const },
+    { icon: Zap, title: t("landing.featureGamification"), description: t("landing.featureGamificationDesc"), variant: "success" as const },
+  ];
+
   return (
     <section className="relative border-t border-border/30 py-10 md:py-14">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.02),transparent_70%)]" />
@@ -68,18 +30,17 @@ export function FeaturesSection() {
           viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <div className="stem-label mb-3">Platform Features</div>
+          <div className="stem-label mb-3">{t("landing.platformFeatures")}</div>
           <h2 className="stem-section-heading">
-            Everything a tuition centre offers
+            {t("landing.featuresHeading")}
             <br className="hidden sm:block" />
-            <span className="stem-gradient-text"> — in an app</span>
+            <span className="stem-gradient-text">{t("landing.featuresHeadingSuffix")}</span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
-            Built by teachers and tutors. From practice questions to live classrooms, everything you need to ace your exams.
+            {t("landing.featuresDesc")}
           </p>
         </motion.div>
 
-        {/* STEM Squad showcase */}
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.97 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -91,7 +52,7 @@ export function FeaturesSection() {
             <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
             <img
               src={stemsquadImg}
-              alt="The STEM Squad — 12 subject mascots guiding your learning journey"
+              alt="The STEM Squad"
               className="relative w-full max-w-lg transition-transform duration-700 hover:scale-[1.02]"
               loading="lazy"
             />
@@ -100,8 +61,8 @@ export function FeaturesSection() {
               transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
               className="mt-3 rounded-xl bg-card px-5 py-2.5 shadow-lg ring-1 ring-border/30 text-center"
             >
-              <p className="text-sm font-bold">Meet your learning squad 🚀</p>
-              <p className="text-[11px] text-muted-foreground">Each mascot specialises in a different subject</p>
+              <p className="text-sm font-bold">{t("landing.meetLearningSquad")}</p>
+              <p className="text-[11px] text-muted-foreground">{t("landing.eachMascotSpecialises")}</p>
             </motion.div>
           </div>
         </motion.div>
@@ -124,7 +85,7 @@ export function FeaturesSection() {
               <h3 className="mb-2 font-bold text-foreground">{feature.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
               {(feature as any).link && (
-                <p className="mt-3 text-xs font-semibold text-primary">Register your institution →</p>
+                <p className="mt-3 text-xs font-semibold text-primary">{t("landing.registerInstitution")}</p>
               )}
             </motion.div>
           ))}

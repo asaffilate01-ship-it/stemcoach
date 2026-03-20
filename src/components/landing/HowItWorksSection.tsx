@@ -1,31 +1,34 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import createAccountIcon from "@/assets/icons/create-account-3d.png";
 import practiceLearnIcon from "@/assets/icons/practice-learn-3d.png";
 import aceExamsIcon from "@/assets/icons/ace-exams-3d.png";
 
-const steps = [
-  {
-    image: createAccountIcon,
-    step: "01",
-    title: "Create Your Account",
-    description: "Sign up in seconds. Choose your curriculum, subjects, and exam board — we personalise everything for you.",
-  },
-  {
-    image: practiceLearnIcon,
-    step: "02",
-    title: "Practise & Learn",
-    description: "Work through exam-style questions with instant feedback, worked solutions, and STEMcoach coaching when you get stuck.",
-  },
-  {
-    image: aceExamsIcon,
-    step: "03",
-    title: "Ace Your Exams",
-    description: "Track progress, earn badges, take mock exams, and build confidence. Your grades will thank you.",
-  },
-];
-
 export function HowItWorksSection() {
+  const { t } = useTranslation();
+
+  const steps = [
+    {
+      image: createAccountIcon,
+      step: "01",
+      title: t("landing.step1Title"),
+      description: t("landing.step1Desc"),
+    },
+    {
+      image: practiceLearnIcon,
+      step: "02",
+      title: t("landing.step2Title"),
+      description: t("landing.step2Desc"),
+    },
+    {
+      image: aceExamsIcon,
+      step: "03",
+      title: t("landing.step3Title"),
+      description: t("landing.step3Desc"),
+    },
+  ];
+
   return (
     <section className="relative border-t border-border/30 py-10 md:py-14">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.03),transparent_60%)]" />
@@ -36,12 +39,12 @@ export function HowItWorksSection() {
           viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <div className="stem-label mb-3">How It Works</div>
+          <div className="stem-label mb-3">{t("landing.howItWorksLabel")}</div>
           <h2 className="stem-section-heading">
-            Three steps to <span className="stem-gradient-text">exam success</span>
+            {t("landing.threeSteps")} <span className="stem-gradient-text">{t("landing.examSuccess")}</span>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">
-            No complicated setup. No textbooks. Just focused practice that actually works.
+            {t("landing.howItWorksDesc")}
           </p>
         </motion.div>
 
@@ -55,7 +58,6 @@ export function HowItWorksSection() {
               transition={{ duration: 0.5, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
               className="group relative text-center"
             >
-              {/* Connector line */}
               {i < steps.length - 1 && (
                 <div className="absolute right-0 top-14 hidden h-px w-[calc(100%-3rem)] translate-x-1/2 md:block">
                   <div className="h-full w-full bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />

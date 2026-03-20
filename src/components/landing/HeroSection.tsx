@@ -2,37 +2,36 @@ import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Trophy, Users, Sparkles, Play, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import heroImg from "@/assets/hero-stemsquad.png";
 import stemsquadImg from "@/assets/stemsquad-hero.png";
 
 const stats = [
-  { label: "Questions", value: "2M+", icon: BookOpen },
-  { label: "Curricula", value: "50+", icon: Users },
-  { label: "Pass Rate", value: "94%", icon: Trophy },
-];
-
-const highlights = [
-  "Step-by-step worked solutions",
-  "STEMcoach coaching when you're stuck",
-  "Real exam simulations",
+  { key: "questionsLabel", value: "2M+", icon: BookOpen },
+  { key: "curriculaLabel", value: "50+", icon: Users },
+  { key: "passRate", value: "94%", icon: Trophy },
 ];
 
 export function HeroSection() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const highlights = [
+    t("landing.highlight1"),
+    t("landing.highlight2"),
+    t("landing.highlight3"),
+  ];
 
   return (
     <section className="relative overflow-hidden">
-      {/* Layered premium background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.10),transparent)]" />
       <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(ellipse_at_100%_0%,hsl(258_60%_52%/0.05),transparent)]" />
       <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-[radial-gradient(ellipse_at_0%_100%,hsl(var(--primary)/0.04),transparent)]" />
       
-      {/* Subtle grid pattern */}
       <div className="absolute inset-0 opacity-[0.015]" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }} />
 
-      {/* Floating orbs */}
       <motion.div
         animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -57,22 +56,20 @@ export function HeroSection() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-primary backdrop-blur-sm"
             >
-              <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-5 w-5 rounded-full object-cover" /> Virtual Tuition Centre
+              <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-5 w-5 rounded-full object-cover" /> {t("landing.virtualTuitionCentre")}
             </motion.div>
             <h1 className="mb-6 text-[2rem] font-extrabold tracking-tight leading-[1.12] sm:text-4xl md:text-5xl lg:text-[3.5rem]">
-              Master your exams{" "}
+              {t("landing.masterExams")}{" "}
               <br className="hidden md:block" />
-              through{" "}
+              {t("landing.through")}{" "}
               <span className="stem-gradient-text">
-                deliberate practice
+                {t("landing.deliberatePractice")}
               </span>
             </h1>
             <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-[1.125rem]">
-               A private tutor in your pocket. 2,000,000+ exam-style questions with step-by-step
-               solutions, STEMcoach coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
+              {t("landing.heroDescription")}
             </p>
 
-            {/* Highlights */}
             <div className="mb-8 flex flex-col gap-2.5 sm:flex-row sm:gap-6">
               {highlights.map((h, i) => (
                 <motion.div
@@ -95,7 +92,7 @@ export function HeroSection() {
                 className="gap-2 px-8"
                 onClick={() => navigate("/subjects")}
               >
-                Start Practising <ArrowRight className="h-4 w-4" />
+                {t("landing.startPractising")} <ArrowRight className="h-4 w-4" />
               </Button>
               <Button
                 variant="outline"
@@ -103,14 +100,14 @@ export function HeroSection() {
                 className="gap-2 px-8"
                 onClick={() => navigate("/pricing")}
               >
-                <Play className="h-4 w-4" /> View Plans
+                <Play className="h-4 w-4" /> {t("landing.viewPlans")}
               </Button>
             </div>
 
             <div className="mt-12 flex items-center gap-8 border-t border-border/40 pt-8 sm:gap-10">
               {stats.map((stat, i) => (
                 <motion.div
-                  key={stat.label}
+                  key={stat.key}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 + i * 0.1 }}
@@ -120,13 +117,12 @@ export function HeroSection() {
                     <stat.icon className="h-4 w-4 text-primary/50 transition-colors group-hover:text-primary" />
                     <span className="text-xl font-extrabold tracking-tight sm:text-2xl">{stat.value}</span>
                   </div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground sm:text-[11px]">{stat.label}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground sm:text-[11px]">{t(`landing.${stat.key}`)}</div>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          {/* Hero image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -136,11 +132,10 @@ export function HeroSection() {
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/8 via-transparent to-[hsl(258_60%_52%/0.06)] blur-3xl" />
               <img
                 src={heroImg}
-                alt="Students studying STEM subjects together with equations and molecules"
+                alt="Students studying STEM subjects together"
                 className="relative w-full rounded-2xl shadow-2xl shadow-primary/10 ring-1 ring-border/30"
                 loading="eager"
               />
-              {/* Floating Squad strip */}
               <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
@@ -148,12 +143,11 @@ export function HeroSection() {
               >
                 <img src={stemsquadImg} alt="STEM Squad" className="h-9 w-auto" />
                 <div>
-                  <div className="text-xs font-bold">Meet the STEM Squad</div>
-                  <div className="text-[10px] text-muted-foreground">Your personal tutoring team</div>
+                  <div className="text-xs font-bold">{t("landing.meetSquad")}</div>
+                  <div className="text-[10px] text-muted-foreground">{t("landing.yourTutoringTeam")}</div>
                 </div>
               </motion.div>
 
-              {/* Floating badge top-right */}
               <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
@@ -163,8 +157,8 @@ export function HeroSection() {
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold">2M+ Questions</div>
-                  <div className="text-[10px] text-muted-foreground">All subjects</div>
+                  <div className="text-xs font-bold">{t("landing.twoMQuestions")}</div>
+                  <div className="text-[10px] text-muted-foreground">{t("landing.allSubjects")}</div>
                 </div>
               </motion.div>
             </div>
