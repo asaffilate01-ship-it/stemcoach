@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import aiTutorImg from "@/assets/ai-tutor-preview.png";
+import stemsquadImg from "@/assets/stemsquad.png";
 
 export function CTASection() {
   const navigate = useNavigate();
@@ -21,14 +21,22 @@ export function CTASection() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="hidden md:block"
           >
-            <div className="relative">
+            <div className="relative flex flex-col items-center">
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
               <img
-                src={aiTutorImg}
-                alt="Student using STEMcoach for step-by-step math solutions"
-                className="relative w-full rounded-2xl shadow-2xl shadow-primary/8 ring-1 ring-border/30"
+                src={stemsquadImg}
+                alt="The STEM Squad — your personal tutoring team"
+                className="relative w-full max-w-md"
                 loading="lazy"
               />
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="mt-4 rounded-xl bg-card px-5 py-3 shadow-lg ring-1 ring-border/30 text-center"
+              >
+                <p className="text-sm font-bold">The Squad is rooting for you! 🎉</p>
+                <p className="text-[11px] text-muted-foreground">7 mascots · 7 subjects · 1 mission</p>
+              </motion.div>
             </div>
           </motion.div>
 

@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Trophy, Users, Sparkles, Play, CheckCircle2 } fro
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroImg from "@/assets/hero-stemsquad.png";
+import stemsquadImg from "@/assets/stemsquad.png";
 
 const stats = [
   { label: "Questions", value: "1M+", icon: BookOpen },
@@ -139,22 +140,20 @@ export function HeroSection() {
                 className="relative w-full rounded-2xl shadow-2xl shadow-primary/10 ring-1 ring-border/30"
                 loading="eager"
               />
-              {/* Floating badge */}
+              {/* Floating Squad strip */}
               <motion.div
-                animate={{ y: [0, -8, 0] }}
+                animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -bottom-4 -left-4 hidden rounded-xl bg-card px-4 py-3 shadow-premium-lg ring-1 ring-border/30 md:flex items-center gap-3"
+                className="absolute -bottom-5 left-1/2 -translate-x-1/2 hidden rounded-2xl bg-card/95 backdrop-blur-sm px-5 py-3 shadow-premium-lg ring-1 ring-border/30 md:flex items-center gap-4"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                  <Trophy className="h-5 w-5 text-success" />
-                </div>
+                <img src={stemsquadImg} alt="STEM Squad" className="h-9 w-auto" />
                 <div>
-                  <div className="text-sm font-bold">94% Pass Rate</div>
-                  <div className="text-[11px] text-muted-foreground">Among active students</div>
+                  <div className="text-xs font-bold">Meet the STEM Squad</div>
+                  <div className="text-[10px] text-muted-foreground">Your personal tutoring team</div>
                 </div>
               </motion.div>
 
-              {/* Second floating badge */}
+              {/* Floating badge top-right */}
               <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
