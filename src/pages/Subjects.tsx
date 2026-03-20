@@ -181,7 +181,7 @@ function FilterPanel({
                           : "bg-muted/30 hover:bg-muted/50"
                       }`}
                     >
-                      <span className="text-base">{group.flag}</span>
+                      <span className="text-lg leading-none">{group.flag}</span>
                       <span className={`flex-1 text-[11px] font-semibold ${isSelected ? "text-primary" : "text-muted-foreground"}`}>
                         {group.label}
                       </span>
