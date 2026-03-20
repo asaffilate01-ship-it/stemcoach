@@ -29,6 +29,42 @@ interface NavItem {
   variant?: Icon3DVariant;
 }
 
+const LANGUAGES = [
+  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+];
+
+function LanguageSelector() {
+  const { i18n } = useTranslation();
+  const current = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors sm:p-2 flex items-center gap-1" aria-label="Language">
+          <span className="text-sm">{current.flag}</span>
+          <Globe className="h-3.5 w-3.5 hidden sm:block" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[140px]">
+        <DropdownMenuLabel className="text-xs">Language</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {LANGUAGES.map(lang => (
+          <DropdownMenuItem
+            key={lang.code}
+            onClick={() => i18n.changeLanguage(lang.code)}
+            className={`gap-2 ${i18n.language === lang.code ? "bg-primary/10 text-primary" : ""}`}
+          >
+            <span>{lang.flag}</span>
+            <span className="text-sm">{lang.label}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 const navItems: NavItem[] = [
   { to: "/", label: "Home", icon: BookOpen, variant: "primary" },
   { to: "/subjects", label: "Subjects", icon: GraduationCap, variant: "success" },
