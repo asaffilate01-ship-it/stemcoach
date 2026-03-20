@@ -112,6 +112,8 @@ export const regionLabels: Record<RegionKey, string> = {
   ca: "🇨🇦 Canada",
   bd: "🇧🇩 Bangladesh",
   lk: "🇱🇰 Sri Lanka",
+  fr: "🇫🇷 France",
+  ph: "🇵🇭 Philippines",
 };
 
 /** Free tier: questions per subject before paywall */
