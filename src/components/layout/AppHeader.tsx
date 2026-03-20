@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -13,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import type { Icon3DVariant } from "@/components/ui/icon-3d";
 
 interface NavItem {
   to: string;
@@ -22,36 +24,37 @@ interface NavItem {
   group?: string;
   image?: string;
   comingSoon?: boolean;
+  variant?: Icon3DVariant;
 }
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Home", icon: BookOpen },
-  { to: "/subjects", label: "Subjects", icon: GraduationCap },
-  { to: "/mock-exam", label: "Exam", icon: Trophy },
+  { to: "/", label: "Home", icon: BookOpen, variant: "primary" },
+  { to: "/subjects", label: "Subjects", icon: GraduationCap, variant: "success" },
+  { to: "/mock-exam", label: "Exam", icon: Trophy, variant: "warning" },
   { to: "/ai-tutor", label: "STEMcoach", icon: Bot, image: "/assets/coach-stem.png" },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study" },
-  { to: "/flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study" },
-  { to: "/weak-drills", label: "Drills", icon: Brain, group: "study" },
-  { to: "/daily-challenge", label: "Daily Challenge", icon: Flame, group: "study" },
-  { to: "/past-papers", label: "Past Papers", icon: FileText, group: "study" },
-  { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"], group: "study" },
-  { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"], group: "study" },
-  { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"], group: "study" },
-  { to: "/badges", label: "Badges", icon: Award, group: "social" },
-  { to: "/leaderboard", label: "Leaderboard", icon: Medal, group: "social" },
-  { to: "/certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social" },
-  { to: "/study-groups", label: "Study Groups", icon: Users, group: "social" },
-  { to: "/my-classes", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes" },
-  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true },
-  { to: "/formulas", label: "Formula Sheets", icon: ScrollText, group: "resources" },
-  { to: "/blog", label: "Blog", icon: FileText, group: "resources" },
-  { to: "/parent", label: "Parent Portal", icon: Eye, roles: ["parent"] },
-  { to: "/teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"] },
-  { to: "/institution", label: "Institution", icon: Building2, roles: ["admin"] },
-  { to: "/admin/generate", label: "Generate", icon: Sparkles, roles: ["admin"] },
-  { to: "/admin/questions", label: "Content", icon: Database, roles: ["admin"] },
-  { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"] },
-  { to: "/pricing", label: "Pricing", icon: CreditCard },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study", variant: "primary" },
+  { to: "/flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study", variant: "accent" },
+  { to: "/weak-drills", label: "Drills", icon: Brain, group: "study", variant: "warning" },
+  { to: "/daily-challenge", label: "Daily Challenge", icon: Flame, group: "study", variant: "destructive" },
+  { to: "/past-papers", label: "Past Papers", icon: FileText, group: "study", variant: "purple" },
+  { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"], group: "study", variant: "success" },
+  { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"], group: "study", variant: "primary" },
+  { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"], group: "study", variant: "accent" },
+  { to: "/badges", label: "Badges", icon: Award, group: "social", variant: "warning" },
+  { to: "/leaderboard", label: "Leaderboard", icon: Medal, group: "social", variant: "primary" },
+  { to: "/certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social", variant: "success" },
+  { to: "/study-groups", label: "Study Groups", icon: Users, group: "social", variant: "purple" },
+  { to: "/my-classes", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes", variant: "primary" },
+  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true, variant: "destructive" },
+  { to: "/formulas", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
+  { to: "/blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
+  { to: "/parent", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
+  { to: "/teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },
+  { to: "/institution", label: "Institution", icon: Building2, roles: ["admin"], variant: "purple" },
+  { to: "/admin/generate", label: "Generate", icon: Sparkles, roles: ["admin"], variant: "warning" },
+  { to: "/admin/questions", label: "Content", icon: Database, roles: ["admin"], variant: "accent" },
+  { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"], variant: "primary" },
+  { to: "/pricing", label: "Pricing", icon: CreditCard, variant: "success" },
 ];
 
 export function AppHeader() {
@@ -85,16 +88,16 @@ export function AppHeader() {
   const NavLink = ({ item }: { item: NavItem }) => (
     <Link
       to={item.to}
-      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+      className={`group flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
         isActive(item.to)
           ? "bg-primary/10 text-primary"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
       {item.image ? (
-        <img src={item.image} alt={item.label} className="h-4 w-4 rounded-sm object-cover" />
+        <img src={item.image} alt={item.label} className="h-5 w-5 rounded-sm object-cover" />
       ) : (
-        <item.icon className="h-3.5 w-3.5" />
+        <Icon3D icon={item.icon} variant={item.variant || "primary"} size="xs" />
       )}
       {item.label}
     </Link>
@@ -112,10 +115,10 @@ export function AppHeader() {
             {label} <ChevronDown className="h-3 w-3 opacity-50" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="min-w-[180px]">
+        <DropdownMenuContent align="start" className="min-w-[200px]">
           {items.map(item => (
-            <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)} className="gap-2">
-              <item.icon className="h-3.5 w-3.5" />
+            <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)} className="gap-2.5 py-2">
+              <Icon3D icon={item.icon} variant={item.variant || "primary"} size="xs" />
               {item.label}
               {item.comingSoon && <span className="ml-auto rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-bold text-warning">Soon</span>}
             </DropdownMenuItem>
@@ -173,18 +176,18 @@ export function AppHeader() {
               <DropdownMenuContent align="end" className="min-w-[200px]">
                 <DropdownMenuLabel className="text-xs truncate max-w-[200px]">{user.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2">
-                  <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2.5 py-2">
+                  <Icon3D icon={LayoutDashboard} variant="primary" size="xs" /> Dashboard
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2">
-                  <Settings className="h-3.5 w-3.5" /> Settings
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2.5 py-2">
+                  <Icon3D icon={Settings} variant="accent" size="xs" /> Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/pricing")} className="gap-2">
-                  <CreditCard className="h-3.5 w-3.5" /> Pricing
+                <DropdownMenuItem onClick={() => navigate("/pricing")} className="gap-2.5 py-2">
+                  <Icon3D icon={CreditCard} variant="success" size="xs" /> Pricing
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
-                  <LogOut className="h-3.5 w-3.5" /> Sign Out
+                <DropdownMenuItem onClick={handleSignOut} className="gap-2.5 py-2 text-destructive">
+                  <Icon3D icon={LogOut} variant="destructive" size="xs" /> Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
