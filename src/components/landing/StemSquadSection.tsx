@@ -7,6 +7,11 @@ const squad = [
   { name: "BioBee", subject: "Biology", image: "/assets/biobee.png" },
   { name: "Codey", subject: "Computer Science", image: "/assets/codey.png" },
   { name: "Lexi", subject: "IELTS & CELTA", image: "/assets/lexi.png" },
+  { name: "EconiQ", subject: "Economics", image: "/assets/econiq.png" },
+  { name: "Litera", subject: "English Literature", image: "/assets/litera.png" },
+  { name: "Pysche", subject: "Psychology", image: "/assets/pysche.png" },
+  { name: "Geo", subject: "Geography", image: "/assets/geo.png" },
+  { name: "BizPro", subject: "Business Studies", image: "/assets/bizpro.png" },
 ];
 
 export function StemSquadSection() {
