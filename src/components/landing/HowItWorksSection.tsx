@@ -1,21 +1,24 @@
 import { motion } from "framer-motion";
-import { UserPlus, BookOpen, Trophy, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import createAccountIcon from "@/assets/icons/create-account-3d.png";
+import practiceLearnIcon from "@/assets/icons/practice-learn-3d.png";
+import aceExamsIcon from "@/assets/icons/ace-exams-3d.png";
 
 const steps = [
   {
-    icon: UserPlus,
+    image: createAccountIcon,
     step: "01",
     title: "Create Your Account",
     description: "Sign up in seconds. Choose your curriculum, subjects, and exam board — we personalise everything for you.",
   },
   {
-    icon: BookOpen,
+    image: practiceLearnIcon,
     step: "02",
     title: "Practise & Learn",
     description: "Work through exam-style questions with instant feedback, worked solutions, and STEMcoach coaching when you get stuck.",
   },
   {
-    icon: Trophy,
+    image: aceExamsIcon,
     step: "03",
     title: "Ace Your Exams",
     description: "Track progress, earn badges, take mock exams, and build confidence. Your grades will thank you.",
@@ -61,15 +64,14 @@ export function HowItWorksSection() {
                 </div>
               )}
 
-              <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/8 to-primary/[0.02] transition-all duration-300" />
+              <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-bold text-white shadow-lg shadow-primary/30"
+                  className="absolute -top-2 -right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[hsl(258_60%_52%)] text-xs font-bold text-white shadow-lg shadow-primary/30"
                 >
                   {step.step}
                 </motion.div>
-                <step.icon className="relative h-8 w-8 text-primary" />
+                <img src={step.image} alt={step.title} className="h-full w-full object-contain drop-shadow-lg" />
               </div>
 
               <h3 className="mb-3 text-lg font-bold text-foreground">{step.title}</h3>
