@@ -58,10 +58,8 @@ const RegisterInstitution = lazy(() => import("./pages/RegisterInstitution"));
 const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 const Support = lazy(() => import("./pages/Support"));
 
-// Only import DevTools in dev mode
-const DevToolsPanel = import.meta.env.DEV
-  ? lazy(() => import("./components/dev/DevToolsPanel").then(m => ({ default: m.DevToolsPanel })))
-  : () => null;
+// DevTools available in all environments for testing
+const DevToolsPanel = lazy(() => import("./components/dev/DevToolsPanel").then(m => ({ default: m.DevToolsPanel })));
 
 const queryClient = new QueryClient();
 
