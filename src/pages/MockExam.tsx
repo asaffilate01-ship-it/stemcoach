@@ -160,7 +160,7 @@ export default function MockExam() {
         return;
       }
 
-      const shuffled = data.sort(() => Math.random() - 0.5);
+      const shuffled = (data as ExamQuestion[]);
       setQuestions(shuffled);
       setTimeLeft(dur * 60);
       setAnswers({});
