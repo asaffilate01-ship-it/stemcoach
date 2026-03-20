@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,21 +11,25 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
+    if (!authHeader?.startsWith("Bearer ")) throw new Error("No authorization header");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
     );
 
-    // Verify JWT
+    // Verify JWT using getClaims
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await createClient(
+    const anonClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!
-    ).auth.getUser(token);
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) throw new Error("Unauthorized");
 
-    if (authError || !user) throw new Error("Unauthorized");
+    const user = { id: claimsData.claims.sub as string };
 
     const { question_id, answer, answers, time_taken_seconds } = await req.json();
     if (!question_id) throw new Error("question_id required");
