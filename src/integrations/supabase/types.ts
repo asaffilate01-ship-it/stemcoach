@@ -1358,6 +1358,7 @@ export type Database = {
           subject: string
         }[]
       }
+      grant_dev_quota: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
