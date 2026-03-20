@@ -76,6 +76,9 @@ export default function Practice() {
   const [mascotCorrect, setMascotCorrect] = useState<boolean | null>(null);
   const [timerRunning, setTimerRunning] = useState(true);
   const [timeTaken, setTimeTaken] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  // Server-returned answer data (only available after submission)
+  const [revealedAnswer, setRevealedAnswer] = useState<any>(null);
 
   useEffect(() => {
     if (!subjectId) return;
