@@ -26,13 +26,13 @@ interface DBQuestion {
   id: string;
   question_text: string;
   options: any;
-  correct_answer: string;
-  correct_answers: string[] | null;
+  correct_answer?: string;
+  correct_answers?: string[] | null;
   allow_multiple_answers: boolean;
-  explanation: string;
-  worked_solution: string;
-  tuition_tips: string[];
-  exam_tip: string;
+  explanation?: string;
+  worked_solution?: string;
+  tuition_tips?: string[];
+  exam_tip?: string;
   formula: string | null;
   topic: string;
   subtopic: string;
@@ -41,8 +41,8 @@ interface DBQuestion {
   points: number;
   question_type: string;
   boards: string[];
-  mark_scheme: string | null;
-  model_answer: string | null;
+  mark_scheme?: string | null;
+  model_answer?: string | null;
   max_marks: number | null;
 }
 
