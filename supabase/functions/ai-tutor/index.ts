@@ -143,10 +143,22 @@ function jsonRes(body: any, status = 200) {
 
 // ── GRADE ESSAY ──
 async function gradeEssay(params: any, apiKey: string) {
-  const { question_text, student_answer, mark_scheme, model_answer, max_marks, subject, topic, question_id } = params;
+  const { question_text, student_answer, max_marks, subject, topic, question_id } = params;
 
   if (!question_text || !student_answer) {
     return jsonRes({ error: "question_text and student_answer are required" }, 400);
+  }
+
+  // Fetch full question data server-side if question_id provided
+  let mark_scheme = params.mark_scheme;
+  let model_answer = params.model_answer;
+  if (question_id && (!mark_scheme || !model_answer)) {
+    const sb = getSupabaseAdmin();
+    const { data: fullQ } = await sb.from("questions").select("mark_scheme, model_answer, correct_answer, worked_solution").eq("id", question_id).single();
+    if (fullQ) {
+      mark_scheme = mark_scheme || fullQ.mark_scheme || fullQ.worked_solution;
+      model_answer = model_answer || fullQ.model_answer || fullQ.correct_answer;
+    }
   }
 
   // Cache key: question + normalized student answer
