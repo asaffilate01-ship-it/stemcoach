@@ -692,10 +692,10 @@ export default function Practice() {
                   </div>
                 )}
 
-                {question.exam_tip && (
+                {revealedAnswer?.exam_tip && (
                   <div className="rounded-2xl border-l-4 border-l-primary bg-primary/5 p-5">
                     <div className="mb-1 text-xs font-bold uppercase tracking-wider text-primary">Exam Tip</div>
-                    <p className="text-sm leading-relaxed">{question.exam_tip}</p>
+                    <p className="text-sm leading-relaxed">{revealedAnswer.exam_tip}</p>
                   </div>
                 )}
 
