@@ -51,7 +51,7 @@ export function CTASection() {
                     whileHover={{ y: -6, scale: 1.1 }}
                     className="flex flex-col items-center"
                   >
-                    <div className="rounded-2xl bg-card p-2 shadow-md ring-1 ring-border/20">
+                    <div className="rounded-2xl bg-[hsl(var(--squad-avatar-bg))] p-2 shadow-md ring-1 ring-border/20">
                       <img src={m.src} alt={m.name} className="h-14 w-14 object-contain" loading="lazy" />
                     </div>
                     <span className="mt-1 text-[10px] font-semibold text-muted-foreground">{m.name}</span>
