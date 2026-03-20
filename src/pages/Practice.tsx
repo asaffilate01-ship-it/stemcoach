@@ -342,6 +342,7 @@ export default function Practice() {
     setTimeTaken(0);
     setShowMascotReaction(false);
     setMascotCorrect(null);
+    setRevealedAnswer(null);
     setCurrentIndex((prev) => (prev + 1) % questions.length);
   };
 
