@@ -49,6 +49,8 @@ function currencyToRegion(currency: string | null): string {
     case "cad": return "ca";
     case "bdt": return "bd";
     case "lkr": return "lk";
+    case "eur": return "fr";
+    case "php": return "ph";
     default: return "uk";
   }
 }
