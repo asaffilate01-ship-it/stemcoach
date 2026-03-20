@@ -232,7 +232,7 @@ export default function AdminGenerate() {
     setGenerating(false);
   };
 
-  const progressPct = batchStatus?.progress_pct || ((dbCount || 0) / 1000000) * 100;
+  const progressPct = batchStatus?.progress_pct || ((dbCount || 0) / 2000000) * 100;
 
   return (
     <div className="min-h-screen bg-background">

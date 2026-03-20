@@ -116,7 +116,7 @@ export const subjects: SubjectInfo[] = [
     name: "Business Studies",
     icon: "💼",
     color: "270 60% 50%",
-    questionCount: 120000,
+    questionCount: 150000,
     topics: ["Marketing", "Finance & Accounting", "Operations", "Human Resources", "Business Strategy", "Enterprise", "External Environment", "Decision Making"],
   },
   {

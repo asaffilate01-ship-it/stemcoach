@@ -293,8 +293,8 @@ serve(async (req) => {
         queue_done: done.count || 0,
         queue_failed: failed.count || 0,
         total_questions: total.count || 0,
-        target: 1000000,
-        progress_pct: Math.round(((total.count || 0) / 1000000) * 100 * 10) / 10,
+        target: 2000000,
+        progress_pct: Math.round(((total.count || 0) / 2000000) * 100 * 10) / 10,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
