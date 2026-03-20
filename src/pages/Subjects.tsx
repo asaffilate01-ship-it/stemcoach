@@ -71,6 +71,32 @@ const boardBranding: Record<string, { abbr: string; color: string }> = {
   "IDP": { abbr: "IDP", color: "hsl(0,70%,50%)" },
   "Cambridge": { abbr: "CAM", color: "hsl(0,70%,48%)" },
   "Cambridge CELTA": { abbr: "CELTA", color: "hsl(0,70%,48%)" },
+  // Australia
+  "NESA": { abbr: "NESA", color: "hsl(210,65%,45%)" },
+  "VCAA": { abbr: "VCAA", color: "hsl(220,60%,42%)" },
+  "QCAA": { abbr: "QCAA", color: "hsl(340,65%,45%)" },
+  "SCSA": { abbr: "SCSA", color: "hsl(35,70%,45%)" },
+  "SACE Board": { abbr: "SACE", color: "hsl(160,55%,40%)" },
+  // New Zealand
+  "NZQA": { abbr: "NZQA", color: "hsl(0,0%,20%)" },
+  // Canada
+  "Ontario Ministry": { abbr: "ONT", color: "hsl(0,70%,48%)" },
+  "BC Ministry": { abbr: "BC", color: "hsl(210,65%,42%)" },
+  "Alberta Education": { abbr: "ALB", color: "hsl(210,60%,45%)" },
+  "Quebec Ministry": { abbr: "QC", color: "hsl(220,65%,48%)" },
+  // Bangladesh
+  "Dhaka Board": { abbr: "DHK", color: "hsl(130,55%,38%)" },
+  "Rajshahi Board": { abbr: "RAJ", color: "hsl(200,60%,42%)" },
+  "Chittagong Board": { abbr: "CTG", color: "hsl(340,65%,45%)" },
+  "Comilla Board": { abbr: "COM", color: "hsl(25,70%,48%)" },
+  "Jessore Board": { abbr: "JES", color: "hsl(160,55%,38%)" },
+  "Sylhet Board": { abbr: "SYL", color: "hsl(280,50%,45%)" },
+  "Dinajpur Board": { abbr: "DIN", color: "hsl(35,65%,45%)" },
+  "Barisal Board": { abbr: "BAR", color: "hsl(220,55%,42%)" },
+  "Madrasa Board": { abbr: "MAD", color: "hsl(145,50%,38%)" },
+  "Technical Board": { abbr: "TEC", color: "hsl(200,50%,42%)" },
+  // Sri Lanka
+  "NIE Sri Lanka": { abbr: "NIE", color: "hsl(25,70%,45%)" },
 };
 
 function getBoardBrand(board: string) {
