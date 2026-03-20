@@ -6,6 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Detect output language from curriculum
+function getLanguageForCurriculum(curriculum: string): { lang: string; instruction: string } {
+  if (curriculum?.startsWith("fr-") || curriculum === "uni-fr") {
+    return { lang: "fr", instruction: "IMPORTANT: Write ALL content in FRENCH (question_text, options, explanation, worked_solution, tuition_tips, exam_tip, mark_scheme, model_answer — everything must be in French)." };
+  }
+  if (curriculum?.startsWith("de-") || curriculum === "uni-de") {
+    return { lang: "de", instruction: "IMPORTANT: Write ALL content in GERMAN (question_text, options, explanation, worked_solution, tuition_tips, exam_tip, mark_scheme, model_answer — everything must be in German)." };
+  }
+  return { lang: "en", instruction: "" };
+}
+
 // Expanded subjects with granular subtopics for 1M+ question coverage
 const SUBJECTS = [
   {
@@ -157,9 +168,27 @@ const SUBJECTS = [
       { name: "Memory & Cognition", subtopics: ["Multi-Store Model", "Working Memory Model", "Long-Term Memory Types", "Forgetting", "Eyewitness Testimony", "Cognitive Interview", "Schemas", "Attention", "Decision Making", "Problem Solving"] },
     ],
   },
+  {
+    id: "french",
+    topics: [
+      { name: "Grammaire", subtopics: ["Conjugaison présent", "Conjugaison passé composé", "Conjugaison imparfait", "Subjonctif", "Conditionnel", "Pronoms relatifs", "Pronoms compléments", "Accords du participe passé", "Voix passive", "Discours indirect"] },
+      { name: "Compréhension écrite", subtopics: ["Texte argumentatif", "Texte narratif", "Texte informatif", "Article de presse", "Extrait littéraire", "Synthèse de documents", "Questions de compréhension", "Vocabulaire en contexte", "Idées principales", "Inférences"] },
+      { name: "Expression écrite", subtopics: ["Dissertation", "Commentaire de texte", "Essai argumentatif", "Lettre formelle", "Résumé", "Compte rendu", "Rédaction créative", "Paragraphe structuré", "Introduction et conclusion", "Connecteurs logiques"] },
+      { name: "Littérature française", subtopics: ["Le classicisme", "Les Lumières", "Le romantisme", "Le réalisme", "Le naturalisme", "Le surréalisme", "L'existentialisme", "Poésie moderne", "Théâtre classique", "Roman contemporain"] },
+      { name: "Oral", subtopics: ["Exposé", "Débat", "Entretien", "Argumentation orale", "Lecture à voix haute", "Présentation de projet", "Analyse d'image", "Prise de parole", "Écoute active", "Phonétique"] },
+    ],
+  },
+  {
+    id: "german",
+    topics: [
+      { name: "Grammatik", subtopics: ["Konjugation Präsens", "Perfekt", "Präteritum", "Konjunktiv II", "Passiv", "Relativsätze", "Nebensätze", "Adjektivdeklination", "Präpositionen", "Modalverben"] },
+      { name: "Leseverstehen", subtopics: ["Sachtext", "Zeitungsartikel", "Literarischer Text", "Diagramme verstehen", "Zusammenfassung", "Textanalyse", "Argumentationsstruktur", "Wortschatz im Kontext", "Hauptaussagen", "Detailverständnis"] },
+      { name: "Schriftlicher Ausdruck", subtopics: ["Erörterung", "Textgebundener Aufsatz", "Leserbrief", "Bericht", "Stellungnahme", "Formeller Brief", "Zusammenfassung schreiben", "Kreatives Schreiben", "Einleitung und Schluss", "Argumentation"] },
+      { name: "Deutsche Literatur", subtopics: ["Sturm und Drang", "Klassik (Goethe/Schiller)", "Romantik", "Realismus", "Expressionismus", "Nachkriegsliteratur", "Moderne Lyrik", "Drama des 20. Jahrhunderts", "Kurzgeschichten", "Gegenwartsliteratur"] },
+      { name: "Mündliche Prüfung", subtopics: ["Präsentation", "Diskussion", "Bildbeschreibung", "Rollenspiel", "Zusammenfassung mündlich", "Stellungnahme mündlich", "Hörverstehen", "Aussprache", "Redewendungen", "Alltagskommunikation"] },
+    ],
+  },
 ];
-
-const CURRICULA = [
   { id: "uk-gcse", boards: ["AQA", "Edexcel", "OCR"] },
   { id: "uk-alevel", boards: ["AQA", "Edexcel", "OCR"] },
   { id: "uk-btec", boards: ["Pearson BTEC"] },
@@ -192,6 +221,23 @@ const CURRICULA = [
   { id: "ielts-academic", boards: ["British Council", "IDP"] },
   { id: "ielts-general", boards: ["British Council", "IDP"] },
   { id: "celta", boards: ["Cambridge CELTA"] },
+  // France
+  { id: "fr-seconde", boards: ["Éducation Nationale"] },
+  { id: "fr-premiere", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-general", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-techno", boards: ["Éducation Nationale"] },
+  { id: "fr-bac-pro", boards: ["Éducation Nationale"] },
+  { id: "fr-bts", boards: ["Éducation Nationale", "Rectorat"] },
+  { id: "fr-cpge", boards: ["Concours CCP", "Concours Mines-Ponts", "Concours X-ENS", "Concours Centrale-Supélec", "BCE", "Ecricome"] },
+  { id: "fr-dut-but", boards: ["IUT / Éducation Nationale"] },
+  { id: "uni-fr", boards: ["Sorbonne Université", "Université de Paris", "Grande École"] },
+  // Germany
+  { id: "de-mittlerer", boards: ["Kultusministerkonferenz"] },
+  { id: "de-oberstufe", boards: ["Kultusministerkonferenz"] },
+  { id: "de-abitur", boards: ["Kultusministerkonferenz", "Bayern Abitur", "NRW Abitur", "Baden-Württemberg Abitur", "Niedersachsen Abitur", "Hessen Abitur", "Sachsen Abitur", "Berlin Abitur", "Hamburg Abitur"] },
+  { id: "de-fachabitur", boards: ["Kultusministerkonferenz", "FOS Bayern", "FOS NRW", "FOS Hessen"] },
+  { id: "de-berufliches-gym", boards: ["Kultusministerkonferenz", "BG Baden-Württemberg", "BG NRW"] },
+  { id: "uni-de", boards: ["TU9 Universitäten", "Universität München (LMU)", "TU München", "Universität Heidelberg", "RWTH Aachen", "Fachhochschule"] },
 ];
 
 // Question type distribution optimised for variety and accuracy
@@ -352,6 +398,8 @@ ACCURACY RULES — VIOLATIONS WILL CAUSE REJECTION:
 9. exam_tip must reflect real exam technique advice.
 10. NO placeholder or generic content — every field must be specific to the question.`;
 
+        const { instruction: langInstruction } = getLanguageForCurriculum(item.curriculum);
+
         const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -370,7 +418,8 @@ Difficulty: ${item.difficulty}/5 | Type: ${item.question_type}
 
 ${typeInstructions[item.question_type] || typeInstructions.mcq}
 
-${accuracyPrompt}`,
+${accuracyPrompt}
+${langInstruction}`,
               },
               {
                 role: "user",

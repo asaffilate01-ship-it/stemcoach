@@ -6,6 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Detect output language from curriculum
+function getLanguageForCurriculum(curriculum: string): { lang: string; instruction: string } {
+  if (curriculum?.startsWith("fr-") || curriculum === "uni-fr") {
+    return { lang: "fr", instruction: "IMPORTANT: Write ALL content in FRENCH (question_text, options, explanation, worked_solution, tuition_tips, exam_tip, mark_scheme, model_answer — everything must be in French)." };
+  }
+  if (curriculum?.startsWith("de-") || curriculum === "uni-de") {
+    return { lang: "de", instruction: "IMPORTANT: Write ALL content in GERMAN (question_text, options, explanation, worked_solution, tuition_tips, exam_tip, mark_scheme, model_answer — everything must be in German)." };
+  }
+  return { lang: "en", instruction: "" };
+}
+
 // In-memory rate limiter
 const rateLimits = new Map<string, { count: number; resetAt: number }>();
 function rateLimit(key: string, max: number, windowMs: number): boolean {
@@ -66,6 +77,8 @@ serve(async (req) => {
       numerical: "Numerical calculation question. The answer should be a specific number with units.",
     };
 
+    const { instruction: langInstruction } = getLanguageForCurriculum(curriculum);
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -82,7 +95,8 @@ Create ${count} HIGH QUALITY, EXAM-ACCURATE questions.
 Subject: ${subject}, Topic: ${topic}, Subtopic: ${subtopic}
 Difficulty: ${difficulty}/5, Boards: ${boards?.join(", ") || "All"}
 Type: ${question_type} - ${typeInstructions[question_type] || typeInstructions.mcq}
-CRITICAL: All answers must be FACTUALLY CORRECT.`,
+CRITICAL: All answers must be FACTUALLY CORRECT.
+${langInstruction}`,
           },
           { role: "user", content: `Generate ${count} ${question_type} questions for ${topic} > ${subtopic} at difficulty ${difficulty}.` },
         ],
