@@ -1,14 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Home, BookOpen, Bot, GraduationCap, LayoutDashboard } from "lucide-react";
+import { Home, BookOpen, GraduationCap, LayoutDashboard } from "lucide-react";
 import { Icon3D, type Icon3DVariant } from "@/components/ui/icon-3d";
 import type { LucideIcon } from "lucide-react";
 
 interface NavItem {
   to: string;
   label: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  image?: string;
   variant: Icon3DVariant;
   auth?: boolean;
 }
@@ -16,7 +17,7 @@ interface NavItem {
 const items: NavItem[] = [
   { to: "/", label: "Home", icon: Home, variant: "primary" },
   { to: "/subjects", label: "Subjects", icon: BookOpen, variant: "success" },
-  { to: "/ai-tutor", label: "STEMcoach", icon: Bot, variant: "purple" },
+  { to: "/ai-tutor", label: "STEMcoach", image: "/assets/coach-stem.png", variant: "purple" },
   { to: "/mock-exam", label: "Exam", icon: GraduationCap, variant: "warning" },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, variant: "accent", auth: true },
 ];
@@ -41,7 +42,15 @@ export function MobileBottomNav() {
               <div className={`relative flex items-center justify-center transition-all duration-300 ${
                 active ? "scale-110" : "opacity-60"
               }`}>
-                <Icon3D icon={item.icon} variant={item.variant} size="sm" />
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.label}
+                    className="h-8 w-8 rounded-xl object-cover shadow-md ring-1 ring-border/20"
+                  />
+                ) : item.icon ? (
+                  <Icon3D icon={item.icon} variant={item.variant} size="sm" />
+                ) : null}
                 {active && (
                   <motion.div
                     layoutId="bottomNavIndicator"
