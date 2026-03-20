@@ -551,7 +551,7 @@ export default function Practice() {
                   {parsedOptions.map((option, i) => {
                     const letter = String.fromCharCode(65 + i);
                     const isSelected = isMultiSelect ? selectedAnswers.has(option) : selectedAnswer === option;
-                    const isOptionCorrect = option === question.correct_answer;
+                    const isOptionCorrect = showFeedback && option === revealedAnswer?.correct_answer;
 
                     let optionClasses = "border border-border/60 bg-card hover:border-primary/30 hover:bg-primary/[0.02]";
                     if (showFeedback && isOptionCorrect) {
