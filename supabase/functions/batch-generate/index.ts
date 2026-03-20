@@ -239,6 +239,9 @@ const SUBJECTS = [
   { id: "de-berufliches-gym", boards: ["Kultusministerkonferenz", "BG Baden-Württemberg", "BG NRW"] },
   { id: "uni-de", boards: ["TU9 Universitäten", "Universität München (LMU)", "TU München", "Universität Heidelberg", "RWTH Aachen", "Fachhochschule"] },
 ];
+
+// Question type distribution optimised for variety and accuracy
+const QUESTION_TYPES = [
   { type: "mcq", count: 20, weight: "Single correct answer from 4 options" },
   { type: "multi-select", count: 15, weight: "2-3 correct answers from 4-6 options" },
   { type: "essay", count: 8, weight: "Extended written response with mark scheme" },
