@@ -271,7 +271,7 @@ export default function Settings() {
           {/* Data & Privacy (GDPR) */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <Download className="h-4 w-4 text-primary" /> Data & Privacy
+              <Icon3D icon={Download} variant="accent" size="sm" /> Data & Privacy
             </h3>
             <p className="mb-4 text-sm text-muted-foreground">
               Under GDPR and data protection law, you have the right to export or delete all your personal data.
