@@ -27,9 +27,9 @@ const countryGroups = [
   { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc", "uni-bd"] },
   { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol", "uni-lk"] },
   { id: "ae", label: "UAE", flag: "🇦🇪", keys: ["uae-moe-9", "uae-moe-10", "uae-moe-11", "uae-moe-12", "uae-emsat"] },
-  { id: "fr", label: "France", flag: "🇫🇷", keys: ["fr-seconde", "fr-premiere", "fr-bac-general", "fr-bac-techno", "fr-bac-pro"] },
+  { id: "fr", label: "France", flag: "🇫🇷", keys: ["fr-seconde", "fr-premiere", "fr-bac-general", "fr-bac-techno", "fr-bac-pro", "fr-bts", "fr-cpge", "fr-dut-but", "uni-fr"] },
   { id: "ph", label: "Philippines", flag: "🇵🇭", keys: ["ph-grade10", "ph-grade11", "ph-grade12", "ph-stem", "ph-abm", "ph-humss"] },
-  { id: "de", label: "Deutschland", flag: "🇩🇪", keys: ["de-mittlerer", "de-oberstufe", "de-abitur", "de-fachabitur"] },
+  { id: "de", label: "Deutschland", flag: "🇩🇪", keys: ["de-mittlerer", "de-oberstufe", "de-abitur", "de-fachabitur", "de-berufliches-gym", "uni-de"] },
   { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
 ];
 
