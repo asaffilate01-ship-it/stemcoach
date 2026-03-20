@@ -4,6 +4,7 @@ import { Trophy, Search, Sparkles, ArrowRight, GraduationCap, Clock, Target, Boo
 import { Button } from "@/components/ui/button";
 import { subjects } from "@/data/questions";
 import { mockExamTemplates, examBoardGroups, type MockExamTemplate } from "@/data/mockExamTemplates";
+import { getMascot } from "@/lib/mascots";
 
 interface ExamBrowseProps {
   onSelectTemplate: (template: MockExamTemplate) => void;
@@ -181,10 +182,14 @@ export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) 
                   <div className="relative p-5 md:p-6">
                     <div className="mb-4 flex items-start justify-between">
                       <div
-                        className="flex h-11 w-11 items-center justify-center rounded-xl text-xl ring-1 ring-border/30"
+                        className="flex h-11 w-11 items-center justify-center rounded-xl overflow-hidden ring-1 ring-border/30"
                         style={{ background: `${template.color}10` }}
                       >
-                        {template.icon}
+                        <img
+                          src={getMascot(template.subject).image}
+                          alt={getMascot(template.subject).name}
+                          className="h-9 w-9 object-cover"
+                        />
                       </div>
                       <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted/40 text-muted-foreground transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-lg group-hover:shadow-primary/20">
                         <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
