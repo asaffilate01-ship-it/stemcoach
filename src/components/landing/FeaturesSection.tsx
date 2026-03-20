@@ -3,7 +3,6 @@ import { BookOpen, Brain, Clock, GraduationCap, LineChart, Shield, Users, Zap } 
 import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
 import stemsquadImg from "@/assets/stemsquad.png";
-import stemsquadImg from "@/assets/stemsquad.png";
 
 const features = [
   {
