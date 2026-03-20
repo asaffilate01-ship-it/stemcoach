@@ -269,7 +269,7 @@ export default function AdminGenerate() {
               <div className="stem-label">Queue Done</div>
             </div>
             <div>
-              <div className="text-xl font-bold">1,000,000</div>
+              <div className="text-xl font-bold">2,000,000</div>
               <div className="stem-label">Target</div>
             </div>
           </div>
