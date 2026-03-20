@@ -353,7 +353,7 @@ export default function Practice() {
         body: {
           action: "explain",
           question_text: question.question_text,
-          correct_answer: question.correct_answer,
+          correct_answer: revealedAnswer?.correct_answer || "",
           student_answer: selectedAnswer || essayAnswer || "",
           subject: question.subject,
           topic: question.topic,
