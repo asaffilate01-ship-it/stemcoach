@@ -77,6 +77,21 @@ export function StemSquadSection() {
             </motion.div>
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-10 text-center"
+        >
+          <a
+            href="/meet-the-squad"
+            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.06] px-6 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-primary/10 hover:shadow-md active:scale-[0.97]"
+          >
+            Meet the full Squad & read their bios →
+          </a>
+        </motion.div>
       </div>
     </section>
   );
