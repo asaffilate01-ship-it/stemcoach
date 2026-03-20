@@ -224,7 +224,7 @@ export default function Settings() {
           {/* Notification Preferences */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <Bell className="h-4 w-4 text-primary" /> Notification Preferences
+              <Icon3D icon={Bell} variant="warning" size="sm" /> Notification Preferences
             </h3>
             <div className="space-y-4">
               {[
