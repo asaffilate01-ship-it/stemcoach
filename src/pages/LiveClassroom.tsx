@@ -1,142 +1,99 @@
-import { useState } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { Whiteboard } from "@/components/classroom/Whiteboard";
-import { ClassroomChat } from "@/components/classroom/ClassroomChat";
-import { Video, PenTool, Users, Copy, ExternalLink, MessageSquare } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "@/hooks/use-toast";
-
-const JITSI_DOMAIN = "meet.jit.si";
+import { Video, Clock, Users, Bell, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function LiveClassroom() {
-  const { user } = useAuth();
-  const [roomName, setRoomName] = useState("");
-  const [activeRoom, setActiveRoom] = useState<string | null>(null);
-  const [showWhiteboard, setShowWhiteboard] = useState(true);
-  const [showChat, setShowChat] = useState(true);
-
-  const generateRoom = () => {
-    const id = `stemcoach-${Date.now().toString(36)}`;
-    setRoomName(id);
-  };
-
-  const joinRoom = () => {
-    if (!roomName.trim()) {
-      toast({ title: "Enter a room name", variant: "destructive" });
-      return;
-    }
-    setActiveRoom(roomName.trim().replace(/\s+/g, "-").toLowerCase());
-  };
-
-  const copyLink = () => {
-    const url = `https://${JITSI_DOMAIN}/${activeRoom}`;
-    navigator.clipboard.writeText(url);
-    toast({ title: "Room link copied!" });
-  };
-
-  if (!activeRoom) {
-    return (
-      <div className="min-h-screen bg-background">
-        <AppHeader />
-        <div className="container mx-auto flex max-w-lg flex-col items-center gap-6 px-4 pt-20">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <Video className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">Live Classroom</h1>
-          <p className="text-center text-muted-foreground">
-            Start or join a live video classroom with collaborative whiteboard and chat.
-          </p>
-          <div className="flex w-full gap-2">
-            <Input
-              value={roomName}
-              onChange={(e) => setRoomName(e.target.value)}
-              placeholder="Enter room name..."
-              onKeyDown={(e) => e.key === "Enter" && joinRoom()}
-            />
-            <Button onClick={joinRoom}>Join</Button>
-          </div>
-          <Button variant="outline" onClick={generateRoom} className="gap-2">
-            <Users className="h-4 w-4" /> Generate New Room
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const jitsiUrl = `https://${JITSI_DOMAIN}/${activeRoom}#userInfo.displayName="${encodeURIComponent(user?.email?.split("@")[0] || "Student")}"&config.prejoinConfig.enabled=false&config.startWithAudioMuted=true`;
+  useDocumentTitle("Live Classroom");
+  const navigate = useNavigate();
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="min-h-screen bg-background">
       <AppHeader />
-      <div className="flex items-center gap-2 border-b bg-muted/30 px-4 py-2">
-        <span className="text-sm font-medium text-muted-foreground">Room:</span>
-        <code className="rounded bg-muted px-2 py-0.5 text-sm font-mono">{activeRoom}</code>
-        <Button size="sm" variant="ghost" onClick={copyLink} className="h-7 gap-1">
-          <Copy className="h-3 w-3" /> Copy Link
-        </Button>
-        <a href={`https://${JITSI_DOMAIN}/${activeRoom}`} target="_blank" rel="noopener noreferrer">
-          <Button size="sm" variant="ghost" className="h-7 gap-1">
-            <ExternalLink className="h-3 w-3" /> Open Full
-          </Button>
-        </a>
-        <div className="flex-1" />
-        <Button
-          size="sm"
-          variant={showChat ? "default" : "outline"}
-          onClick={() => setShowChat(!showChat)}
-          className="gap-1.5"
+      <div className="container mx-auto flex max-w-lg flex-col items-center gap-6 px-4 pt-24 pb-32 text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="relative"
         >
-          <MessageSquare className="h-3.5 w-3.5" />
-          Chat
-        </Button>
-        <Button
-          size="sm"
-          variant={showWhiteboard ? "default" : "outline"}
-          onClick={() => setShowWhiteboard(!showWhiteboard)}
-          className="gap-1.5"
-        >
-          <PenTool className="h-3.5 w-3.5" />
-          Board
-        </Button>
-        <Button size="sm" variant="destructive" onClick={() => setActiveRoom(null)}>
-          Leave
-        </Button>
-      </div>
-
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-hidden">
-          {showWhiteboard ? (
-            <ResizablePanelGroup direction="horizontal">
-              <ResizablePanel defaultSize={55} minSize={30}>
-                <iframe
-                  src={jitsiUrl}
-                  className="h-full w-full border-0"
-                  allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-                  title="Live Video"
-                />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={45} minSize={25}>
-                <Whiteboard roomId={activeRoom} />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          ) : (
-            <iframe
-              src={jitsiUrl}
-              className="h-full w-full border-0"
-              allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-              title="Live Video"
-            />
-          )}
-        </div>
-        {showChat && (
-          <div className="w-72 shrink-0">
-            <ClassroomChat roomId={activeRoom} />
+          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 shadow-lg shadow-primary/10">
+            <Video className="h-10 w-10 text-primary" />
           </div>
-        )}
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-warning text-[10px] font-bold text-warning-foreground shadow-md"
+          >
+            <Clock className="h-3 w-3" />
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-warning">
+            <Clock className="h-3 w-3" /> Coming Soon
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Live Classroom</h1>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="max-w-md text-muted-foreground leading-relaxed"
+        >
+          Live video classrooms with collaborative whiteboard and real-time chat are on the way. 
+          Get notified when this feature launches!
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="flex w-full max-w-sm flex-col gap-3"
+        >
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { icon: Video, label: "Live Video", desc: "HD video calls" },
+              { icon: Users, label: "Whiteboard", desc: "Draw together" },
+              { icon: Bell, label: "Chat", desc: "Real-time messaging" },
+            ].map((f, i) => (
+              <motion.div
+                key={f.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + i * 0.08 }}
+                className="stem-card flex flex-col items-center gap-1.5 p-3 text-center"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/8">
+                  <f.icon className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-[11px] font-semibold">{f.label}</span>
+                <span className="text-[9px] text-muted-foreground">{f.desc}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="flex flex-col gap-2 sm:flex-row"
+        >
+          <Button onClick={() => navigate("/subjects")} className="gap-2">
+            Practice Now <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/dashboard")}>
+            Back to Dashboard
+          </Button>
+        </motion.div>
       </div>
     </div>
   );

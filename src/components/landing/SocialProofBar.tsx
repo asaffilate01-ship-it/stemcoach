@@ -1,18 +1,18 @@
 import { motion } from "framer-motion";
 
+const counters = [
+  { value: "25,000+", label: "Active Students" },
+  { value: "200+", label: "Partner Schools" },
+  { value: "5", label: "Countries" },
+  { value: "4.9★", label: "App Rating" },
+];
+
 const trustedBy = [
   { name: "Dubai Academy", location: "UAE" },
   { name: "Lahore Grammar School", location: "Pakistan" },
   { name: "DPS International", location: "India" },
   { name: "Westminster Academy", location: "UK" },
   { name: "GEMS Education", location: "UAE" },
-];
-
-const counters = [
-  { value: "25,000+", label: "Active Students" },
-  { value: "200+", label: "Partner Schools" },
-  { value: "5", label: "Countries" },
-  { value: "4.9★", label: "App Rating" },
 ];
 
 export function SocialProofBar() {
@@ -28,9 +28,9 @@ export function SocialProofBar() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="text-center"
+              className="group text-center"
             >
-              <div className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
+              <div className="text-2xl font-extrabold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary sm:text-3xl lg:text-4xl">
                 {counter.value}
               </div>
               <div className="mt-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">

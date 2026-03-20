@@ -21,6 +21,7 @@ interface NavItem {
   roles?: string[];
   group?: string;
   image?: string;
+  comingSoon?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -41,7 +42,7 @@ const navItems: NavItem[] = [
   { to: "/certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social" },
   { to: "/study-groups", label: "Study Groups", icon: Users, group: "social" },
   { to: "/my-classes", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes" },
-  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes" },
+  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true },
   { to: "/formulas", label: "Formula Sheets", icon: ScrollText, group: "resources" },
   { to: "/blog", label: "Blog", icon: FileText, group: "resources" },
   { to: "/parent", label: "Parent Portal", icon: Eye, roles: ["parent"] },
@@ -116,6 +117,7 @@ export function AppHeader() {
             <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)} className="gap-2">
               <item.icon className="h-3.5 w-3.5" />
               {item.label}
+              {item.comingSoon && <span className="ml-auto rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-bold text-warning">Soon</span>}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
