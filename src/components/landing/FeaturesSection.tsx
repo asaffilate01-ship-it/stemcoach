@@ -57,6 +57,7 @@ const features = [
 ];
 
 export function FeaturesSection() {
+  const navigate = useNavigate();
   return (
     <section className="relative border-t border-border/30 py-10 md:py-14">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.02),transparent_70%)]" />
