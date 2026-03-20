@@ -4,6 +4,7 @@ import { Icon3D } from "@/components/ui/icon-3d";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useTenantBranding } from "@/hooks/useTenantBranding";
 import { NotificationBell } from "./NotificationBell";
 import { useTheme } from "@/hooks/useTheme";
 import {
