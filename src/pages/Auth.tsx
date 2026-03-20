@@ -115,9 +115,7 @@ export default function Auth() {
         <div className="relative z-10 max-w-md px-12 text-primary-foreground">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <div className="mb-8 flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-foreground/20 text-lg font-extrabold backdrop-blur-sm">
-                S
-              </span>
+              <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-12 w-12 rounded-2xl object-cover shadow-lg shadow-black/20 ring-2 ring-white/20" />
               <span className="text-2xl font-bold tracking-tight">
                 STEM<span className="opacity-80">Coach</span>
               </span>
