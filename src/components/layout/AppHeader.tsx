@@ -64,6 +64,7 @@ export function AppHeader() {
   const { user, signOut } = useAuth();
   const { roles, loading: rolesLoading } = useUserRole();
   const { theme, toggleTheme } = useTheme();
+  const tenant = useTenantBranding();
 
   const handleSignOut = async () => {
     await signOut();
