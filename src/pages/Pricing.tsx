@@ -62,7 +62,7 @@ export default function Pricing() {
               transition={{ duration: 0.5 }}
             >
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Zap className="h-3.5 w-3.5" /> One-Time Purchase
+                <Zap className="h-3.5 w-3.5" /> No Subscription · Pay As You Go
               </div>
               <h1 className="stem-section-heading mb-4">
                 Pay once,{" "}
