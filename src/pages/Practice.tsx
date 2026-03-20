@@ -88,7 +88,7 @@ export default function Practice() {
       // Try network first, fall back to IndexedDB cache for offline support
       try {
         const { data } = await supabase
-          .from("questions")
+          .from("questions_safe" as any)
           .select("*")
           .eq("subject", subjectId)
           .limit(50);
