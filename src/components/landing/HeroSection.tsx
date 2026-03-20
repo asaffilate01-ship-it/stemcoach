@@ -163,7 +163,7 @@ export function HeroSection() {
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold">1M+ Questions</div>
+                  <div className="text-xs font-bold">2M+ Questions</div>
                   <div className="text-[10px] text-muted-foreground">All subjects</div>
                 </div>
               </motion.div>

@@ -132,8 +132,8 @@ export default function Auth() {
             
             <div className="space-y-4">
               {[
-                { stat: "1M+", label: "Practice Questions" },
-                { stat: "30+", label: "Curricula Supported" },
+                 { stat: "2M+", label: "Practice Questions" },
+                 { stat: "40+", label: "Curricula Supported" },
                 { stat: "94%", label: "Student Pass Rate" },
               ].map((item, i) => (
                 <motion.div

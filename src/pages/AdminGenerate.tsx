@@ -394,7 +394,7 @@ export default function AdminGenerate() {
             <div className="h-[500px] overflow-y-auto rounded-lg bg-muted/50 p-4 font-mono text-xs">
               {log.length === 0 ? (
                 <span className="text-muted-foreground">
-                  How to generate 1M questions:{"\n\n"}
+                  How to generate 2M questions:{"\n\n"}
                   1. Click "Seed Queue" to create all subject×curriculum×type×difficulty combos{"\n"}
                   2. Click "Auto-Generate (Loop)" to start processing{"\n"}
                   3. The system will auto-pause on rate limits and resume{"\n"}

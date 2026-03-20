@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: "STEMCoach — Virtual Tuition Centre",
         short_name: "STEMCoach",
-        description: "Expert-crafted exam prep with 1M+ questions across 30+ curricula",
+        description: "Expert-crafted exam prep with 2M+ questions across 50+ curricula",
         theme_color: "#3b5bdb",
         background_color: "#f5f6f8",
         display: "standalone",

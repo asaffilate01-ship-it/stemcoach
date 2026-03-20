@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 
 const counters = [
-  { value: "1M+", label: "Exam Questions" },
-  { value: "35+", label: "Curricula Covered" },
-  { value: "7", label: "Subjects" },
+  { value: "2M+", label: "Exam Questions" },
+  { value: "50+", label: "Curricula Covered" },
+  { value: "12", label: "Subjects" },
   { value: "6", label: "AI Mascot Tutors" },
 ];
 
