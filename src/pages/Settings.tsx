@@ -319,7 +319,7 @@ function PushNotificationCard() {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="stem-card rounded-xl p-6">
       <h3 className="mb-4 flex items-center gap-2 font-semibold">
-        <BellRing className="h-4 w-4 text-primary" /> Browser Push Notifications
+        <Icon3D icon={BellRing} variant="primary" size="sm" /> Browser Push Notifications
       </h3>
       <div className="flex items-center justify-between rounded-lg border p-3">
         <div>

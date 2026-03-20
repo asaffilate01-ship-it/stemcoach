@@ -251,7 +251,7 @@ export default function Analytics() {
                 {/* Weekly Trend Chart */}
                 <div className="stem-card rounded-xl p-6">
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <TrendingUp className="h-4 w-4 text-primary" /> Weekly Trend
+                    <Icon3D icon={TrendingUp} variant="success" size="sm" /> Weekly Trend
                   </h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={weeklyTrend}>
