@@ -84,7 +84,7 @@ export const subjects: SubjectInfo[] = [
     name: "Economics",
     icon: "📈",
     color: "340 75% 50%",
-    questionCount: 120000,
+    questionCount: 150000,
     topics: ["Microeconomics", "Macroeconomics", "International Trade", "Development Economics", "Market Structures", "Fiscal Policy", "Monetary Policy", "Behavioural Economics"],
   },
   {
