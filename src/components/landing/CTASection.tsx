@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import stemsquadClassroomImg from "@/assets/stemsquad-classroom.png";
+import stemsquadImg from "@/assets/stemsquad.png";
 
 export function CTASection() {
   const navigate = useNavigate();
@@ -23,12 +23,35 @@ export function CTASection() {
           >
             <div className="relative flex flex-col items-center">
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/6 via-transparent to-[hsl(258_60%_52%/0.04)] blur-3xl" />
-              <img
-                src={stemsquadClassroomImg}
-                alt="The STEM Squad — your personal tutoring team"
-                className="relative w-full max-w-md"
-                loading="lazy"
-              />
+              
+              {/* Individual mascot images in a grid */}
+              <div className="relative grid grid-cols-4 gap-3 max-w-sm">
+                {[
+                  { src: "/assets/mathmax.png", name: "MathMax", delay: 0 },
+                  { src: "/assets/physix.png", name: "PhysiX", delay: 0.1 },
+                  { src: "/assets/chemi.png", name: "Chemi", delay: 0.2 },
+                  { src: "/assets/biobee.png", name: "BioBee", delay: 0.3 },
+                  { src: "/assets/codey.png", name: "Codey", delay: 0.15 },
+                  { src: "/assets/lexi.png", name: "Lexi", delay: 0.25 },
+                  { src: "/assets/coach-stem.png", name: "Coach Stem", delay: 0.05, span: true },
+                ].map((m) => (
+                  <motion.div
+                    key={m.name}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: m.delay, ease: [0.16, 1, 0.3, 1] }}
+                    whileHover={{ y: -6, scale: 1.1 }}
+                    className={`flex flex-col items-center ${m.span ? "col-span-2 col-start-2" : ""}`}
+                  >
+                    <div className="rounded-2xl bg-card p-2 shadow-md ring-1 ring-border/20">
+                      <img src={m.src} alt={m.name} className="h-16 w-16 object-contain" loading="lazy" />
+                    </div>
+                    <span className="mt-1 text-[10px] font-semibold text-muted-foreground">{m.name}</span>
+                  </motion.div>
+                ))}
+              </div>
+
               <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
