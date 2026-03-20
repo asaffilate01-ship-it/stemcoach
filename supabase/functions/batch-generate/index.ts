@@ -189,6 +189,8 @@ const SUBJECTS = [
     ],
   },
 ];
+
+const CURRICULUM_BOARDS: { id: string; boards: string[] }[] = [
   { id: "uk-gcse", boards: ["AQA", "Edexcel", "OCR"] },
   { id: "uk-alevel", boards: ["AQA", "Edexcel", "OCR"] },
   { id: "uk-btec", boards: ["Pearson BTEC"] },
