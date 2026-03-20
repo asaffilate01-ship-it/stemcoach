@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, ArrowRight, BookOpen, Lightbulb, GraduationCap, Brain, Clock, ChevronRight } from "lucide-react";
+import { Search, Calendar, BookOpen, Lightbulb, GraduationCap, Brain, Clock, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const categories = [
@@ -16,7 +15,6 @@ const categories = [
   { id: "subject-guides", label: "Subject Guides", icon: Brain },
 ];
 
-// Seed blog posts (will come from DB when admin publishes)
 const seedPosts = [
   {
     id: "1", title: "10 Proven Study Techniques Backed by Science", slug: "10-proven-study-techniques",
@@ -53,6 +51,90 @@ const seedPosts = [
     excerpt: "Step-by-step guide to building a revision timetable that balances subjects, includes breaks, and maximizes retention.",
     category: "exam-prep", author_name: "STEMCoach Team", published_at: "2026-03-02", read_time: "6 min",
     cover_gradient: "from-[hsl(200,80%,45%)] to-[hsl(220,70%,50%)]",
+  },
+  {
+    id: "7", title: "Mastering A-Level Economics: Micro vs Macro", slug: "mastering-economics",
+    excerpt: "Understand the key differences between microeconomics and macroeconomics, and learn the best strategies for tackling essay questions.",
+    category: "subject-guides", author_name: "STEMCoach Team", published_at: "2026-02-28", read_time: "9 min",
+    cover_gradient: "from-[hsl(340,75%,50%)] to-[hsl(360,80%,55%)]",
+  },
+  {
+    id: "8", title: "How Spaced Repetition Supercharges Memory", slug: "spaced-repetition-guide",
+    excerpt: "Learn why spacing out your study sessions is far more effective than cramming, and how to implement it with flashcards and apps.",
+    category: "study-tips", author_name: "STEMCoach Team", published_at: "2026-02-25", read_time: "6 min",
+    cover_gradient: "from-[hsl(270,60%,50%)] to-[hsl(290,55%,45%)]",
+  },
+  {
+    id: "9", title: "GCSE Biology: The Cell Topic Simplified", slug: "gcse-biology-cells",
+    excerpt: "Everything you need to know about cell structure, transport, and division for your GCSE Biology exam — broken down clearly.",
+    category: "subject-guides", author_name: "STEMCoach Team", published_at: "2026-02-22", read_time: "8 min",
+    cover_gradient: "from-[hsl(38,92%,45%)] to-[hsl(25,85%,50%)]",
+  },
+  {
+    id: "10", title: "Top 5 Mistakes Students Make in Maths Exams", slug: "maths-exam-mistakes",
+    excerpt: "Avoid these common pitfalls that cost students marks every year — from misreading questions to forgetting units.",
+    category: "exam-prep", author_name: "STEMCoach Team", published_at: "2026-02-20", read_time: "5 min",
+    cover_gradient: "from-primary to-[hsl(258,60%,52%)]",
+  },
+  {
+    id: "11", title: "Computer Science: Understanding Big-O Notation", slug: "big-o-notation",
+    excerpt: "A student-friendly guide to algorithmic complexity. Learn what O(n), O(log n), and O(n²) actually mean with real examples.",
+    category: "subject-guides", author_name: "STEMCoach Team", published_at: "2026-02-18", read_time: "7 min",
+    cover_gradient: "from-[hsl(200,80%,45%)] to-[hsl(220,70%,50%)]",
+  },
+  {
+    id: "12", title: "How to Write a Perfect English Literature Essay", slug: "english-lit-essay",
+    excerpt: "Master the PEAL structure, learn to embed quotations, and understand what examiners are really looking for in your essays.",
+    category: "exam-prep", author_name: "STEMCoach Team", published_at: "2026-02-15", read_time: "8 min",
+    cover_gradient: "from-[hsl(210,70%,45%)] to-[hsl(230,65%,50%)]",
+  },
+  {
+    id: "13", title: "Active Recall: The #1 Study Method You're Not Using", slug: "active-recall",
+    excerpt: "Research shows active recall is one of the most powerful learning strategies. Here's how to use it effectively for every subject.",
+    category: "study-tips", author_name: "STEMCoach Team", published_at: "2026-02-12", read_time: "5 min",
+    cover_gradient: "from-[hsl(142,71%,40%)] to-[hsl(160,60%,38%)]",
+  },
+  {
+    id: "14", title: "Geography Fieldwork: Planning Your Investigation", slug: "geography-fieldwork",
+    excerpt: "A step-by-step guide to planning, conducting, and writing up your geography fieldwork investigation for GCSE and A-Level.",
+    category: "subject-guides", author_name: "STEMCoach Team", published_at: "2026-02-10", read_time: "10 min",
+    cover_gradient: "from-[hsl(160,60%,38%)] to-[hsl(180,50%,35%)]",
+  },
+  {
+    id: "15", title: "How to Stay Motivated During Exam Season", slug: "exam-motivation",
+    excerpt: "Practical tips for maintaining focus, managing stress, and keeping your energy up when the pressure is on.",
+    category: "study-tips", author_name: "STEMCoach Team", published_at: "2026-02-08", read_time: "4 min",
+    cover_gradient: "from-[hsl(30,80%,50%)] to-[hsl(45,75%,45%)]",
+  },
+  {
+    id: "16", title: "A-Level Chemistry: Organic Mechanisms Cheat Sheet", slug: "organic-mechanisms",
+    excerpt: "All the key organic mechanisms you need for A-Level Chemistry in one place — nucleophilic substitution, elimination, and more.",
+    category: "subject-guides", author_name: "STEMCoach Team", published_at: "2026-02-05", read_time: "9 min",
+    cover_gradient: "from-[hsl(142,71%,40%)] to-[hsl(160,60%,38%)]",
+  },
+  {
+    id: "17", title: "Psychology: Key Studies You Must Know", slug: "psychology-key-studies",
+    excerpt: "From Milgram to Bandura — the essential psychology studies for GCSE and A-Level, summarised with evaluation points.",
+    category: "subject-guides", author_name: "STEMCoach Team", published_at: "2026-02-02", read_time: "11 min",
+    cover_gradient: "from-[hsl(30,80%,50%)] to-[hsl(45,75%,45%)]",
+  },
+  {
+    id: "18", title: "IELTS Writing Task 2: How to Score Band 7+", slug: "ielts-writing-band7",
+    excerpt: "A structured approach to IELTS essay writing — learn the format, linking phrases, and common mistakes to avoid.",
+    category: "exam-prep", author_name: "STEMCoach Team", published_at: "2026-01-30", read_time: "7 min",
+    cover_gradient: "from-[hsl(250,80%,55%)] to-[hsl(280,70%,50%)]",
+  },
+  {
+    id: "19", title: "Business Studies: Break-Even Analysis Explained", slug: "break-even-analysis",
+    excerpt: "Learn how to calculate, draw, and interpret break-even charts — one of the most tested topics in Business Studies exams.",
+    category: "subject-guides", author_name: "STEMCoach Team", published_at: "2026-01-28", read_time: "6 min",
+    cover_gradient: "from-[hsl(270,60%,50%)] to-[hsl(290,55%,45%)]",
+  },
+  {
+    id: "20", title: "History: How to Evaluate Sources Like a Pro", slug: "history-source-evaluation",
+    excerpt: "Master source analysis with the OPCVL framework — Origin, Purpose, Content, Value, and Limitations explained with examples.",
+    category: "exam-prep", author_name: "STEMCoach Team", published_at: "2026-01-25", read_time: "7 min",
+    cover_gradient: "from-[hsl(340,75%,50%)] to-[hsl(0,84%,55%)]",
   },
 ];
 
