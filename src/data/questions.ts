@@ -108,7 +108,7 @@ export const subjects: SubjectInfo[] = [
     name: "Geography",
     icon: "🌍",
     color: "160 60% 40%",
-    questionCount: 120000,
+    questionCount: 150000,
     topics: ["Physical Geography", "Human Geography", "Plate Tectonics", "Weather & Climate", "Rivers & Coasts", "Urbanisation", "Globalisation", "Fieldwork & Statistical Skills"],
   },
   {
