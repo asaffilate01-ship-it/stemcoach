@@ -175,7 +175,7 @@ export default function Settings() {
           {/* Profile Section */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <User className="h-4 w-4 text-primary" /> Profile
+              <Icon3D icon={User} variant="primary" size="sm" /> Profile
             </h3>
             <div className="space-y-4">
               <div>
