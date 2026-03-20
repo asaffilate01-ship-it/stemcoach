@@ -195,7 +195,7 @@ export default function Settings() {
           {/* Parent Link Requests */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }} className="stem-card rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
-              <Link2 className="h-4 w-4 text-primary" /> Parent Link Requests
+              <Icon3D icon={Link2} variant="purple" size="sm" /> Parent Link Requests
             </h3>
             {pendingLinks.length === 0 ? (
               <p className="text-sm text-muted-foreground">No pending requests.</p>
