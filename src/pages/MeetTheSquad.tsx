@@ -86,7 +86,7 @@ export default function MeetTheSquad() {
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-lg font-bold">{member.name} {member.emoji}</h3>
-                    <p className="text-xs text-muted-foreground">{member.personality}</p>
+                    <p className="text-xs font-medium text-primary/70">{member.personality}</p>
                   </div>
                 </div>
                 <div className="border-t border-border/30 px-5 py-4">
