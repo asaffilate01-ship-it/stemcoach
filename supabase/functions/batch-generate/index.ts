@@ -168,9 +168,27 @@ const SUBJECTS = [
       { name: "Memory & Cognition", subtopics: ["Multi-Store Model", "Working Memory Model", "Long-Term Memory Types", "Forgetting", "Eyewitness Testimony", "Cognitive Interview", "Schemas", "Attention", "Decision Making", "Problem Solving"] },
     ],
   },
+  {
+    id: "french",
+    topics: [
+      { name: "Grammaire", subtopics: ["Conjugaison présent", "Conjugaison passé composé", "Conjugaison imparfait", "Subjonctif", "Conditionnel", "Pronoms relatifs", "Pronoms compléments", "Accords du participe passé", "Voix passive", "Discours indirect"] },
+      { name: "Compréhension écrite", subtopics: ["Texte argumentatif", "Texte narratif", "Texte informatif", "Article de presse", "Extrait littéraire", "Synthèse de documents", "Questions de compréhension", "Vocabulaire en contexte", "Idées principales", "Inférences"] },
+      { name: "Expression écrite", subtopics: ["Dissertation", "Commentaire de texte", "Essai argumentatif", "Lettre formelle", "Résumé", "Compte rendu", "Rédaction créative", "Paragraphe structuré", "Introduction et conclusion", "Connecteurs logiques"] },
+      { name: "Littérature française", subtopics: ["Le classicisme", "Les Lumières", "Le romantisme", "Le réalisme", "Le naturalisme", "Le surréalisme", "L'existentialisme", "Poésie moderne", "Théâtre classique", "Roman contemporain"] },
+      { name: "Oral", subtopics: ["Exposé", "Débat", "Entretien", "Argumentation orale", "Lecture à voix haute", "Présentation de projet", "Analyse d'image", "Prise de parole", "Écoute active", "Phonétique"] },
+    ],
+  },
+  {
+    id: "german",
+    topics: [
+      { name: "Grammatik", subtopics: ["Konjugation Präsens", "Perfekt", "Präteritum", "Konjunktiv II", "Passiv", "Relativsätze", "Nebensätze", "Adjektivdeklination", "Präpositionen", "Modalverben"] },
+      { name: "Leseverstehen", subtopics: ["Sachtext", "Zeitungsartikel", "Literarischer Text", "Diagramme verstehen", "Zusammenfassung", "Textanalyse", "Argumentationsstruktur", "Wortschatz im Kontext", "Hauptaussagen", "Detailverständnis"] },
+      { name: "Schriftlicher Ausdruck", subtopics: ["Erörterung", "Textgebundener Aufsatz", "Leserbrief", "Bericht", "Stellungnahme", "Formeller Brief", "Zusammenfassung schreiben", "Kreatives Schreiben", "Einleitung und Schluss", "Argumentation"] },
+      { name: "Deutsche Literatur", subtopics: ["Sturm und Drang", "Klassik (Goethe/Schiller)", "Romantik", "Realismus", "Expressionismus", "Nachkriegsliteratur", "Moderne Lyrik", "Drama des 20. Jahrhunderts", "Kurzgeschichten", "Gegenwartsliteratur"] },
+      { name: "Mündliche Prüfung", subtopics: ["Präsentation", "Diskussion", "Bildbeschreibung", "Rollenspiel", "Zusammenfassung mündlich", "Stellungnahme mündlich", "Hörverstehen", "Aussprache", "Redewendungen", "Alltagskommunikation"] },
+    ],
+  },
 ];
-
-const CURRICULA = [
   { id: "uk-gcse", boards: ["AQA", "Edexcel", "OCR"] },
   { id: "uk-alevel", boards: ["AQA", "Edexcel", "OCR"] },
   { id: "uk-btec", boards: ["Pearson BTEC"] },
