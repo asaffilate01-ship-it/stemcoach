@@ -26,13 +26,13 @@ interface DBQuestion {
   id: string;
   question_text: string;
   options: any;
-  correct_answer: string;
-  correct_answers: string[] | null;
+  correct_answer?: string;
+  correct_answers?: string[] | null;
   allow_multiple_answers: boolean;
-  explanation: string;
-  worked_solution: string;
-  tuition_tips: string[];
-  exam_tip: string;
+  explanation?: string;
+  worked_solution?: string;
+  tuition_tips?: string[];
+  exam_tip?: string;
   formula: string | null;
   topic: string;
   subtopic: string;
@@ -41,8 +41,8 @@ interface DBQuestion {
   points: number;
   question_type: string;
   boards: string[];
-  mark_scheme: string | null;
-  model_answer: string | null;
+  mark_scheme?: string | null;
+  model_answer?: string | null;
   max_marks: number | null;
 }
 
@@ -51,7 +51,7 @@ export default function Practice() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { stats, recordAnswer, newBadges, dismissBadge } = useGameStats();
+  const { stats, recordAnswer, newBadges, dismissBadge, fetchStats } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
   useDocumentTitle(subject ? `Practice ${subject.name}` : "Practice");
@@ -76,6 +76,9 @@ export default function Practice() {
   const [mascotCorrect, setMascotCorrect] = useState<boolean | null>(null);
   const [timerRunning, setTimerRunning] = useState(true);
   const [timeTaken, setTimeTaken] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  // Server-returned answer data (only available after submission)
+  const [revealedAnswer, setRevealedAnswer] = useState<any>(null);
 
   useEffect(() => {
     if (!subjectId) return;
@@ -85,12 +88,12 @@ export default function Practice() {
       // Try network first, fall back to IndexedDB cache for offline support
       try {
         const { data } = await supabase
-          .from("questions")
+          .from("questions_safe" as any)
           .select("*")
           .eq("subject", subjectId)
           .limit(50);
-        if (data && data.length > 0) {
-          const shuffled = (data as DBQuestion[]).sort(() => Math.random() - 0.5);
+        if (data && (data as any[]).length > 0) {
+          const shuffled = (data as unknown as DBQuestion[]).sort(() => Math.random() - 0.5);
           setQuestions(shuffled);
           // Cache for offline use
           cacheQuestions(subjectId, shuffled);
@@ -222,12 +225,7 @@ export default function Practice() {
   const parsedOptions: string[] = typeof question.options === "string"
     ? JSON.parse(question.options)
     : (Array.isArray(question.options) ? question.options : []);
-  const isCorrect = isMultiSelect
-    ? (() => {
-        const correctSet = new Set(question.correct_answers || [question.correct_answer]);
-        return correctSet.size === selectedAnswers.size && [...correctSet].every(a => selectedAnswers.has(a));
-      })()
-    : selectedAnswer === question.correct_answer;
+  const isCorrect = revealedAnswer ? revealedAnswer.correct : false;
   const progressPercent = ((currentIndex + 1) / questions.length) * 100;
 
   const showXPPopup = (xp: number) => {
@@ -249,10 +247,9 @@ export default function Practice() {
         const { data, error } = await supabase.functions.invoke("ai-tutor", {
           body: {
             action: "grade-essay",
+            question_id: question.id,
             question_text: question.question_text,
             student_answer: essayAnswer,
-            mark_scheme: question.mark_scheme || question.worked_solution,
-            model_answer: question.model_answer || question.correct_answer,
             max_marks: question.max_marks || question.points,
             subject: question.subject,
             topic: question.topic,
@@ -290,30 +287,46 @@ export default function Practice() {
 
     if (!selectedAnswer && selectedAnswers.size === 0) return;
     setTimerRunning(false);
-    setShowFeedback(true);
-    const correct = isMultiSelect
-      ? (() => {
-          const correctSet = new Set(question.correct_answers || [question.correct_answer]);
-          return correctSet.size === selectedAnswers.size && [...correctSet].every(a => selectedAnswers.has(a));
-        })()
-      : selectedAnswer === question.correct_answer;
-    setLastCorrect(correct);
-    setShowCorrectAnim(true);
-    setMascotCorrect(correct);
-    setShowMascotReaction(true);
-    setTimeout(() => setShowCorrectAnim(false), 2000);
-    setTimeout(() => setShowMascotReaction(false), 3000);
-    setScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
-    if (user) {
-      await supabase.from("attempts").insert({
-        user_id: user.id, question_id: question.id,
-        answer: selectedAnswer || Array.from(selectedAnswers).join(", "),
-        correct, time_taken_seconds: timeTaken,
+    setSubmitting(true);
+
+    try {
+      const { data: result, error } = await supabase.functions.invoke("check-answer", {
+        body: {
+          question_id: question.id,
+          answer: isMultiSelect ? undefined : selectedAnswer,
+          answers: isMultiSelect ? Array.from(selectedAnswers) : undefined,
+          time_taken_seconds: timeTaken,
+        },
       });
+      if (error) throw error;
+
+      const correct = result.correct;
+      setRevealedAnswer(result);
+      setLastCorrect(correct);
+      setShowFeedback(true);
+      setShowCorrectAnim(true);
+      setMascotCorrect(correct);
+      setShowMascotReaction(true);
+      setTimeout(() => setShowCorrectAnim(false), 2000);
+      setTimeout(() => setShowMascotReaction(false), 3000);
+      setScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
+
+      // Update local stats from server response
+      if (result.stats) {
+        fetchStats();
+      }
+      showXPPopup(result.xp_gained || 0);
+      incrementCount();
+
+      // Handle new badges
+      if (result.new_badges?.length > 0) {
+        // Trigger badge display through fetchStats
+      }
+    } catch (e: any) {
+      toast({ title: "Submit failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
     }
-    const result = await recordAnswer(correct, question.points);
-    showXPPopup(result.xpGained);
-    incrementCount();
   };
 
   const handleNext = () => {
@@ -328,6 +341,7 @@ export default function Practice() {
     setTimeTaken(0);
     setShowMascotReaction(false);
     setMascotCorrect(null);
+    setRevealedAnswer(null);
     setCurrentIndex((prev) => (prev + 1) % questions.length);
   };
 
@@ -338,7 +352,7 @@ export default function Practice() {
         body: {
           action: "explain",
           question_text: question.question_text,
-          correct_answer: question.correct_answer,
+          correct_answer: revealedAnswer?.correct_answer || "",
           student_answer: selectedAnswer || essayAnswer || "",
           subject: question.subject,
           topic: question.topic,
@@ -536,7 +550,7 @@ export default function Practice() {
                   {parsedOptions.map((option, i) => {
                     const letter = String.fromCharCode(65 + i);
                     const isSelected = isMultiSelect ? selectedAnswers.has(option) : selectedAnswer === option;
-                    const isOptionCorrect = option === question.correct_answer;
+                    const isOptionCorrect = showFeedback && option === revealedAnswer?.correct_answer;
 
                     let optionClasses = "border border-border/60 bg-card hover:border-primary/30 hover:bg-primary/[0.02]";
                     if (showFeedback && isOptionCorrect) {
@@ -653,7 +667,7 @@ export default function Practice() {
                           <XCircle className="h-4 w-4 text-destructive" />
                         </div>
                         <span className="font-semibold text-destructive">Incorrect</span>
-                        <span className="text-sm text-muted-foreground">— Answer: {question.correct_answer}</span>
+                        <span className="text-sm text-muted-foreground">— Answer: {revealedAnswer?.correct_answer}</span>
                       </>
                     )}
                     {timeTaken > 0 && (
@@ -662,10 +676,10 @@ export default function Practice() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{question.explanation}</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{revealedAnswer?.explanation}</p>
                 </div>
 
-                {question.worked_solution && (
+                {revealedAnswer?.worked_solution && (
                   <div className="rounded-2xl border border-border/60 bg-card p-6">
                     <div className="mb-3 flex items-center gap-2">
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
@@ -673,14 +687,14 @@ export default function Practice() {
                       </div>
                       <span className="text-sm font-semibold">Worked Solution</span>
                     </div>
-                    <div className="whitespace-pre-line font-mono text-sm leading-relaxed text-muted-foreground">{question.worked_solution}</div>
+                    <div className="whitespace-pre-line font-mono text-sm leading-relaxed text-muted-foreground">{revealedAnswer.worked_solution}</div>
                   </div>
                 )}
 
-                {question.exam_tip && (
+                {revealedAnswer?.exam_tip && (
                   <div className="rounded-2xl border-l-4 border-l-primary bg-primary/5 p-5">
                     <div className="mb-1 text-xs font-bold uppercase tracking-wider text-primary">Exam Tip</div>
-                    <p className="text-sm leading-relaxed">{question.exam_tip}</p>
+                    <p className="text-sm leading-relaxed">{revealedAnswer.exam_tip}</p>
                   </div>
                 )}
 
@@ -695,8 +709,7 @@ export default function Practice() {
                     </div>
                     <div className="space-y-3">
                       {parsedOptions.map((opt) => {
-                        const isRight = opt === question.correct_answer;
-                        // Check for distractor reasoning from DB (JSON object) or local data
+                        const isRight = opt === revealedAnswer?.correct_answer;
                         const dbDistractors = (question as any).distractor_reasoning;
                         const reasoning = dbDistractors?.[opt] || null;
                         return (
@@ -705,7 +718,7 @@ export default function Practice() {
                               {isRight ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground/60" />}
                               <span className={`text-sm font-medium ${isRight ? "text-emerald-600 dark:text-emerald-400" : ""}`}>{opt}</span>
                             </div>
-                            {isRight && <p className="ml-5.5 text-xs leading-relaxed text-emerald-600/80 dark:text-emerald-400/80">✓ This is correct. {question.explanation}</p>}
+                            {isRight && <p className="ml-5.5 text-xs leading-relaxed text-emerald-600/80 dark:text-emerald-400/80">✓ This is correct. {revealedAnswer?.explanation}</p>}
                             {!isRight && reasoning && <p className="ml-5.5 text-xs leading-relaxed text-muted-foreground">{reasoning}</p>}
                             {!isRight && !reasoning && <p className="ml-5.5 text-xs leading-relaxed text-muted-foreground">This is incorrect.</p>}
                           </div>
@@ -753,14 +766,14 @@ export default function Practice() {
             )}
 
             {/* Tuition Tips */}
-            {showTips && question.tuition_tips?.length > 0 && (
+            {showTips && revealedAnswer?.tuition_tips?.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
                 <div className="rounded-2xl border-l-4 border-l-primary bg-primary/5 p-5">
                   <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
                     <Lightbulb className="h-4 w-4" /> Tuition Tips
                   </div>
                   <ul className="space-y-2">
-                    {question.tuition_tips.map((tip, i) => (
+                    {revealedAnswer.tuition_tips.map((tip: string, i: number) => (
                       <li key={i} className="text-sm leading-relaxed">• {tip}</li>
                     ))}
                   </ul>

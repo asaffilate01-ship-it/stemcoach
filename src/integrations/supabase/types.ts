@@ -180,6 +180,13 @@ export type Database = {
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       badges: {
@@ -538,6 +545,13 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flashcards_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1138,9 +1152,69 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      questions_safe: {
+        Row: {
+          allow_multiple_answers: boolean | null
+          boards: string[] | null
+          command_word: string | null
+          created_at: string | null
+          curriculum: string | null
+          difficulty: number | null
+          formula: string | null
+          id: string | null
+          max_marks: number | null
+          options: Json | null
+          points: number | null
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          topic: string | null
+        }
+        Insert: {
+          allow_multiple_answers?: boolean | null
+          boards?: string[] | null
+          command_word?: string | null
+          created_at?: string | null
+          curriculum?: string | null
+          difficulty?: number | null
+          formula?: string | null
+          id?: string | null
+          max_marks?: number | null
+          options?: Json | null
+          points?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          topic?: string | null
+        }
+        Update: {
+          allow_multiple_answers?: boolean | null
+          boards?: string[] | null
+          command_word?: string | null
+          created_at?: string | null
+          curriculum?: string | null
+          difficulty?: number | null
+          formula?: string | null
+          id?: string | null
+          max_marks?: number | null
+          options?: Json | null
+          points?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      award_badge: {
+        Args: { _badge_id: string; _user_id: string }
+        Returns: boolean
+      }
       confirm_subject_selection: {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
@@ -1167,6 +1241,11 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      record_answer_stats: {
+        Args: { _correct: boolean; _user_id: string; _xp_gain: number }
+        Returns: Json
+      }
+      record_perfect_score: { Args: { _user_id: string }; Returns: undefined }
       register_session: {
         Args: {
           _device_info?: string

@@ -73,106 +73,38 @@ export function useGameStats() {
   const recordAnswer = useCallback(async (correct: boolean, pointsEarned: number) => {
     if (!user) return { xpGained: 0, newBadges: [] };
 
-    const today = new Date().toISOString().split("T")[0];
     const xpGain = correct ? pointsEarned * 10 : Math.max(pointsEarned * 2, 5);
 
-    // Upsert stats
-    const { data: existing } = await supabase
-      .from("user_stats")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const isNewDay = existing?.last_active_date !== today;
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const wasYesterday = existing?.last_active_date === yesterday.toISOString().split("T")[0];
-    const newStreak = isNewDay ? (wasYesterday ? (existing?.streak || 0) + 1 : 1) : (existing?.streak || 1);
-
-    const updatedStats = {
-      user_id: user.id,
-      xp: (existing?.xp || 0) + xpGain,
-      level: calcLevel((existing?.xp || 0) + xpGain),
-      streak: newStreak,
-      longest_streak: Math.max(newStreak, existing?.longest_streak || 0),
-      total_questions: (existing?.total_questions || 0) + 1,
-      correct_answers: (existing?.correct_answers || 0) + (correct ? 1 : 0),
-      perfect_scores: existing?.perfect_scores || 0,
-      last_active_date: today,
-      updated_at: new Date().toISOString(),
-    };
-
-    if (existing) {
-      await supabase.from("user_stats").update(updatedStats).eq("user_id", user.id);
-    } else {
-      await supabase.from("user_stats").insert(updatedStats);
-    }
-
-    setStats({
-      xp: updatedStats.xp,
-      level: updatedStats.level,
-      streak: updatedStats.streak,
-      longestStreak: updatedStats.longest_streak,
-      totalQuestions: updatedStats.total_questions,
-      correctAnswers: updatedStats.correct_answers,
-      perfectScores: updatedStats.perfect_scores,
+    // Use server-side SECURITY DEFINER function
+    const { data: result } = await supabase.rpc("record_answer_stats", {
+      _user_id: user.id,
+      _correct: correct,
+      _xp_gain: xpGain,
     });
 
-    // Check for new badges
-    const earned = await checkBadges(updatedStats);
-    if (earned.length > 0) setNewBadges(prev => [...prev, ...earned]);
+    if (result) {
+      const r = result as any;
+      setStats(prev => ({
+        ...prev,
+        xp: r.xp,
+        level: r.level,
+        streak: r.streak,
+        longestStreak: r.longest_streak,
+        totalQuestions: prev.totalQuestions + 1,
+        correctAnswers: prev.correctAnswers + (correct ? 1 : 0),
+      }));
+    }
 
-    return { xpGained: xpGain, newBadges: earned };
-  }, [user]);
-
-  const recordPerfectScore = useCallback(async () => {
-    if (!user) return;
-    await supabase
-      .from("user_stats")
-      .update({ perfect_scores: stats.perfectScores + 1 })
-      .eq("user_id", user.id);
-    setStats(prev => ({ ...prev, perfectScores: prev.perfectScores + 1 }));
-  }, [user, stats.perfectScores]);
-
-  const checkBadges = async (currentStats: any) => {
-    if (!user) return [];
+    // Check for new badges via server-side function
     const { data: allBadges } = await supabase.from("badges").select("*");
-    const { data: earnedBadges } = await supabase
-      .from("user_badges")
-      .select("badge_id")
-      .eq("user_id", user.id);
-
-    const earnedIds = new Set(earnedBadges?.map(b => b.badge_id) || []);
-    const newlyEarned: EarnedBadge[] = [];
-
+    const earned: EarnedBadge[] = [];
     for (const badge of allBadges || []) {
-      if (earnedIds.has(badge.id)) continue;
-
-      let earned = false;
-      switch (badge.requirement_type) {
-        case "questions_answered":
-          earned = currentStats.total_questions >= badge.requirement_value;
-          break;
-        case "streak":
-          earned = currentStats.streak >= badge.requirement_value;
-          break;
-        case "accuracy":
-          const acc = currentStats.total_questions > 0
-            ? (currentStats.correct_answers / currentStats.total_questions) * 100
-            : 0;
-          earned = acc >= badge.requirement_value && currentStats.total_questions >= 10;
-          break;
-        case "perfect_score":
-          earned = currentStats.perfect_scores >= badge.requirement_value;
-          break;
-        case "xp":
-          earned = currentStats.xp >= badge.requirement_value;
-          break;
-      }
-
-      if (earned) {
-        await supabase.from("user_badges").insert({ user_id: user!.id, badge_id: badge.id });
-        newlyEarned.push({
+      const { data: awarded } = await supabase.rpc("award_badge", {
+        _user_id: user.id,
+        _badge_id: badge.id,
+      });
+      if (awarded) {
+        earned.push({
           id: badge.id,
           name: badge.name,
           icon: badge.icon,
@@ -181,9 +113,16 @@ export function useGameStats() {
         });
       }
     }
+    if (earned.length > 0) setNewBadges(prev => [...prev, ...earned]);
 
-    return newlyEarned;
-  };
+    return { xpGained: xpGain, newBadges: earned };
+  }, [user]);
+
+  const recordPerfectScore = useCallback(async () => {
+    if (!user) return;
+    await supabase.rpc("record_perfect_score", { _user_id: user.id });
+    setStats(prev => ({ ...prev, perfectScores: prev.perfectScores + 1 }));
+  }, [user]);
 
   const dismissBadge = useCallback((id: string) => {
     setNewBadges(prev => prev.filter(b => b.id !== id));
