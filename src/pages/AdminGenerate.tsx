@@ -140,7 +140,7 @@ export default function AdminGenerate() {
 
   const handleSeedQueue = async () => {
     setSeeding(true);
-    addLog("🌱 Seeding batch generation queue with all 1M combinations...");
+    addLog("🌱 Seeding batch generation queue with all 2M combinations...");
     try {
       const { data, error } = await supabase.functions.invoke("batch-generate", {
         body: { action: "seed" },
@@ -232,7 +232,7 @@ export default function AdminGenerate() {
     setGenerating(false);
   };
 
-  const progressPct = batchStatus?.progress_pct || ((dbCount || 0) / 1000000) * 100;
+  const progressPct = batchStatus?.progress_pct || ((dbCount || 0) / 2000000) * 100;
 
   return (
     <div className="min-h-screen bg-background">
@@ -242,7 +242,7 @@ export default function AdminGenerate() {
           <div className="stem-label mb-2">Admin Panel</div>
           <h1 className="stem-heading text-3xl">Question Generator</h1>
           <p className="mt-2 text-muted-foreground">
-            Generate exam-accurate questions using STEMcoach. Target: 1,000,000 questions.
+            Generate exam-accurate questions using STEMcoach. Target: 2,000,000 questions.
           </p>
         </div>
 
@@ -250,7 +250,7 @@ export default function AdminGenerate() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 stem-card rounded-xl p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold flex items-center gap-2">
-              <Rocket className="h-4 w-4 text-primary" /> Progress to 1,000,000 Questions
+              <Rocket className="h-4 w-4 text-primary" /> Progress to 2,000,000 Questions
             </h3>
             <span className="text-sm font-bold text-primary">{progressPct.toFixed(1)}%</span>
           </div>
@@ -269,7 +269,7 @@ export default function AdminGenerate() {
               <div className="stem-label">Queue Done</div>
             </div>
             <div>
-              <div className="text-xl font-bold">1,000,000</div>
+              <div className="text-xl font-bold">2,000,000</div>
               <div className="stem-label">Target</div>
             </div>
           </div>
@@ -394,7 +394,7 @@ export default function AdminGenerate() {
             <div className="h-[500px] overflow-y-auto rounded-lg bg-muted/50 p-4 font-mono text-xs">
               {log.length === 0 ? (
                 <span className="text-muted-foreground">
-                  How to generate 1M questions:{"\n\n"}
+                  How to generate 2M questions:{"\n\n"}
                   1. Click "Seed Queue" to create all subject×curriculum×type×difficulty combos{"\n"}
                   2. Click "Auto-Generate (Loop)" to start processing{"\n"}
                   3. The system will auto-pause on rate limits and resume{"\n"}

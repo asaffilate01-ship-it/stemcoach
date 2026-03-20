@@ -6,8 +6,8 @@ import heroImg from "@/assets/hero-stemsquad.png";
 import stemsquadImg from "@/assets/stemsquad.png";
 
 const stats = [
-  { label: "Questions", value: "1M+", icon: BookOpen },
-  { label: "Curricula", value: "30+", icon: Users },
+  { label: "Questions", value: "2M+", icon: BookOpen },
+  { label: "Curricula", value: "50+", icon: Users },
   { label: "Pass Rate", value: "94%", icon: Trophy },
 ];
 
@@ -68,8 +68,8 @@ export function HeroSection() {
               </span>
             </h1>
             <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-[1.125rem]">
-              A private tutor in your pocket. 1,000,000+ exam-style questions with step-by-step
-              solutions, STEMcoach coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
+               A private tutor in your pocket. 2,000,000+ exam-style questions with step-by-step
+               solutions, STEMcoach coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
             </p>
 
             {/* Highlights */}
@@ -163,7 +163,7 @@ export function HeroSection() {
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold">1M+ Questions</div>
+                  <div className="text-xs font-bold">2M+ Questions</div>
                   <div className="text-[10px] text-muted-foreground">All subjects</div>
                 </div>
               </motion.div>
