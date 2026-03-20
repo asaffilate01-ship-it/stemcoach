@@ -14,12 +14,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const countryGroups = [
   { id: "uk", label: "United Kingdom", flag: "🇬🇧", keys: ["uk-gcse", "uk-alevel", "uk-btec", "uk-scottish-nat5", "uk-scottish-higher", "uk-scottish-adv-higher"] },
-  { id: "intl", label: "International", flag: "🌍", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u"] },
+  { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u"] },
   { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl", "ib-dp-further"] },
   { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act"] },
   { id: "in", label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad"] },
   { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat"] },
-  { id: "lang", label: "Language Certs", flag: "📝", keys: ["ielts-academic", "ielts-general", "celta"] },
+  { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
 ];
 
 /** Exam board visual identity — short code + brand color */
@@ -181,7 +181,7 @@ function FilterPanel({
                           : "bg-muted/30 hover:bg-muted/50"
                       }`}
                     >
-                      <span className="text-base">{group.flag}</span>
+                      <span className="text-lg leading-none">{group.flag}</span>
                       <span className={`flex-1 text-[11px] font-semibold ${isSelected ? "text-primary" : "text-muted-foreground"}`}>
                         {group.label}
                       </span>
