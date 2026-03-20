@@ -57,7 +57,7 @@ export const subjects: SubjectInfo[] = [
     name: "Chemistry",
     icon: "⚗",
     color: "142 71% 45%",
-    questionCount: 200000,
+    questionCount: 250000,
     topics: ["Atomic Structure", "Bonding", "Stoichiometry", "Organic Chemistry", "Thermochemistry", "Kinetics", "Equilibrium", "Electrochemistry"],
     mascotImage: "/assets/chemi.png",
   },
