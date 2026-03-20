@@ -218,11 +218,11 @@ export const curricula = [
 export const allBoards = [...new Set(curricula.flatMap(c => c.boards))];
 
 export const difficultyLabels: Record<Difficulty, string> = {
-  1: "Foundation",
+  1: "Foundation / GCSE",
   2: "GCSE / Grade 9–10",
   3: "Advanced GCSE / O-Level",
-  4: "A-Level / AP / IB HL",
-  5: "Olympiad / JEE Advanced",
+  4: "A-Level / AP / IB HL / Year 12",
+  5: "University Degree / Olympiad / JEE",
 };
 
 // ─── PHYSICS QUESTIONS ───────────────────────────────────────────────
