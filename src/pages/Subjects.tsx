@@ -19,8 +19,13 @@ const countryGroups = [
   { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u"] },
   { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl", "ib-dp-further"] },
   { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act"] },
+  { id: "au", label: "Australia", flag: "🇦🇺", keys: ["au-hsc", "au-vce", "au-qce", "au-wace", "au-sace", "au-atar"] },
+  { id: "nz", label: "New Zealand", flag: "🇳🇿", keys: ["nz-ncea-1", "nz-ncea-2", "nz-ncea-3", "nz-scholarship"] },
+  { id: "ca", label: "Canada", flag: "🇨🇦", keys: ["ca-ontario-12", "ca-bc-12", "ca-alberta-12", "ca-quebec-cegep"] },
   { id: "in", label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad"] },
   { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat"] },
+  { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc"] },
+  { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol"] },
   { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
 ];
 
