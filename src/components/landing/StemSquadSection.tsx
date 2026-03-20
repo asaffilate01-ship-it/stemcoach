@@ -37,7 +37,7 @@ export function StemSquadSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl shadow-premium-lg ring-2 ring-primary/20 sm:h-28 sm:w-28"
+            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-premium-lg ring-2 ring-primary/20 sm:h-28 sm:w-28"
           >
               <img
                 src="/assets/coach-stem-cutout.png"
