@@ -35,7 +35,7 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section className="relative border-t py-20 md:py-28">
+    <section className="relative border-t py-10 md:py-14">
       <div className="container relative mx-auto px-4">
         <div className="mb-14 text-center">
           <div className="stem-label mb-3">FAQ</div>

@@ -3,7 +3,7 @@ import { curricula } from "@/data/questions";
 
 export function CurriculaSection() {
   return (
-    <section className="relative border-t py-20 md:py-28">
+    <section className="relative border-t py-10 md:py-14">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.04),transparent_60%)]" />
       <div className="container relative mx-auto px-4">
         <div className="mb-14 text-center">
