@@ -7,6 +7,11 @@ const squad = [
   { name: "BioBee", subject: "Biology", image: "/assets/biobee.png" },
   { name: "Codey", subject: "Computer Science", image: "/assets/codey.png" },
   { name: "Lexi", subject: "IELTS & CELTA", image: "/assets/lexi.png" },
+  { name: "EconiQ", subject: "Economics", image: "/assets/econiq.png" },
+  { name: "Litera", subject: "English Literature", image: "/assets/litera.png" },
+  { name: "Pysche", subject: "Psychology", image: "/assets/pysche.png" },
+  { name: "Geo", subject: "Geography", image: "/assets/geo.png" },
+  { name: "BizPro", subject: "Business Studies", image: "/assets/bizpro.png" },
 ];
 
 export function StemSquadSection() {
@@ -49,7 +54,7 @@ export function StemSquadSection() {
         </motion.div>
 
         {/* Squad grid */}
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-6">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-6">
           {squad.map((member, i) => (
             <motion.div
               key={member.name}

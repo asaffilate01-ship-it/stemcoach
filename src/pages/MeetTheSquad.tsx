@@ -7,7 +7,7 @@ import { getSquadMembers, getCoachStem } from "@/lib/mascots";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Lightbulb, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import stemsquadImg from "@/assets/stemsquad.png";
+import stemsquadImg from "@/assets/stemsquad-hero.png";
 
 export default function MeetTheSquad() {
   useDocumentTitle("Meet the STEM Squad");
