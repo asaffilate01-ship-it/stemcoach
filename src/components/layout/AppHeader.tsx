@@ -4,6 +4,7 @@ import { Icon3D } from "@/components/ui/icon-3d";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useTenantBranding } from "@/hooks/useTenantBranding";
 import { NotificationBell } from "./NotificationBell";
 import { useTheme } from "@/hooks/useTheme";
 import {
@@ -63,6 +64,7 @@ export function AppHeader() {
   const { user, signOut } = useAuth();
   const { roles, loading: rolesLoading } = useUserRole();
   const { theme, toggleTheme } = useTheme();
+  const tenant = useTenantBranding();
 
   const handleSignOut = async () => {
     await signOut();
@@ -134,12 +136,16 @@ export function AppHeader() {
         {/* Logo */}
         <Link to="/" className="group flex items-center gap-2">
           <img
-            src="/assets/coach-stem.png"
-            alt="Coach Stem"
+            src={tenant.logoUrl || "/assets/coach-stem.png"}
+            alt={tenant.name || "Coach Stem"}
             className="h-7 w-7 rounded-lg shadow-sm shadow-primary/20 transition-transform duration-300 group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-xl object-cover"
           />
           <span className="font-bold tracking-tight text-foreground text-sm sm:text-base">
-            STEM<span className="text-primary">Coach</span>
+            {tenant.name ? (
+              <>{tenant.name}</>
+            ) : (
+              <>STEM<span className="text-primary">Coach</span></>
+            )}
           </span>
         </Link>
 

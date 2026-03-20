@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { TenantBrandingProvider } from "@/hooks/useTenantBranding";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SessionGuard } from "@/components/SessionGuard";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -53,6 +54,7 @@ const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
 const StudyGroups = lazy(() => import("./pages/StudyGroups"));
 const Blog = lazy(() => import("./pages/Blog"));
 const MeetTheSquad = lazy(() => import("./pages/MeetTheSquad"));
+const RegisterInstitution = lazy(() => import("./pages/RegisterInstitution"));
 
 // Only import DevTools in dev mode
 const DevToolsPanel = import.meta.env.DEV
@@ -79,6 +81,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
+          <TenantBrandingProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -100,6 +103,7 @@ const App = () => (
                     <Route path="/blog" element={<P><Blog /></P>} />
                     <Route path="/blog/:slug" element={<P><Blog /></P>} />
                     <Route path="/meet-the-squad" element={<P><MeetTheSquad /></P>} />
+                    <Route path="/register-institution" element={<P><RegisterInstitution /></P>} />
                     <Route path="/formulas" element={<P><FormulaSheets /></P>} />
 
                     {/* Auth-required public */}
@@ -132,7 +136,7 @@ const App = () => (
                     {/* Role-protected */}
                     <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><P><TeacherDashboard /></P></ProtectedRoute>} />
                     <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><P><ParentDashboard /></P></ProtectedRoute>} />
-                    <Route path="/institution" element={<ProtectedRoute requiredRole="admin"><P><TenantAdmin /></P></ProtectedRoute>} />
+                    <Route path="/institution" element={<ProtectedRoute><P><TenantAdmin /></P></ProtectedRoute>} />
                     <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><P><AdminGenerate /></P></ProtectedRoute>} />
                     <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><P><AdminQuestions /></P></ProtectedRoute>} />
 
@@ -147,7 +151,8 @@ const App = () => (
               </Suspense>
             </BrowserRouter>
           </TooltipProvider>
-        </ThemeProvider>
+          </TenantBrandingProvider>
+          </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { BookOpen, Brain, Clock, GraduationCap, LineChart, Shield, Users, Zap } from "lucide-react";
 import { Icon3D } from "@/components/ui/icon-3d";
+import { useNavigate } from "react-router-dom";
 import stemsquadImg from "@/assets/stemsquad.png";
 
 const features = [
@@ -39,6 +40,7 @@ const features = [
     title: "White-Label Portal",
     description: "Colleges and tuition centres get branded portals with class management, assignments, and parent monitoring.",
     variant: "purple" as const,
+    link: "/register-institution",
   },
   {
     icon: Users,
@@ -55,6 +57,7 @@ const features = [
 ];
 
 export function FeaturesSection() {
+  const navigate = useNavigate();
   return (
     <section className="relative border-t border-border/30 py-10 md:py-14">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.02),transparent_70%)]" />
@@ -112,13 +115,17 @@ export function FeaturesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -4, transition: { duration: 0.25 } }}
-              className="group stem-card p-5 sm:p-6"
+              className={`group stem-card p-5 sm:p-6 ${(feature as any).link ? "cursor-pointer" : ""}`}
+              onClick={() => (feature as any).link && navigate((feature as any).link)}
             >
               <div className="mb-4">
                 <Icon3D icon={feature.icon} variant={feature.variant} size="lg" />
               </div>
               <h3 className="mb-2 font-bold text-foreground">{feature.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
+              {(feature as any).link && (
+                <p className="mt-3 text-xs font-semibold text-primary">Register your institution →</p>
+              )}
             </motion.div>
           ))}
         </div>
