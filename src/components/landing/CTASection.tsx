@@ -35,10 +35,10 @@ export function CTASection() {
                   { src: "/assets/lexi.png", name: "Lexi", delay: 0.25 },
                   { src: "/assets/econiq.png", name: "EconiQ", delay: 0.1 },
                   { src: "/assets/litera.png", name: "Litera", delay: 0.15 },
-                  { src: "/assets/pysche.png", name: "Pysche", delay: 0.2 },
+                  { src: "/assets/psyche-cutout.png", name: "Pysche", delay: 0.2 },
                   { src: "/assets/geo.png", name: "Geo", delay: 0.25 },
                   { src: "/assets/bizpro.png", name: "BizPro", delay: 0.3 },
-                  { src: "/assets/coach-stem.png", name: "Coach Stem", delay: 0.05 },
+                  { src: "/assets/coach-stem-cutout.png", name: "Coach Stem", delay: 0.05 },
                 ].map((m) => (
                   <motion.div
                     key={m.name}

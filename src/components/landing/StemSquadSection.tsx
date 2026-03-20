@@ -10,7 +10,7 @@ const squad = [
   { name: "Lexi", subject: "IELTS & CELTA", image: "/assets/lexi.png" },
   { name: "EconiQ", subject: "Economics", image: "/assets/econiq.png" },
   { name: "Litera", subject: "English Literature", image: "/assets/litera.png" },
-  { name: "Pysche", subject: "Psychology", image: "/assets/pysche.png" },
+  { name: "Pysche", subject: "Psychology", image: "/assets/psyche-cutout.png" },
   { name: "Geo", subject: "Geography", image: "/assets/geo.png" },
   { name: "BizPro", subject: "Business Studies", image: "/assets/bizpro.png" },
   { name: "François", subject: "Français", image: "/assets/francois.png" },
@@ -39,11 +39,11 @@ export function StemSquadSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl shadow-premium-lg ring-2 ring-primary/20 sm:h-28 sm:w-28"
           >
-            <img
-              src="/assets/coach-stem.png"
-              alt="Coach Stem — leader of the STEM Squad"
-              className="h-full w-full object-cover"
-            />
+              <img
+                src="/assets/coach-stem-cutout.png"
+                alt="Coach Stem — leader of the STEM Squad"
+                className="h-full w-full object-contain p-1"
+              />
           </motion.div>
           <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-primary">
             {t("landing.meetYourTutors")}
