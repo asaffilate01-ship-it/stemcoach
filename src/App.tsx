@@ -108,6 +108,7 @@ const App = () => (
                     <Route path="/register-institution" element={<P><RegisterInstitution /></P>} />
                     <Route path="/join-institution" element={<P><JoinInstitution /></P>} />
                     <Route path="/formulas" element={<P><FormulaSheets /></P>} />
+                    <Route path="/support" element={<P><Support /></P>} />
 
                     {/* Auth-required public */}
                     <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />

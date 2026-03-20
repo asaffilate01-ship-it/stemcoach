@@ -15,9 +15,10 @@ const footerLinks = {
     { label: "Meet the Squad", to: "/meet-the-squad" },
   ],
   Company: [
+    { label: "Support", to: "/support" },
     { label: "Privacy Policy", to: "/privacy" },
     { label: "Terms of Service", to: "/terms" },
-    { label: "Contact", to: "mailto:support@stemcoach.app", external: true },
+    { label: "Email Us", to: "mailto:support@stemcoach.app", external: true },
   ],
 };
 

@@ -15,7 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Mail, MessageSquare, HelpCircle, Bug, Lightbulb, Send, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
-import useDocumentTitle from "@/hooks/useDocumentTitle";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const ticketSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
