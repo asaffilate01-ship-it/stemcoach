@@ -295,5 +295,7 @@ export function guessMascotFromText(text: string): MascotInfo {
   if (lower.includes("psych") || lower.includes("behav") || lower.includes("mental")) return getMascot("psychology");
   if (lower.includes("geog") || lower.includes("climate") || lower.includes("continent")) return getMascot("geography");
   if (lower.includes("business") || lower.includes("entrepreneur") || lower.includes("market")) return getMascot("business-studies");
+  if (lower.includes("french") || lower.includes("français") || lower.includes("francais")) return getMascot("french");
+  if (lower.includes("german") || lower.includes("deutsch")) return getMascot("german");
   return getCoachStem();
 }

@@ -192,6 +192,8 @@ const subjectGradients: Record<string, string> = {
   "business-studies": "from-[hsl(270,60%,50%)] to-[hsl(290,55%,45%)]",
   ielts: "from-[hsl(200,80%,45%)] to-[hsl(220,70%,50%)]",
   celta: "from-[hsl(280,70%,50%)] to-[hsl(310,60%,50%)]",
+  french: "from-[hsl(220,70%,45%)] to-[hsl(240,60%,50%)]",
+  german: "from-[hsl(145,50%,35%)] to-[hsl(160,45%,30%)]",
 };
 
 /* ───────────────── Board Logo Chip ───────────────── */
