@@ -198,6 +198,17 @@ export const curricula = [
   { id: "pakistan-olevel", label: "Pakistan O-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International"] },
   { id: "pakistan-alevel", label: "Pakistan A-Level", country: "🇵🇰", boards: ["Cambridge (CAIE)", "Edexcel International (IAL)"] },
   { id: "pakistan-ecat-mdcat", label: "ECAT / MDCAT", country: "🇵🇰", boards: ["ECAT (Engineering)", "MDCAT (Medical)"] },
+  // ─── University / Degree Level ───
+  { id: "uni-uk", label: "UK University (Degree)", country: "🇬🇧", boards: ["Russell Group", "UK University"] },
+  { id: "uni-us", label: "US College (Degree)", country: "🇺🇸", boards: ["US University", "Ivy League"] },
+  { id: "uni-au", label: "Australian University (Degree)", country: "🇦🇺", boards: ["Go8 (Group of Eight)", "Australian University"] },
+  { id: "uni-nz", label: "NZ University (Degree)", country: "🇳🇿", boards: ["NZ University", "University of Auckland"] },
+  { id: "uni-ca", label: "Canadian University (Degree)", country: "🇨🇦", boards: ["U15 (Group of Canadian Research Universities)", "Canadian University"] },
+  { id: "uni-in", label: "Indian University (Degree)", country: "🇮🇳", boards: ["IIT", "NIT", "AIIMS", "Indian University"] },
+  { id: "uni-pk", label: "Pakistan University (Degree)", country: "🇵🇰", boards: ["HEC Pakistan", "LUMS", "NUST", "Pakistan University"] },
+  { id: "uni-bd", label: "Bangladesh University (Degree)", country: "🇧🇩", boards: ["Dhaka University", "BUET", "Bangladesh University"] },
+  { id: "uni-lk", label: "Sri Lanka University (Degree)", country: "🇱🇰", boards: ["University of Colombo", "University of Peradeniya", "Sri Lanka University"] },
+  { id: "uni-intl", label: "International University (Degree)", country: "🌍", boards: ["International University"] },
   // ─── Language Certs ───
   { id: "ielts-academic", label: "IELTS Academic", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
   { id: "ielts-general", label: "IELTS General Training", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
