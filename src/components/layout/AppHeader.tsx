@@ -21,6 +21,7 @@ interface NavItem {
   roles?: string[];
   group?: string;
   image?: string;
+  comingSoon?: boolean;
 }
 
 const navItems: NavItem[] = [
