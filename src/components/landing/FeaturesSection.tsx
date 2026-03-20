@@ -115,13 +115,17 @@ export function FeaturesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -4, transition: { duration: 0.25 } }}
-              className="group stem-card p-5 sm:p-6"
+              className={`group stem-card p-5 sm:p-6 ${(feature as any).link ? "cursor-pointer" : ""}`}
+              onClick={() => (feature as any).link && navigate((feature as any).link)}
             >
               <div className="mb-4">
                 <Icon3D icon={feature.icon} variant={feature.variant} size="lg" />
               </div>
               <h3 className="mb-2 font-bold text-foreground">{feature.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
+              {(feature as any).link && (
+                <p className="mt-3 text-xs font-semibold text-primary">Register your institution →</p>
+              )}
             </motion.div>
           ))}
         </div>
