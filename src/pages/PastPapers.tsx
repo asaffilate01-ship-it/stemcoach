@@ -19,6 +19,10 @@ const boards = [
   { id: "ap", name: "AP (College Board)", country: "🇺🇸" },
   { id: "cbse", name: "CBSE", country: "🇮🇳" },
   { id: "fbise", name: "FBISE", country: "🇵🇰" },
+  { id: "uae-moe", name: "UAE MoE", country: "🇦🇪" },
+  { id: "emsat", name: "EmSAT", country: "🇦🇪" },
+  { id: "ednat", name: "Éducation Nationale (France)", country: "🇫🇷" },
+  { id: "deped", name: "DepEd Philippines", country: "🇵🇭" },
 ];
 
 const subjects = [
