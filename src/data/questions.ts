@@ -1,6 +1,6 @@
 export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
-export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies";
+export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies" | "french" | "german";
 
 export interface Question {
   id: string;
