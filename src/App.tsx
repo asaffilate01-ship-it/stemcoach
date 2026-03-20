@@ -55,6 +55,7 @@ const StudyGroups = lazy(() => import("./pages/StudyGroups"));
 const Blog = lazy(() => import("./pages/Blog"));
 const MeetTheSquad = lazy(() => import("./pages/MeetTheSquad"));
 const RegisterInstitution = lazy(() => import("./pages/RegisterInstitution"));
+const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 
 // Only import DevTools in dev mode
 const DevToolsPanel = import.meta.env.DEV

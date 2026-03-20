@@ -101,6 +101,14 @@ function hexToHsl(hex: string): string | null {
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
+const BRANDED_VARS = [
+  "--primary",
+  "--primary-foreground",
+  "--accent",
+  "--ring",
+  "--sidebar-primary",
+] as const;
+
 function applyCssVars(branding: TenantBranding) {
   const root = document.documentElement;
   if (branding.primaryColor) {
@@ -108,12 +116,19 @@ function applyCssVars(branding: TenantBranding) {
     if (hsl) {
       root.style.setProperty("--primary", hsl);
       root.style.setProperty("--primary-foreground", "0 0% 100%");
+      root.style.setProperty("--ring", hsl);
+      root.style.setProperty("--sidebar-primary", hsl);
+    }
+  }
+  if (branding.secondaryColor) {
+    const hsl = hexToHsl(branding.secondaryColor);
+    if (hsl) {
+      root.style.setProperty("--accent", hsl);
     }
   }
 }
 
 function removeCssVars() {
   const root = document.documentElement;
-  root.style.removeProperty("--primary");
-  root.style.removeProperty("--primary-foreground");
+  BRANDED_VARS.forEach((v) => root.style.removeProperty(v));
 }
