@@ -92,7 +92,7 @@ export const subjects: SubjectInfo[] = [
     name: "English Literature",
     icon: "📖",
     color: "210 70% 50%",
-    questionCount: 120000,
+    questionCount: 150000,
     topics: ["Poetry Analysis", "Prose Fiction", "Drama", "Shakespeare", "Modern Literature", "Comparative Analysis", "Unseen Poetry", "Creative Writing"],
   },
   {
