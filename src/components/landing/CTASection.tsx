@@ -35,7 +35,7 @@ export function CTASection() {
                   { src: "/assets/lexi.png", name: "Lexi", delay: 0.25 },
                   { src: "/assets/econiq.png", name: "EconiQ", delay: 0.1 },
                   { src: "/assets/litera.png", name: "Litera", delay: 0.15 },
-                  { src: "/assets/psyche-cutout.png", name: "Pysche", delay: 0.2 },
+                  { src: "/assets/pysche.png", name: "Pysche", delay: 0.2 },
                   { src: "/assets/geo.png", name: "Geo", delay: 0.25 },
                   { src: "/assets/bizpro.png", name: "BizPro", delay: 0.3 },
                   { src: "/assets/francois.png", name: "François", delay: 0.15 },
@@ -51,7 +51,7 @@ export function CTASection() {
                     whileHover={{ y: -6, scale: 1.1 }}
                     className="flex flex-col items-center"
                   >
-                    <div className="rounded-2xl bg-card p-2 shadow-md ring-1 ring-border/20">
+                    <div className="rounded-2xl bg-[hsl(var(--squad-avatar-bg))] p-2 shadow-md ring-1 ring-border/20">
                       <img src={m.src} alt={m.name} className="h-14 w-14 object-contain" loading="lazy" />
                     </div>
                     <span className="mt-1 text-[10px] font-semibold text-muted-foreground">{m.name}</span>

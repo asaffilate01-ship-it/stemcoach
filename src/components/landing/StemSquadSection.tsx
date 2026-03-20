@@ -10,7 +10,7 @@ const squad = [
   { name: "Lexi", subject: "IELTS & CELTA", image: "/assets/lexi.png" },
   { name: "EconiQ", subject: "Economics", image: "/assets/econiq.png" },
   { name: "Litera", subject: "English Literature", image: "/assets/litera.png" },
-  { name: "Pysche", subject: "Psychology", image: "/assets/psyche-cutout.png" },
+  { name: "Pysche", subject: "Psychology", image: "/assets/pysche.png" },
   { name: "Geo", subject: "Geography", image: "/assets/geo.png" },
   { name: "BizPro", subject: "Business Studies", image: "/assets/bizpro.png" },
   { name: "François", subject: "Français", image: "/assets/francois.png" },
@@ -37,7 +37,7 @@ export function StemSquadSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl shadow-premium-lg ring-2 ring-primary/20 sm:h-28 sm:w-28"
+            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-premium-lg ring-2 ring-primary/20 sm:h-28 sm:w-28"
           >
               <img
                 src="/assets/coach-stem-cutout.png"
@@ -66,7 +66,7 @@ export function StemSquadSection() {
               transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="group flex flex-col items-center"
             >
-              <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-2xl bg-muted shadow-md ring-1 ring-border/30 transition-all duration-300 group-hover:shadow-lg group-hover:ring-primary/30 group-hover:scale-105 sm:h-24 sm:w-24">
+              <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-md ring-1 ring-border/30 transition-all duration-300 group-hover:shadow-lg group-hover:ring-primary/30 group-hover:scale-105 sm:h-24 sm:w-24">
                 <img
                   src={member.image}
                   alt={`${member.name} — ${member.subject} mascot`}
