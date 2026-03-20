@@ -192,7 +192,7 @@ export default function Analytics() {
 
           {attempts.length === 0 ? (
             <div className="stem-card rounded-xl p-12 text-center">
-              <BarChart3 className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+              <Icon3D icon={BarChart3} variant="primary" size="xl" className="mx-auto" />
               <h3 className="mb-2 text-lg font-semibold">No data yet</h3>
               <p className="text-sm text-muted-foreground">Practice some questions to see your analytics.</p>
             </div>
