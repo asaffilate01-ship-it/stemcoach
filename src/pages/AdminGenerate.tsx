@@ -140,7 +140,7 @@ export default function AdminGenerate() {
 
   const handleSeedQueue = async () => {
     setSeeding(true);
-    addLog("🌱 Seeding batch generation queue with all 1M combinations...");
+    addLog("🌱 Seeding batch generation queue with all 2M combinations...");
     try {
       const { data, error } = await supabase.functions.invoke("batch-generate", {
         body: { action: "seed" },
