@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Icon3DVariant = "primary" | "warning" | "success" | "destructive" | "purple" | "accent";
+export type Icon3DVariant = "primary" | "warning" | "success" | "destructive" | "purple" | "accent";
 type Icon3DSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface Icon3DProps {
