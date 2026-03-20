@@ -83,12 +83,13 @@ export function useGameStats() {
     });
 
     if (result) {
+      const r = result as any;
       setStats(prev => ({
         ...prev,
-        xp: result.xp,
-        level: result.level,
-        streak: result.streak,
-        longestStreak: result.longest_streak,
+        xp: r.xp,
+        level: r.level,
+        streak: r.streak,
+        longestStreak: r.longest_streak,
         totalQuestions: prev.totalQuestions + 1,
         correctAnswers: prev.correctAnswers + (correct ? 1 : 0),
       }));
