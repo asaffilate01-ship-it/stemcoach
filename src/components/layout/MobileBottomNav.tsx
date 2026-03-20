@@ -1,14 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, Trophy, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
+import homeIcon from "@/assets/icons/home-3d.png";
+import subjectsIcon from "@/assets/icons/subjects-3d.png";
+import examsIcon from "@/assets/icons/exams-3d.png";
+import dashboardIcon from "@/assets/icons/dashboard-3d.png";
 
 const items = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/subjects", label: "Subjects", icon: BookOpen },
-  { to: "/ai-tutor", label: "STEMcoach", icon: null, image: "/assets/coach-stem.png" },
-  { to: "/mock-exam", label: "Exam", icon: Trophy },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, auth: true },
+  { to: "/", label: "Home", image: homeIcon },
+  { to: "/subjects", label: "Subjects", image: subjectsIcon },
+  { to: "/ai-tutor", label: "STEMcoach", image: "/assets/coach-stem.png" },
+  { to: "/mock-exam", label: "Exam", image: examsIcon },
+  { to: "/dashboard", label: "Dashboard", image: dashboardIcon, auth: true },
 ];
 
 export function MobileBottomNav() {
@@ -29,15 +32,15 @@ export function MobileBottomNav() {
               className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-semibold transition-all active:scale-95"
             >
               <div className={`relative flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-300 ${
-                active ? "bg-primary/12 scale-110" : ""
+                active ? "scale-110" : ""
               }`}>
-                {item.image ? (
-                  <img src={item.image} alt={item.label} className={`h-[18px] w-[18px] rounded-sm object-cover transition-all duration-300 ${active ? "scale-110" : "opacity-70"}`} />
-                ) : item.icon ? (
-                  <item.icon className={`h-[18px] w-[18px] transition-all duration-300 ${
-                    active ? "text-primary" : "text-muted-foreground"
-                  }`} strokeWidth={active ? 2.5 : 2} />
-                ) : null}
+                <img
+                  src={item.image}
+                  alt={item.label}
+                  className={`h-6 w-6 object-contain transition-all duration-300 ${
+                    active ? "scale-110 drop-shadow-md" : "opacity-60 grayscale-[30%]"
+                  }`}
+                />
                 {active && (
                   <motion.div
                     layoutId="bottomNavIndicator"
