@@ -107,6 +107,7 @@
     --stem-card-hover: 0 2px 4px 0 rgba(0,0,0,.2), 0 16px 40px -8px rgba(0,0,0,.35);
 
     --gradient-glass: linear-gradient(135deg, rgba(18,18,28,0.95), rgba(18,18,28,0.7));
+    --squad-avatar-bg: 220 20% 92%;
   }
 }
 

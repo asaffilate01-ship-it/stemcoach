@@ -66,7 +66,7 @@ export function StemSquadSection() {
               transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="group flex flex-col items-center"
             >
-              <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-2xl bg-muted shadow-md ring-1 ring-border/30 transition-all duration-300 group-hover:shadow-lg group-hover:ring-primary/30 group-hover:scale-105 sm:h-24 sm:w-24">
+              <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-md ring-1 ring-border/30 transition-all duration-300 group-hover:shadow-lg group-hover:ring-primary/30 group-hover:scale-105 sm:h-24 sm:w-24">
                 <img
                   src={member.image}
                   alt={`${member.name} — ${member.subject} mascot`}
