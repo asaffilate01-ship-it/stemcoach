@@ -871,6 +871,13 @@ export type Database = {
             referencedRelation: "study_groups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       study_groups: {
@@ -1209,6 +1216,36 @@ export type Database = {
         }
         Relationships: []
       }
+      study_groups_public: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string | null
+          max_members: number | null
+          name: string | null
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          max_members?: number | null
+          name?: string | null
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          max_members?: number | null
+          name?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       award_badge: {
@@ -1240,6 +1277,16 @@ export type Database = {
       increment_used_questions: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      issue_certificate: {
+        Args: {
+          _achievement_type: string
+          _score_percent: number
+          _subject: string
+          _title: string
+          _user_id: string
+        }
+        Returns: string
       }
       record_answer_stats: {
         Args: { _correct: boolean; _user_id: string; _xp_gain: number }
