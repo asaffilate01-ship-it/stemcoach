@@ -1159,6 +1159,62 @@ export type Database = {
       }
     }
     Views: {
+      challenge_leaderboard: {
+        Row: {
+          challenge_id: string | null
+          score: number | null
+          time_taken_seconds: number | null
+          total: number | null
+          user_id: string | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          score?: number | null
+          time_taken_seconds?: number | null
+          total?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          challenge_id?: string | null
+          score?: number | null
+          time_taken_seconds?: number | null
+          total?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_challenge_attempts_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leaderboard_stats: {
+        Row: {
+          level: number | null
+          longest_streak: number | null
+          streak: number | null
+          user_id: string | null
+          xp: number | null
+        }
+        Insert: {
+          level?: number | null
+          longest_streak?: number | null
+          streak?: number | null
+          user_id?: string | null
+          xp?: number | null
+        }
+        Update: {
+          level?: number | null
+          longest_streak?: number | null
+          streak?: number | null
+          user_id?: string | null
+          xp?: number | null
+        }
+        Relationships: []
+      }
       questions_safe: {
         Row: {
           allow_multiple_answers: boolean | null
