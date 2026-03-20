@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePushNotifications } from "@/hooks/useNotifications";
 import { motion } from "framer-motion";
 import { User, Shield, Bell, Link2, Check, X, BellRing, Download, Trash2, Loader2 } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
