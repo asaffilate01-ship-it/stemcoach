@@ -324,10 +324,18 @@ Include detailed tuition tips and exam technique advice with every question.`;
 
 // ── EXPLAIN QUESTION ──
 async function explainQuestion(params: any, apiKey: string) {
-  const { question_text, correct_answer, student_answer, subject, topic, question_id } = params;
+  const { question_text, student_answer, subject, topic, question_id } = params;
 
   if (!question_text) {
     return jsonRes({ error: "question_text is required" }, 400);
+  }
+
+  // Fetch correct answer server-side
+  let correct_answer = params.correct_answer;
+  if (question_id && !correct_answer) {
+    const sb = getSupabaseAdmin();
+    const { data: fullQ } = await sb.from("questions").select("correct_answer, explanation").eq("id", question_id).single();
+    if (fullQ) correct_answer = fullQ.correct_answer;
   }
 
   // Check cache
