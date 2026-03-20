@@ -395,6 +395,8 @@ ACCURACY RULES — VIOLATIONS WILL CAUSE REJECTION:
 9. exam_tip must reflect real exam technique advice.
 10. NO placeholder or generic content — every field must be specific to the question.`;
 
+        const { instruction: langInstruction } = getLanguageForCurriculum(item.curriculum);
+
         const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -413,7 +415,8 @@ Difficulty: ${item.difficulty}/5 | Type: ${item.question_type}
 
 ${typeInstructions[item.question_type] || typeInstructions.mcq}
 
-${accuracyPrompt}`,
+${accuracyPrompt}
+${langInstruction}`,
               },
               {
                 role: "user",
