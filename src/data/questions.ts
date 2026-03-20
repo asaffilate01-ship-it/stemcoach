@@ -100,7 +100,7 @@ export const subjects: SubjectInfo[] = [
     name: "Psychology",
     icon: "🧠",
     color: "30 80% 50%",
-    questionCount: 120000,
+    questionCount: 150000,
     topics: ["Social Psychology", "Cognitive Psychology", "Developmental Psychology", "Biological Psychology", "Psychopathology", "Research Methods", "Memory", "Attachment"],
   },
   {
