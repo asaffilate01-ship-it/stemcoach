@@ -99,6 +99,7 @@ const App = () => (
                     <Route path="/terms" element={<P><TermsOfService /></P>} />
                     <Route path="/blog" element={<P><Blog /></P>} />
                     <Route path="/blog/:slug" element={<P><Blog /></P>} />
+                    <Route path="/meet-the-squad" element={<P><MeetTheSquad /></P>} />
                     <Route path="/formulas" element={<P><FormulaSheets /></P>} />
 
                     {/* Auth-required public */}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { guessMascotFromText } from "@/lib/mascots";
 
 export function NotificationBell() {
   const { user } = useAuth();
@@ -67,19 +68,27 @@ export function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border bg-card p-2 shadow-lg">
+          <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border bg-card p-2 shadow-lg">
             <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">Notifications</div>
             {notifications.length === 0 ? (
               <div className="px-2 py-4 text-center text-xs text-muted-foreground">No notifications yet</div>
             ) : (
               <div className="max-h-64 space-y-1 overflow-y-auto">
-                {notifications.map(n => (
-                  <div key={n.id} className={`rounded-lg px-3 py-2 text-sm ${n.read ? "" : "bg-primary/5"}`}>
-                    <div className="font-medium text-xs">{n.title}</div>
-                    <div className="text-[11px] text-muted-foreground">{n.message}</div>
-                    <div className="mt-1 text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleDateString()}</div>
-                  </div>
-                ))}
+                {notifications.map(n => {
+                  const mascot = guessMascotFromText(`${n.title} ${n.message}`);
+                  return (
+                    <div key={n.id} className={`flex items-start gap-2.5 rounded-lg px-3 py-2 transition-colors ${n.read ? "" : "bg-primary/5"}`}>
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 mt-0.5">
+                        <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-xs">{n.title}</div>
+                        <div className="text-[11px] text-muted-foreground">{n.message}</div>
+                        <div className="mt-1 text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
