@@ -55,6 +55,7 @@ const StudyGroups = lazy(() => import("./pages/StudyGroups"));
 const Blog = lazy(() => import("./pages/Blog"));
 const MeetTheSquad = lazy(() => import("./pages/MeetTheSquad"));
 const RegisterInstitution = lazy(() => import("./pages/RegisterInstitution"));
+const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 
 // Only import DevTools in dev mode
 const DevToolsPanel = import.meta.env.DEV
@@ -104,6 +105,7 @@ const App = () => (
                     <Route path="/blog/:slug" element={<P><Blog /></P>} />
                     <Route path="/meet-the-squad" element={<P><MeetTheSquad /></P>} />
                     <Route path="/register-institution" element={<P><RegisterInstitution /></P>} />
+                    <Route path="/join-institution" element={<P><JoinInstitution /></P>} />
                     <Route path="/formulas" element={<P><FormulaSheets /></P>} />
 
                     {/* Auth-required public */}

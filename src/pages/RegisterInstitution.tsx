@@ -175,6 +175,16 @@ export default function RegisterInstitution() {
                 {loading ? "Registering…" : "Register Institution"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate("/join-institution")}
+                  className="text-xs text-muted-foreground underline hover:text-foreground"
+                >
+                  Want to join an existing institution instead?
+                </button>
+              </div>
             </motion.form>
           </div>
         </div>
