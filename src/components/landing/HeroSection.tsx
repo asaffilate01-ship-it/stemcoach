@@ -68,8 +68,8 @@ export function HeroSection() {
               </span>
             </h1>
             <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-[1.125rem]">
-              A private tutor in your pocket. 1,000,000+ exam-style questions with step-by-step
-              solutions, STEMcoach coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
+               A private tutor in your pocket. 2,000,000+ exam-style questions with step-by-step
+               solutions, STEMcoach coaching, and real exam simulations across GCSE, A-Level, IB, FSC, CBSE & more.
             </p>
 
             {/* Highlights */}
