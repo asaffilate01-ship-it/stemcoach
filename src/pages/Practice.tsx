@@ -288,30 +288,46 @@ export default function Practice() {
 
     if (!selectedAnswer && selectedAnswers.size === 0) return;
     setTimerRunning(false);
-    setShowFeedback(true);
-    const correct = isMultiSelect
-      ? (() => {
-          const correctSet = new Set(question.correct_answers || [question.correct_answer]);
-          return correctSet.size === selectedAnswers.size && [...correctSet].every(a => selectedAnswers.has(a));
-        })()
-      : selectedAnswer === question.correct_answer;
-    setLastCorrect(correct);
-    setShowCorrectAnim(true);
-    setMascotCorrect(correct);
-    setShowMascotReaction(true);
-    setTimeout(() => setShowCorrectAnim(false), 2000);
-    setTimeout(() => setShowMascotReaction(false), 3000);
-    setScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
-    if (user) {
-      await supabase.from("attempts").insert({
-        user_id: user.id, question_id: question.id,
-        answer: selectedAnswer || Array.from(selectedAnswers).join(", "),
-        correct, time_taken_seconds: timeTaken,
+    setSubmitting(true);
+
+    try {
+      const { data: result, error } = await supabase.functions.invoke("check-answer", {
+        body: {
+          question_id: question.id,
+          answer: isMultiSelect ? undefined : selectedAnswer,
+          answers: isMultiSelect ? Array.from(selectedAnswers) : undefined,
+          time_taken_seconds: timeTaken,
+        },
       });
+      if (error) throw error;
+
+      const correct = result.correct;
+      setRevealedAnswer(result);
+      setLastCorrect(correct);
+      setShowFeedback(true);
+      setShowCorrectAnim(true);
+      setMascotCorrect(correct);
+      setShowMascotReaction(true);
+      setTimeout(() => setShowCorrectAnim(false), 2000);
+      setTimeout(() => setShowMascotReaction(false), 3000);
+      setScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
+
+      // Update local stats from server response
+      if (result.stats) {
+        fetchStats();
+      }
+      showXPPopup(result.xp_gained || 0);
+      incrementCount();
+
+      // Handle new badges
+      if (result.new_badges?.length > 0) {
+        // Trigger badge display through fetchStats
+      }
+    } catch (e: any) {
+      toast({ title: "Submit failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
     }
-    const result = await recordAnswer(correct, question.points);
-    showXPPopup(result.xpGained);
-    incrementCount();
   };
 
   const handleNext = () => {
