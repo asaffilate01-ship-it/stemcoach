@@ -142,21 +142,12 @@ export default function MockExam() {
 
     setState("loading");
     try {
-      let query = supabase
-        .from("questions")
-        .select(
-          "id, question_text, options, correct_answer, topic, subject, difficulty, points, explanation, worked_solution"
-        )
-        .eq("subject", subj)
-        .eq("curriculum", curr)
-        .eq("question_type", "mcq")
-        .limit(qCount);
-
-      if (board) {
-        query = query.contains("boards", [board]);
-      }
-
-      const { data, error } = await query;
+      const { data, error } = await supabase.rpc("get_mock_exam_questions" as any, {
+        _subject: subj,
+        _curriculum: curr,
+        _count: qCount,
+        _board: board || null,
+      });
 
       if (error) throw error;
       if (!data || data.length === 0) {
@@ -169,7 +160,7 @@ export default function MockExam() {
         return;
       }
 
-      const shuffled = data.sort(() => Math.random() - 0.5);
+      const shuffled = (data as ExamQuestion[]);
       setQuestions(shuffled);
       setTimeLeft(dur * 60);
       setAnswers({});
