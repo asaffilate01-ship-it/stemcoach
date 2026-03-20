@@ -151,7 +151,8 @@ const App = () => (
               </Suspense>
             </BrowserRouter>
           </TooltipProvider>
-        </ThemeProvider>
+          </TenantBrandingProvider>
+          </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
