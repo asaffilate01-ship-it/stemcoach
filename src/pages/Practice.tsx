@@ -677,7 +677,7 @@ export default function Practice() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{question.explanation}</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{revealedAnswer?.explanation}</p>
                 </div>
 
                 {question.worked_solution && (
