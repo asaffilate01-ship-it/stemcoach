@@ -212,7 +212,7 @@ export default function WeakTopicDrill() {
 
               {question.options && (
                 <div className="mb-6 space-y-3">
-                  {(question.options as string[]).map((opt, i) => {
+                  {(typeof question.options === "string" ? JSON.parse(question.options) : (question.options || [])).map((opt: string, i: number) => {
                     const letter = String.fromCharCode(65 + i);
                     let cls = "border-2 border-transparent hover:border-primary/20";
                     if (showFeedback && opt === question.correct_answer) cls = "stem-success-card";
