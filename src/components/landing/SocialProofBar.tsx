@@ -7,13 +7,6 @@ const counters = [
   { value: "6", label: "AI Mascot Tutors" },
 ];
 
-const trustedBy = [
-  { name: "Dubai Academy", location: "UAE" },
-  { name: "Lahore Grammar School", location: "Pakistan" },
-  { name: "DPS International", location: "India" },
-  { name: "Westminster Academy", location: "UK" },
-  { name: "GEMS Education", location: "UAE" },
-];
 
 export function SocialProofBar() {
   return (
@@ -40,29 +33,6 @@ export function SocialProofBar() {
           ))}
         </div>
 
-        {/* Trusted by */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center"
-        >
-          <p className="mb-5 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60">
-            Trusted by leading institutions
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
-            {trustedBy.map((org) => (
-              <div
-                key={org.name}
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-              >
-                <div className="h-1.5 w-1.5 rounded-full bg-primary/25" />
-                <span>{org.name}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </section>
   );
