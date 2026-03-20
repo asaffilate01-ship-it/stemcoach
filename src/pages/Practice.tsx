@@ -668,7 +668,7 @@ export default function Practice() {
                           <XCircle className="h-4 w-4 text-destructive" />
                         </div>
                         <span className="font-semibold text-destructive">Incorrect</span>
-                        <span className="text-sm text-muted-foreground">— Answer: {question.correct_answer}</span>
+                        <span className="text-sm text-muted-foreground">— Answer: {revealedAnswer?.correct_answer}</span>
                       </>
                     )}
                     {timeTaken > 0 && (
