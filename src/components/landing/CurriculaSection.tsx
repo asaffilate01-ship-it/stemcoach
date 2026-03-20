@@ -12,7 +12,7 @@ export function CurriculaSection() {
             Supports every <span className="stem-gradient-text">major exam board</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            From UK GCSEs to university degrees — one platform, every curriculum, every level.
+            From UK GCSEs to the French Baccalauréat, Philippine DepEd, UAE EmSAT, and university degrees — one platform, every curriculum, every level.
           </p>
         </div>
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
