@@ -48,8 +48,8 @@ export default function StudyGroups() {
 
   const fetchGroups = async () => {
     setLoading(true);
-    const { data } = await supabase.from("study_groups").select("*").order("created_at", { ascending: false });
-    if (data) setGroups(data);
+    const { data } = await supabase.from("study_groups_public" as any).select("*").order("created_at", { ascending: false });
+    if (data) setGroups(data as any);
 
     if (user) {
       const { data: memberships } = await supabase
