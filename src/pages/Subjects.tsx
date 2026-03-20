@@ -26,6 +26,9 @@ const countryGroups = [
   { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat", "uni-pk"] },
   { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc", "uni-bd"] },
   { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol", "uni-lk"] },
+  { id: "ae", label: "UAE", flag: "🇦🇪", keys: ["uae-moe-9", "uae-moe-10", "uae-moe-11", "uae-moe-12", "uae-emsat"] },
+  { id: "fr", label: "France", flag: "🇫🇷", keys: ["fr-seconde", "fr-premiere", "fr-bac-general", "fr-bac-techno", "fr-bac-pro"] },
+  { id: "ph", label: "Philippines", flag: "🇵🇭", keys: ["ph-grade10", "ph-grade11", "ph-grade12", "ph-stem", "ph-abm", "ph-humss"] },
   { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
 ];
 
@@ -103,6 +106,13 @@ const boardBranding: Record<string, { abbr: string; color: string }> = {
   "University of Peradeniya": { abbr: "UoP", color: "hsl(145,50%,38%)" },
   "Sri Lanka University": { abbr: "LKU", color: "hsl(200,55%,42%)" },
   "International University": { abbr: "INTL", color: "hsl(270,50%,45%)" },
+  // UAE
+  "UAE MoE": { abbr: "MoE", color: "hsl(145,60%,38%)" },
+  "EmSAT": { abbr: "EmSAT", color: "hsl(210,65%,42%)" },
+  // France
+  "Éducation Nationale": { abbr: "ÉN", color: "hsl(220,70%,45%)" },
+  // Philippines
+  "DepEd Philippines": { abbr: "DepEd", color: "hsl(210,65%,45%)" },
   // New Zealand
   "NZQA": { abbr: "NZQA", color: "hsl(0,0%,20%)" },
   // Canada

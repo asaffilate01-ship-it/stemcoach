@@ -1,4 +1,4 @@
-export type RegionKey = "uk" | "us" | "ae" | "in" | "pk" | "au" | "nz" | "ca" | "bd" | "lk";
+export type RegionKey = "uk" | "us" | "ae" | "in" | "pk" | "au" | "nz" | "ca" | "bd" | "lk" | "fr" | "ph";
 
 export interface RegionalPrice {
   price: string;
@@ -41,6 +41,8 @@ export const PACKS: Record<string, QuestionPack> = {
       ca: { price: "C$24.99", price_id: "price_1TCxywFFogsDQVs4rI3DVCmN" },
       bd: { price: "৳1,499", price_id: "price_1TCxyyFFogsDQVs43c1p47T9" },
       lk: { price: "LKR 4,999", price_id: "price_1TCxyzFFogsDQVs4r94WHEqY" },
+      fr: { price: "€14.99", price_id: "price_fr_standard" },
+      ph: { price: "₱899", price_id: "price_ph_standard" },
     },
   },
   topup: {
@@ -66,6 +68,8 @@ export const PACKS: Record<string, QuestionPack> = {
       ca: { price: "C$8.99", price_id: "price_1TCxyyFFogsDQVs4XlzjR3xR" },
       bd: { price: "৳499", price_id: "price_1TCxyyFFogsDQVs4AemajlYo" },
       lk: { price: "LKR 1,499", price_id: "price_1TCxz0FFogsDQVs4bwezp7QL" },
+      fr: { price: "€4.99", price_id: "price_fr_topup" },
+      ph: { price: "₱299", price_id: "price_ph_topup" },
     },
   },
 } as const;
@@ -108,6 +112,8 @@ export const regionLabels: Record<RegionKey, string> = {
   ca: "🇨🇦 Canada",
   bd: "🇧🇩 Bangladesh",
   lk: "🇱🇰 Sri Lanka",
+  fr: "🇫🇷 France",
+  ph: "🇵🇭 Philippines",
 };
 
 /** Free tier: questions per subject before paywall */
