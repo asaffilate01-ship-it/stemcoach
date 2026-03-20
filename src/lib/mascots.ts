@@ -227,7 +227,12 @@ export function guessMascotFromText(text: string): MascotInfo {
   if (lower.includes("chem") || lower.includes("reaction") || lower.includes("element")) return getMascot("chemistry");
   if (lower.includes("bio") || lower.includes("cell") || lower.includes("organism")) return getMascot("biology");
   if (lower.includes("code") || lower.includes("comput") || lower.includes("program")) return getMascot("computer-science");
-  if (lower.includes("ielts") || lower.includes("english") || lower.includes("language")) return getMascot("ielts");
+  if (lower.includes("ielts") || lower.includes("language")) return getMascot("ielts");
   if (lower.includes("celta") || lower.includes("teach")) return getMascot("celta");
+  if (lower.includes("econ") || lower.includes("market") || lower.includes("supply")) return getMascot("economics");
+  if (lower.includes("litera") || lower.includes("english") || lower.includes("poetry") || lower.includes("novel")) return getMascot("english-literature");
+  if (lower.includes("psych") || lower.includes("behav") || lower.includes("mental")) return getMascot("psychology");
+  if (lower.includes("geog") || lower.includes("climate") || lower.includes("continent")) return getMascot("geography");
+  if (lower.includes("business") || lower.includes("entrepreneur") || lower.includes("market")) return getMascot("business-studies");
   return getCoachStem();
 }
