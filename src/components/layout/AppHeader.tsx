@@ -162,6 +162,8 @@ export function AppHeader() {
 
         {/* Right actions */}
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Language selector */}
+          <LanguageSelector />
           <button
             onClick={toggleTheme}
             className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors sm:p-2"
