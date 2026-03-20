@@ -4,6 +4,7 @@ import { Trophy, Search, Sparkles, ArrowRight, GraduationCap, Clock, Target, Boo
 import { Button } from "@/components/ui/button";
 import { subjects } from "@/data/questions";
 import { mockExamTemplates, examBoardGroups, type MockExamTemplate } from "@/data/mockExamTemplates";
+import { getMascot } from "@/lib/mascots";
 
 interface ExamBrowseProps {
   onSelectTemplate: (template: MockExamTemplate) => void;
