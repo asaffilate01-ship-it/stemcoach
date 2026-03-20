@@ -201,7 +201,7 @@ export default function Analytics() {
               {/* Subject Cards */}
               <div className="space-y-4 lg:col-span-1">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <BookOpen className="h-4 w-4 text-primary" /> By Subject
+                  <Icon3D icon={BookOpen} variant="primary" size="sm" /> By Subject
                 </h3>
                 {subjectBreakdowns.map((s, i) => (
                   <motion.button
