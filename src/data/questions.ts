@@ -1,6 +1,6 @@
 export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
-export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies";
+export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies" | "french" | "german";
 
 export interface Question {
   id: string;
@@ -137,6 +137,22 @@ export const subjects: SubjectInfo[] = [
     questionCount: 50000,
     topics: ["Language Analysis", "Teaching Methodology", "Classroom Management", "Lesson Planning", "Phonology", "Grammar Teaching", "Skills Teaching", "Error Correction"],
   },
+  {
+    id: "french",
+    name: "Français",
+    icon: "🇫🇷",
+    color: "220 70% 45%",
+    questionCount: 100000,
+    topics: ["Grammaire", "Conjugaison", "Compréhension écrite", "Expression écrite", "Littérature française", "Commentaire de texte", "Dissertation", "Oral"],
+  },
+  {
+    id: "german",
+    name: "Deutsch",
+    icon: "🇩🇪",
+    color: "0 0% 20%",
+    questionCount: 100000,
+    topics: ["Grammatik", "Leseverstehen", "Schriftlicher Ausdruck", "Textanalyse", "Deutsche Literatur", "Erörterung", "Hörverständnis", "Mündliche Prüfung"],
+  },
 ];
 
 export const curricula = [
@@ -215,12 +231,16 @@ export const curricula = [
   { id: "uae-moe-11", label: "UAE MoE Grade 11", country: "🇦🇪", boards: ["UAE MoE"] },
   { id: "uae-moe-12", label: "UAE MoE Grade 12 (Thanawiya)", country: "🇦🇪", boards: ["UAE MoE"] },
   { id: "uae-emsat", label: "EmSAT (UAE Standard Test)", country: "🇦🇪", boards: ["EmSAT"] },
-  // ─── France ───
+  // ─── France (16–19 + University) ───
   { id: "fr-seconde", label: "Seconde (Year 10)", country: "🇫🇷", boards: ["Éducation Nationale"] },
   { id: "fr-premiere", label: "Première (Year 11)", country: "🇫🇷", boards: ["Éducation Nationale"] },
   { id: "fr-bac-general", label: "Baccalauréat Général", country: "🇫🇷", boards: ["Éducation Nationale"] },
   { id: "fr-bac-techno", label: "Baccalauréat Technologique", country: "🇫🇷", boards: ["Éducation Nationale"] },
   { id: "fr-bac-pro", label: "Baccalauréat Professionnel", country: "🇫🇷", boards: ["Éducation Nationale"] },
+  { id: "fr-bts", label: "BTS (Brevet de Technicien Supérieur)", country: "🇫🇷", boards: ["Éducation Nationale", "Rectorat"] },
+  { id: "fr-cpge", label: "CPGE (Classes Préparatoires)", country: "🇫🇷", boards: ["Concours CCP", "Concours Mines-Ponts", "Concours X-ENS", "Concours Centrale-Supélec", "BCE", "Ecricome"] },
+  { id: "fr-dut-but", label: "BUT (Bachelor Universitaire de Technologie)", country: "🇫🇷", boards: ["IUT / Éducation Nationale"] },
+  { id: "uni-fr", label: "Université française (Licence / Master)", country: "🇫🇷", boards: ["Université de Paris", "Sorbonne Université", "Université Lyon", "Université Toulouse", "Université Bordeaux", "Université Strasbourg", "Université Aix-Marseille", "Grande École"] },
   // ─── Philippines ───
   { id: "ph-grade10", label: "DepEd Grade 10", country: "🇵🇭", boards: ["DepEd Philippines"] },
   { id: "ph-grade11", label: "DepEd Grade 11 (SHS)", country: "🇵🇭", boards: ["DepEd Philippines"] },
@@ -228,11 +248,13 @@ export const curricula = [
   { id: "ph-stem", label: "SHS STEM Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
   { id: "ph-abm", label: "SHS ABM Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
   { id: "ph-humss", label: "SHS HUMSS Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
-  // ─── Germany ───
+  // ─── Germany (16–19 + University) ───
   { id: "de-mittlerer", label: "Mittlerer Schulabschluss (Klasse 10)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
   { id: "de-oberstufe", label: "Gymnasiale Oberstufe (Klasse 11–12)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
-  { id: "de-abitur", label: "Abitur (Allgemeine Hochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
-  { id: "de-fachabitur", label: "Fachabitur (Fachhochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
+  { id: "de-abitur", label: "Abitur (Allgemeine Hochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz", "Bayern Abitur", "NRW Abitur", "Baden-Württemberg Abitur", "Niedersachsen Abitur", "Hessen Abitur", "Sachsen Abitur", "Berlin Abitur", "Hamburg Abitur"] },
+  { id: "de-fachabitur", label: "Fachabitur (Fachhochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz", "FOS Bayern", "FOS NRW", "FOS Hessen"] },
+  { id: "de-berufliches-gym", label: "Berufliches Gymnasium", country: "🇩🇪", boards: ["Kultusministerkonferenz", "BG Baden-Württemberg", "BG NRW"] },
+  { id: "uni-de", label: "Deutsche Hochschule (Bachelor / Master)", country: "🇩🇪", boards: ["TU9 Universitäten", "Universität München (LMU)", "TU München", "Universität Heidelberg", "Humboldt-Universität Berlin", "RWTH Aachen", "Universität Freiburg", "Fachhochschule"] },
   // ─── Language Certs ───
   { id: "ielts-academic", label: "IELTS Academic", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
   { id: "ielts-general", label: "IELTS General Training", country: "🌍", boards: ["British Council", "IDP", "Cambridge"] },
