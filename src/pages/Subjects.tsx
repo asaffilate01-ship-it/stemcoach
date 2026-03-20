@@ -7,6 +7,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { subjects, curricula, difficultyLabels, type Difficulty } from "@/data/questions";
 import { ChevronRight, ChevronDown, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X, Check, Globe, Lightbulb } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getMascot } from "@/lib/mascots";
