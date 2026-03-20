@@ -313,7 +313,7 @@ export default function Analytics() {
                 {weakTopics.length > 0 && (
                   <div className="stem-card rounded-xl p-6">
                     <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                      <AlertTriangle className="h-4 w-4 text-warning" /> Focus Areas
+                      <Icon3D icon={AlertTriangle} variant="warning" size="sm" /> Focus Areas
                     </h3>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {weakTopics.map((t) => (
