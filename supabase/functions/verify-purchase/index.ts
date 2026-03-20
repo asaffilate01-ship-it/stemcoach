@@ -20,6 +20,8 @@ const VALID_PRICES: Record<string, { questions: number; mock_exams: number; pack
   "price_1TCxywFFogsDQVs4rI3DVCmN": { questions: 5000, mock_exams: 20, pack: "standard" }, // CAD
   "price_1TCxyyFFogsDQVs43c1p47T9": { questions: 5000, mock_exams: 20, pack: "standard" }, // BDT
   "price_1TCxyzFFogsDQVs4r94WHEqY": { questions: 5000, mock_exams: 20, pack: "standard" }, // LKR
+  "price_fr_standard": { questions: 5000, mock_exams: 20, pack: "standard" }, // EUR (France)
+  "price_ph_standard": { questions: 5000, mock_exams: 20, pack: "standard" }, // PHP (Philippines)
   // Top-up pack — 1,000 questions + 5 mock exams
   "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 1000, mock_exams: 5, pack: "topup" }, // GBP
   "price_1TCZCNFFogsDQVs4dhoer5AL": { questions: 1000, mock_exams: 5, pack: "topup" }, // USD
@@ -31,6 +33,8 @@ const VALID_PRICES: Record<string, { questions: number; mock_exams: number; pack
   "price_1TCxyyFFogsDQVs4XlzjR3xR": { questions: 1000, mock_exams: 5, pack: "topup" }, // CAD
   "price_1TCxyyFFogsDQVs4AemajlYo": { questions: 1000, mock_exams: 5, pack: "topup" }, // BDT
   "price_1TCxz0FFogsDQVs4bwezp7QL": { questions: 1000, mock_exams: 5, pack: "topup" }, // LKR
+  "price_fr_topup": { questions: 1000, mock_exams: 5, pack: "topup" }, // EUR (France)
+  "price_ph_topup": { questions: 1000, mock_exams: 5, pack: "topup" }, // PHP (Philippines)
 };
 
 function currencyToRegion(currency: string | null): string {
