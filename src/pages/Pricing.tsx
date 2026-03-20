@@ -184,7 +184,7 @@ export default function Pricing() {
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Pay once</strong> → Access your questions & results forever</span>
+                  <span><strong className="text-foreground">No subscription</strong> → Buy credits, keep them forever, top up anytime</span>
                 </div>
               </div>
             </motion.div>
