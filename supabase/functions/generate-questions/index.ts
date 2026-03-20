@@ -83,6 +83,8 @@ serve(async (req) => {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
+      const { instruction: langInstruction } = getLanguageForCurriculum(curriculum);
+
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
@@ -93,7 +95,8 @@ Create ${count} HIGH QUALITY, EXAM-ACCURATE questions.
 Subject: ${subject}, Topic: ${topic}, Subtopic: ${subtopic}
 Difficulty: ${difficulty}/5, Boards: ${boards?.join(", ") || "All"}
 Type: ${question_type} - ${typeInstructions[question_type] || typeInstructions.mcq}
-CRITICAL: All answers must be FACTUALLY CORRECT.`,
+CRITICAL: All answers must be FACTUALLY CORRECT.
+${langInstruction}`,
           },
           { role: "user", content: `Generate ${count} ${question_type} questions for ${topic} > ${subtopic} at difficulty ${difficulty}.` },
         ],
