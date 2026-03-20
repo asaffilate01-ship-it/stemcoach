@@ -283,7 +283,7 @@ export default function Analytics() {
                     className="stem-card rounded-xl p-6"
                   >
                     <h3 className="mb-4 flex items-center gap-2 font-semibold capitalize">
-                      <Target className="h-4 w-4 text-primary" /> {selected.subject} — Topics
+                      <Icon3D icon={Target} variant="primary" size="sm" /> {selected.subject} — Topics
                     </h3>
                     <div className="space-y-3">
                       {selected.topics.map((t) => (
