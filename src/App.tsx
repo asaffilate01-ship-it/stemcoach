@@ -136,7 +136,7 @@ const App = () => (
                     {/* Role-protected */}
                     <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><P><TeacherDashboard /></P></ProtectedRoute>} />
                     <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><P><ParentDashboard /></P></ProtectedRoute>} />
-                    <Route path="/institution" element={<ProtectedRoute requiredRole="admin"><P><TenantAdmin /></P></ProtectedRoute>} />
+                    <Route path="/institution" element={<ProtectedRoute><P><TenantAdmin /></P></ProtectedRoute>} />
                     <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><P><AdminGenerate /></P></ProtectedRoute>} />
                     <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><P><AdminQuestions /></P></ProtectedRoute>} />
 
