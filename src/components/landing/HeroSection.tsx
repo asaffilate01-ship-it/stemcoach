@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Trophy, Users, Sparkles, Play, CheckCircle2 } fro
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroImg from "@/assets/hero-stemsquad.png";
+import stemsquadImg from "@/assets/stemsquad.png";
 
 const stats = [
   { label: "Questions", value: "1M+", icon: BookOpen },
