@@ -247,10 +247,9 @@ export default function Practice() {
         const { data, error } = await supabase.functions.invoke("ai-tutor", {
           body: {
             action: "grade-essay",
+            question_id: question.id,
             question_text: question.question_text,
             student_answer: essayAnswer,
-            mark_scheme: question.mark_scheme || question.worked_solution,
-            model_answer: question.model_answer || question.correct_answer,
             max_marks: question.max_marks || question.points,
             subject: question.subject,
             topic: question.topic,
