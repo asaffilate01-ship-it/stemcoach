@@ -6,7 +6,7 @@ import heroImg from "@/assets/hero-stemsquad.png";
 import stemsquadImg from "@/assets/stemsquad.png";
 
 const stats = [
-  { label: "Questions", value: "1M+", icon: BookOpen },
+  { label: "Questions", value: "2M+", icon: BookOpen },
   { label: "Curricula", value: "30+", icon: Users },
   { label: "Pass Rate", value: "94%", icon: Trophy },
 ];
