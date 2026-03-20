@@ -9,20 +9,29 @@ import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
 import { useNavigate } from "react-router-dom";
+import { getMascot, getCoachStem } from "@/lib/mascots";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
-const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Biology", "IELTS", "CELTA"];
+const SUBJECT_IDS = ["mathematics", "physics", "chemistry", "biology", "ielts", "celta"];
+const SUBJECT_LABELS: Record<string, string> = {
+  mathematics: "Mathematics",
+  physics: "Physics",
+  chemistry: "Chemistry",
+  biology: "Biology",
+  ielts: "IELTS",
+  celta: "CELTA",
+};
 
 const QUICK_PROMPTS: Record<string, string[]> = {
-  Mathematics: ["Explain the quadratic formula", "How do I solve simultaneous equations?", "What is differentiation?"],
-  Physics: ["Explain Newton's 3 laws", "What is Ohm's law?", "How does radioactive decay work?"],
-  Chemistry: ["What is ionic bonding?", "Explain Le Chatelier's principle", "What are moles in chemistry?"],
-  Biology: ["Explain mitosis vs meiosis", "How does photosynthesis work?", "What is natural selection?"],
-  IELTS: ["Tips for Writing Task 2", "How to improve my speaking score?", "Common grammar mistakes to avoid"],
-  CELTA: ["What is TTT vs STT?", "How to write a lesson plan?", "Explain concept checking questions"],
+  mathematics: ["Explain the quadratic formula", "How do I solve simultaneous equations?", "What is differentiation?"],
+  physics: ["Explain Newton's 3 laws", "What is Ohm's law?", "How does radioactive decay work?"],
+  chemistry: ["What is ionic bonding?", "Explain Le Chatelier's principle", "What are moles in chemistry?"],
+  biology: ["Explain mitosis vs meiosis", "How does photosynthesis work?", "What is natural selection?"],
+  ielts: ["Tips for Writing Task 2", "How to improve my speaking score?", "Common grammar mistakes to avoid"],
+  celta: ["What is TTT vs STT?", "How to write a lesson plan?", "Explain concept checking questions"],
 };
 
 export default function AITutor() {
@@ -33,8 +42,11 @@ export default function AITutor() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [subject, setSubject] = useState("Mathematics");
+  const [subjectId, setSubjectId] = useState("mathematics");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const mascot = getMascot(subjectId);
+  const coach = getCoachStem();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -68,18 +80,14 @@ export default function AITutor() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages, subject, curriculum: "International" }),
+        body: JSON.stringify({ messages: allMessages, subject: SUBJECT_LABELS[subjectId], curriculum: "International" }),
       });
 
       if (!resp.ok || !resp.body) {
         const errData = await resp.json().catch(() => ({}));
-        if (resp.status === 429) {
-          upsertAssistant("⏳ Rate limit reached. Please wait a moment and try again.");
-        } else if (resp.status === 402) {
-          upsertAssistant("💳 Coaching credits exhausted. Please contact support.");
-        } else {
-          upsertAssistant(errData.error || "Sorry, something went wrong. Please try again.");
-        }
+        if (resp.status === 429) upsertAssistant("⏳ Rate limit reached. Please wait a moment and try again.");
+        else if (resp.status === 402) upsertAssistant("💳 Coaching credits exhausted. Please contact support.");
+        else upsertAssistant(errData.error || "Sorry, something went wrong. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -92,7 +100,6 @@ export default function AITutor() {
         const { done, value } = await reader.read();
         if (done) break;
         textBuffer += decoder.decode(value, { stream: true });
-
         let newlineIndex: number;
         while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
           let line = textBuffer.slice(0, newlineIndex);
@@ -125,8 +132,8 @@ export default function AITutor() {
         <AppHeader />
         <PageTransition>
           <main className="container mx-auto flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-              <Lock className="h-8 w-8 text-primary" />
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-primary/10">
+              <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">STEMcoach Coaching — Premium Feature</h2>
             <p className="mb-6 max-w-md text-muted-foreground">
@@ -146,20 +153,27 @@ export default function AITutor() {
       <AppHeader />
       <PageTransition>
         <main className="container mx-auto flex flex-1 flex-col px-4 py-4">
-          {/* Subject selector */}
+          {/* Subject selector with mascot avatars */}
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Subject:</span>
-            {SUBJECTS.map(s => (
-              <button
-                key={s}
-                onClick={() => { setSubject(s); if (messages.length === 0) setMessages([]); }}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  subject === s ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
+            <span className="text-sm font-medium text-muted-foreground">Tutor:</span>
+            {SUBJECT_IDS.map(id => {
+              const m = getMascot(id);
+              const isActive = subjectId === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => { setSubjectId(id); if (messages.length === 0) setMessages([]); }}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <img src={m.image} alt={m.name} className="h-5 w-5 rounded-full object-cover" />
+                  {m.name}
+                </button>
+              );
+            })}
             {messages.length > 0 && (
               <button
                 onClick={() => setMessages([])}
@@ -181,17 +195,18 @@ export default function AITutor() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
-                    <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
+                  <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+                    <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
                   </div>
-                  <h3 className="text-lg font-semibold">STEMcoach</h3>
-                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                    Ask me anything about {subject}. I'll explain concepts, solve problems, and give you exam tips — like a private tutor.
+                  <h3 className="text-lg font-semibold">{mascot.name}</h3>
+                  <p className="mt-1 text-xs italic text-muted-foreground">"{mascot.personality}"</p>
+                  <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                    Ask me anything about {SUBJECT_LABELS[subjectId]}. I'll explain concepts, solve problems, and give you exam tips — like a private tutor.
                   </p>
 
                   {/* Quick prompts */}
                   <div className="mt-6 flex flex-wrap justify-center gap-2">
-                    {(QUICK_PROMPTS[subject] || []).map(prompt => (
+                    {(QUICK_PROMPTS[subjectId] || []).map(prompt => (
                       <button
                         key={prompt}
                         onClick={() => send(prompt)}
@@ -216,7 +231,7 @@ export default function AITutor() {
               >
                 {msg.role === "assistant" && (
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg overflow-hidden">
-                    <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
+                    <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
                   </div>
                 )}
                 <div
@@ -238,7 +253,7 @@ export default function AITutor() {
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
-                  <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-full w-full object-cover" />
+                  <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
                 </div>
                 <div className="rounded-xl bg-muted px-4 py-2.5">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -253,7 +268,7 @@ export default function AITutor() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && send()}
-              placeholder={`Ask about ${subject}...`}
+              placeholder={`Ask ${mascot.name} about ${SUBJECT_LABELS[subjectId]}...`}
               className="flex-1 rounded-xl border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               disabled={isLoading}
             />
