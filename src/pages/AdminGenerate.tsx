@@ -250,7 +250,7 @@ export default function AdminGenerate() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 stem-card rounded-xl p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold flex items-center gap-2">
-              <Rocket className="h-4 w-4 text-primary" /> Progress to 1,000,000 Questions
+              <Rocket className="h-4 w-4 text-primary" /> Progress to 2,000,000 Questions
             </h3>
             <span className="text-sm font-bold text-primary">{progressPct.toFixed(1)}%</span>
           </div>
