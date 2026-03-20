@@ -120,63 +120,9 @@ export function useGameStats() {
 
   const recordPerfectScore = useCallback(async () => {
     if (!user) return;
-    await supabase
-      .from("user_stats")
-      .update({ perfect_scores: stats.perfectScores + 1 })
-      .eq("user_id", user.id);
+    await supabase.rpc("record_perfect_score", { _user_id: user.id });
     setStats(prev => ({ ...prev, perfectScores: prev.perfectScores + 1 }));
-  }, [user, stats.perfectScores]);
-
-  const checkBadges = async (currentStats: any) => {
-    if (!user) return [];
-    const { data: allBadges } = await supabase.from("badges").select("*");
-    const { data: earnedBadges } = await supabase
-      .from("user_badges")
-      .select("badge_id")
-      .eq("user_id", user.id);
-
-    const earnedIds = new Set(earnedBadges?.map(b => b.badge_id) || []);
-    const newlyEarned: EarnedBadge[] = [];
-
-    for (const badge of allBadges || []) {
-      if (earnedIds.has(badge.id)) continue;
-
-      let earned = false;
-      switch (badge.requirement_type) {
-        case "questions_answered":
-          earned = currentStats.total_questions >= badge.requirement_value;
-          break;
-        case "streak":
-          earned = currentStats.streak >= badge.requirement_value;
-          break;
-        case "accuracy":
-          const acc = currentStats.total_questions > 0
-            ? (currentStats.correct_answers / currentStats.total_questions) * 100
-            : 0;
-          earned = acc >= badge.requirement_value && currentStats.total_questions >= 10;
-          break;
-        case "perfect_score":
-          earned = currentStats.perfect_scores >= badge.requirement_value;
-          break;
-        case "xp":
-          earned = currentStats.xp >= badge.requirement_value;
-          break;
-      }
-
-      if (earned) {
-        await supabase.from("user_badges").insert({ user_id: user!.id, badge_id: badge.id });
-        newlyEarned.push({
-          id: badge.id,
-          name: badge.name,
-          icon: badge.icon,
-          description: badge.description,
-          earnedAt: new Date().toISOString(),
-        });
-      }
-    }
-
-    return newlyEarned;
-  };
+  }, [user]);
 
   const dismissBadge = useCallback((id: string) => {
     setNewBadges(prev => prev.filter(b => b.id !== id));
