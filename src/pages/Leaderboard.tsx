@@ -114,6 +114,12 @@ export default function Leaderboard() {
 
   const medals = ["🥇", "🥈", "🥉"];
 
+  // Pick a random cheerleader mascot for the top section
+  const squadMembers = getSquadMembers();
+  const cheerMascot = squadMembers.length > 0
+    ? squadMembers[Math.floor(Date.now() / 86400000) % squadMembers.length]
+    : getCoachStem();
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
