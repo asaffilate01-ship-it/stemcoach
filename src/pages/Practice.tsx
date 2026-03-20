@@ -767,14 +767,14 @@ export default function Practice() {
             )}
 
             {/* Tuition Tips */}
-            {showTips && question.tuition_tips?.length > 0 && (
+            {showTips && revealedAnswer?.tuition_tips?.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
                 <div className="rounded-2xl border-l-4 border-l-primary bg-primary/5 p-5">
                   <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
                     <Lightbulb className="h-4 w-4" /> Tuition Tips
                   </div>
                   <ul className="space-y-2">
-                    {question.tuition_tips.map((tip, i) => (
+                    {revealedAnswer.tuition_tips.map((tip: string, i: number) => (
                       <li key={i} className="text-sm leading-relaxed">• {tip}</li>
                     ))}
                   </ul>
