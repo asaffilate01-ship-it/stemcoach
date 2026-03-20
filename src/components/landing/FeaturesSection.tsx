@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { BookOpen, Brain, Clock, GraduationCap, LineChart, Shield, Users, Zap } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import stemsquadImg from "@/assets/stemsquad.png";
 
 const features = [
@@ -7,49 +8,49 @@ const features = [
     icon: BookOpen,
     title: "Practice Mode",
     description: "Unlimited topic-based questions with instant feedback, step-by-step worked solutions, and tuition tips from expert tutors.",
-    iconBg: "bg-primary/8 text-primary",
+    variant: "primary" as const,
   },
   {
     icon: Clock,
     title: "Mock Exams",
     description: "Timed exam simulations matching real paper formats — MCQ, numerical, structured, and essay. Get certified on completion.",
-    iconBg: "bg-warning/8 text-warning",
+    variant: "warning" as const,
   },
   {
     icon: Brain,
     title: "STEMcoach Coaching",
     description: "Chat with STEMcoach — get step-by-step explanations, problem solving, and personalised coaching that adapts to your learning style.",
-    iconBg: "bg-[hsl(258_60%_52%/0.08)] text-[hsl(258_60%_52%)]",
+    variant: "purple" as const,
   },
   {
     icon: GraduationCap,
     title: "30+ Curricula",
     description: "GCSE, A-Level, IB, AP, JEE, NEET, FSC, IELTS, CELTA — every major exam board in 5 countries.",
-    iconBg: "bg-success/8 text-success",
+    variant: "success" as const,
   },
   {
     icon: LineChart,
     title: "Smart Analytics",
     description: "Track accuracy, exam readiness scores, weak topics, study streaks, and XP progress in real time.",
-    iconBg: "bg-primary/8 text-primary",
+    variant: "primary" as const,
   },
   {
     icon: Shield,
     title: "White-Label Portal",
     description: "Colleges and tuition centres get branded portals with class management, assignments, and parent monitoring.",
-    iconBg: "bg-[hsl(258_60%_52%/0.08)] text-[hsl(258_60%_52%)]",
+    variant: "purple" as const,
   },
   {
     icon: Users,
     title: "Teacher Dashboard",
     description: "Create classes, set assignments, track student progress, and manage live classroom sessions.",
-    iconBg: "bg-warning/8 text-warning",
+    variant: "warning" as const,
   },
   {
     icon: Zap,
     title: "Gamified Learning",
     description: "Earn XP, unlock badges, climb leaderboards, and maintain streaks to stay motivated every day.",
-    iconBg: "bg-success/8 text-success",
+    variant: "success" as const,
   },
 ];
 
@@ -113,8 +114,8 @@ export function FeaturesSection() {
               whileHover={{ y: -4, transition: { duration: 0.25 } }}
               className="group stem-card p-5 sm:p-6"
             >
-              <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${feature.iconBg} transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
-                <feature.icon className="h-5 w-5" />
+              <div className="mb-4">
+                <Icon3D icon={feature.icon} variant={feature.variant} size="lg" />
               </div>
               <h3 className="mb-2 font-bold text-foreground">{feature.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
