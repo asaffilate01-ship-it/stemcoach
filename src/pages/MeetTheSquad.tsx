@@ -57,9 +57,14 @@ export default function MeetTheSquad() {
                 <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
               </div>
               <div className="text-center md:text-left">
-                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">Squad Leader</div>
+                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">Squad Leader · {coach.personality}</div>
                 <h2 className="mb-2 text-2xl font-extrabold">{coach.name} {coach.emoji}</h2>
-                <p className="mb-3 text-sm italic text-muted-foreground">"{coach.personality}"</p>
+                <p className="mb-2 text-sm italic text-primary/80">"{coach.catchphrase}"</p>
+                <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                  {coach.traits.map(t => (
+                    <span key={t} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold text-primary">{t}</span>
+                  ))}
+                </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">{coach.bio}</p>
               </div>
             </div>
@@ -81,16 +86,23 @@ export default function MeetTheSquad() {
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-lg font-bold">{member.name} {member.emoji}</h3>
-                    <p className="text-xs text-muted-foreground">{member.personality}</p>
+                    <p className="text-xs font-medium text-primary/70">{member.personality}</p>
                   </div>
                 </div>
                 <div className="border-t border-border/30 px-5 py-4">
-                  <p className="mb-4 text-xs leading-relaxed text-muted-foreground">{member.bio}</p>
+                  <p className="mb-3 text-xs leading-relaxed text-muted-foreground">{member.bio}</p>
 
-                  {/* Top tip */}
+                  {/* Traits */}
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {member.traits.map(t => (
+                      <span key={t} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{t}</span>
+                    ))}
+                  </div>
+
+                  {/* Catchphrase */}
                   <div className="mb-3 flex items-start gap-2 rounded-xl bg-primary/5 px-3 py-2.5">
                     <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                    <p className="text-[11px] font-medium text-primary">{member.tips[0]}</p>
+                    <p className="text-[11px] font-medium italic text-primary">"{member.catchphrase}"</p>
                   </div>
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
