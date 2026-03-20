@@ -11,7 +11,7 @@ const squad = [
 
 export function StemSquadSection() {
   return (
-    <section className="relative overflow-hidden py-20 md:py-28">
+    <section className="relative overflow-hidden py-10 md:py-14">
       {/* Background accents */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,hsl(var(--primary)/0.06),transparent)]" />
 

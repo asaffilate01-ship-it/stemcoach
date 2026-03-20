@@ -8,7 +8,7 @@ export function CTASection() {
   const navigate = useNavigate();
 
   return (
-    <section className="relative overflow-hidden border-t border-border/30 py-20 md:py-28">
+    <section className="relative overflow-hidden border-t border-border/30 py-10 md:py-14">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-[hsl(258_60%_52%/0.03)]" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-primary/[0.03] blur-3xl" />
       <div className="container relative mx-auto px-4">
