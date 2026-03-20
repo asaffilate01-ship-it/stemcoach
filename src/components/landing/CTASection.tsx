@@ -38,6 +38,8 @@ export function CTASection() {
                   { src: "/assets/psyche-cutout.png", name: "Pysche", delay: 0.2 },
                   { src: "/assets/geo.png", name: "Geo", delay: 0.25 },
                   { src: "/assets/bizpro.png", name: "BizPro", delay: 0.3 },
+                  { src: "/assets/francois.png", name: "François", delay: 0.15 },
+                  { src: "/assets/hans.png", name: "Hans", delay: 0.2 },
                   { src: "/assets/coach-stem-cutout.png", name: "Coach Stem", delay: 0.05 },
                 ].map((m) => (
                   <motion.div
