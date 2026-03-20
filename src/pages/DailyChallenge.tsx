@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Clock, Trophy, Zap, Star, Users, Target, ArrowRight } from "lucide-react";
+import { Icon3D } from "@/components/ui/icon-3d";
 import { motion, AnimatePresence } from "framer-motion";
 
 const challengeSubjects = [
