@@ -41,7 +41,7 @@ const navItems: NavItem[] = [
   { to: "/certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social" },
   { to: "/study-groups", label: "Study Groups", icon: Users, group: "social" },
   { to: "/my-classes", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes" },
-  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes" },
+  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true },
   { to: "/formulas", label: "Formula Sheets", icon: ScrollText, group: "resources" },
   { to: "/blog", label: "Blog", icon: FileText, group: "resources" },
   { to: "/parent", label: "Parent Portal", icon: Eye, roles: ["parent"] },
