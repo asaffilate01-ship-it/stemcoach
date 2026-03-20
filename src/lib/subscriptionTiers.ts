@@ -1,4 +1,4 @@
-export type RegionKey = "uk" | "us" | "ae" | "in" | "pk" | "au" | "nz" | "ca" | "bd" | "lk";
+export type RegionKey = "uk" | "us" | "ae" | "in" | "pk" | "au" | "nz" | "ca" | "bd" | "lk" | "fr" | "ph";
 
 export interface RegionalPrice {
   price: string;
