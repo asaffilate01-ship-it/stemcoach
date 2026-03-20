@@ -1,17 +1,24 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import homeIcon from "@/assets/icons/home-3d.png";
-import subjectsIcon from "@/assets/icons/subjects-3d.png";
-import examsIcon from "@/assets/icons/exams-3d.png";
-import dashboardIcon from "@/assets/icons/dashboard-3d.png";
+import { Home, BookOpen, Bot, GraduationCap, LayoutDashboard } from "lucide-react";
+import { Icon3D, type Icon3DVariant } from "@/components/ui/icon-3d";
+import type { LucideIcon } from "lucide-react";
 
-const items = [
-  { to: "/", label: "Home", image: homeIcon },
-  { to: "/subjects", label: "Subjects", image: subjectsIcon },
-  { to: "/ai-tutor", label: "STEMcoach", image: "/assets/coach-stem.png" },
-  { to: "/mock-exam", label: "Exam", image: examsIcon },
-  { to: "/dashboard", label: "Dashboard", image: dashboardIcon, auth: true },
+interface NavItem {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  variant: Icon3DVariant;
+  auth?: boolean;
+}
+
+const items: NavItem[] = [
+  { to: "/", label: "Home", icon: Home, variant: "primary" },
+  { to: "/subjects", label: "Subjects", icon: BookOpen, variant: "success" },
+  { to: "/ai-tutor", label: "STEMcoach", icon: Bot, variant: "purple" },
+  { to: "/mock-exam", label: "Exam", icon: GraduationCap, variant: "warning" },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, variant: "accent", auth: true },
 ];
 
 export function MobileBottomNav() {
@@ -29,22 +36,16 @@ export function MobileBottomNav() {
             <Link
               key={item.to}
               to={item.to}
-              className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-semibold transition-all active:scale-95"
+              className="group relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-semibold transition-all active:scale-95"
             >
-              <div className={`relative flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-300 ${
-                active ? "scale-110" : ""
+              <div className={`relative flex items-center justify-center transition-all duration-300 ${
+                active ? "scale-110" : "opacity-60"
               }`}>
-                <img
-                  src={item.image}
-                  alt={item.label}
-                  className={`h-7 w-7 object-contain transition-all duration-300 ${
-                    active ? "scale-110 drop-shadow-md" : "opacity-60 grayscale-[30%]"
-                  }`}
-                />
+                <Icon3D icon={item.icon} variant={item.variant} size="sm" />
                 {active && (
                   <motion.div
                     layoutId="bottomNavIndicator"
-                    className="absolute -bottom-1 h-[3px] w-4 rounded-full bg-primary"
+                    className="absolute -bottom-1.5 h-[3px] w-4 rounded-full bg-primary"
                     transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   />
                 )}
