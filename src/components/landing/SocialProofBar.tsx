@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 
 const counters = [
-  { value: "25,000+", label: "Active Students" },
-  { value: "200+", label: "Partner Schools" },
-  { value: "5", label: "Countries" },
-  { value: "4.9★", label: "App Rating" },
+  { value: "1M+", label: "Exam Questions" },
+  { value: "35+", label: "Curricula Covered" },
+  { value: "7", label: "Subjects" },
+  { value: "6", label: "AI Mascot Tutors" },
 ];
 
 const trustedBy = [
