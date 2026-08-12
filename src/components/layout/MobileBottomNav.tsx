@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { Home, BookOpen, GraduationCap, LayoutDashboard } from "lucide-react";
@@ -7,7 +8,7 @@ import type { LucideIcon } from "lucide-react";
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: string;
   icon?: LucideIcon;
   image?: string;
   variant: Icon3DVariant;
@@ -15,16 +16,17 @@ interface NavItem {
 }
 
 const items: NavItem[] = [
-  { to: "/", label: "Home", icon: Home, variant: "primary" },
-  { to: "/subjects", label: "Subjects", icon: BookOpen, variant: "success" },
-  { to: "/ai-tutor", label: "STEMcoach", image: "/assets/coach-stem.png", variant: "purple" },
-  { to: "/mock-exam", label: "Exam", icon: GraduationCap, variant: "warning" },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, variant: "accent", auth: true },
+  { to: "/", labelKey: "nav.home", icon: Home, variant: "primary" },
+  { to: "/subjects", labelKey: "nav.subjects", icon: BookOpen, variant: "success" },
+  { to: "/ai-tutor", labelKey: "nav.aiTutor", image: "/assets/coach-stem.png", variant: "purple" },
+  { to: "/mock-exam", labelKey: "nav.mockExam", icon: GraduationCap, variant: "warning" },
+  { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard, variant: "accent", auth: true },
 ];
 
 export function MobileBottomNav() {
   const { pathname } = useLocation();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const visible = items.filter(i => !i.auth || user);
 
@@ -32,6 +34,7 @@ export function MobileBottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/15 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 lg:hidden safe-area-bottom">
       <div className="flex items-center justify-around px-2 py-1.5">
         {visible.map((item) => {
+          const label = t(item.labelKey);
           const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to));
           return (
             <Link
@@ -45,7 +48,7 @@ export function MobileBottomNav() {
                 {item.image ? (
                   <img
                     src={item.image}
-                    alt={item.label}
+                    alt={label}
                     className="h-8 w-8 rounded-xl object-cover shadow-md ring-1 ring-border/20"
                   />
                 ) : item.icon ? (
@@ -62,7 +65,7 @@ export function MobileBottomNav() {
               <span className={`transition-all duration-300 ${
                 active ? "text-primary font-bold" : "text-muted-foreground"
               }`}>
-                {item.label}
+                {label}
               </span>
             </Link>
           );
