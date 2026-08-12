@@ -24,7 +24,7 @@ const fr = {
     login: "Connexion",
     signup: "Inscription",
     logout: "Déconnexion",
-    aiTutor: "Tuteur IA",
+    aiTutor: "Clinique STEMcoach",
     liveClassroom: "Classe en direct",
     weakTopicDrill: "Points faibles",
     progressReports: "Rapports",

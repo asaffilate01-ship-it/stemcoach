@@ -24,7 +24,7 @@ const en = {
     login: "Login",
     signup: "Sign Up",
     logout: "Logout",
-    aiTutor: "AI Tutor",
+    aiTutor: "STEMcoach Clinic",
     liveClassroom: "Live Classroom",
     weakTopicDrill: "Weak Topic Drill",
     progressReports: "Progress Reports",
