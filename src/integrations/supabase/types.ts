@@ -1367,16 +1367,13 @@ export type Database = {
           _subject: string
         }
         Returns: {
-          correct_answer: string
           difficulty: number
-          explanation: string
           id: string
           options: Json
           points: number
           question_text: string
           subject: string
           topic: string
-          worked_solution: string
         }[]
       }
       grant_dev_quota: { Args: { _user_id: string }; Returns: undefined }
