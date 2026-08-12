@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-import { useDocumentTitle } from "@/hooks/useDocumentTitle";
   FileText, TrendingUp, Target, Calendar, Download,
   BookOpen, Clock, Flame, Zap, Star, ChevronRight, Trophy, Award,
 } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface DailyData {
   date: string;
