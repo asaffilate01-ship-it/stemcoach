@@ -61,53 +61,71 @@ export default function MockExam() {
     setSubmitting(true);
     setState("review");
 
-    if (!user) {
+    if (!user || questions.length === 0) {
       setSubmitting(false);
       return;
     }
 
-    const totalScore = questions.reduce(
-      (acc, q, i) => acc + (answers[i] === q.correct_answer ? 1 : 0),
-      0
-    );
-    const percent = Math.round((totalScore / questions.length) * 100);
+    const examName =
+      selectedTemplate?.name ||
+      subjects.find((s) => s.id === examSubject)?.name ||
+      examSubject;
 
-    const insertData = questions
-      .map((q, i) => ({ q, i }))
-      .filter(({ i }) => answers[i] !== undefined)
-      .map(({ q, i }) => ({
-        user_id: user.id,
-        question_id: q.id,
-        answer: answers[i],
-        correct: answers[i] === q.correct_answer,
-      }));
-
-    if (insertData.length > 0) {
-      await supabase.from("attempts").insert(insertData);
-    }
-
-    // Decrement mock exam quota
-    await incrementMockExam();
-
-    if (percent >= 60) {
-      const examName =
-        selectedTemplate?.name ||
-        subjects.find((s) => s.id === examSubject)?.name ||
-        examSubject;
-      await supabase.rpc("issue_certificate", {
-        _user_id: user.id,
-        _title: `${examName} — ${percent}%`,
-        _subject: selectedTemplate?.subject || examSubject,
-        _achievement_type: "mock_exam",
-        _score_percent: percent,
+    try {
+      const { data, error } = await supabase.functions.invoke("grade-mock-exam", {
+        body: {
+          submissions: questions.map((q, i) => ({
+            question_id: q.id,
+            answer: answers[i] ?? null,
+          })),
+          exam_name: examName,
+          subject: selectedTemplate?.subject || examSubject,
+        },
       });
+
+      if (error) throw error;
+
+      const results: Array<{
+        question_id: string;
+        correct_answer: string | null;
+        explanation: string | null;
+        worked_solution: string | null;
+      }> = data?.results ?? [];
+
+      const byId = new Map(results.map((r) => [r.question_id, r]));
+      setQuestions((prev) =>
+        prev.map((q) => {
+          const r = byId.get(q.id);
+          return r
+            ? {
+                ...q,
+                correct_answer: r.correct_answer ?? undefined,
+                explanation: r.explanation ?? undefined,
+                worked_solution: r.worked_solution ?? undefined,
+              }
+            : q;
+        })
+      );
+
+      // Keep the local quota display in sync (server already consumed the credit)
+      await refreshQuota();
+
+      if (data?.certificate_issued) {
+        toast({
+          title: "🏆 Certificate earned!",
+          description: `You scored ${data.percent}% — a certificate has been added to your profile.`,
+        });
+      }
+    } catch (e: any) {
       toast({
-        title: "🏆 Certificate earned!",
-        description: `You scored ${percent}% — a certificate has been added to your profile.`,
+        title: "Could not grade exam",
+        description: e?.message || "Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
-  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast, incrementMockExam]);
+  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast, refreshQuota]);
 
   useEffect(() => {
     if (state !== "active") return;
