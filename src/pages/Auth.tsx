@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Mail, Lock, User, ArrowRight, Sparkles, GraduationCap, Users, Eye } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 type Role = "student" | "teacher" | "parent";
 
@@ -17,6 +18,7 @@ const roleOptions: { key: Role; label: string; icon: typeof GraduationCap; desc:
 ];
 
 export default function Auth() {
+  useDocumentTitle("Sign In");
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

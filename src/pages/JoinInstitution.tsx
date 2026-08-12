@@ -9,8 +9,10 @@ import { Building2, ArrowRight, Search, Users, GraduationCap } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function JoinInstitution() {
+  useDocumentTitle("Join Your Institution");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

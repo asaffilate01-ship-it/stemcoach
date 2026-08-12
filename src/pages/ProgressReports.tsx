@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
   FileText, TrendingUp, Target, Calendar, Download,
   BookOpen, Clock, Flame, Zap, Star, ChevronRight, Trophy, Award,
 } from "lucide-react";
@@ -18,6 +19,7 @@ interface DailyData {
 }
 
 export default function ProgressReports() {
+  useDocumentTitle("Progress Reports");
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [attempts, setAttempts] = useState<any[]>([]);

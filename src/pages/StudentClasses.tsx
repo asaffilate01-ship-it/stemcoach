@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function StudentClasses() {
+  useDocumentTitle("My Classes");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();

@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Home, Search, ArrowLeft } from "lucide-react";
 import { getSquadMembers } from "@/lib/mascots";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const confused404Messages = [
   { text: "I've searched every equation, but this page doesn't compute!", subjectHint: "mathematics" },
@@ -16,6 +17,7 @@ const confused404Messages = [
 ];
 
 const NotFound = () => {
+  useDocumentTitle("Page Not Found");
   const location = useLocation();
   const navigate = useNavigate();
   const [messageIndex] = useState(() => Math.floor(Math.random() * confused404Messages.length));

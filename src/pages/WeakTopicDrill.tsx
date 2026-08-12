@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Target, Loader2, AlertTriangle, CheckCircle2, XCircle, ArrowRight, Sparkles } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface WeakTopic {
   subject: string;
@@ -32,6 +33,7 @@ interface AIPlan {
 }
 
 export default function WeakTopicDrill() {
+  useDocumentTitle("Weak Topic Drill");
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);

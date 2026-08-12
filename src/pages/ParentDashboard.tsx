@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface ChildData {
   user_id: string;
@@ -28,6 +29,7 @@ interface AttemptData {
 }
 
 export default function ParentDashboard() {
+  useDocumentTitle("Parent Dashboard");
   const { user } = useAuth();
   const { toast } = useToast();
   const [children, setChildren] = useState<ChildData[]>([]);
