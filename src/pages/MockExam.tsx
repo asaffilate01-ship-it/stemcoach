@@ -20,13 +20,14 @@ interface ExamQuestion {
   id: string;
   question_text: string;
   options: any;
-  correct_answer: string;
   topic: string;
   subject: string;
   difficulty: number;
   points: number;
-  explanation: string;
-  worked_solution: string;
+  /** Only populated after server-side grading */
+  correct_answer?: string;
+  explanation?: string;
+  worked_solution?: string;
 }
 
 export default function MockExam() {
