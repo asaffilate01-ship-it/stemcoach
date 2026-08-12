@@ -5,7 +5,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
-import { ThemeProvider } from "@/hooks/useTheme";
 import { TenantBrandingProvider } from "@/hooks/useTenantBranding";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SessionGuard } from "@/components/SessionGuard";
@@ -80,8 +79,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider>
-          <TenantBrandingProvider>
+                  <TenantBrandingProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -154,8 +152,7 @@ const App = () => (
             </BrowserRouter>
           </TooltipProvider>
           </TenantBrandingProvider>
-          </ThemeProvider>
-      </AuthProvider>
+                </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );
