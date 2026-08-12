@@ -32,3 +32,9 @@ verify_jwt = false
 
 [functions.link-parent-child]
 verify_jwt = false
+
+[functions.grade-mock-exam]
+verify_jwt = false
+
+[functions.dev-grant-quota]
+verify_jwt = false

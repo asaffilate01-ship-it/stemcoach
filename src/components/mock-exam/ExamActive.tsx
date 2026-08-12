@@ -6,13 +6,13 @@ interface ExamQuestion {
   id: string;
   question_text: string;
   options: any;
-  correct_answer: string;
+  correct_answer?: string;
   topic: string;
   subject: string;
   difficulty: number;
   points: number;
-  explanation: string;
-  worked_solution: string;
+  explanation?: string;
+  worked_solution?: string;
 }
 
 interface ExamActiveProps {

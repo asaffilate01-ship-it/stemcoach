@@ -43,9 +43,10 @@ export function DevToolsPanel() {
           },
         });
         if (signUpError) throw signUpError;
-        // Grant 10 questions per subject (110 total) for the new dev account
-        if (signUpData?.user) {
-          await supabase.rpc("grant_dev_quota", { _user_id: signUpData.user.id });
+        // Grant 10 questions per subject (110 total) for the new dev account.
+        // Granted server-side — the database function is no longer callable from the browser.
+        if (signUpData?.session) {
+          await supabase.functions.invoke("dev-grant-quota");
         }
         toast({
           title: `Dev ${account.label} created + 110 questions unlocked`,
