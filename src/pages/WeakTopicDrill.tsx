@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Target, Loader2, AlertTriangle, CheckCircle2, XCircle, ArrowRight, Sparkles } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface WeakTopic {
   subject: string;
@@ -32,6 +33,7 @@ interface AIPlan {
 }
 
 export default function WeakTopicDrill() {
+  useDocumentTitle("Weak Topic Drill");
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -160,7 +162,7 @@ export default function WeakTopicDrill() {
             {aiPlan?.plans && aiPlan.plans.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="stem-card rounded-xl p-6">
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                  <Sparkles className="h-4 w-4 text-primary" /> AI Study Plan
+                  <Sparkles className="h-4 w-4 text-primary" /> STEMcoach Study Plan
                 </h3>
                 <div className="space-y-4">
                   {aiPlan.plans.map((plan, i) => (

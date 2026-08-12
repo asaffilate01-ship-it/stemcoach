@@ -8,8 +8,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Search, Trash2, Edit3, Save, X, ChevronLeft, ChevronRight, Database } from "lucide-react";
 import { CSVImport } from "@/components/admin/CSVImport";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function AdminQuestions() {
+  useDocumentTitle("Question Bank");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");

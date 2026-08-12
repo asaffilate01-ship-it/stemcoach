@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Plus, Brain, Check, X, Loader2 } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface Flashcard {
   id: string;
@@ -47,6 +48,7 @@ function sm2(card: Flashcard, quality: number): Partial<Flashcard> {
 }
 
 export default function Flashcards() {
+  useDocumentTitle("Flashcards");
   const { user } = useAuth();
   const { toast } = useToast();
   const [cards, setCards] = useState<Flashcard[]>([]);

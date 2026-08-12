@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Layers, ChevronRight, Loader2, Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
 import { subjects } from "@/data/questions";
 import { calculateQuestionAllocation } from "@/lib/subscriptionTiers";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const LEVELS = [
   { id: "year-9", label: "Year 9", description: "Foundation level" },
@@ -25,6 +26,7 @@ const LEVELS = [
 type Step = "verifying" | "subjects" | "levels" | "confirm" | "done";
 
 export default function SelectSubjects() {
+  useDocumentTitle("Select Your Subjects");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

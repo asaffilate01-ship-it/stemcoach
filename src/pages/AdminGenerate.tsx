@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { Loader2, Sparkles, Database, ShieldAlert, Rocket, BarChart3, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const questionTypes = [
   { id: "mcq", label: "Multiple Choice (single answer)" },
@@ -21,6 +22,7 @@ const questionTypes = [
 ];
 
 export default function AdminGenerate() {
+  useDocumentTitle("Generate Questions");
   const { user } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const { toast } = useToast();

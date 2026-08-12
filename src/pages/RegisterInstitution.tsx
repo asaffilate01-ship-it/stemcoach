@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const benefits = [
   { icon: Palette, text: "Custom branding with your logo and colours" },
@@ -19,6 +20,7 @@ const benefits = [
 ];
 
 export default function RegisterInstitution() {
+  useDocumentTitle("Register Your Institution");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

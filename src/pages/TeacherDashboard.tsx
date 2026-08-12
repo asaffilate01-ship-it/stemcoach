@@ -12,8 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { subjects, curricula } from "@/data/questions";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function TeacherDashboard() {
+  useDocumentTitle("Teacher Dashboard");
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();

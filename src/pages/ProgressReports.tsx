@@ -9,6 +9,7 @@ import {
   FileText, TrendingUp, Target, Calendar, Download,
   BookOpen, Clock, Flame, Zap, Star, ChevronRight, Trophy, Award,
 } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface DailyData {
   date: string;
@@ -18,6 +19,7 @@ interface DailyData {
 }
 
 export default function ProgressReports() {
+  useDocumentTitle("Progress Reports");
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [attempts, setAttempts] = useState<any[]>([]);

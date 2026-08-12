@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { Target, Flame, Calendar, CheckCircle2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface StudyGoal {
   id: string;
@@ -43,6 +44,7 @@ function getMonthDays(year: number, month: number) {
 }
 
 export default function StudyPlanner() {
+  useDocumentTitle("Study Planner");
   const { user } = useAuth();
   const { toast } = useToast();
   const today = new Date().toISOString().split("T")[0];

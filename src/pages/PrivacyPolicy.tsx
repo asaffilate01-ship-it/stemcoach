@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const rights = [
   { icon: Eye, title: "Right of Access", desc: "Request a copy of all personal data we hold about you." },
@@ -19,6 +20,7 @@ const rights = [
 ];
 
 export default function PrivacyPolicy() {
+  useDocumentTitle("Privacy Policy");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();

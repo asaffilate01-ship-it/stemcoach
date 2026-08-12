@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap, BookOpen, ChevronRight, Loader2, Sparkles, Layers, CreditCard } from "lucide-react";
 import { subjects, curricula } from "@/data/questions";
 import { getSquadMembers, getCoachStem } from "@/lib/mascots";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 type Step = "welcome" | "meet-squad" | "curriculum" | "preview" | "go-pay";
 
@@ -25,6 +26,7 @@ const LEVELS = [
 ];
 
 export default function Onboarding() {
+  useDocumentTitle("Get Started");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

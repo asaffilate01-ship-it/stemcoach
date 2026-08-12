@@ -10,6 +10,7 @@ import { Check, Zap, Plus, Globe, ArrowRight, Shield, Package, Gift } from "luci
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const packIcons: Record<PackKey, typeof Zap> = {
   standard: Package,
@@ -26,6 +27,7 @@ const faqs = [
 ];
 
 export default function Pricing() {
+  useDocumentTitle("Pricing");
   const { user } = useAuth();
   const { checkout, loading } = useSubscription();
   const { region, setRegion, loading: geoLoading } = useGeoRegion();

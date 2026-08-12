@@ -1,7 +1,9 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Link } from "react-router-dom";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function TermsOfService() {
+  useDocumentTitle("Terms of Service");
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
