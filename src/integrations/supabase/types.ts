@@ -1343,6 +1343,7 @@ export type Database = {
       }
     }
     Functions: {
+      assert_self: { Args: { _user_id: string }; Returns: undefined }
       award_badge: {
         Args: { _badge_id: string; _user_id: string }
         Returns: boolean
