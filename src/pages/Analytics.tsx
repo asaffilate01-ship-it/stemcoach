@@ -14,6 +14,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 
 interface AttemptWithQuestion {
   id: string;
@@ -45,7 +46,8 @@ interface TopicBreakdown {
 }
 
 export default function Analytics() {
-  useDocumentTitle("Analytics");
+  const { t: tr } = useTranslation();
+  useDocumentTitle(tr("analytics.title"));
   const { user } = useAuth();
   const [attempts, setAttempts] = useState<AttemptWithQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,14 +141,14 @@ export default function Analytics() {
       });
       const correct = weekAttempts.filter(a => a.correct).length;
       weeks.push({
-        label: `Week ${4 - i}`,
+        label: `${tr("analytics.week")} ${4 - i}`,
         total: weekAttempts.length,
         correct,
         accuracy: weekAttempts.length > 0 ? Math.round((correct / weekAttempts.length) * 100) : 0,
       });
     }
     return weeks;
-  }, [attempts]);
+  }, [attempts, tr]);
 
   // Radar chart data
   const radarData = useMemo(() => {
@@ -186,22 +188,22 @@ export default function Analytics() {
       <PageTransition>
         <main className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <div className="stem-label mb-2">Performance</div>
-            <h1 className="stem-heading text-3xl">Subject Analytics</h1>
+            <div className="stem-label mb-2">{tr("analytics.label")}</div>
+            <h1 className="stem-heading text-3xl">{tr("analytics.title")}</h1>
           </div>
 
           {attempts.length === 0 ? (
             <div className="stem-card rounded-xl p-12 text-center">
               <Icon3D icon={BarChart3} variant="primary" size="xl" className="mx-auto" />
-              <h3 className="mb-2 text-lg font-semibold">No data yet</h3>
-              <p className="text-sm text-muted-foreground">Practice some questions to see your analytics.</p>
+              <h3 className="mb-2 text-lg font-semibold">{tr("analytics.noData")}</h3>
+              <p className="text-sm text-muted-foreground">{tr("analytics.noDataDesc")}</p>
             </div>
           ) : (
             <div className="grid gap-6 lg:grid-cols-3">
               {/* Subject Cards */}
               <div className="space-y-4 lg:col-span-1">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <Icon3D icon={BookOpen} variant="primary" size="sm" /> By Subject
+                  <Icon3D icon={BookOpen} variant="primary" size="sm" /> {tr("analytics.bySubject")}
                 </h3>
                 {subjectBreakdowns.map((s, i) => (
                   <motion.button
@@ -224,8 +226,8 @@ export default function Analytics() {
                     </div>
                     <Progress value={s.accuracy} className="mb-2 h-2" />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{s.total} questions</span>
-                      <span>{s.correct} correct</span>
+                      <span>{s.total} {tr("analytics.questions")}</span>
+                      <span>{s.correct} {tr("analytics.correct")}</span>
                     </div>
                   </motion.button>
                 ))}
@@ -233,7 +235,7 @@ export default function Analytics() {
                 {/* Radar Chart */}
                 {radarData.length >= 3 && (
                   <div className="stem-card rounded-xl p-4">
-                    <h4 className="mb-2 text-xs font-semibold text-muted-foreground">Subject Radar</h4>
+                    <h4 className="mb-2 text-xs font-semibold text-muted-foreground">{tr("analytics.subjectRadar")}</h4>
                     <ResponsiveContainer width="100%" height={200}>
                       <RadarChart data={radarData}>
                         <PolarGrid stroke="hsl(var(--border))" />
@@ -251,7 +253,7 @@ export default function Analytics() {
                 {/* Weekly Trend Chart */}
                 <div className="stem-card rounded-xl p-6">
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <Icon3D icon={TrendingUp} variant="success" size="sm" /> Weekly Trend
+                    <Icon3D icon={TrendingUp} variant="success" size="sm" /> {tr("analytics.weeklyTrend")}
                   </h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={weeklyTrend}>
@@ -266,7 +268,7 @@ export default function Analytics() {
                         }}
                         formatter={(value: number, name: string) => [
                           name === "accuracy" ? `${value}%` : value,
-                          name === "accuracy" ? "Accuracy" : "Questions",
+                          name === "accuracy" ? tr("analytics.accuracyLabel") : tr("analytics.questionsLabel"),
                         ]}
                       />
                       <Bar dataKey="accuracy" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} name="accuracy" />
@@ -283,7 +285,7 @@ export default function Analytics() {
                     className="stem-card rounded-xl p-6"
                   >
                     <h3 className="mb-4 flex items-center gap-2 font-semibold capitalize">
-                      <Icon3D icon={Target} variant="primary" size="sm" /> {selected.subject} — Topics
+                      <Icon3D icon={Target} variant="primary" size="sm" /> {selected.subject} — {tr("analytics.topics")}
                     </h3>
                     <div className="space-y-3">
                       {selected.topics.map((t) => (
@@ -292,7 +294,7 @@ export default function Analytics() {
                             <span className="text-sm font-medium">{t.topic}</span>
                             <div className="flex items-center gap-2">
                               {t.avgTime > 0 && (
-                                <span className="text-[10px] text-muted-foreground">{t.avgTime}s avg</span>
+                                <span className="text-[10px] text-muted-foreground">{t.avgTime}{tr("analytics.avgSuffix")}</span>
                               )}
                               <span className={`text-sm font-bold ${
                                 t.accuracy >= 80 ? "text-success" : t.accuracy >= 60 ? "text-primary" : "text-destructive"
@@ -301,7 +303,7 @@ export default function Analytics() {
                           </div>
                           <Progress value={t.accuracy} className="h-1.5" />
                           <div className="mt-1 text-xs text-muted-foreground">
-                            {t.correct}/{t.total} correct
+                            {t.correct}/{t.total} {tr("analytics.correct")}
                           </div>
                         </div>
                       ))}
@@ -313,7 +315,7 @@ export default function Analytics() {
                 {weakTopics.length > 0 && (
                   <div className="stem-card rounded-xl p-6">
                     <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                      <Icon3D icon={AlertTriangle} variant="warning" size="sm" /> Focus Areas
+                      <Icon3D icon={AlertTriangle} variant="warning" size="sm" /> {tr("analytics.focusAreas")}
                     </h3>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {weakTopics.map((t) => (
@@ -322,7 +324,7 @@ export default function Analytics() {
                             <span className="text-sm font-medium">{t.topic}</span>
                             <span className="text-xs font-bold text-destructive">{t.accuracy}%</span>
                           </div>
-                          <div className="text-xs capitalize text-muted-foreground">{t.subject} · {t.total} attempts</div>
+                          <div className="text-xs capitalize text-muted-foreground">{t.subject} · {t.total} {tr("analytics.attempts")}</div>
                         </div>
                       ))}
                     </div>
