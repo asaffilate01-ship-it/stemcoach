@@ -29,11 +29,10 @@ export default function JoinInstitution() {
 
     try {
       // Look up tenant by slug (public lookup via RLS — user must be authenticated)
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("id, name, logo_url")
-        .eq("slug", slug.trim().toLowerCase())
-        .maybeSingle();
+      const { data: rows } = await supabase.rpc("lookup_tenant_by_slug", {
+        _slug: slug.trim().toLowerCase(),
+      });
+      const data = Array.isArray(rows) ? rows[0] : rows;
 
       // If RLS blocks it (user not a member), try a different approach
       // We'll allow search by creating a lookup function or just attempt to join
