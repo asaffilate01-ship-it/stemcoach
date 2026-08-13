@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { QuotaWidget } from "@/components/dashboard/QuotaWidget";
 import { getCoachStem, getDailyMotivation } from "@/lib/mascots";
+import { useTranslation } from "react-i18next";
 
 interface SubjectProgress {
   subject: string;
@@ -30,7 +31,8 @@ interface WeakTopic {
 }
 
 export default function Dashboard() {
-  useDocumentTitle("Dashboard");
+  const { t } = useTranslation();
+  useDocumentTitle(t("dashboard.title"));
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -175,17 +177,17 @@ export default function Dashboard() {
   const accuracy = totalQ > 0 ? Math.round((correctQ / totalQ) * 100) : 0;
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 17) return "Good afternoon";
-    return "Good evening";
+    if (h < 12) return t("dashboard.goodMorning");
+    if (h < 17) return t("dashboard.goodAfternoon");
+    return t("dashboard.goodEvening");
   })();
-  const displayName = user?.email?.split("@")[0] || "Student";
+  const displayName = user?.email?.split("@")[0] || t("dashboard.student");
 
   const quickActions = [
-    { label: "Practice", icon: BookOpen, to: "/subjects", variant: "primary" as const },
-    { label: "Weak Drills", icon: Brain, to: "/weak-drills", variant: "warning" as const },
-    { label: "Flashcards", icon: Layers, to: "/flashcards", variant: "success" as const },
-    { label: "Analytics", icon: BarChart3, to: "/analytics", variant: "accent" as const },
+    { label: t("dashboard.practiceAction"), icon: BookOpen, to: "/subjects", variant: "primary" as const },
+    { label: t("dashboard.weakDrills"), icon: Brain, to: "/weak-drills", variant: "warning" as const },
+    { label: t("dashboard.flashcardsAction"), icon: Layers, to: "/flashcards", variant: "success" as const },
+    { label: t("dashboard.analyticsAction"), icon: BarChart3, to: "/analytics", variant: "accent" as const },
   ];
 
   return (
@@ -209,7 +211,7 @@ export default function Dashboard() {
                 <img src={getCoachStem().image} alt="Coach Stem" className="h-full w-full object-cover" />
               </motion.div>
               <div>
-                <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">Student Dashboard</div>
+                <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">{t("dashboard.studentDashboard")}</div>
                 <h1 className="stem-heading text-2xl md:text-3xl">
                   {greeting}, <span className="stem-gradient-text capitalize">{displayName}</span>
                 </h1>
@@ -224,7 +226,7 @@ export default function Dashboard() {
                 {stats?.streak > 0 && (
                   <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Flame className="h-4 w-4 text-warning" />
-                    {stats.streak}-day streak — keep it going!
+                    {t("dashboard.streakKeepGoing", { count: stats.streak })}
                   </p>
                 )}
               </div>
@@ -259,10 +261,10 @@ export default function Dashboard() {
           {/* Stats Grid */}
           <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4 md:mb-8">
             {[
-              { label: "Questions", value: totalQ, icon: Target, variant: "primary" as const },
-              { label: "Accuracy", value: `${accuracy}%`, icon: TrendingUp, variant: "success" as const },
-              { label: "Streak", value: `${stats?.streak || 0}`, icon: Flame, variant: "warning" as const, suffix: " days" },
-              { label: "XP", value: (stats?.xp || 0).toLocaleString(), icon: Zap, variant: "primary" as const },
+              { label: t("dashboard.questions"), value: totalQ, icon: Target, variant: "primary" as const },
+              { label: t("dashboard.accuracy"), value: `${accuracy}%`, icon: TrendingUp, variant: "success" as const },
+              { label: t("dashboard.streak"), value: `${stats?.streak || 0}`, icon: Flame, variant: "warning" as const, suffix: ` ${t("dashboard.days")}` },
+              { label: t("dashboard.xp"), value: (stats?.xp || 0).toLocaleString(), icon: Zap, variant: "primary" as const },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -294,13 +296,13 @@ export default function Dashboard() {
               <div className="mx-auto mb-5">
                 <Icon3D icon={Target} variant="primary" size="xl" className="mx-auto" />
               </div>
-              <h3 className="mb-2 text-lg font-bold">Start practicing!</h3>
-              <p className="mb-6 text-sm text-muted-foreground">Answer some questions to see your progress here.</p>
+              <h3 className="mb-2 text-lg font-bold">{t("dashboard.startPracticing")}</h3>
+              <p className="mb-6 text-sm text-muted-foreground">{t("dashboard.answerToSeeProgress")}</p>
               <button
                 onClick={() => navigate("/subjects")}
                 className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98]"
               >
-                Browse Subjects <ArrowRight className="h-4 w-4" />
+                {t("dashboard.browseSubjects")} <ArrowRight className="h-4 w-4" />
               </button>
             </motion.div>
           ) : (
@@ -315,7 +317,7 @@ export default function Dashboard() {
                 >
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
                     <Icon3D icon={Calendar} variant="primary" size="sm" />
-                    14-Day Activity
+                    {t("dashboard.dayActivity")}
                   </h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <AreaChart data={dailyData}>
@@ -352,14 +354,14 @@ export default function Dashboard() {
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 font-semibold">
                     <Icon3D icon={BookOpen} variant="primary" size="sm" />
-                    Subject Readiness
+                    {t("dashboard.subjectReadiness")}
                   </h3>
                   <button onClick={() => navigate("/analytics")} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline transition-colors">
-                    View details <ArrowRight className="h-3 w-3" />
+                    {t("dashboard.viewDetails")} <ArrowRight className="h-3 w-3" />
                   </button>
                 </div>
                 {subjectProgress.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No subject data yet.</p>
+                  <p className="text-sm text-muted-foreground">{t("dashboard.noSubjectData")}</p>
                 ) : (
                   <div className="space-y-4">
                     {subjectProgress.map((sp) => (
@@ -370,8 +372,8 @@ export default function Dashboard() {
                         </div>
                         <Progress value={sp.accuracy} className="h-2" />
                         <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-                          <span>{sp.total} questions</span>
-                          <span>{sp.correct} correct</span>
+                          <span>{sp.total} {t("common.questions")}</span>
+                          <span>{sp.correct} {t("common.correct")}</span>
                         </div>
                       </div>
                     ))}
@@ -388,12 +390,12 @@ export default function Dashboard() {
               >
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
                   <Icon3D icon={AlertTriangle} variant="warning" size="sm" />
-                  Focus Areas
+                  {t("dashboard.focusAreas")}
                 </h3>
                 {weakTopics.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center">
                     <Sparkles className="mx-auto mb-2 h-6 w-6 text-muted-foreground/30" />
-                    <p className="text-sm text-muted-foreground">No weak areas identified yet. Keep practicing!</p>
+                    <p className="text-sm text-muted-foreground">{t("dashboard.noWeakAreas")}</p>
                   </div>
                 ) : (
                   <div className="space-y-2.5">
@@ -408,7 +410,7 @@ export default function Dashboard() {
                           <span className="text-sm font-medium">{wt.topic}</span>
                           <span className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${wt.accuracy < 40 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>{wt.accuracy}%</span>
                         </div>
-                        <div className="text-xs capitalize text-muted-foreground">{wt.subject} · {wt.total} attempts</div>
+                        <div className="text-xs capitalize text-muted-foreground">{wt.subject} · {wt.total} {t("dashboard.attempts")}</div>
                       </motion.div>
                     ))}
                   </div>
@@ -425,7 +427,7 @@ export default function Dashboard() {
                 >
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
                     <Icon3D icon={TrendingUp} variant="accent" size="sm" />
-                    Recent Activity
+                    {t("dashboard.recentActivity")}
                   </h3>
                   <div className="space-y-2">
                     {recentActivity.map((a, i) => {
@@ -463,10 +465,10 @@ export default function Dashboard() {
                   <div className="mb-4 flex items-center justify-between">
                     <h3 className="flex items-center gap-2 font-semibold">
                       <Icon3D icon={Trophy} variant="primary" size="sm" />
-                      Recent Badges
+                      {t("dashboard.recentBadges")}
                     </h3>
                     <button onClick={() => navigate("/badges")} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                      View all <ArrowRight className="h-3 w-3" />
+                      {t("dashboard.viewAll")} <ArrowRight className="h-3 w-3" />
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
