@@ -21,6 +21,7 @@ import type { Icon3DVariant } from "@/components/ui/icon-3d";
 interface NavItem {
   to: string;
   label: string;
+  labelKey?: string;
   icon: typeof BookOpen;
   roles?: string[];
   group?: string;
@@ -36,7 +37,7 @@ const LANGUAGES = [
 ];
 
 function LanguageSelector() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const current = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
   return (
@@ -48,7 +49,7 @@ function LanguageSelector() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[140px]">
-        <DropdownMenuLabel className="text-xs">Language</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs">{t("common.language")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {LANGUAGES.map(lang => (
           <DropdownMenuItem
@@ -66,37 +67,38 @@ function LanguageSelector() {
 }
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Home", icon: BookOpen, variant: "primary" },
-  { to: "/subjects", label: "Subjects", icon: GraduationCap, variant: "success" },
-  { to: "/mock-exam", label: "Exam", icon: Trophy, variant: "warning" },
-  { to: "/ai-tutor", label: "STEMcoach", icon: Bot, image: "/assets/coach-stem.png" },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study", variant: "primary" },
-  { to: "/flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study", variant: "accent" },
-  { to: "/weak-drills", label: "Drills", icon: Brain, group: "study", variant: "warning" },
-  { to: "/daily-challenge", label: "Daily Challenge", icon: Flame, group: "study", variant: "destructive" },
-  { to: "/past-papers", label: "Past Papers", icon: FileText, group: "study", variant: "purple" },
-  { to: "/study-planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"], group: "study", variant: "success" },
-  { to: "/analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"], group: "study", variant: "primary" },
-  { to: "/progress-report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"], group: "study", variant: "accent" },
-  { to: "/badges", label: "Badges", icon: Award, group: "social", variant: "warning" },
-  { to: "/leaderboard", label: "Leaderboard", icon: Medal, group: "social", variant: "primary" },
-  { to: "/certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social", variant: "success" },
-  { to: "/study-groups", label: "Study Groups", icon: Users, group: "social", variant: "purple" },
-  { to: "/my-classes", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes", variant: "primary" },
-  { to: "/live-classroom", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true, variant: "destructive" },
-  { to: "/formulas", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
-  { to: "/blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
-  { to: "/parent", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
-  { to: "/teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },
-  { to: "/institution", label: "My Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
-  { to: "/join-institution", label: "Join Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
-  { to: "/admin/generate", label: "Generate", icon: Sparkles, roles: ["admin"], variant: "warning" },
-  { to: "/admin/questions", label: "Content", icon: Database, roles: ["admin"], variant: "accent" },
-  { to: "/settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"], variant: "primary" },
-  { to: "/pricing", label: "Pricing", icon: CreditCard, variant: "success" },
+  { to: "/", labelKey: "nav.home", label: "Home", icon: BookOpen, variant: "primary" },
+  { to: "/subjects", labelKey: "nav.subjects", label: "Subjects", icon: GraduationCap, variant: "success" },
+  { to: "/mock-exam", labelKey: "nav.exam", label: "Exam", icon: Trophy, variant: "warning" },
+  { to: "/ai-tutor", labelKey: "nav.aiTutor", label: "STEMcoach", icon: Bot, image: "/assets/coach-stem.png" },
+  { to: "/dashboard", labelKey: "nav.dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study", variant: "primary" },
+  { to: "/flashcards", labelKey: "nav.flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study", variant: "accent" },
+  { to: "/weak-drills", labelKey: "nav.drills", label: "Drills", icon: Brain, group: "study", variant: "warning" },
+  { to: "/daily-challenge", labelKey: "nav.dailyChallenge", label: "Daily Challenge", icon: Flame, group: "study", variant: "destructive" },
+  { to: "/past-papers", labelKey: "nav.pastPapers", label: "Past Papers", icon: FileText, group: "study", variant: "purple" },
+  { to: "/study-planner", labelKey: "nav.planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"], group: "study", variant: "success" },
+  { to: "/analytics", labelKey: "nav.analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"], group: "study", variant: "primary" },
+  { to: "/progress-report", labelKey: "nav.report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"], group: "study", variant: "accent" },
+  { to: "/badges", labelKey: "nav.badges", label: "Badges", icon: Award, group: "social", variant: "warning" },
+  { to: "/leaderboard", labelKey: "nav.leaderboard", label: "Leaderboard", icon: Medal, group: "social", variant: "primary" },
+  { to: "/certificates", labelKey: "nav.certificates", label: "Certificates", icon: ScrollText, roles: ["student", "admin"], group: "social", variant: "success" },
+  { to: "/study-groups", labelKey: "nav.studyGroups", label: "Study Groups", icon: Users, group: "social", variant: "purple" },
+  { to: "/my-classes", labelKey: "nav.myClasses", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes", variant: "primary" },
+  { to: "/live-classroom", labelKey: "nav.liveClass", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true, variant: "destructive" },
+  { to: "/formulas", labelKey: "nav.formulaSheets", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
+  { to: "/blog", labelKey: "nav.blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
+  { to: "/parent", labelKey: "nav.parentPortal", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
+  { to: "/teacher", labelKey: "nav.teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },
+  { to: "/institution", labelKey: "nav.myInstitution", label: "My Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
+  { to: "/join-institution", labelKey: "nav.joinInstitution", label: "Join Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
+  { to: "/admin/generate", labelKey: "nav.generate", label: "Generate", icon: Sparkles, roles: ["admin"], variant: "warning" },
+  { to: "/admin/questions", labelKey: "nav.content", label: "Content", icon: Database, roles: ["admin"], variant: "accent" },
+  { to: "/settings", labelKey: "nav.settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"], variant: "primary" },
+  { to: "/pricing", labelKey: "nav.pricing", label: "Pricing", icon: CreditCard, variant: "success" },
 ];
 
 export function AppHeader() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -139,7 +141,7 @@ export function AppHeader() {
       ) : (
         <Icon3D icon={item.icon} variant={item.variant || "primary"} size="xs" />
       )}
-      {item.label}
+      {item.labelKey ? t(item.labelKey) : item.label}
     </Link>
   );
 
@@ -159,8 +161,8 @@ export function AppHeader() {
           {items.map(item => (
             <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)} className="gap-2.5 py-2">
               <Icon3D icon={item.icon} variant={item.variant || "primary"} size="xs" />
-              {item.label}
-              {item.comingSoon && <span className="ml-auto rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-bold text-warning">Soon</span>}
+              {item.labelKey ? t(item.labelKey) : item.label}
+              {item.comingSoon && <span className="ml-auto rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-bold text-warning">{t("nav.soon")}</span>}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -190,10 +192,10 @@ export function AppHeader() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-0.5 lg:flex">
           {topNav.slice(0, 4).map(item => <NavLink key={item.to} item={item} />)}
-          {user && <GroupDropdown label="Study" items={studyItems} />}
-          <GroupDropdown label="Rewards" items={socialItems} />
-          {classItems.length > 0 && <GroupDropdown label="Classes" items={classItems} />}
-          <GroupDropdown label="Resources" items={resourceItems} />
+          {user && <GroupDropdown label={t("nav.groupStudy")} items={studyItems} />}
+          <GroupDropdown label={t("nav.groupRewards")} items={socialItems} />
+          {classItems.length > 0 && <GroupDropdown label={t("nav.groupClasses")} items={classItems} />}
+          <GroupDropdown label={t("nav.groupResources")} items={resourceItems} />
         </nav>
 
         {/* Right actions */}
@@ -203,7 +205,7 @@ export function AppHeader() {
           <button
             onClick={toggleTheme}
             className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors sm:p-2"
-            aria-label="Toggle theme"
+            aria-label={t("nav.toggleTheme")}
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -223,23 +225,23 @@ export function AppHeader() {
                 <DropdownMenuLabel className="text-xs truncate max-w-[200px]">{user.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/dashboard")} className="gap-2.5 py-2">
-                  <Icon3D icon={LayoutDashboard} variant="primary" size="xs" /> Dashboard
+                  <Icon3D icon={LayoutDashboard} variant="primary" size="xs" /> {t("nav.dashboard")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2.5 py-2">
-                  <Icon3D icon={Settings} variant="accent" size="xs" /> Settings
+                  <Icon3D icon={Settings} variant="accent" size="xs" /> {t("nav.settings")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/pricing")} className="gap-2.5 py-2">
-                  <Icon3D icon={CreditCard} variant="success" size="xs" /> Pricing
+                  <Icon3D icon={CreditCard} variant="success" size="xs" /> {t("nav.pricing")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="gap-2.5 py-2 text-destructive">
-                  <Icon3D icon={LogOut} variant="destructive" size="xs" /> Sign Out
+                  <Icon3D icon={LogOut} variant="destructive" size="xs" /> {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button size="sm" onClick={() => navigate("/auth")} className="rounded-lg shadow-sm h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
-              Sign In
+              {t("nav.login")}
             </Button>
           )}
         </div>
