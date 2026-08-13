@@ -511,7 +511,7 @@ function FilterPanel({
 
 export default function Subjects() {
   const { t } = useTranslation();
-  useDocumentTitle("Subjects");
+  useDocumentTitle(t("nav.subjects"));
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set(["uk"]));
