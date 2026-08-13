@@ -46,8 +46,8 @@ interface TopicBreakdown {
 }
 
 export default function Analytics() {
-  const { t } = useTranslation();
-  useDocumentTitle(t("analytics.title"));
+  const { t: tr } = useTranslation();
+  useDocumentTitle(tr("analytics.title"));
   const { user } = useAuth();
   const [attempts, setAttempts] = useState<AttemptWithQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,14 +141,14 @@ export default function Analytics() {
       });
       const correct = weekAttempts.filter(a => a.correct).length;
       weeks.push({
-        label: `${t("analytics.week")} ${4 - i}`,
+        label: `${tr("analytics.week")} ${4 - i}`,
         total: weekAttempts.length,
         correct,
         accuracy: weekAttempts.length > 0 ? Math.round((correct / weekAttempts.length) * 100) : 0,
       });
     }
     return weeks;
-  }, [attempts, t]);
+  }, [attempts, tr]);
 
   // Radar chart data
   const radarData = useMemo(() => {
@@ -188,22 +188,22 @@ export default function Analytics() {
       <PageTransition>
         <main className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <div className="stem-label mb-2">{t("analytics.label")}</div>
-            <h1 className="stem-heading text-3xl">{t("analytics.title")}</h1>
+            <div className="stem-label mb-2">{tr("analytics.label")}</div>
+            <h1 className="stem-heading text-3xl">{tr("analytics.title")}</h1>
           </div>
 
           {attempts.length === 0 ? (
             <div className="stem-card rounded-xl p-12 text-center">
               <Icon3D icon={BarChart3} variant="primary" size="xl" className="mx-auto" />
-              <h3 className="mb-2 text-lg font-semibold">{t("analytics.noData")}</h3>
-              <p className="text-sm text-muted-foreground">{t("analytics.noDataDesc")}</p>
+              <h3 className="mb-2 text-lg font-semibold">{tr("analytics.noData")}</h3>
+              <p className="text-sm text-muted-foreground">{tr("analytics.noDataDesc")}</p>
             </div>
           ) : (
             <div className="grid gap-6 lg:grid-cols-3">
               {/* Subject Cards */}
               <div className="space-y-4 lg:col-span-1">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <Icon3D icon={BookOpen} variant="primary" size="sm" /> {t("analytics.bySubject")}
+                  <Icon3D icon={BookOpen} variant="primary" size="sm" /> {tr("analytics.bySubject")}
                 </h3>
                 {subjectBreakdowns.map((s, i) => (
                   <motion.button
@@ -226,8 +226,8 @@ export default function Analytics() {
                     </div>
                     <Progress value={s.accuracy} className="mb-2 h-2" />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{s.total} {t("analytics.questions")}</span>
-                      <span>{s.correct} {t("analytics.correct")}</span>
+                      <span>{s.total} {tr("analytics.questions")}</span>
+                      <span>{s.correct} {tr("analytics.correct")}</span>
                     </div>
                   </motion.button>
                 ))}
@@ -235,7 +235,7 @@ export default function Analytics() {
                 {/* Radar Chart */}
                 {radarData.length >= 3 && (
                   <div className="stem-card rounded-xl p-4">
-                    <h4 className="mb-2 text-xs font-semibold text-muted-foreground">{t("analytics.subjectRadar")}</h4>
+                    <h4 className="mb-2 text-xs font-semibold text-muted-foreground">{tr("analytics.subjectRadar")}</h4>
                     <ResponsiveContainer width="100%" height={200}>
                       <RadarChart data={radarData}>
                         <PolarGrid stroke="hsl(var(--border))" />
@@ -253,7 +253,7 @@ export default function Analytics() {
                 {/* Weekly Trend Chart */}
                 <div className="stem-card rounded-xl p-6">
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                    <Icon3D icon={TrendingUp} variant="success" size="sm" /> {t("analytics.weeklyTrend")}
+                    <Icon3D icon={TrendingUp} variant="success" size="sm" /> {tr("analytics.weeklyTrend")}
                   </h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={weeklyTrend}>
@@ -268,7 +268,7 @@ export default function Analytics() {
                         }}
                         formatter={(value: number, name: string) => [
                           name === "accuracy" ? `${value}%` : value,
-                          name === "accuracy" ? t("analytics.accuracyLabel") : t("analytics.questionsLabel"),
+                          name === "accuracy" ? tr("analytics.accuracyLabel") : tr("analytics.questionsLabel"),
                         ]}
                       />
                       <Bar dataKey="accuracy" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} name="accuracy" />
@@ -285,7 +285,7 @@ export default function Analytics() {
                     className="stem-card rounded-xl p-6"
                   >
                     <h3 className="mb-4 flex items-center gap-2 font-semibold capitalize">
-                      <Icon3D icon={Target} variant="primary" size="sm" /> {selected.subject} — {t("analytics.topics")}
+                      <Icon3D icon={Target} variant="primary" size="sm" /> {selected.subject} — {tr("analytics.topics")}
                     </h3>
                     <div className="space-y-3">
                       {selected.topics.map((t) => (
@@ -315,7 +315,7 @@ export default function Analytics() {
                 {weakTopics.length > 0 && (
                   <div className="stem-card rounded-xl p-6">
                     <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                      <Icon3D icon={AlertTriangle} variant="warning" size="sm" /> {t("analytics.focusAreas")}
+                      <Icon3D icon={AlertTriangle} variant="warning" size="sm" /> {tr("analytics.focusAreas")}
                     </h3>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {weakTopics.map((t) => (
