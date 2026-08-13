@@ -21,6 +21,7 @@ import { MascotReaction } from "@/components/gamification/MascotReaction";
 import ReactMarkdown from "react-markdown";
 import { getCachedQuestions, cacheQuestions } from "@/lib/questionCache";
 import { getMascot } from "@/lib/mascots";
+import { useTranslation } from "react-i18next";
 
 interface DBQuestion {
   id: string;
@@ -47,6 +48,7 @@ interface DBQuestion {
 }
 
 export default function Practice() {
+  const { t } = useTranslation();
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -54,7 +56,7 @@ export default function Practice() {
   const { stats, recordAnswer, newBadges, dismissBadge, fetchStats } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
-  useDocumentTitle(subject ? `Practice ${subject.name}` : "Practice");
+  useDocumentTitle(subject ? t("practice.practiceSubject", { subject: subject.name }) : t("practice.title"));
 
   const [questions, setQuestions] = useState<DBQuestion[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
@@ -102,7 +104,7 @@ export default function Practice() {
           const cached = await getCachedQuestions(subjectId);
           if (cached && cached.length > 0) {
             setQuestions(cached as DBQuestion[]);
-            toast({ title: "Offline mode", description: "Showing cached questions." });
+            toast({ title: t("practice.offlineMode"), description: t("practice.showingCached") });
           }
         }
       } catch {
@@ -110,7 +112,7 @@ export default function Practice() {
         const cached = await getCachedQuestions(subjectId);
         if (cached && cached.length > 0) {
           setQuestions(cached as DBQuestion[]);
-          toast({ title: "You're offline", description: "Practicing with cached questions." });
+          toast({ title: t("practice.youreOffline"), description: t("practice.practicingCached") });
         }
       }
 
@@ -168,10 +170,10 @@ export default function Practice() {
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
               <XCircle className="h-8 w-8 text-destructive" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">Subject not found</h2>
-            <p className="mb-8 text-muted-foreground">The subject you're looking for doesn't exist or has been removed.</p>
+            <h2 className="mb-2 text-2xl font-bold">{t("practice.subjectNotFound")}</h2>
+            <p className="mb-8 text-muted-foreground">{t("practice.subjectNotFoundDesc")}</p>
             <Button onClick={() => navigate("/subjects")} className="gap-2">
-              <ChevronLeft className="h-4 w-4" /> Back to Subjects
+              <ChevronLeft className="h-4 w-4" /> {t("practice.backToSubjects")}
             </Button>
           </div>
         </div>
@@ -192,7 +194,7 @@ export default function Practice() {
           >
             <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
           </motion.div>
-          <p className="text-sm text-muted-foreground">{mascot.name} is loading your questions…</p>
+          <p className="text-sm text-muted-foreground">{mascot.name} {t("practice.loadingQuestions")}</p>
         </div>
       </div>
     );
@@ -208,8 +210,8 @@ export default function Practice() {
             <div className="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-2xl shadow-md">
               <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">No questions yet</h2>
-            <p className="mb-8 text-muted-foreground">{mascot.name} is preparing questions for {subject.name}. Check back soon!</p>
+            <h2 className="mb-2 text-2xl font-bold">{t("practice.noQuestionsYet")}</h2>
+            <p className="mb-8 text-muted-foreground">{mascot.name} {t("practice.preparingQuestions")} {subject.name}. {t("practice.checkBackSoon")}</p>
             <Button onClick={() => navigate("/subjects")} className="gap-2">
               <ChevronLeft className="h-4 w-4" /> Back to Subjects
             </Button>
@@ -236,7 +238,7 @@ export default function Practice() {
 
   const handleSubmit = async () => {
     if (!canPractice && !canPracticeSubjectFree(subjectId || "")) {
-      toast({ title: "Question limit reached", description: "Purchase a pack to continue practicing.", variant: "destructive" });
+      toast({ title: t("practice.questionLimitReached"), description: t("practice.purchaseToContinue"), variant: "destructive" });
       return;
     }
     if (isEssay) {
@@ -278,7 +280,7 @@ export default function Practice() {
         showXPPopup(result.xpGained);
         incrementCount();
       } catch (e: any) {
-        toast({ title: "Grading failed", description: e.message, variant: "destructive" });
+        toast({ title: t("practice.gradingFailed"), description: e.message, variant: "destructive" });
       } finally {
         setLoadingAI(false);
       }
@@ -323,7 +325,7 @@ export default function Practice() {
         // Trigger badge display through fetchStats
       }
     } catch (e: any) {
-      toast({ title: "Submit failed", description: e.message, variant: "destructive" });
+      toast({ title: t("practice.submitFailed"), description: e.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -362,7 +364,7 @@ export default function Practice() {
       if (error) throw error;
       setAiExplanation(data.explanation);
     } catch (e: any) {
-      toast({ title: "Coaching failed", description: e.message, variant: "destructive" });
+      toast({ title: t("practice.coachingFailed"), description: e.message, variant: "destructive" });
     } finally {
       setLoadingAI(false);
     }
@@ -376,7 +378,7 @@ export default function Practice() {
     });
   };
 
-  const difficultyLabel = question.difficulty <= 2 ? "Easy" : question.difficulty <= 4 ? "Medium" : "Hard";
+  const difficultyLabel = question.difficulty <= 2 ? t("practice.easy") : question.difficulty <= 4 ? t("practice.medium") : t("practice.hard");
   const difficultyColor = question.difficulty <= 2 ? "text-emerald-600 bg-emerald-500/10" : question.difficulty <= 4 ? "text-amber-600 bg-amber-500/10" : "text-red-500 bg-red-500/10";
 
   return (
@@ -393,8 +395,8 @@ export default function Practice() {
             className="gap-1.5 text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back to Subjects</span>
-            <span className="sm:hidden">Back</span>
+            <span className="hidden sm:inline">{t("practice.backToSubjects")}</span>
+            <span className="sm:hidden">{t("common.back")}</span>
           </Button>
 
           <div className="flex items-center gap-2">
@@ -434,12 +436,12 @@ export default function Practice() {
               </div>
               <span className="font-medium">
                 {canPracticeSubjectFree(subjectId || "") 
-                  ? `${getFreeRemainingForSubject(subjectId || "")} free questions remaining for this subject`
-                  : "Free trial used — purchase to continue"}
+                  ? `${getFreeRemainingForSubject(subjectId || "")} ${t("practice.freeRemaining")}`
+                  : t("practice.freeTrialUsed")}
               </span>
             </div>
             <Button size="sm" onClick={() => navigate("/pricing")} className="rounded-xl text-xs">
-              Get Full Access
+              {t("practice.getFullAccess")}
             </Button>
           </motion.div>
         )}
@@ -599,11 +601,11 @@ export default function Practice() {
                   <Textarea
                     value={essayAnswer}
                     onChange={(e) => setEssayAnswer(e.target.value)}
-                    placeholder="Write your detailed answer here…"
+                    placeholder={t("practice.writeAnswerPlaceholder")}
                     rows={8}
                     className="resize-none rounded-xl border-border/60 bg-muted/20 text-sm"
                   />
-                  <p className="mt-2 text-xs text-muted-foreground">{question.max_marks || question.points} marks available</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{t("practice.marksAvailable", { count: question.max_marks || question.points })}</p>
                 </div>
               )}
 
@@ -617,31 +619,31 @@ export default function Practice() {
                     size="lg"
                   >
                     {loadingAI ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Grading…</>
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("practice.grading")}</>
                     ) : isFree && !canPracticeSubjectFree(subjectId || "") ? (
-                      <><Lock className="mr-2 h-4 w-4" /> Free Limit Reached</>
+                      <><Lock className="mr-2 h-4 w-4" /> {t("practice.freeLimitReached")}</>
                     ) : isEssay ? (
-                      "Submit for Grading"
+                      t("practice.submitForGrading")
                     ) : (
-                      "Check Answer"
+                      t("practice.checkAnswer")
                     )}
                   </Button>
                 ) : (
                   <>
                     <Button onClick={handleNext} className="gap-2 rounded-xl px-6" size="lg">
-                      Next Question <ArrowRight className="h-4 w-4" />
+                      {t("practice.nextQuestion")} <ArrowRight className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" onClick={() => setShowTips(!showTips)} className="gap-2 rounded-xl">
-                      <Lightbulb className="h-4 w-4" /> {showTips ? "Hide Tips" : "Tips"}
+                      <Lightbulb className="h-4 w-4" /> {showTips ? t("practice.hideTips") : t("practice.tips")}
                     </Button>
                     {canUseCoaching ? (
                       <Button variant="outline" onClick={handleAskAI} disabled={loadingAI} className="gap-2 rounded-xl">
                         {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                        Ask STEMcoach
+                        {t("practice.askCoach")}
                       </Button>
                     ) : (
                       <Button variant="outline" onClick={() => navigate("/pricing")} className="gap-2 rounded-xl text-muted-foreground">
-                        <Lock className="h-4 w-4" /> Coaching (Pro)
+                        <Lock className="h-4 w-4" /> {t("practice.coachingPro")}
                       </Button>
                     )}
                   </>
@@ -659,14 +661,14 @@ export default function Practice() {
                         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                         </div>
-                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">Correct!</span>
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">{t("practice.correct")}</span>
                       </>
                     ) : (
                       <>
                         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-destructive/10">
                           <XCircle className="h-4 w-4 text-destructive" />
                         </div>
-                        <span className="font-semibold text-destructive">Incorrect</span>
+                        <span className="font-semibold text-destructive">{t("practice.incorrect")}</span>
                         <span className="text-sm text-muted-foreground">— Answer: {revealedAnswer?.correct_answer}</span>
                       </>
                     )}
@@ -685,7 +687,7 @@ export default function Practice() {
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
                         <BookOpen className="h-4 w-4 text-primary" />
                       </div>
-                      <span className="text-sm font-semibold">Worked Solution</span>
+                      <span className="text-sm font-semibold">{t("practice.workedSolution")}</span>
                     </div>
                     <div className="whitespace-pre-line font-mono text-sm leading-relaxed text-muted-foreground">{revealedAnswer.worked_solution}</div>
                   </div>
@@ -693,7 +695,7 @@ export default function Practice() {
 
                 {revealedAnswer?.exam_tip && (
                   <div className="rounded-2xl border-l-4 border-l-primary bg-primary/5 p-5">
-                    <div className="mb-1 text-xs font-bold uppercase tracking-wider text-primary">Exam Tip</div>
+                    <div className="mb-1 text-xs font-bold uppercase tracking-wider text-primary">{t("practice.examTip")}</div>
                     <p className="text-sm leading-relaxed">{revealedAnswer.exam_tip}</p>
                   </div>
                 )}
@@ -705,7 +707,7 @@ export default function Practice() {
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10">
                         <Lightbulb className="h-4 w-4 text-amber-500" />
                       </div>
-                      <span className="text-sm font-semibold">Why each answer is right or wrong</span>
+                      <span className="text-sm font-semibold">{t("practice.whyEachAnswer")}</span>
                     </div>
                     <div className="space-y-3">
                       {parsedOptions.map((opt) => {
@@ -758,7 +760,7 @@ export default function Practice() {
                 )}
                 {aiGrading.tuition_tip && (
                   <div className="rounded-2xl border-l-4 border-l-primary bg-primary/5 p-5">
-                    <div className="mb-1 text-xs font-bold uppercase tracking-wider text-primary">Tuition Tip</div>
+                    <div className="mb-1 text-xs font-bold uppercase tracking-wider text-primary">{t("practice.tuitionTip")}</div>
                     <p className="text-sm leading-relaxed">{aiGrading.tuition_tip}</p>
                   </div>
                 )}
