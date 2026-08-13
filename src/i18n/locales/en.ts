@@ -237,6 +237,10 @@ const en = {
     badgeCollection: "Badge Collection",
     viewAllBadges: "View all badges",
     noBadgesYet: "Complete challenges to earn your first badge!",
+    attempts: "attempts",
+    recentBadges: "Recent Badges",
+    viewAll: "View all",
+    student: "Student",
   },
   // ── Gamification ──
   gamification: {

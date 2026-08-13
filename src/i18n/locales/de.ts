@@ -237,6 +237,10 @@ const de = {
     badgeCollection: "Abzeichen-Sammlung",
     viewAllBadges: "Alle Abzeichen anzeigen",
     noBadgesYet: "Meistere Herausforderungen, um dein erstes Abzeichen zu verdienen!",
+    attempts: "Versuche",
+    recentBadges: "Neue Abzeichen",
+    viewAll: "Alle ansehen",
+    student: "Schüler",
   },
   // ── Gamification ──
   gamification: {

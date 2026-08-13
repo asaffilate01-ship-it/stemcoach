@@ -237,6 +237,10 @@ const fr = {
     badgeCollection: "Collection de badges",
     viewAllBadges: "Voir tous les badges",
     noBadgesYet: "Relevez des défis pour gagner votre premier badge !",
+    attempts: "tentatives",
+    recentBadges: "Badges récents",
+    viewAll: "Tout voir",
+    student: "Élève",
   },
   // ── Gamification ──
   gamification: {
