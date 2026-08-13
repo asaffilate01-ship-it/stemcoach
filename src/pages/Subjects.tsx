@@ -11,6 +11,7 @@ import { Icon3D } from "@/components/ui/icon-3d";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getMascot } from "@/lib/mascots";
+import { useTranslation } from "react-i18next";
 
 /* ───────────────── Country & Board Data ───────────────── */
 
@@ -254,6 +255,7 @@ function FilterPanel({
   availableBoards: string[];
   activeLevelOptions: typeof curricula;
 }) {
+  const { t } = useTranslation();
   const [expandedSection, setExpandedSection] = useState<string | null>("countries");
 
   return (
@@ -508,6 +510,7 @@ function FilterPanel({
 /* ───────────────── Main Page ───────────────── */
 
 export default function Subjects() {
+  const { t } = useTranslation();
   useDocumentTitle("Subjects");
   const navigate = useNavigate();
   const isMobile = useIsMobile();
