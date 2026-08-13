@@ -183,6 +183,18 @@ const de = {
     easy: "Leicht",
     medium: "Mittel",
     hard: "Schwer",
+    practiceSubject: "{{subject}} üben",
+    grading: "Bewertung…",
+    freeLimitReached: "Gratislimit erreicht",
+    submitForGrading: "Zur Bewertung einreichen",
+    getFullAccess: "Vollzugriff erhalten",
+    writeAnswerPlaceholder: "Schreibe hier deine ausführliche Antwort…",
+    marksAvailable: "{{count}} Punkte verfügbar",
+    hideTips: "Tipps ausblenden",
+    tips: "Tipps",
+    coachingPro: "Coaching (Pro)",
+    whyEachAnswer: "Warum jede Antwort richtig oder falsch ist",
+    tuitionTip: "Lerntipp",
   },
   // ── Mock Exam ──
   mockExam: {

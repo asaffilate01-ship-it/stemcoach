@@ -183,6 +183,18 @@ const fr = {
     easy: "Facile",
     medium: "Moyen",
     hard: "Difficile",
+    practiceSubject: "Réviser {{subject}}",
+    grading: "Correction…",
+    freeLimitReached: "Limite gratuite atteinte",
+    submitForGrading: "Soumettre pour correction",
+    getFullAccess: "Obtenir l'accès complet",
+    writeAnswerPlaceholder: "Rédigez votre réponse détaillée ici…",
+    marksAvailable: "{{count}} points disponibles",
+    hideTips: "Masquer les conseils",
+    tips: "Conseils",
+    coachingPro: "Coaching (Pro)",
+    whyEachAnswer: "Pourquoi chaque réponse est juste ou fausse",
+    tuitionTip: "Conseil de tuteur",
   },
   // ── Mock Exam ──
   mockExam: {
