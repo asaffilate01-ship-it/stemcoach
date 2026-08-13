@@ -130,6 +130,15 @@ const fr = {
     clearFilters: "Effacer les filtres",
     freeQuestions: "questions gratuites restantes",
     unlockMore: "Débloquer plus",
+    studyCentre: "Centre d'étude",
+    chooseHeading: "Choisissez votre matière",
+    chooseSub: "Sélectionnez votre pays, niveau, examen et difficulté pour commencer.",
+    filters: "Filtres",
+    activeFilters: "Filtres actifs",
+    allCountriesShort: "Tous les pays",
+    subjectsHeading: "Matières",
+    subjectsAvailable: "{{count}} matières disponibles",
+    qs: "Q",
   },
   // ── Practice ──
   practice: {

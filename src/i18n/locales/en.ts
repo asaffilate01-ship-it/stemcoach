@@ -130,6 +130,15 @@ const en = {
     clearFilters: "Clear Filters",
     freeQuestions: "free questions remaining",
     unlockMore: "Unlock more",
+    studyCentre: "Study Centre",
+    chooseHeading: "Choose your subject",
+    chooseSub: "Select your country, level, exam board, and difficulty to start practising.",
+    filters: "Filters",
+    activeFilters: "Active Filters",
+    allCountriesShort: "All countries",
+    subjectsHeading: "Subjects",
+    subjectsAvailable: "{{count}} subjects available",
+    qs: "Qs",
   },
   // ── Practice ──
   practice: {
