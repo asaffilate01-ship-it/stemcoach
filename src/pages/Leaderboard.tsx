@@ -8,6 +8,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { motion } from "framer-motion";
 import { Trophy, Flame, Zap, Target, Users, Calendar } from "lucide-react";
 import { getSquadMembers, getCoachStem } from "@/lib/mascots";
+import { useTranslation } from "react-i18next";
 
 interface LeaderEntry {
   user_id: string;
@@ -23,7 +24,8 @@ type Tab = "xp" | "streak" | "accuracy";
 type TimeFrame = "all" | "weekly";
 
 export default function Leaderboard() {
-  useDocumentTitle("Leaderboard");
+  const { t } = useTranslation();
+  useDocumentTitle(t("leaderboard.title"));
   const { user } = useAuth();
   const [entries, setEntries] = useState<LeaderEntry[]>([]);
   const [tab, setTab] = useState<Tab>("xp");
@@ -94,12 +96,12 @@ export default function Leaderboard() {
       .select("user_id, display_name")
       .in("user_id", userIds);
 
-    const profileMap = new Map((profiles || []).map((p) => [p.user_id, p.display_name || "Student"]));
+    const profileMap = new Map((profiles || []).map((p) => [p.user_id, p.display_name || t("leaderboard.student")]));
 
     setEntries(
       statsData.map((s) => ({
         ...s,
-        display_name: profileMap.get(s.user_id) || "Student",
+        display_name: profileMap.get(s.user_id) || t("leaderboard.student"),
       }))
     );
   };
@@ -134,8 +136,8 @@ export default function Leaderboard() {
             <img src={cheerMascot.image} alt={cheerMascot.name} className="h-full w-full object-cover" />
           </motion.div>
           <div>
-            <div className="stem-label mb-1">Competition</div>
-            <h1 className="stem-heading text-3xl">Leaderboard</h1>
+            <div className="stem-label mb-1">{t("leaderboard.label")}</div>
+            <h1 className="stem-heading text-3xl">{t("leaderboard.title")}</h1>
             <p className="text-[11px] text-muted-foreground italic">"{cheerMascot.cheerMessage}"</p>
           </div>
         </div>
@@ -143,9 +145,9 @@ export default function Leaderboard() {
         {/* Filters */}
         <div className="mb-4 flex flex-wrap gap-2">
           {[
-            { key: "xp" as const, label: "XP", icon: Zap },
-            { key: "streak" as const, label: "Streak", icon: Flame },
-            { key: "accuracy" as const, label: "Accuracy", icon: Target },
+            { key: "xp" as const, label: t("leaderboard.xp"), icon: Zap },
+            { key: "streak" as const, label: t("leaderboard.streak"), icon: Flame },
+            { key: "accuracy" as const, label: t("leaderboard.accuracy"), icon: Target },
           ].map((t) => (
             <button
               key={t.key}
@@ -170,7 +172,7 @@ export default function Leaderboard() {
                   : "border-border text-muted-foreground"
               }`}
             >
-              <Trophy className="h-3.5 w-3.5" /> All Time
+              <Trophy className="h-3.5 w-3.5" /> {t("leaderboard.allTime")}
             </button>
             <button
               onClick={() => setTimeFrame("weekly")}
@@ -180,7 +182,7 @@ export default function Leaderboard() {
                   : "border-border text-muted-foreground"
               }`}
             >
-              <Calendar className="h-3.5 w-3.5" /> This Week
+              <Calendar className="h-3.5 w-3.5" /> {t("leaderboard.thisWeek")}
             </button>
           </div>
         </div>
@@ -196,7 +198,7 @@ export default function Leaderboard() {
                   : "border-border text-muted-foreground"
               }`}
             >
-              <Users className="h-3 w-3" /> Global
+              <Users className="h-3 w-3" /> {t("leaderboard.global")}
             </button>
             {classes.map((c) => (
               <button
@@ -237,9 +239,9 @@ export default function Leaderboard() {
                 </div>
                 <div className="flex-1">
                   <div className="text-sm font-semibold">
-                    {entry.display_name} {isMe && <span className="text-xs text-primary">(You)</span>}
+                    {entry.display_name} {isMe && <span className="text-xs text-primary">{t("leaderboard.you")}</span>}
                   </div>
-                  <div className="text-xs text-muted-foreground">Level {entry.level}</div>
+                  <div className="text-xs text-muted-foreground">{t("leaderboard.level")} {entry.level}</div>
                 </div>
                 <div className="text-right">
                   {tab === "xp" && (
@@ -249,7 +251,7 @@ export default function Leaderboard() {
                   )}
                   {tab === "streak" && (
                     <div className="flex items-center gap-1 text-sm font-bold text-warning">
-                      <Flame className="h-3.5 w-3.5" /> {entry.streak} days
+                      <Flame className="h-3.5 w-3.5" /> {entry.streak} {t("leaderboard.days")}
                     </div>
                   )}
                   {tab === "accuracy" && (
@@ -264,7 +266,7 @@ export default function Leaderboard() {
           {sorted.length === 0 && (
             <div className="py-12 text-center text-muted-foreground">
               <Trophy className="mx-auto mb-3 h-10 w-10 opacity-30" />
-              <p>No entries yet. Start practicing to join the leaderboard!</p>
+              <p>{t("leaderboard.empty")}</p>
             </div>
           )}
         </div>
