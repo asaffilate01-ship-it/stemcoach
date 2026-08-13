@@ -1410,6 +1410,14 @@ export type Database = {
         }
         Returns: string
       }
+      lookup_tenant_by_slug: {
+        Args: { _slug: string }
+        Returns: {
+          id: string
+          logo_url: string
+          name: string
+        }[]
+      }
       record_answer_stats: {
         Args: { _correct: boolean; _user_id: string; _xp_gain: number }
         Returns: Json
