@@ -50,10 +50,7 @@ export default function TenantAdmin() {
       if (!data?.length) return [];
 
       const userIds = data.map(m => m.user_id);
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, display_name")
-        .in("user_id", userIds);
+      const { data: profiles } = await supabase.rpc("get_display_names", { _user_ids: userIds });
       const profileMap = new Map((profiles || []).map(p => [p.user_id, p.display_name || "Unknown"]));
 
       return data.map(m => ({ ...m, display_name: profileMap.get(m.user_id) || "Unknown" }));

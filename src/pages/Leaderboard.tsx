@@ -91,10 +91,7 @@ export default function Leaderboard() {
     }
 
     const userIds = statsData.map((s) => s.user_id);
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, display_name")
-      .in("user_id", userIds);
+    const { data: profiles } = await supabase.rpc("get_display_names", { _user_ids: userIds });
 
     const profileMap = new Map((profiles || []).map((p) => [p.user_id, p.display_name || t("leaderboard.student")]));
 

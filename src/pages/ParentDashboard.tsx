@@ -55,7 +55,7 @@ export default function ParentDashboard() {
     const childIds = links.map(l => l.child_id);
 
     const [profilesRes, statsRes, badgesRes, certsRes, attemptsRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, display_name").in("user_id", childIds),
+      supabase.rpc("get_display_names", { _user_ids: childIds }),
       supabase.from("user_stats").select("*").in("user_id", childIds),
       supabase.from("user_badges").select("user_id").in("user_id", childIds),
       supabase.from("certificates").select("user_id").in("user_id", childIds),
