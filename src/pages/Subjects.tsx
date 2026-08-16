@@ -668,7 +668,7 @@ export default function Subjects() {
               <div className="mb-5 hidden items-center justify-between md:flex">
                 <div>
                   <h2 className="text-lg font-bold tracking-tight md:text-xl">{t("subjects.subjectsHeading")}</h2>
-                  <p className="text-xs text-muted-foreground">{t("subjects.subjectsAvailable", { count: subjects.length })} · {summaryLabel}</p>
+                  <p className="text-xs text-muted-foreground">{t("subjects.subjectsAvailable", { count: availableCount })} · {summaryLabel}</p>
                 </div>
               </div>
 
