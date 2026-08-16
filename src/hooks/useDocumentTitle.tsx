@@ -12,7 +12,8 @@ export function useDocumentTitle(title: string, description?: string) {
 
   useEffect(() => {
     const prev = document.title;
-    const fullTitle = title ? `${title} | STEMCoach` : "STEMCoach — Virtual Tuition Centre";
+    const base = (title || "").replace(/\s*[|—-]\s*STEMCoach\s*$/i, "").trim();
+    const fullTitle = base ? `${base} | STEMCoach` : "STEMCoach — Virtual Tuition Centre";
     document.title = fullTitle;
 
     const setMeta = (selector: string, attr: string, value: string) => {
