@@ -263,6 +263,9 @@ serve(async (req) => {
     }
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    const denied = await requireCronOrAdmin(req, supabase, corsHeaders);
+    if (denied) return denied;
+
     const body = await req.json().catch(() => ({}));
     const action = body.action || "process";
 
