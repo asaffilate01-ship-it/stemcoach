@@ -1352,6 +1352,16 @@ export type Database = {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
       }
+      get_daily_challenge_leaderboard: {
+        Args: { _challenge_id: string }
+        Returns: {
+          display_name: string
+          score: number
+          time_taken_seconds: number
+          total: number
+          user_id: string
+        }[]
+      }
       get_display_names: {
         Args: { _user_ids: string[] }
         Returns: {
@@ -1382,6 +1392,26 @@ export type Database = {
           question_text: string
           subject: string
           topic: string
+        }[]
+      }
+      get_my_challenge_summary: {
+        Args: never
+        Returns: {
+          best_score: number
+          completed: number
+          total_xp: number
+        }[]
+      }
+      get_or_create_daily_challenge: {
+        Args: { _curriculum?: string; _subject: string }
+        Returns: {
+          curriculum: string
+          date: string
+          id: string
+          question_count: number
+          subject: string
+          time_limit_seconds: number
+          xp_reward: number
         }[]
       }
       grant_dev_quota: { Args: { _user_id: string }; Returns: undefined }
@@ -1428,6 +1458,15 @@ export type Database = {
       }
       record_answer_stats: {
         Args: { _correct: boolean; _user_id: string; _xp_gain: number }
+        Returns: Json
+      }
+      record_daily_challenge_attempt: {
+        Args: {
+          _challenge_id: string
+          _score: number
+          _time_taken_seconds: number
+          _total: number
+        }
         Returns: Json
       }
       record_perfect_score: { Args: { _user_id: string }; Returns: undefined }
