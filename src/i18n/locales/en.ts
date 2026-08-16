@@ -156,6 +156,8 @@ const en = {
     allCountriesShort: "All countries",
     subjectsHeading: "Subjects",
     subjectsAvailable: "{{count}} subjects available",
+    comingSoon: "Coming soon",
+    contentInProgress: "Content in progress",
     qs: "Qs",
   },
   // ── Practice ──

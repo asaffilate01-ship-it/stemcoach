@@ -156,6 +156,8 @@ const fr = {
     allCountriesShort: "Tous les pays",
     subjectsHeading: "Matières",
     subjectsAvailable: "{{count}} matières disponibles",
+    comingSoon: "Bientôt disponible",
+    contentInProgress: "Contenu en préparation",
     qs: "Q",
   },
   // ── Practice ──

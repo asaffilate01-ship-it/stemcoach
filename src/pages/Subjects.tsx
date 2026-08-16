@@ -12,6 +12,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getMascot } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
+import { useSubjectCounts } from "@/hooks/useSubjectCounts";
+
 
 /* ───────────────── Country & Board Data ───────────────── */
 
@@ -519,6 +521,15 @@ export default function Subjects() {
   const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set());
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const { isEmpty, countFor } = useSubjectCounts();
+
+  // Subjects with real content first; empty ones fall to the end as "coming soon".
+  const orderedSubjects = useMemo(
+    () => [...subjects].sort((a, b) => Number(isEmpty(a.id)) - Number(isEmpty(b.id))),
+    [isEmpty]
+  );
+  const availableCount = orderedSubjects.filter((s) => !isEmpty(s.id)).length;
+
 
   const toggleCountry = (id: string) => {
     setSelectedCountries(prev => {
@@ -616,7 +627,7 @@ export default function Subjects() {
           {/* Mobile: Sticky filter bar */}
           <div className="mb-4 flex items-center justify-between gap-3 md:hidden">
             <div>
-              <h2 className="text-base font-bold tracking-tight">{subjects.length} {t("subjects.subjectsHeading")}</h2>
+              <h2 className="text-base font-bold tracking-tight">{availableCount} {t("subjects.subjectsHeading")}</h2>
               <p className="text-[11px] text-muted-foreground">{summaryLabel}</p>
             </div>
             <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
@@ -657,12 +668,15 @@ export default function Subjects() {
               <div className="mb-5 hidden items-center justify-between md:flex">
                 <div>
                   <h2 className="text-lg font-bold tracking-tight md:text-xl">{t("subjects.subjectsHeading")}</h2>
-                  <p className="text-xs text-muted-foreground">{t("subjects.subjectsAvailable", { count: subjects.length })} · {summaryLabel}</p>
+                  <p className="text-xs text-muted-foreground">{t("subjects.subjectsAvailable", { count: availableCount })} · {summaryLabel}</p>
                 </div>
               </div>
 
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 md:gap-4">
-                {subjects.map((subject, i) => (
+                {orderedSubjects.map((subject, i) => {
+                  const empty = isEmpty(subject.id);
+                  const liveCount = countFor(subject.id, subject.questionCount);
+                  return (
                   <motion.div
                     key={subject.id}
                     initial={{ opacity: 0, y: 16 }}
@@ -670,8 +684,10 @@ export default function Subjects() {
                     transition={{ duration: 0.35, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <button
-                      onClick={() => navigate(`/practice/${subject.id}`)}
-                      className="group relative w-full overflow-hidden rounded-2xl border border-border/50 bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/25 active:scale-[0.98]"
+                      onClick={() => !empty && navigate(`/practice/${subject.id}`)}
+                      disabled={empty}
+                      aria-disabled={empty}
+                      className={`group relative w-full overflow-hidden rounded-2xl border border-border/50 bg-card text-left shadow-sm transition-all duration-300 ${empty ? "cursor-not-allowed opacity-60" : "hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/25 active:scale-[0.98]"}`}
                     >
                       {/* Gradient accent bar */}
                       <div className={`h-1 w-full bg-gradient-to-r md:h-1.5 ${subjectGradients[subject.id] || "from-primary to-primary/70"}`} />
@@ -688,14 +704,21 @@ export default function Subjects() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between md:mb-1">
                             <h3 className="text-sm font-bold tracking-tight md:text-base lg:text-lg">{subject.name}</h3>
-                            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary md:hidden" />
+                            {empty ? (
+                              <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                {t("subjects.comingSoon")}
+                              </span>
+                            ) : (
+                              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary md:hidden" />
+                            )}
                           </div>
                           <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground md:mb-3 md:text-xs">
                             <BookOpen className="h-3 w-3" />
-                            {subject.questionCount.toLocaleString()} {t("subjects.qs")}
+                            {empty ? t("subjects.contentInProgress") : `${liveCount.toLocaleString()} ${t("subjects.qs")}`}
                             <span className="h-2.5 w-px bg-border" />
                             {subject.topics.length} {t("subjects.topics")}
                           </div>
+
 
                           {/* Mascot tip - desktop only */}
                           {(() => {
@@ -736,7 +759,10 @@ export default function Subjects() {
                       <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 ring-1 ring-inset ring-primary/10" />
                     </button>
                   </motion.div>
-                ))}
+                  );
+                })}
+
+
               </div>
             </div>
           </div>
