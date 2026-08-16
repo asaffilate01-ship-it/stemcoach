@@ -48,7 +48,7 @@ function makeCacheKey(params: Record<string, any>): string {
   return btoa(JSON.stringify(sorted)).slice(0, 200);
 }
 
-// Try to get cached response
+// Try to get cached response (permanent store — avoids re-calling the model)
 async function getCache(action: string, questionId?: string, cacheKey?: string): Promise<string | null> {
   const sb = getSupabaseAdmin();
   let query = sb.from("coaching_cache").select("response_text, hit_count, id").eq("action", action);
@@ -57,26 +57,26 @@ async function getCache(action: string, questionId?: string, cacheKey?: string):
   if (cacheKey) query = query.eq("cache_key", cacheKey);
   else query = query.is("cache_key", null);
 
-  const { data } = await query.maybeSingle();
+  const { data, error } = await query.limit(1).maybeSingle();
+  if (error) console.error("cache read error:", error.message);
   if (data) {
-    // Increment hit count in background
     sb.from("coaching_cache").update({ hit_count: (data.hit_count || 0) + 1 } as any).eq("id", data.id).then(() => {});
     return data.response_text;
   }
   return null;
 }
 
-// Store response in cache
+// Store response in cache. Written once, reused forever after.
 async function setCache(responseText: string, action: string, questionId?: string, cacheKey?: string) {
   const sb = getSupabaseAdmin();
-  const row: any = { action, response_text: responseText };
+  const row: Record<string, unknown> = { action, response_text: responseText };
   if (questionId) row.question_id = questionId;
   if (cacheKey) row.cache_key = cacheKey;
-  await sb.from("coaching_cache").upsert(row, {
-    onConflict: "coaching_cache_flexible_key_idx",
-    ignoreDuplicates: false,
-  }).then(() => {});
+  const { error } = await sb.from("coaching_cache").insert(row);
+  // 23505 = already cached by a concurrent request; that's fine.
+  if (error && error.code !== "23505") console.error("cache write error:", error.message);
 }
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
