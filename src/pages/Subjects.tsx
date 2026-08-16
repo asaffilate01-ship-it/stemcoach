@@ -519,6 +519,15 @@ export default function Subjects() {
   const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set());
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const { isEmpty, countFor } = useSubjectCounts();
+
+  // Subjects with real content first; empty ones fall to the end as "coming soon".
+  const orderedSubjects = useMemo(
+    () => [...subjects].sort((a, b) => Number(isEmpty(a.id)) - Number(isEmpty(b.id))),
+    [isEmpty]
+  );
+  const availableCount = orderedSubjects.filter((s) => !isEmpty(s.id)).length;
+
 
   const toggleCountry = (id: string) => {
     setSelectedCountries(prev => {
