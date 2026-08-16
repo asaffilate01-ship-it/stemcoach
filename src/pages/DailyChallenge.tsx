@@ -105,7 +105,7 @@ export default function DailyChallenge() {
   useEffect(() => {
     if (!user) return;
     supabase.rpc("get_my_challenge_summary" as never).then(({ data }) => {
-      const row = Array.isArray(data) ? data[0] : data;
+      const row = Array.isArray(data) ? data[0] : (data as unknown);
       if (row) setSummary(row as never);
     });
   }, [user, result]);
@@ -138,7 +138,7 @@ export default function DailyChallenge() {
         _curriculum: curriculum,
       } as never);
       if (cErr) throw cErr;
-      const ch = (Array.isArray(created) ? created[0] : created) as Challenge;
+      const ch = (Array.isArray(created) ? created[0] : (created as unknown)) as Challenge;
       if (!ch) throw new Error("Could not start today's challenge");
       setChallenge(ch);
       await loadLeaderboard(ch.id);
