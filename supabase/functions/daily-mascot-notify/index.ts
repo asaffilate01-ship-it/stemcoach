@@ -26,6 +26,9 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    const denied = await requireCronOrAdmin(req, supabase, corsHeaders);
+    if (denied) return denied;
+
     const today = new Date().toISOString().slice(0, 10);
     const todayStart = `${today}T00:00:00.000Z`;
 
