@@ -1414,6 +1414,13 @@ export type Database = {
           xp_reward: number
         }[]
       }
+      get_subject_question_counts: {
+        Args: never
+        Returns: {
+          question_count: number
+          subject: string
+        }[]
+      }
       grant_dev_quota: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
