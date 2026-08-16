@@ -44,6 +44,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_config: {
+        Row: {
+          created_at: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string

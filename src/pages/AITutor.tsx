@@ -4,6 +4,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Send, User, Loader2, Trash2, Sparkles, Lock, CreditCard, GraduationCap } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
@@ -74,11 +75,18 @@ export default function AITutor() {
     };
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        upsertAssistant("Please sign in again to continue coaching.");
+        setIsLoading(false);
+        return;
+      }
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ messages: allMessages, subject: SUBJECT_LABELS[subjectId], curriculum: "International" }),
       });

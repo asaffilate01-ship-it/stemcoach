@@ -1,9 +1,10 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { requireCronOrAdmin } from "../_shared/gate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 // Mascot data for notification personalization
@@ -25,6 +26,9 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    const denied = await requireCronOrAdmin(req, supabase, corsHeaders);
+    if (denied) return denied;
 
     const today = new Date().toISOString().slice(0, 10);
     const todayStart = `${today}T00:00:00.000Z`;
