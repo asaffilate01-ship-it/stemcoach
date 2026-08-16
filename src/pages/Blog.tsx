@@ -217,7 +217,7 @@ export default function Blog() {
   const { slug } = useParams<{ slug: string }>();
   const activePost = slug ? seedPosts.find((p) => p.slug === slug) : undefined;
   useDocumentTitle(
-    activePost ? `${activePost.title} | STEMCoach Blog` : "Blog — Study Tips & Exam Guides | STEMCoach",
+    activePost ? activePost.title : "Blog — Study Tips & Exam Guides",
   );
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
