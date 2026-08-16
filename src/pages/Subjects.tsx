@@ -748,7 +748,10 @@ export default function Subjects() {
                       <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 ring-1 ring-inset ring-primary/10" />
                     </button>
                   </motion.div>
-                ))}
+                  </motion.div>
+                  );
+                })}
+
               </div>
             </div>
           </div>
