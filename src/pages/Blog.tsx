@@ -142,7 +142,6 @@ const seedPosts = [
 function ArticleView({ slug }: { slug: string }) {
   const post = seedPosts.find((p) => p.slug === slug);
   const sections = blogArticles[slug];
-  useDocumentTitle(post ? `${post.title} | STEMCoach Blog` : "Article | STEMCoach Blog");
 
   if (!post || !sections) {
     return (
@@ -214,9 +213,12 @@ function ArticleView({ slug }: { slug: string }) {
 }
 
 export default function Blog() {
-  useDocumentTitle("Blog — Study Tips & Exam Guides | STEMCoach");
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
+  const activePost = slug ? seedPosts.find((p) => p.slug === slug) : undefined;
+  useDocumentTitle(
+    activePost ? `${activePost.title} | STEMCoach Blog` : "Blog — Study Tips & Exam Guides | STEMCoach",
+  );
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
 
