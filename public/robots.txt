@@ -19,5 +19,24 @@ Disallow: /teacher*
 Disallow: /parent*
 Disallow: /onboarding
 Disallow: /select-subjects
+Disallow: /subjects
+Disallow: /mock-exam
+Disallow: /practice
+Disallow: /leaderboard
+Disallow: /analytics
+Disallow: /flashcards
+Disallow: /certificates
+Disallow: /study-planner
+Disallow: /institution
+Disallow: /my-classes
+Disallow: /daily-challenge
+Disallow: /past-papers
+Disallow: /study-groups
+Disallow: /weak-drills
+Disallow: /live-classroom
+Disallow: /badges
+Disallow: /ai-tutor
+Disallow: /progress-report
+Disallow: /reset-password
 
 Sitemap: https://stemcoach.app/sitemap.xml
