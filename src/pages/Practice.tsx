@@ -348,6 +348,17 @@ export default function Practice() {
   };
 
   const handleAskAI = async () => {
+    // Device-level cache: an explanation for a given question never changes,
+    // so we only ever fetch it once per device.
+    const cacheKey = `stemcoach:explain:${question.id}`;
+    try {
+      const local = localStorage.getItem(cacheKey);
+      if (local) {
+        setAiExplanation(local);
+        return;
+      }
+    } catch { /* storage unavailable — fall through to fetch */ }
+
     setLoadingAI(true);
     try {
       const { data, error } = await supabase.functions.invoke("ai-tutor", {
@@ -363,12 +374,14 @@ export default function Practice() {
       });
       if (error) throw error;
       setAiExplanation(data.explanation);
+      try { localStorage.setItem(cacheKey, data.explanation); } catch { /* quota full */ }
     } catch (e: any) {
       toast({ title: t("practice.coachingFailed"), description: e.message, variant: "destructive" });
     } finally {
       setLoadingAI(false);
     }
   };
+
 
   const toggleMultiSelect = (option: string) => {
     setSelectedAnswers((prev) => {
