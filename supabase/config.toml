@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.dev-grant-quota]
 verify_jwt = false
+
+[functions.grade-daily-challenge]
+verify_jwt = false

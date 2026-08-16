@@ -48,7 +48,7 @@ function makeCacheKey(params: Record<string, any>): string {
   return btoa(JSON.stringify(sorted)).slice(0, 200);
 }
 
-// Try to get cached response
+// Try to get cached response (permanent store — avoids re-calling the model)
 async function getCache(action: string, questionId?: string, cacheKey?: string): Promise<string | null> {
   const sb = getSupabaseAdmin();
   let query = sb.from("coaching_cache").select("response_text, hit_count, id").eq("action", action);
@@ -57,26 +57,26 @@ async function getCache(action: string, questionId?: string, cacheKey?: string):
   if (cacheKey) query = query.eq("cache_key", cacheKey);
   else query = query.is("cache_key", null);
 
-  const { data } = await query.maybeSingle();
+  const { data, error } = await query.limit(1).maybeSingle();
+  if (error) console.error("cache read error:", error.message);
   if (data) {
-    // Increment hit count in background
     sb.from("coaching_cache").update({ hit_count: (data.hit_count || 0) + 1 } as any).eq("id", data.id).then(() => {});
     return data.response_text;
   }
   return null;
 }
 
-// Store response in cache
+// Store response in cache. Written once, reused forever after.
 async function setCache(responseText: string, action: string, questionId?: string, cacheKey?: string) {
   const sb = getSupabaseAdmin();
-  const row: any = { action, response_text: responseText };
+  const row: Record<string, unknown> = { action, response_text: responseText };
   if (questionId) row.question_id = questionId;
   if (cacheKey) row.cache_key = cacheKey;
-  await sb.from("coaching_cache").upsert(row, {
-    onConflict: "coaching_cache_flexible_key_idx",
-    ignoreDuplicates: false,
-  }).then(() => {});
+  const { error } = await sb.from("coaching_cache").insert(row);
+  // 23505 = already cached by a concurrent request; that's fine.
+  if (error && error.code !== "23505") console.error("cache write error:", error.message);
 }
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -330,19 +330,38 @@ async function explainQuestion(params: any, apiKey: string) {
     return jsonRes({ error: "question_text is required" }, 400);
   }
 
-  // Fetch correct answer server-side
-  let correct_answer = params.correct_answer;
-  if (question_id && !correct_answer) {
-    const sb = getSupabaseAdmin();
-    const { data: fullQ } = await sb.from("questions").select("correct_answer, explanation").eq("id", question_id).single();
-    if (fullQ) correct_answer = fullQ.correct_answer;
-  }
-
-  // Check cache
+  // 1. Cache first — an explanation is generated once per question, then reused forever.
   if (question_id) {
     const cached = await getCache("explain", question_id);
-    if (cached) return jsonRes({ explanation: cached });
+    if (cached) return jsonRes({ explanation: cached, source: "cache" });
   }
+
+  // 2. Stored coaching content on the question itself — no model call needed.
+  let correct_answer = params.correct_answer;
+  if (question_id) {
+    const sb = getSupabaseAdmin();
+    const { data: fullQ } = await sb
+      .from("questions")
+      .select("correct_answer, explanation, worked_solution, exam_tip, tuition_tips")
+      .eq("id", question_id)
+      .maybeSingle();
+    if (fullQ) {
+      correct_answer = correct_answer || fullQ.correct_answer;
+      const parts: string[] = [];
+      if (fullQ.explanation) parts.push(`### Why this is the answer\n\n${fullQ.explanation}`);
+      if (fullQ.worked_solution) parts.push(`### Step-by-step\n\n${fullQ.worked_solution}`);
+      const tips: string[] = Array.isArray(fullQ.tuition_tips) ? fullQ.tuition_tips : [];
+      if (tips.length) parts.push(`### Tuition tips\n\n${tips.map((x) => `- ${x}`).join("\n")}`);
+      if (fullQ.exam_tip) parts.push(`### Exam tip\n\n${fullQ.exam_tip}`);
+      const stored = parts.join("\n\n");
+      // Rich enough to stand on its own: serve it and cache it.
+      if (stored.length >= 200) {
+        if (question_id) setCache(stored, "explain", question_id);
+        return jsonRes({ explanation: stored, source: "stored" });
+      }
+    }
+  }
+
 
   const systemPrompt = `You are a friendly, expert ${subject || "STEM"} tutor explaining a concept to a 16-18 year old student.
 Be clear, use analogies, and break complex ideas into simple steps. 
