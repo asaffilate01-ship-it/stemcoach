@@ -1352,6 +1352,14 @@ export type Database = {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
       }
+      get_display_names: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          user_id: string
+        }[]
+      }
       get_free_usage: {
         Args: { _user_id: string }
         Returns: {
