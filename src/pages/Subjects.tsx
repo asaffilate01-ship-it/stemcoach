@@ -627,7 +627,7 @@ export default function Subjects() {
           {/* Mobile: Sticky filter bar */}
           <div className="mb-4 flex items-center justify-between gap-3 md:hidden">
             <div>
-              <h2 className="text-base font-bold tracking-tight">{subjects.length} {t("subjects.subjectsHeading")}</h2>
+              <h2 className="text-base font-bold tracking-tight">{availableCount} {t("subjects.subjectsHeading")}</h2>
               <p className="text-[11px] text-muted-foreground">{summaryLabel}</p>
             </div>
             <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
