@@ -11,4 +11,14 @@
   <url><loc>https://stemcoach.app/install</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://stemcoach.app/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://stemcoach.app/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://stemcoach.app/blog/10-proven-study-techniques</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/ace-gcse-maths</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/organic-chemistry-guide</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/feynman-technique</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/alevel-physics-formulas</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/revision-timetable</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/mastering-economics</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/spaced-repetition-guide</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/gcse-biology-cells</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://stemcoach.app/blog/maths-exam-mistakes</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
