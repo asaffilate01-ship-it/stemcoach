@@ -12,6 +12,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getMascot } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
+import { useSubjectCounts } from "@/hooks/useSubjectCounts";
+
 
 /* ───────────────── Country & Board Data ───────────────── */
 
