@@ -16,7 +16,7 @@ interface NavItem {
 }
 
 const items: NavItem[] = [
-  { to: "/", labelKey: "nav.home", icon: Home, variant: "primary" },
+  { to: "/home", labelKey: "nav.home", icon: Home, variant: "primary" },
   { to: "/subjects", labelKey: "nav.subjects", icon: BookOpen, variant: "success" },
   { to: "/ai-tutor", labelKey: "nav.aiTutor", image: "/assets/coach-stem.png", variant: "purple" },
   { to: "/mock-exam", labelKey: "nav.mockExam", icon: GraduationCap, variant: "warning" },
@@ -30,12 +30,15 @@ export function MobileBottomNav() {
 
   const visible = items.filter(i => !i.auth || user);
 
+  // The promo landing page ships its own native-style bottom navigation
+  if (pathname === "/") return null;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/15 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 lg:hidden safe-area-bottom">
       <div className="flex items-center justify-around px-2 py-1.5">
         {visible.map((item) => {
           const label = t(item.labelKey);
-          const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to));
+          const active = pathname === item.to || pathname.startsWith(item.to);
           return (
             <Link
               key={item.to}

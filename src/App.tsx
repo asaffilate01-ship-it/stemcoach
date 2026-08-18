@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TenantBrandingProvider } from "@/hooks/useTenantBranding";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PromoGate } from "@/components/PromoGate";
 import { SessionGuard } from "@/components/SessionGuard";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -17,6 +18,7 @@ import { SkipToContent } from "@/components/layout/SkipToContent";
 
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
+const Promo = lazy(() => import("./pages/Promo"));
 const Subjects = lazy(() => import("./pages/Subjects"));
 const Practice = lazy(() => import("./pages/Practice"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -71,8 +73,16 @@ const PageLoader = () => (
   </div>
 );
 
-const P = ({ children }: { children: React.ReactNode }) => (
+// Public (always reachable) page wrapper
+const Pub = ({ children }: { children: React.ReactNode }) => (
   <PageTransition>{children}</PageTransition>
+);
+
+// Everything past the promo landing page requires the preview access code
+const P = ({ children }: { children: React.ReactNode }) => (
+  <PromoGate>
+    <PageTransition>{children}</PageTransition>
+  </PromoGate>
 );
 
 const App = () => (
@@ -91,13 +101,14 @@ const App = () => (
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
                     {/* Public */}
-                    <Route path="/" element={<Index />} />
+                    <Route path="/" element={<Promo />} />
+                    <Route path="/home" element={<P><Index /></P>} />
                     <Route path="/auth" element={<P><Auth /></P>} />
                     <Route path="/reset-password" element={<P><ResetPassword /></P>} />
                     <Route path="/pricing" element={<P><Pricing /></P>} />
-                    <Route path="/privacy" element={<P><PrivacyPolicy /></P>} />
+                    <Route path="/privacy" element={<Pub><PrivacyPolicy /></Pub>} />
                     <Route path="/install" element={<P><InstallApp /></P>} />
-                    <Route path="/terms" element={<P><TermsOfService /></P>} />
+                    <Route path="/terms" element={<Pub><TermsOfService /></Pub>} />
                     <Route path="/blog" element={<P><Blog /></P>} />
                     <Route path="/blog/:slug" element={<P><Blog /></P>} />
                     <Route path="/meet-the-squad" element={<P><MeetTheSquad /></P>} />
