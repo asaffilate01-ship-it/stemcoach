@@ -81,11 +81,14 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-border/30 pt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
-            {t("footer.copyright", { year: new Date().getFullYear() })}
-            <Heart className="h-3 w-3 text-destructive fill-destructive" />
-            {t("footer.copyrightSuffix")}
-          </p>
+          <div className="flex flex-col items-center gap-1 sm:items-start">
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
+              {t("footer.copyright", { year: new Date().getFullYear() })}
+              <Heart className="h-3 w-3 text-destructive fill-destructive" />
+              {t("footer.copyrightSuffix")}
+            </p>
+            <p className="text-xs text-muted-foreground/60">STEMcoach is a trading name of iTechLounge Ltd</p>
+          </div>
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">{t("footer.privacy")}</Link>
             <Link to="/terms" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">{t("footer.terms")}</Link>
