@@ -23,6 +23,7 @@ export function Footer() {
       { label: t("footer.support"), to: "/support" },
       { label: t("footer.privacyPolicy"), to: "/privacy" },
       { label: t("footer.termsOfService"), to: "/terms" },
+      { label: "Cookie Policy", to: "/cookies" },
       { label: t("footer.emailUs"), to: "mailto:support@stemcoach.app", external: true },
     ],
   };
