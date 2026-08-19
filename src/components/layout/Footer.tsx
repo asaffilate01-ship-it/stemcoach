@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Heart } from "lucide-react";
+import { openCookieSettings } from "@/lib/cookieConsent";
 import { useTranslation } from "react-i18next";
 
 export function Footer() {
