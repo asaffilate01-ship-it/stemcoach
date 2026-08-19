@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Heart } from "lucide-react";
+import { openCookieSettings } from "@/lib/cookieConsent";
 import { useTranslation } from "react-i18next";
 
 export function Footer() {
@@ -22,6 +23,7 @@ export function Footer() {
       { label: t("footer.support"), to: "/support" },
       { label: t("footer.privacyPolicy"), to: "/privacy" },
       { label: t("footer.termsOfService"), to: "/terms" },
+      { label: "Cookie Policy", to: "/cookies" },
       { label: t("footer.emailUs"), to: "mailto:support@stemcoach.app", external: true },
     ],
   };
@@ -92,6 +94,14 @@ export function Footer() {
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">{t("footer.privacy")}</Link>
             <Link to="/terms" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">{t("footer.terms")}</Link>
+            <Link to="/cookies" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">Cookies</Link>
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+            >
+              Cookie settings
+            </button>
           </div>
         </div>
       </div>

@@ -47,6 +47,7 @@ const Onboarding = lazy(() => import("./pages/Onboarding"));
 const SelectSubjects = lazy(() => import("./pages/SelectSubjects"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
 const FormulaSheets = lazy(() => import("./pages/FormulaSheets"));
@@ -109,6 +110,7 @@ const App = () => (
                     <Route path="/privacy" element={<Pub><PrivacyPolicy /></Pub>} />
                     <Route path="/install" element={<P><InstallApp /></P>} />
                     <Route path="/terms" element={<Pub><TermsOfService /></Pub>} />
+                    <Route path="/cookies" element={<Pub><CookiePolicy /></Pub>} />
                     <Route path="/blog" element={<P><Blog /></P>} />
                     <Route path="/blog/:slug" element={<P><Blog /></P>} />
                     <Route path="/meet-the-squad" element={<P><MeetTheSquad /></P>} />
