@@ -356,6 +356,19 @@ export default function Promo() {
           <div className="container mx-auto flex flex-col items-center gap-3 px-4 text-center">
             <img src="/assets/coach-stem.png" alt="" className="h-10 w-10 rounded-xl object-cover ring-1 ring-border/30" />
             <p className="text-sm font-semibold">STEMcoach</p>
+            <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link>
+              <Link to="/cookies" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link>
+              <button
+                type="button"
+                onClick={openCookieSettings}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Cookie settings
+              </button>
+              <a href="mailto:support@stemcoach.app" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+            </nav>
             <p className="text-xs text-muted-foreground">
               STEMcoach is a trading name of iTechLounge Ltd
             </p>
