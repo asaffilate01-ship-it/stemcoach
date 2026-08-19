@@ -94,6 +94,14 @@ export function Footer() {
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">{t("footer.privacy")}</Link>
             <Link to="/terms" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">{t("footer.terms")}</Link>
+            <Link to="/cookies" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">Cookies</Link>
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+            >
+              Cookie settings
+            </button>
           </div>
         </div>
       </div>
