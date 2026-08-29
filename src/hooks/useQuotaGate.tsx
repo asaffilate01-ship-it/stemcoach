@@ -79,26 +79,14 @@ export function useQuotaGate() {
   }, [refresh]);
 
   const incrementUsed = useCallback(async () => {
-    if (!user) return;
-    setState(prev => ({
-      ...prev,
-      usedQuestions: prev.usedQuestions + 1,
-      remainingQuestions: Math.max(0, prev.remainingQuestions - 1),
-    }));
-
-    await supabase.rpc("increment_used_questions", { _user_id: user.id });
-  }, [user]);
+    // Quotas are consumed by the answer-checking Edge Function. Refreshing here
+    // keeps the browser UI current without trusting it to mutate entitlements.
+    await refresh();
+  }, [refresh]);
 
   const incrementMockExam = useCallback(async () => {
-    if (!user) return;
-    setState(prev => ({
-      ...prev,
-      mockExamsUsed: prev.mockExamsUsed + 1,
-      mockExamsRemaining: Math.max(0, prev.mockExamsRemaining - 1),
-    }));
-
-    await supabase.rpc("increment_mock_exams_used" as any, { _user_id: user.id });
-  }, [user]);
+    await refresh();
+  }, [refresh]);
 
   const canPractice = state.hasPurchased && state.remainingQuestions > 0;
   const canUseCoaching = state.hasPurchased;
