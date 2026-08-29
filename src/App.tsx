@@ -17,7 +17,6 @@ import { SkipToContent } from "@/components/layout/SkipToContent";
 
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
-const Promo = lazy(() => import("./pages/Promo"));
 const Subjects = lazy(() => import("./pages/Subjects"));
 const Practice = lazy(() => import("./pages/Practice"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
