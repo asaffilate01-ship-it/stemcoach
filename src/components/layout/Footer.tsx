@@ -17,7 +17,6 @@ export function Footer() {
     [t("footer.resources")]: [
       { label: t("footer.formulaSheets"), to: "/formulas" },
       { label: t("footer.blog"), to: "/blog" },
-      { label: t("footer.tutorials"), to: "/tutorials" },
       { label: t("footer.meetTheSquad"), to: "/meet-the-squad" },
     ],
     [t("footer.company")]: [
@@ -48,7 +47,7 @@ export function Footer() {
               {t("footer.footerDesc")}
             </p>
             <div className="mt-6 flex items-center gap-2">
-              {["/assets/mathmax.png", "/assets/physix.png", "/assets/chemi.png", "/assets/biobee.png", "/assets/codey.png", "/assets/lexi.png", "/assets/econiq.png", "/assets/litera.png", "/assets/pysche.png", "/assets/geo.png", "/assets/bizpro.png"].map((src, i) => (
+              {["/assets/mathmax.png", "/assets/physix.png", "/assets/chemi.png", "/assets/biobee.png", "/assets/codey.png", "/assets/lexi.png", "/assets/econiq.png", "/assets/litera.png", "/assets/psyche.png", "/assets/geo.png", "/assets/bizpro.png"].map((src, i) => (
                 <img
                   key={i}
                   src={src}
@@ -90,7 +89,7 @@ export function Footer() {
               <Heart className="h-3 w-3 text-destructive fill-destructive" />
               {t("footer.copyrightSuffix")}
             </p>
-            <p className="text-xs text-muted-foreground/60">STEMcoach is a trading name of iTechLounge Ltd</p>
+            <p className="text-xs text-muted-foreground/60">STEMCoach is a trading name of iTechLounge Ltd</p>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">{t("footer.privacy")}</Link>

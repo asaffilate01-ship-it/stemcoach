@@ -14,6 +14,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { SkipToContent } from "@/components/layout/SkipToContent";
+import { PersistentCoach } from "@/components/layout/PersistentCoach";
 
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -155,6 +156,7 @@ const App = () => (
                 </Suspense>
               </div>
               <MobileBottomNav />
+              <PersistentCoach />
               <CookieConsent />
               {DevToolsPanel && (
                 <Suspense fallback={null}>

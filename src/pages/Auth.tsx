@@ -129,14 +129,14 @@ export default function Auth() {
               always available.
             </h2>
             <p className="mb-10 text-base leading-relaxed opacity-80">
-              2,000,000+ exam-style questions, STEMcoach coaching, and real exam simulations across 40+ curricula worldwide.
+              Reviewed practice questions, guided tutorials, STEMCoach support, and exam-style simulations across global curricula.
             </p>
             
             <div className="space-y-4">
               {[
-                 { stat: "2M+", label: "Practice Questions" },
-                 { stat: "40+", label: "Curricula Supported" },
-                { stat: "94%", label: "Student Pass Rate" },
+                 { stat: "Reviewed", label: "Practice Questions" },
+                 { stat: "Global", label: "Curriculum Frameworks" },
+                { stat: "14", label: "Subject Coaches" },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}

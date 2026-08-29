@@ -1,7 +1,7 @@
 const STORAGE_KEY = "stemcoach_preview_access";
 
-/** Promo/demo access code. Change this to rotate access for reviewers. */
-export const PREVIEW_ACCESS_CODE = "STEMCOACH2026";
+/** Cosmetic preview gate only. It is not an authentication boundary. */
+export const PREVIEW_ACCESS_CODE = import.meta.env.VITE_PREVIEW_ACCESS_CODE || "";
 
 export function isPreviewUnlocked(): boolean {
   try {
@@ -12,7 +12,7 @@ export function isPreviewUnlocked(): boolean {
 }
 
 export function unlockPreview(code: string): boolean {
-  const ok = code.trim().toUpperCase() === PREVIEW_ACCESS_CODE;
+  const ok = Boolean(PREVIEW_ACCESS_CODE) && code.trim().toUpperCase() === PREVIEW_ACCESS_CODE.toUpperCase();
   if (ok) {
     try {
       localStorage.setItem(STORAGE_KEY, PREVIEW_ACCESS_CODE);

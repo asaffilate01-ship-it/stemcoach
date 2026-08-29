@@ -7,9 +7,9 @@ import heroImg from "@/assets/hero-stemsquad.png";
 import stemsquadImg from "@/assets/stemsquad-hero.png";
 
 const stats = [
-  { key: "questionsLabel", value: "2M+", icon: BookOpen },
-  { key: "curriculaLabel", value: "50+", icon: Users },
-  { key: "passRate", value: "94%", icon: Trophy },
+  { key: "questionsLabel", value: "Reviewed", icon: BookOpen },
+  { key: "curriculaLabel", value: "Global", icon: Users },
+  { key: "passRate", value: "Practice", icon: Trophy },
 ];
 
 export function HeroSection() {

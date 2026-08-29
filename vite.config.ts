@@ -1,11 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   server: {
     host: "::",
     port: 8080,
@@ -15,13 +14,13 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Keep installation fast; large artwork is fetched on demand.
+        globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
         navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
           {
@@ -57,7 +56,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: "STEMCoach — Virtual Tuition Centre",
         short_name: "STEMCoach",
-        description: "Expert-crafted exam prep with 2M+ questions across 50+ curricula",
+        description: "Reviewed, curriculum-mapped practice, tutorials, coaching, and mock exams",
         theme_color: "#3b5bdb",
         background_color: "#f5f6f8",
         display: "standalone",
@@ -89,7 +88,7 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "framer-motion"],
   },

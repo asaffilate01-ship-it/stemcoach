@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { subjects, type Question as LocalQuestion } from "@/data/questions";
-import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2, Lock, CreditCard, Trophy, Zap, ChevronLeft, Timer, Target, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2, Lock, Trophy, Zap, ChevronLeft, Timer, Target, Sparkles, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,17 @@ interface DBQuestion {
   max_marks: number | null;
 }
 
+function parseOptions(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  if (typeof value !== "string") return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function Practice() {
   const { t } = useTranslation();
   const { subjectId } = useParams<{ subjectId: string }>();
@@ -65,6 +76,7 @@ export default function Practice() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(new Set());
   const [essayAnswer, setEssayAnswer] = useState("");
+  const [orderedOptions, setOrderedOptions] = useState<string[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showTips, setShowTips] = useState(false);
   const [score, setScore] = useState({ correct: 0, total: 0 });
@@ -129,7 +141,8 @@ export default function Practice() {
       const q = questions[currentIndex];
       if (!q) return;
       const isEssayQ = q.question_type === "essay" || q.question_type === "multi-step";
-      const opts: string[] = typeof q.options === "string" ? JSON.parse(q.options) : (Array.isArray(q.options) ? q.options : []);
+      const opts = parseOptions(q.options);
+      const isOrderingQ = q.question_type === "ordering";
 
       // Don't intercept keys when typing in textarea
       if (isEssayQ && document.activeElement?.tagName === "TEXTAREA") return;
@@ -147,7 +160,7 @@ export default function Practice() {
         e.preventDefault();
         if (showFeedback) {
           handleNext();
-        } else if (selectedAnswer || selectedAnswers.size > 0 || (isEssayQ && essayAnswer.trim())) {
+        } else if (selectedAnswer || selectedAnswers.size > 0 || isOrderingQ || (isEssayQ && essayAnswer.trim())) {
           handleSubmit();
         }
       }
@@ -225,10 +238,11 @@ export default function Practice() {
   const question = questions[currentIndex];
   const isMultiSelect = question.allow_multiple_answers || question.question_type === "multi-select";
   const isEssay = question.question_type === "essay" || question.question_type === "multi-step";
-  const isNumerical = question.question_type === "numerical" && !question.options?.length;
-  const parsedOptions: string[] = typeof question.options === "string"
-    ? JSON.parse(question.options)
-    : (Array.isArray(question.options) ? question.options : []);
+  const isShortAnswer = question.question_type === "short-answer";
+  const isOrdering = question.question_type === "ordering";
+  const parsedOptions = parseOptions(question.options);
+  const isNumerical = question.question_type === "numerical" && parsedOptions.length === 0;
+  const currentOrder = orderedOptions.length ? orderedOptions : parsedOptions;
   const isCorrect = revealedAnswer ? revealedAnswer.correct : false;
   const progressPercent = ((currentIndex + 1) / questions.length) * 100;
 
@@ -281,7 +295,8 @@ export default function Practice() {
       return;
     }
 
-    if (!selectedAnswer && selectedAnswers.size === 0) return;
+    const submittedSingleAnswer = isOrdering ? currentOrder.join(" → ") : selectedAnswer;
+    if (!submittedSingleAnswer && selectedAnswers.size === 0) return;
     setTimerRunning(false);
     setSubmitting(true);
 
@@ -289,7 +304,7 @@ export default function Practice() {
       const { data: result, error } = await supabase.functions.invoke("check-answer", {
         body: {
           question_id: question.id,
-          answer: isMultiSelect ? undefined : selectedAnswer,
+          answer: isMultiSelect ? undefined : submittedSingleAnswer,
           answers: isMultiSelect ? Array.from(selectedAnswers) : undefined,
           time_taken_seconds: timeTaken,
         },
@@ -329,6 +344,7 @@ export default function Practice() {
     setSelectedAnswer(null);
     setSelectedAnswers(new Set());
     setEssayAnswer("");
+    setOrderedOptions([]);
     setShowFeedback(false);
     setShowTips(false);
     setAiExplanation(null);
@@ -384,6 +400,14 @@ export default function Practice() {
       else next.add(option);
       return next;
     });
+  };
+
+  const moveOrderedOption = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= currentOrder.length) return;
+    const next = [...currentOrder];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    setOrderedOptions(next);
   };
 
   const difficultyLabel = question.difficulty <= 2 ? t("practice.easy") : question.difficulty <= 4 ? t("practice.medium") : t("practice.hard");
@@ -530,7 +554,7 @@ export default function Practice() {
                 </span>
               </div>
 
-              {/* Multi-select / essay badges */}
+              {/* Format-specific instructions */}
               {isMultiSelect && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-400">
                   <Sparkles className="h-3.5 w-3.5" />
@@ -541,6 +565,26 @@ export default function Practice() {
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-medium text-primary">
                   <Sparkles className="h-3.5 w-3.5" />
                   {question.question_type === "multi-step" ? "Multi-step solution" : "Extended response"} · STEMCoach graded
+                </div>
+              )}
+              {isOrdering && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300">
+                  <GripVertical className="h-3.5 w-3.5" /> Put the steps in the correct order
+                </div>
+              )}
+              {question.question_type === "true-false" && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-xs font-medium text-violet-700 dark:text-violet-300">
+                  <Sparkles className="h-3.5 w-3.5" /> Decide whether the statement is true or false
+                </div>
+              )}
+              {question.question_type === "data-interpretation" && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs font-medium text-cyan-700 dark:text-cyan-300">
+                  <Sparkles className="h-3.5 w-3.5" /> Interpret the supplied data before choosing an answer
+                </div>
+              )}
+              {question.question_type === "assertion-reason" && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/5 px-3 py-2 text-xs font-medium text-fuchsia-700 dark:text-fuchsia-300">
+                  <Sparkles className="h-3.5 w-3.5" /> Check each statement, then decide whether the reason explains the assertion
                 </div>
               )}
 
@@ -555,12 +599,15 @@ export default function Practice() {
               )}
 
               {/* MCQ Options */}
-              {parsedOptions.length > 0 && !isEssay && (
+              {parsedOptions.length > 0 && !isEssay && !isOrdering && (
                 <div className="mb-6 space-y-2.5">
                   {parsedOptions.map((option, i) => {
                     const letter = String.fromCharCode(65 + i);
                     const isSelected = isMultiSelect ? selectedAnswers.has(option) : selectedAnswer === option;
-                    const isOptionCorrect = showFeedback && option === revealedAnswer?.correct_answer;
+                    const correctOptions: string[] = Array.isArray(revealedAnswer?.correct_answers) && revealedAnswer.correct_answers.length
+                      ? revealedAnswer.correct_answers
+                      : [revealedAnswer?.correct_answer];
+                    const isOptionCorrect = showFeedback && correctOptions.includes(option);
 
                     let optionClasses = "border border-border/60 bg-card hover:border-primary/30 hover:bg-primary/[0.02]";
                     if (showFeedback && isOptionCorrect) {
@@ -604,6 +651,24 @@ export default function Practice() {
                 </div>
               )}
 
+              {isOrdering && (
+                <div className="mb-6 space-y-2">
+                  {currentOrder.map((option, index) => (
+                    <div key={option} className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
+                      <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">{index + 1}</span>
+                      <span className="flex-1 text-sm font-medium">{option}</span>
+                      {!showFeedback && (
+                        <span className="flex gap-1">
+                          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveOrderedOption(index, -1)} disabled={index === 0} aria-label={`Move ${option} up`}><ArrowUp className="h-4 w-4" /></Button>
+                          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveOrderedOption(index, 1)} disabled={index === currentOrder.length - 1} aria-label={`Move ${option} down`}><ArrowDown className="h-4 w-4" /></Button>
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {isNumerical && !showFeedback && (
                 <div className="mb-6 max-w-md">
                   <label htmlFor="numerical-answer" className="mb-2 block text-sm font-medium">Your answer (include units where appropriate)</label>
@@ -615,6 +680,13 @@ export default function Practice() {
                     inputMode="decimal"
                     className="rounded-xl"
                   />
+                </div>
+              )}
+
+              {isShortAnswer && !showFeedback && (
+                <div className="mb-6 max-w-xl">
+                  <label htmlFor="short-answer" className="mb-2 block text-sm font-medium">Your short answer</label>
+                  <Input id="short-answer" value={selectedAnswer || ""} onChange={(event) => setSelectedAnswer(event.target.value)} placeholder="Enter the key term or concise answer" className="rounded-xl" maxLength={300} />
                 </div>
               )}
 
@@ -637,7 +709,7 @@ export default function Practice() {
                 {!showFeedback ? (
                   <Button
                     onClick={handleSubmit}
-                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim()) || loadingAI || (isFree && !canPracticeSubjectFree(subjectId || ""))}
+                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim() && !isOrdering) || loadingAI || submitting || (isFree && !canPracticeSubjectFree(subjectId || ""))}
                     className="rounded-xl px-6"
                     size="lg"
                   >
@@ -692,7 +764,7 @@ export default function Practice() {
                           <XCircle className="h-4 w-4 text-destructive" />
                         </div>
                         <span className="font-semibold text-destructive">{t("practice.incorrect")}</span>
-                        <span className="text-sm text-muted-foreground">— Answer: {revealedAnswer?.correct_answer}</span>
+                        <span className="text-sm text-muted-foreground">— Answer: {isMultiSelect && Array.isArray(revealedAnswer?.correct_answers) && revealedAnswer.correct_answers.length ? revealedAnswer.correct_answers.join(", ") : revealedAnswer?.correct_answer}</span>
                       </>
                     )}
                     {timeTaken > 0 && (
@@ -734,7 +806,9 @@ export default function Practice() {
                     </div>
                     <div className="space-y-3">
                       {parsedOptions.map((opt) => {
-                        const isRight = opt === revealedAnswer?.correct_answer;
+                        const isRight = Array.isArray(revealedAnswer?.correct_answers) && revealedAnswer.correct_answers.length
+                          ? revealedAnswer.correct_answers.includes(opt)
+                          : opt === revealedAnswer?.correct_answer;
                         const dbDistractors = (question as any).distractor_reasoning;
                         const reasoning = dbDistractors?.[opt] || null;
                         return (
@@ -829,7 +903,7 @@ export default function Practice() {
         <AnimatePresence>
           {showMascotReaction && (
             <div className="fixed bottom-20 left-4 right-4 z-40 flex justify-center lg:bottom-8 lg:left-auto lg:right-8">
-              <MascotReaction subjectId={subjectId || ""} correct={mascotCorrect} show={showMascotReaction} />
+              <MascotReaction subjectId={subjectId || ""} correct={mascotCorrect} show={showMascotReaction} reactionKey={question.id} />
             </div>
           )}
         </AnimatePresence>

@@ -5,10 +5,10 @@ export function SocialProofBar() {
   const { t } = useTranslation();
 
   const counters = [
-    { value: "2M+", key: "landing.examQuestions" },
-    { value: "50+", key: "landing.curriculaCovered" },
-    { value: "12", key: "landing.subjects" },
-    { value: "12", key: "landing.aiMascotTutors" },
+    { value: "Reviewed", key: "landing.examQuestions" },
+    { value: "Global", key: "landing.curriculaCovered" },
+    { value: "14", key: "landing.subjects" },
+    { value: "14", key: "landing.aiMascotTutors" },
   ];
 
   return (

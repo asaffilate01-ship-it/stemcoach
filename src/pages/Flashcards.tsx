@@ -86,59 +86,13 @@ export default function Flashcards() {
     if (!user) return;
     setGenerating(true);
     try {
-      const { data: wrongAttempts } = await supabase
-        .from("attempts")
-        .select("question_id")
-        .eq("user_id", user.id)
-        .eq("correct", false)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      if (!wrongAttempts?.length) {
-        toast({ title: "No wrong answers found", description: "Practice more to generate flashcards." });
-        setGenerating(false);
-        return;
-      }
-
-      const qIds = [...new Set(wrongAttempts.map((a) => a.question_id))];
-
-      const { data: existing } = await supabase
-        .from("flashcards")
-        .select("question_id")
-        .eq("user_id", user.id)
-        .in("question_id", qIds);
-
-      const existingIds = new Set(existing?.map((e) => e.question_id) || []);
-      const newIds = qIds.filter((id) => !existingIds.has(id));
-
-      if (newIds.length === 0) {
-        toast({ title: "All caught up!", description: "Flashcards already exist for your missed questions." });
-        setGenerating(false);
-        return;
-      }
-
-      const { data: questions } = await supabase
-        .from("questions")
-        .select("id, question_text, correct_answer, explanation, subject, topic")
-        .in("id", newIds);
-
-      if (!questions?.length) {
-        setGenerating(false);
-        return;
-      }
-
-      const newCards = questions.map((q) => ({
-        user_id: user.id,
-        question_id: q.id,
-        front: q.question_text,
-        back: `${q.correct_answer}\n\n${q.explanation}`,
-        subject: q.subject,
-        topic: q.topic,
-      }));
-
-      await supabase.from("flashcards").insert(newCards as any);
+      const { data: created, error } = await supabase.rpc("create_flashcards_from_mistakes", { _limit: 20 });
+      if (error) throw error;
       await loadCards();
-      toast({ title: `${newCards.length} flashcards created!`, description: "Generated from your missed questions." });
+      const count = Number(created || 0);
+      toast(count > 0
+        ? { title: `${count} flashcards created!`, description: "Generated securely from your missed questions." }
+        : { title: "All caught up!", description: "No new missed questions need flashcards." });
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     }

@@ -7,7 +7,7 @@ import { openCookieSettings } from "@/lib/cookieConsent";
 export default function CookiePolicy() {
   useDocumentTitle(
     "Cookie Policy",
-    "How STEMcoach uses cookies and local storage, the categories we use, and how to change your preferences at any time."
+    "How STEMCoach uses cookies and local storage, the categories we use, and how to change your preferences at any time."
   );
 
   return (
@@ -24,7 +24,7 @@ export default function CookiePolicy() {
           <section>
             <h2 className="text-xl font-semibold">1. What we use</h2>
             <p>
-              STEMcoach uses cookies and equivalent browser storage (localStorage and IndexedDB) to keep you
+              STEMCoach uses cookies and equivalent browser storage (localStorage and IndexedDB) to keep you
               signed in, remember your preferences, and understand how the platform is used. You can change
               your choices at any time.
             </p>
@@ -76,7 +76,7 @@ export default function CookiePolicy() {
               <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>, or contact{" "}
               <a href="mailto:privacy@stemcoach.app" className="text-primary hover:underline">privacy@stemcoach.app</a>.
             </p>
-            <p className="text-xs text-muted-foreground">STEMcoach is a trading name of iTechLounge Ltd.</p>
+            <p className="text-xs text-muted-foreground">STEMCoach is a trading name of iTechLounge Ltd.</p>
           </section>
         </div>
       </main>

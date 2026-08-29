@@ -1,4 +1,4 @@
-export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select";
+export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select" | "code" | "data-interpretation" | "assertion-reason" | "true-false" | "ordering" | "short-answer";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
 export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies" | "french" | "german";
 
@@ -40,7 +40,7 @@ export const subjects: SubjectInfo[] = [
     icon: "∑",
     mascotImage: "/assets/mathmax.png",
     color: "221 83% 53%",
-    questionCount: 300000,
+    questionCount: 0,
     topics: ["Algebra", "Calculus", "Trigonometry", "Statistics", "Geometry", "Vectors", "Matrices", "Differential Equations"],
   },
   {
@@ -49,7 +49,7 @@ export const subjects: SubjectInfo[] = [
     icon: "⚛",
     mascotImage: "/assets/physix.png",
     color: "250 80% 60%",
-    questionCount: 250000,
+    questionCount: 0,
     topics: ["Mechanics", "Electricity", "Waves", "Thermodynamics", "Magnetism", "Nuclear Physics", "Quantum Physics", "Optics"],
   },
   {
@@ -57,7 +57,7 @@ export const subjects: SubjectInfo[] = [
     name: "Chemistry",
     icon: "⚗",
     color: "142 71% 45%",
-    questionCount: 250000,
+    questionCount: 0,
     topics: ["Atomic Structure", "Bonding", "Stoichiometry", "Organic Chemistry", "Thermochemistry", "Kinetics", "Equilibrium", "Electrochemistry"],
     mascotImage: "/assets/chemi.png",
   },
@@ -66,7 +66,7 @@ export const subjects: SubjectInfo[] = [
     name: "Biology",
     icon: "🧬",
     color: "38 92% 50%",
-    questionCount: 250000,
+    questionCount: 0,
     topics: ["Cell Biology", "Genetics", "Evolution", "Human Physiology", "Plant Biology", "Ecology", "Biotechnology", "Microbiology"],
     mascotImage: "/assets/biobee.png",
   },
@@ -75,7 +75,7 @@ export const subjects: SubjectInfo[] = [
     name: "Computer Science",
     icon: "⟨⟩",
     color: "0 84% 60%",
-    questionCount: 200000,
+    questionCount: 0,
     topics: ["Programming", "Algorithms", "Data Structures", "Databases", "Networking", "Cybersecurity", "Operating Systems", "AI"],
     mascotImage: "/assets/codey.png",
   },
@@ -85,7 +85,7 @@ export const subjects: SubjectInfo[] = [
     icon: "📈",
     mascotImage: "/assets/econiq.png",
     color: "340 75% 50%",
-    questionCount: 150000,
+    questionCount: 0,
     topics: ["Microeconomics", "Macroeconomics", "International Trade", "Development Economics", "Market Structures", "Fiscal Policy", "Monetary Policy", "Behavioural Economics"],
   },
   {
@@ -94,7 +94,7 @@ export const subjects: SubjectInfo[] = [
     icon: "📖",
     mascotImage: "/assets/litera.png",
     color: "210 70% 50%",
-    questionCount: 150000,
+    questionCount: 0,
     topics: ["Poetry Analysis", "Prose Fiction", "Drama", "Shakespeare", "Modern Literature", "Comparative Analysis", "Unseen Poetry", "Creative Writing"],
   },
   {
@@ -103,7 +103,7 @@ export const subjects: SubjectInfo[] = [
     icon: "🧠",
     mascotImage: "/assets/psyche.png",
     color: "30 80% 50%",
-    questionCount: 150000,
+    questionCount: 0,
     topics: ["Social Psychology", "Cognitive Psychology", "Developmental Psychology", "Biological Psychology", "Psychopathology", "Research Methods", "Memory", "Attachment"],
   },
   {
@@ -112,7 +112,7 @@ export const subjects: SubjectInfo[] = [
     icon: "🌍",
     mascotImage: "/assets/geo.png",
     color: "160 60% 40%",
-    questionCount: 150000,
+    questionCount: 0,
     topics: ["Physical Geography", "Human Geography", "Plate Tectonics", "Weather & Climate", "Rivers & Coasts", "Urbanisation", "Globalisation", "Fieldwork & Statistical Skills"],
   },
   {
@@ -121,7 +121,7 @@ export const subjects: SubjectInfo[] = [
     icon: "💼",
     mascotImage: "/assets/bizpro.png",
     color: "270 60% 50%",
-    questionCount: 150000,
+    questionCount: 0,
     topics: ["Marketing", "Finance & Accounting", "Operations", "Human Resources", "Business Strategy", "Enterprise", "External Environment", "Decision Making"],
   },
   {
@@ -130,7 +130,7 @@ export const subjects: SubjectInfo[] = [
     icon: "🌐",
     mascotImage: "/assets/lexi.png",
     color: "200 80% 50%",
-    questionCount: 100000,
+    questionCount: 0,
     topics: ["Reading Comprehension", "Writing Task 1", "Writing Task 2", "Listening", "Speaking Part 1", "Speaking Part 2", "Speaking Part 3", "Academic Vocabulary", "Grammar for IELTS"],
   },
   {
@@ -139,7 +139,7 @@ export const subjects: SubjectInfo[] = [
     icon: "📝",
     mascotImage: "/assets/lexi.png",
     color: "330 70% 55%",
-    questionCount: 50000,
+    questionCount: 0,
     topics: ["Language Analysis", "Teaching Methodology", "Classroom Management", "Lesson Planning", "Phonology", "Grammar Teaching", "Skills Teaching", "Error Correction"],
   },
   {
@@ -148,7 +148,7 @@ export const subjects: SubjectInfo[] = [
     icon: "🇫🇷",
     mascotImage: "/assets/francois.png",
     color: "220 70% 45%",
-    questionCount: 100000,
+    questionCount: 0,
     topics: ["Grammaire", "Conjugaison", "Compréhension écrite", "Expression écrite", "Littérature française", "Commentaire de texte", "Dissertation", "Oral"],
   },
   {
@@ -157,7 +157,7 @@ export const subjects: SubjectInfo[] = [
     icon: "🇩🇪",
     mascotImage: "/assets/hans.png",
     color: "0 0% 20%",
-    questionCount: 100000,
+    questionCount: 0,
     topics: ["Grammatik", "Leseverstehen", "Schriftlicher Ausdruck", "Textanalyse", "Deutsche Literatur", "Erörterung", "Hörverständnis", "Mündliche Prüfung"],
   },
 ];
@@ -173,15 +173,13 @@ export const curricula = [
   { id: "uk-igcse", label: "IGCSE", country: "🌍", boards: ["Cambridge (CAIE)", "Edexcel International", "Oxford AQA"] },
   { id: "uk-ial", label: "International A-Level (IAL)", country: "🌍", boards: ["Edexcel International (IAL)", "Cambridge (CAIE)", "Oxford AQA International"] },
   { id: "uk-olevel", label: "O-Level", country: "🌍", boards: ["Cambridge (CAIE)"] },
-  { id: "uk-pre-u", label: "Cambridge Pre-U", country: "🌍", boards: ["Cambridge Pre-U"] },
   { id: "ib-myp", label: "IB MYP (Middle Years)", country: "🌍", boards: ["IB MYP"] },
   { id: "ib-dp-sl", label: "IB Diploma SL", country: "🌍", boards: ["IB SL"] },
   { id: "ib-dp-hl", label: "IB Diploma HL", country: "🌍", boards: ["IB HL"] },
-  { id: "ib-dp-further", label: "IB Further/Higher Level", country: "🌍", boards: ["IB Further Maths", "IB HL Options"] },
   { id: "us-middle", label: "US Middle School (6–8)", country: "🇺🇸", boards: ["Common Core", "NGSS"] },
   { id: "us-highschool", label: "US High School (9–11)", country: "🇺🇸", boards: ["Common Core", "NGSS", "State Standards"] },
   { id: "us-ap", label: "AP (Advanced Placement)", country: "🇺🇸", boards: ["AP Physics 1", "AP Physics 2", "AP Physics C", "AP Chemistry", "AP Biology", "AP Calculus AB", "AP Calculus BC", "AP Statistics", "AP Computer Science A", "AP Computer Science Principles"] },
-  { id: "us-sat", label: "SAT / SAT Subject", country: "🇺🇸", boards: ["SAT Math", "SAT Subject Physics", "SAT Subject Chemistry", "SAT Subject Biology"] },
+  { id: "us-sat", label: "Digital SAT", country: "🇺🇸", boards: ["SAT Math", "SAT Reading and Writing"] },
   { id: "us-act", label: "ACT", country: "🇺🇸", boards: ["ACT Math", "ACT Science"] },
   // ─── Australia ───
   { id: "au-hsc", label: "HSC (NSW Year 12)", country: "🇦🇺", boards: ["NESA"] },
@@ -189,6 +187,9 @@ export const curricula = [
   { id: "au-qce", label: "QCE (Queensland Year 12)", country: "🇦🇺", boards: ["QCAA"] },
   { id: "au-wace", label: "WACE (WA Year 12)", country: "🇦🇺", boards: ["SCSA"] },
   { id: "au-sace", label: "SACE (SA Year 12)", country: "🇦🇺", boards: ["SACE Board"] },
+  { id: "au-act", label: "ACT Senior Secondary Certificate", country: "🇦🇺", boards: ["ACT Board of Senior Secondary Studies"] },
+  { id: "au-tce", label: "TCE (Tasmania Year 12)", country: "🇦🇺", boards: ["TASC"] },
+  { id: "au-ntcet", label: "NTCET (Northern Territory Year 12)", country: "🇦🇺", boards: ["Northern Territory Board of Studies"] },
   { id: "au-atar", label: "ATAR Preparation", country: "🇦🇺", boards: ["NESA", "VCAA", "QCAA", "SCSA", "SACE Board"] },
   // ─── New Zealand ───
   { id: "nz-ncea-1", label: "NCEA Level 1", country: "🇳🇿", boards: ["NZQA"] },
@@ -196,13 +197,13 @@ export const curricula = [
   { id: "nz-ncea-3", label: "NCEA Level 3", country: "🇳🇿", boards: ["NZQA"] },
   { id: "nz-scholarship", label: "NZ Scholarship", country: "🇳🇿", boards: ["NZQA"] },
   // ─── Canada ───
-  { id: "ca-ontario-12", label: "Ontario Grade 12", country: "🇨🇦", boards: ["Ontario Ministry"] },
-  { id: "ca-bc-12", label: "BC Grade 12", country: "🇨🇦", boards: ["BC Ministry"] },
-  { id: "ca-alberta-12", label: "Alberta Grade 12 Diploma", country: "🇨🇦", boards: ["Alberta Education"] },
-  { id: "ca-quebec-cegep", label: "Quebec CEGEP", country: "🇨🇦", boards: ["Quebec Ministry"] },
+  { id: "ca-ontario-12", label: "Ontario Grade 12", country: "🇨🇦", boards: ["Ontario Ministry of Education"] },
+  { id: "ca-bc-12", label: "British Columbia Grade 12", country: "🇨🇦", boards: ["BC Ministry of Education and Child Care"] },
+  { id: "ca-alberta-12", label: "Alberta Grade 12 Diploma", country: "🇨🇦", boards: ["Alberta Education and Childcare"] },
+  { id: "ca-quebec-cegep", label: "Québec Secondary V / CEGEP Science", country: "🇨🇦", boards: ["Ministère de l'Éducation du Québec"] },
   // ─── Bangladesh ───
-  { id: "bd-hsc", label: "HSC (Higher Secondary)", country: "🇧🇩", boards: ["Dhaka Board", "Rajshahi Board", "Chittagong Board", "Comilla Board", "Jessore Board", "Sylhet Board", "Dinajpur Board", "Barisal Board", "Madrasa Board", "Technical Board"] },
-  { id: "bd-ssc", label: "SSC (Secondary School)", country: "🇧🇩", boards: ["Dhaka Board", "Rajshahi Board", "Chittagong Board", "Comilla Board", "Jessore Board", "Sylhet Board", "Dinajpur Board", "Barisal Board"] },
+  { id: "bd-hsc", label: "HSC (Higher Secondary)", country: "🇧🇩", boards: ["Dhaka Board", "Rajshahi Board", "Chattogram Board", "Cumilla Board", "Jashore Board", "Sylhet Board", "Dinajpur Board", "Barishal Board", "Mymensingh Board", "Madrasah Board", "Technical Board"] },
+  { id: "bd-ssc", label: "SSC (Secondary School)", country: "🇧🇩", boards: ["Dhaka Board", "Rajshahi Board", "Chattogram Board", "Cumilla Board", "Jashore Board", "Sylhet Board", "Dinajpur Board", "Barishal Board", "Mymensingh Board"] },
   // ─── Sri Lanka ───
   { id: "lk-al", label: "GCE A/L (Sri Lanka)", country: "🇱🇰", boards: ["NIE Sri Lanka"] },
   { id: "lk-ol", label: "GCE O/L (Sri Lanka)", country: "🇱🇰", boards: ["NIE Sri Lanka"] },
@@ -237,7 +238,7 @@ export const curricula = [
   { id: "uae-moe-10", label: "UAE MoE Grade 10", country: "🇦🇪", boards: ["UAE MoE"] },
   { id: "uae-moe-11", label: "UAE MoE Grade 11", country: "🇦🇪", boards: ["UAE MoE"] },
   { id: "uae-moe-12", label: "UAE MoE Grade 12 (Thanawiya)", country: "🇦🇪", boards: ["UAE MoE"] },
-  { id: "uae-emsat", label: "EmSAT (UAE Standard Test)", country: "🇦🇪", boards: ["EmSAT"] },
+  { id: "uae-emsat-legacy", label: "EmSAT Achieve (legacy practice; Grade 12 requirement ended 2024)", country: "🇦🇪", boards: ["EmSAT Achieve (legacy)"] },
   // ─── France (16–19 + University) ───
   { id: "fr-seconde", label: "Seconde (Year 10)", country: "🇫🇷", boards: ["Éducation Nationale"] },
   { id: "fr-premiere", label: "Première (Year 11)", country: "🇫🇷", boards: ["Éducation Nationale"] },
@@ -246,7 +247,7 @@ export const curricula = [
   { id: "fr-bac-pro", label: "Baccalauréat Professionnel", country: "🇫🇷", boards: ["Éducation Nationale"] },
   { id: "fr-bts", label: "BTS (Brevet de Technicien Supérieur)", country: "🇫🇷", boards: ["Éducation Nationale", "Rectorat"] },
   { id: "fr-cpge", label: "CPGE (Classes Préparatoires)", country: "🇫🇷", boards: ["Concours CCP", "Concours Mines-Ponts", "Concours X-ENS", "Concours Centrale-Supélec", "BCE", "Ecricome"] },
-  { id: "fr-dut-but", label: "BUT (Bachelor Universitaire de Technologie)", country: "🇫🇷", boards: ["IUT / Éducation Nationale"] },
+  { id: "fr-but", label: "BUT (Bachelor Universitaire de Technologie)", country: "🇫🇷", boards: ["IUT / Ministère de l'Enseignement supérieur"] },
   { id: "uni-fr", label: "Université française (Licence / Master)", country: "🇫🇷", boards: ["Université de Paris", "Sorbonne Université", "Université Lyon", "Université Toulouse", "Université Bordeaux", "Université Strasbourg", "Université Aix-Marseille", "Grande École"] },
   // ─── Philippines ───
   { id: "ph-grade10", label: "DepEd Grade 10", country: "🇵🇭", boards: ["DepEd Philippines"] },
@@ -257,7 +258,7 @@ export const curricula = [
   { id: "ph-humss", label: "SHS HUMSS Strand", country: "🇵🇭", boards: ["DepEd Philippines"] },
   // ─── Germany (16–19 + University) ───
   { id: "de-mittlerer", label: "Mittlerer Schulabschluss (Klasse 10)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
-  { id: "de-oberstufe", label: "Gymnasiale Oberstufe (Klasse 11–12)", country: "🇩🇪", boards: ["Kultusministerkonferenz"] },
+  { id: "de-oberstufe", label: "Gymnasiale Oberstufe (Klasse 11–12/13)", country: "🇩🇪", boards: ["Kultusministerkonferenz", "State education ministries"] },
   { id: "de-abitur", label: "Abitur (Allgemeine Hochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz", "Bayern Abitur", "NRW Abitur", "Baden-Württemberg Abitur", "Niedersachsen Abitur", "Hessen Abitur", "Sachsen Abitur", "Berlin Abitur", "Hamburg Abitur"] },
   { id: "de-fachabitur", label: "Fachabitur (Fachhochschulreife)", country: "🇩🇪", boards: ["Kultusministerkonferenz", "FOS Bayern", "FOS NRW", "FOS Hessen"] },
   { id: "de-berufliches-gym", label: "Berufliches Gymnasium", country: "🇩🇪", boards: ["Kultusministerkonferenz", "BG Baden-Württemberg", "BG NRW"] },

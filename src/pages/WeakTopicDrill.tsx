@@ -23,9 +23,7 @@ interface DrillQuestion {
   subject: string;
   topic: string;
   difficulty: number;
-  correct_answer: string;
   options: string[] | null;
-  explanation: string;
 }
 
 interface AIPlan {
@@ -43,6 +41,7 @@ export default function WeakTopicDrill() {
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [answerResult, setAnswerResult] = useState<{ correct: boolean; correct_answer: string; explanation?: string } | null>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [analyzed, setAnalyzed] = useState(false);
   const [drilling, setDrilling] = useState(false);
@@ -72,28 +71,29 @@ export default function WeakTopicDrill() {
     setScore({ correct: 0, total: 0 });
     setSelected(null);
     setShowFeedback(false);
+    setAnswerResult(null);
   };
 
   const submitAnswer = async () => {
     if (!selected) return;
-    setShowFeedback(true);
     const q = drillQuestions[currentQ];
-    const correct = selected === q.correct_answer;
-    setScore(prev => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
-
-    if (user) {
-      await supabase.from("attempts").insert({
-        user_id: user.id,
-        question_id: q.id,
-        answer: selected,
-        correct,
+    try {
+      const { data, error } = await supabase.functions.invoke("check-answer", {
+        body: { question_id: q.id, answer: selected },
       });
+      if (error) throw error;
+      setAnswerResult(data);
+      setShowFeedback(true);
+      setScore(prev => ({ correct: prev.correct + (data.correct ? 1 : 0), total: prev.total + 1 }));
+    } catch (error) {
+      toast({ title: "Could not submit answer", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
     }
   };
 
   const nextQuestion = () => {
     setSelected(null);
     setShowFeedback(false);
+    setAnswerResult(null);
     if (currentQ + 1 < drillQuestions.length) {
       setCurrentQ(prev => prev + 1);
     } else {
@@ -106,7 +106,7 @@ export default function WeakTopicDrill() {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">Sign in to access STEMcoach-powered drills.</div>
+        <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">Sign in to access STEMCoach-powered drills.</div>
       </div>
     );
   }
@@ -119,16 +119,16 @@ export default function WeakTopicDrill() {
       <PageTransition>
       <main className="container mx-auto max-w-3xl px-4 py-8">
         <div className="mb-8">
-          <div className="stem-label mb-2">STEMcoach Practice</div>
+          <div className="stem-label mb-2">STEMCoach Practice</div>
           <h1 className="stem-heading text-3xl">Weak Topic Drills</h1>
-          <p className="mt-2 text-sm text-muted-foreground">STEMcoach analyzes your performance and creates targeted practice sets for your weakest areas.</p>
+          <p className="mt-2 text-sm text-muted-foreground">STEMCoach analyzes your performance and creates targeted practice sets for your weakest areas.</p>
         </div>
 
         {!analyzed && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="stem-card rounded-xl p-8 text-center">
             <Brain className="mx-auto mb-4 h-12 w-12 text-primary" />
             <h3 className="mb-2 text-lg font-semibold">Analyze Your Performance</h3>
-            <p className="mb-6 text-sm text-muted-foreground">STEMcoach will review your past answers to identify weak areas and generate targeted practice questions.</p>
+            <p className="mb-6 text-sm text-muted-foreground">STEMCoach will review your past answers to identify weak areas and generate targeted practice questions.</p>
             <Button onClick={analyze} disabled={loading} className="gap-2 rounded-xl">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</> : <><Sparkles className="h-4 w-4" /> Start Analysis</>}
             </Button>
@@ -162,7 +162,7 @@ export default function WeakTopicDrill() {
             {aiPlan?.plans && aiPlan.plans.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="stem-card rounded-xl p-6">
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                  <Sparkles className="h-4 w-4 text-primary" /> STEMcoach Study Plan
+                  <Sparkles className="h-4 w-4 text-primary" /> STEMCoach Study Plan
                 </h3>
                 <div className="space-y-4">
                   {aiPlan.plans.map((plan, i) => (
@@ -217,7 +217,7 @@ export default function WeakTopicDrill() {
                   {(typeof question.options === "string" ? JSON.parse(question.options) : (question.options || [])).map((opt: string, i: number) => {
                     const letter = String.fromCharCode(65 + i);
                     let cls = "border-2 border-transparent hover:border-primary/20";
-                    if (showFeedback && opt === question.correct_answer) cls = "stem-success-card";
+                    if (showFeedback && opt === answerResult?.correct_answer) cls = "stem-success-card";
                     else if (showFeedback && selected === opt) cls = "stem-error-card";
                     else if (selected === opt) cls = "border-2 border-primary bg-primary/5";
 
@@ -230,16 +230,16 @@ export default function WeakTopicDrill() {
                       >
                         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-semibold">{letter}</span>
                         <span className="text-sm font-medium">{opt}</span>
-                        {showFeedback && opt === question.correct_answer && <CheckCircle2 className="ml-auto h-5 w-5 text-success" />}
-                        {showFeedback && selected === opt && opt !== question.correct_answer && <XCircle className="ml-auto h-5 w-5 text-destructive" />}
+                        {showFeedback && opt === answerResult?.correct_answer && <CheckCircle2 className="ml-auto h-5 w-5 text-success" />}
+                        {showFeedback && selected === opt && opt !== answerResult?.correct_answer && <XCircle className="ml-auto h-5 w-5 text-destructive" />}
                       </button>
                     );
                   })}
                 </div>
               )}
 
-              {showFeedback && question.explanation && (
-                <div className="mb-4 rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground">{question.explanation}</div>
+              {showFeedback && answerResult?.explanation && (
+                <div className="mb-4 rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground">{answerResult.explanation}</div>
               )}
 
               <div className="flex gap-3">

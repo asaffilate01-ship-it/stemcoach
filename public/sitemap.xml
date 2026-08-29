@@ -6,6 +6,7 @@
   <url><loc>https://stemcoach.app/meet-the-squad</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://stemcoach.app/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://stemcoach.app/formulas</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://stemcoach.app/tutorials</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://stemcoach.app/register-institution</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://stemcoach.app/support</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://stemcoach.app/install</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>

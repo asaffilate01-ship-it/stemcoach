@@ -23,7 +23,7 @@ const faqs = [
   { q: "Is this a subscription?", a: "No! Pay only when you need more questions. No recurring charges, no auto-renewals — your credits never expire." },
   { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
   { q: "What do I get for free?", a: `You get ${FREE_QUESTIONS_PER_SUBJECT} free questions per subject to try before purchasing. Full tutorial explanations included.` },
-  { q: "What is STEMcoach coaching?", a: "When you're stuck on a question, STEMcoach explains the concept step-by-step — like having a private tutor on demand." },
+  { q: "What is STEMCoach coaching?", a: "When you're stuck on a question, STEMCoach explains the concept step-by-step — like having a private tutor on demand." },
 ];
 
 export default function Pricing() {

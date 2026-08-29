@@ -95,8 +95,10 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     if (action === "grade-essay") {
-      return await gradeEssay(params, LOVABLE_API_KEY);
+      return await gradeEssay(params, LOVABLE_API_KEY, user.id);
     } else if (action === "generate-questions") {
+      const { data: isAdmin } = await getSupabaseAdmin().rpc("has_role", { _user_id: user.id, _role: "admin" });
+      if (!isAdmin) return jsonRes({ error: "Admin access required" }, 403);
       return await generateQuestions(params, LOVABLE_API_KEY);
     } else if (action === "explain") {
       return await explainQuestion(params, LOVABLE_API_KEY);
@@ -142,24 +144,33 @@ function jsonRes(body: any, status = 200) {
 }
 
 // ── GRADE ESSAY ──
-async function gradeEssay(params: any, apiKey: string) {
-  const { question_text, student_answer, max_marks, subject, topic, question_id } = params;
+async function gradeEssay(params: any, apiKey: string, userId: string) {
+  const question_id = typeof params.question_id === "string" ? params.question_id : "";
+  const student_answer = typeof params.student_answer === "string" ? params.student_answer.trim().slice(0, 5_000) : "";
+  if (!question_id || !student_answer) return jsonRes({ error: "question_id and student_answer are required" }, 400);
 
-  if (!question_text || !student_answer) {
-    return jsonRes({ error: "question_text and student_answer are required" }, 400);
+  const sb = getSupabaseAdmin();
+  const { data: fullQ, error: questionError } = await sb.from("questions")
+    .select("question_text, mark_scheme, model_answer, correct_answer, worked_solution, max_marks, points, subject, topic")
+    .eq("id", question_id).eq("review_status", "published").single();
+  if (questionError || !fullQ) return jsonRes({ error: "Published question not found" }, 404);
+
+  const { data: quota } = await sb.from("user_quotas").select("total_questions, used_questions, subjects").eq("user_id", userId).maybeSingle();
+  if (quota?.total_questions > 0) {
+    if (quota.used_questions >= quota.total_questions) return jsonRes({ error: "Question allowance exhausted" }, 403);
+    if (quota.subjects?.length && !quota.subjects.includes(fullQ.subject)) return jsonRes({ error: "Subject is not included in your plan" }, 403);
+  } else {
+    const { count } = await sb.from("attempts").select("id, questions!inner(subject)", { count: "exact", head: true })
+      .eq("user_id", userId).eq("questions.subject", fullQ.subject);
+    if ((count || 0) >= 5) return jsonRes({ error: "Free question allowance exhausted for this subject" }, 403);
   }
 
-  // Fetch full question data server-side if question_id provided
-  let mark_scheme = params.mark_scheme;
-  let model_answer = params.model_answer;
-  if (question_id && (!mark_scheme || !model_answer)) {
-    const sb = getSupabaseAdmin();
-    const { data: fullQ } = await sb.from("questions").select("mark_scheme, model_answer, correct_answer, worked_solution").eq("id", question_id).single();
-    if (fullQ) {
-      mark_scheme = mark_scheme || fullQ.mark_scheme || fullQ.worked_solution;
-      model_answer = model_answer || fullQ.model_answer || fullQ.correct_answer;
-    }
-  }
+  const question_text = fullQ.question_text;
+  const max_marks = Math.max(1, Math.min(50, fullQ.max_marks || fullQ.points || 6));
+  const subject = fullQ.subject;
+  const topic = fullQ.topic;
+  const mark_scheme = fullQ.mark_scheme || fullQ.worked_solution;
+  const model_answer = fullQ.model_answer || fullQ.correct_answer;
 
   // Cache key: question + normalized student answer
   const cacheKey = makeCacheKey({ q: question_text.slice(0, 500), a: student_answer.slice(0, 500) });
@@ -167,7 +178,9 @@ async function gradeEssay(params: any, apiKey: string) {
   // Check cache
   const cached = await getCache("grade-essay", question_id, cacheKey);
   if (cached) {
-    return jsonRes({ grading: JSON.parse(cached) });
+    const grading = JSON.parse(cached);
+    const recorded = await recordEssayResult(sb, userId, question_id, student_answer, grading, max_marks, fullQ.points || 1, quota?.total_questions > 0);
+    return jsonRes({ grading, ...recorded });
   }
 
   const systemPrompt = `You are an expert ${subject || "STEM"} examiner marking a student's essay/extended answer. 
@@ -217,13 +230,34 @@ Maximum marks available: ${max_marks || 6}`;
 
   const toolCall = result.data.choices[0]?.message?.tool_calls?.[0];
   const grading = toolCall ? JSON.parse(toolCall.function.arguments) : null;
+  if (!grading) return jsonRes({ error: "The grading service returned no result" }, 502);
+  grading.max_marks = max_marks;
+  grading.score = Math.max(0, Math.min(max_marks, Number(grading.score) || 0));
 
   // Cache the grading result
   if (grading) {
     setCache(JSON.stringify(grading), "grade-essay", question_id, cacheKey);
   }
 
-  return jsonRes({ grading });
+  const recorded = await recordEssayResult(sb, userId, question_id, student_answer, grading, max_marks, fullQ.points || 1, quota?.total_questions > 0);
+  return jsonRes({ grading, ...recorded });
+}
+
+async function recordEssayResult(sb: any, userId: string, questionId: string, answer: string, grading: any, maxMarks: number, points: number, paid: boolean) {
+  const passed = Number(grading.score) >= maxMarks * 0.6;
+  const xpGain = passed ? Math.min(200, points * 10) : Math.min(50, Math.max(points * 2, 5));
+  const { error: attemptError } = await sb.from("attempts").insert({
+    user_id: userId, question_id: questionId, answer, correct: passed,
+    ai_score: grading.score, ai_feedback: String(grading.feedback || "").slice(0, 500),
+  });
+  if (attemptError) throw attemptError;
+  const { data: stats, error: statsError } = await sb.rpc("record_answer_stats", { _user_id: userId, _correct: passed, _xp_gain: xpGain });
+  if (statsError) throw statsError;
+  if (paid) {
+    const { error } = await sb.rpc("increment_used_questions", { _user_id: userId });
+    if (error) throw error;
+  }
+  return { correct: passed, xp_gained: xpGain, stats };
 }
 
 // ── GENERATE QUESTIONS ──

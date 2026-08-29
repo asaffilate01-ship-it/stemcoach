@@ -1,21 +1,17 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { getCoachStem, getSquadMembers } from "@/lib/mascots";
 
-const squad = [
-  { name: "MathMax", subject: "Mathematics", image: "/assets/mathmax.png" },
-  { name: "PhysiX", subject: "Physics", image: "/assets/physix.png" },
-  { name: "Chemi", subject: "Chemistry", image: "/assets/chemi.png" },
-  { name: "BioBee", subject: "Biology", image: "/assets/biobee.png" },
-  { name: "Codey", subject: "Computer Science", image: "/assets/codey.png" },
-  { name: "Lexi", subject: "IELTS & CELTA", image: "/assets/lexi.png" },
-  { name: "EconiQ", subject: "Economics", image: "/assets/econiq.png" },
-  { name: "Litera", subject: "English Literature", image: "/assets/litera.png" },
-  { name: "Pysche", subject: "Psychology", image: "/assets/pysche.png" },
-  { name: "Geo", subject: "Geography", image: "/assets/geo.png" },
-  { name: "BizPro", subject: "Business Studies", image: "/assets/bizpro.png" },
-  { name: "François", subject: "Français", image: "/assets/francois.png" },
-  { name: "Hans", subject: "Deutsch", image: "/assets/hans.png" },
-];
+const subjectLabels: Record<string, string> = {
+  mathematics: "Mathematics", physics: "Physics", chemistry: "Chemistry", biology: "Biology",
+  "computer-science": "Computer Science", ielts: "IELTS & CELTA", economics: "Economics",
+  "english-literature": "English Literature", psychology: "Psychology", geography: "Geography",
+  "business-studies": "Business Studies", french: "Français", german: "Deutsch",
+};
+const squad = getSquadMembers()
+  .filter((member) => member.subjectId !== "celta")
+  .map((member) => ({ ...member, subject: subjectLabels[member.subjectId] || member.subjectId }));
+const coach = getCoachStem();
 
 export function StemSquadSection() {
   const { t } = useTranslation();
@@ -40,7 +36,7 @@ export function StemSquadSection() {
             className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-premium-lg ring-2 ring-primary/20 sm:h-28 sm:w-28"
           >
               <img
-                src="/assets/coach-stem-cutout.png"
+                src={coach.image}
                 alt="Coach Stem — leader of the STEM Squad"
                 className="h-full w-full object-contain p-1"
               />

@@ -177,13 +177,7 @@ export default function DailyChallenge() {
     if (!challenge) return;
     setSubmitting(true);
     try {
-      const payload = questions
-        .filter((q) => answers[q.id])
-        .map((q) => ({ question_id: q.id, answer: answers[q.id] }));
-      if (payload.length === 0) {
-        toast({ title: "Answer at least one question first", variant: "destructive" });
-        return;
-      }
+      const payload = questions.map((q) => ({ question_id: q.id, answer: answers[q.id] || "" }));
       const { data, error } = await supabase.functions.invoke("grade-daily-challenge", {
         body: { challenge_id: challenge.id, answers: payload, time_taken_seconds: elapsed },
       });

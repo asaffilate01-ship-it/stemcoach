@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
   { to: "/", labelKey: "nav.home", label: "Home", icon: BookOpen, variant: "primary" },
   { to: "/subjects", labelKey: "nav.subjects", label: "Subjects", icon: GraduationCap, variant: "success" },
   { to: "/mock-exam", labelKey: "nav.exam", label: "Exam", icon: Trophy, variant: "warning" },
-  { to: "/ai-tutor", labelKey: "nav.aiTutor", label: "STEMcoach", icon: Bot, image: "/assets/coach-stem.png" },
+  { to: "/ai-tutor", labelKey: "nav.aiTutor", label: "STEMCoach", icon: Bot, image: "/assets/coach-stem.png" },
   { to: "/dashboard", labelKey: "nav.dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study", variant: "primary" },
   { to: "/flashcards", labelKey: "nav.flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study", variant: "accent" },
   { to: "/weak-drills", labelKey: "nav.drills", label: "Drills", icon: Brain, group: "study", variant: "warning" },
@@ -86,8 +86,8 @@ const navItems: NavItem[] = [
   { to: "/my-classes", labelKey: "nav.myClasses", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes", variant: "primary" },
   { to: "/live-classroom", labelKey: "nav.liveClass", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true, variant: "destructive" },
   { to: "/formulas", labelKey: "nav.formulaSheets", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
+  { to: "/tutorials", label: "Tutorials", icon: BookOpen, group: "resources", variant: "success" },
   { to: "/blog", labelKey: "nav.blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
-  { to: "/tutorials", labelKey: "nav.tutorials", label: "Tutorials", icon: BookOpen, group: "resources", variant: "primary" },
   { to: "/parent", labelKey: "nav.parentPortal", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
   { to: "/teacher", labelKey: "nav.teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },
   { to: "/institution", labelKey: "nav.myInstitution", label: "My Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
@@ -175,7 +175,7 @@ export function AppHeader() {
     <header className="sticky top-0 z-50 border-b border-border/20 bg-background/70 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300">
       <div className="container mx-auto flex h-12 items-center justify-between px-4 sm:h-14">
         {/* Logo */}
-        <Link to="/" className="group flex items-center gap-2">
+        <Link to="/home" className="group flex items-center gap-2">
           <img
             src={tenant.logoUrl || "/assets/coach-stem.png"}
             alt={tenant.name || "Coach Stem"}
@@ -193,7 +193,7 @@ export function AppHeader() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-0.5 lg:flex">
           {topNav.slice(0, 4).map(item => <NavLink key={item.to} item={item} />)}
-          <GroupDropdown label={t("nav.groupStudy")} items={studyItems} />
+          {user && <GroupDropdown label={t("nav.groupStudy")} items={studyItems} />}
           <GroupDropdown label={t("nav.groupRewards")} items={socialItems} />
           {classItems.length > 0 && <GroupDropdown label={t("nav.groupClasses")} items={classItems} />}
           <GroupDropdown label={t("nav.groupResources")} items={resourceItems} />
@@ -211,7 +211,7 @@ export function AppHeader() {
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
           {user && <NotificationBell />}
-          {user && (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" variant="ghost" className="gap-1.5 rounded-lg text-xs h-8 px-2 sm:h-9 sm:px-3">
@@ -240,6 +240,10 @@ export function AppHeader() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            <Button size="sm" onClick={() => navigate("/auth")} className="rounded-lg shadow-sm h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
+              {t("nav.login")}
+            </Button>
           )}
         </div>
       </div>

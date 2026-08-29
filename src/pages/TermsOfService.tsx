@@ -19,7 +19,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-xl font-semibold">2. Description of Service</h2>
-            <p>STEMCoach is an online educational platform providing practice questions, mock exams, STEMcoach coaching, flashcards, and progress tracking across multiple curricula and subjects. The Platform is available via web browser.</p>
+            <p>STEMCoach is an online educational platform providing practice questions, mock exams, STEMCoach coaching, flashcards, and progress tracking across multiple curricula and subjects. The Platform is available via web browser.</p>
           </section>
 
           <section>
