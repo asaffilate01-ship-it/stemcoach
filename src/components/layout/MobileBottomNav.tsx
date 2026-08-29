@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Home, BookOpen, GraduationCap, LayoutDashboard } from "lucide-react";
+import { Home, BookOpen, GraduationCap, LayoutDashboard, Library } from "lucide-react";
 import { Icon3D, type Icon3DVariant } from "@/components/ui/icon-3d";
 import type { LucideIcon } from "lucide-react";
 
@@ -19,6 +19,7 @@ const items: NavItem[] = [
   { to: "/home", labelKey: "nav.home", icon: Home, variant: "primary" },
   { to: "/subjects", labelKey: "nav.subjects", icon: BookOpen, variant: "success" },
   { to: "/ai-tutor", labelKey: "nav.aiTutor", image: "/assets/coach-stem.png", variant: "purple" },
+  { to: "/tutorials", labelKey: "nav.tutorials", icon: Library, variant: "primary" },
   { to: "/mock-exam", labelKey: "nav.mockExam", icon: GraduationCap, variant: "warning" },
   { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard, variant: "accent", auth: true },
 ];
