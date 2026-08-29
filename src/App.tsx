@@ -59,11 +59,15 @@ const MeetTheSquad = lazy(() => import("./pages/MeetTheSquad"));
 const RegisterInstitution = lazy(() => import("./pages/RegisterInstitution"));
 const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 const Support = lazy(() => import("./pages/Support"));
+const Tutorials = lazy(() => import("./pages/Tutorials"));
 
-// DevTools available in all environments for testing
-const DevToolsPanel = lazy(() => import("./components/dev/DevToolsPanel").then(m => ({ default: m.DevToolsPanel })));
+// Keep test credentials and development helpers out of production bundles.
+const DevToolsPanel = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_TOOLS === "true"
+  ? lazy(() => import("./components/dev/DevToolsPanel").then(m => ({ default: m.DevToolsPanel })))
+  : null;
 
 const queryClient = new QueryClient();
+const previewEnabled = import.meta.env.VITE_PREVIEW_GATE_ENABLED !== "false";
 
 const PageLoader = () => (
   <div className="flex min-h-screen items-center justify-center bg-background">
@@ -79,18 +83,17 @@ const Pub = ({ children }: { children: React.ReactNode }) => (
   <PageTransition>{children}</PageTransition>
 );
 
-// Everything past the promo landing page requires the preview access code
 const P = ({ children }: { children: React.ReactNode }) => (
-  <PromoGate>
-    <PageTransition>{children}</PageTransition>
-  </PromoGate>
+  previewEnabled
+    ? <PromoGate><PageTransition>{children}</PageTransition></PromoGate>
+    : <PageTransition>{children}</PageTransition>
 );
 
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-                  <TenantBrandingProvider>
+        <TenantBrandingProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -102,7 +105,7 @@ const App = () => (
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
                     {/* Public */}
-                    <Route path="/" element={<Promo />} />
+                    <Route path="/" element={previewEnabled ? <Promo /> : <Index />} />
                     <Route path="/home" element={<P><Index /></P>} />
                     <Route path="/auth" element={<P><Auth /></P>} />
                     <Route path="/reset-password" element={<P><ResetPassword /></P>} />
@@ -118,6 +121,7 @@ const App = () => (
                     <Route path="/join-institution" element={<P><JoinInstitution /></P>} />
                     <Route path="/formulas" element={<P><FormulaSheets /></P>} />
                     <Route path="/support" element={<P><Support /></P>} />
+                    <Route path="/tutorials" element={<P><Tutorials /></P>} />
 
                     {/* Auth-required public */}
                     <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
@@ -159,13 +163,15 @@ const App = () => (
               </div>
               <MobileBottomNav />
               <CookieConsent />
-              <Suspense fallback={null}>
-                <DevToolsPanel />
-              </Suspense>
+              {DevToolsPanel && (
+                <Suspense fallback={null}>
+                  <DevToolsPanel />
+                </Suspense>
+              )}
             </BrowserRouter>
           </TooltipProvider>
-          </TenantBrandingProvider>
-                </AuthProvider>
+        </TenantBrandingProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );
