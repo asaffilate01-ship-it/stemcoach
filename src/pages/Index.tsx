@@ -4,7 +4,6 @@ import { StemSquadSection } from "@/components/landing/StemSquadSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { CurriculaSection } from "@/components/landing/CurriculaSection";
-import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -21,7 +20,6 @@ const Index = () => {
         <HowItWorksSection />
         <FeaturesSection />
         <CurriculaSection />
-        <TestimonialsSection />
         <FAQSection />
         <CTASection />
       </main>

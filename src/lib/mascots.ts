@@ -12,7 +12,7 @@ export interface MascotInfo {
   cheerMessage: string;
 }
 
-const mascotMap: Record<string, MascotInfo> = {
+const mascotMap = {
   mathematics: {
     image: "/assets/mathmax.png",
     name: "MathMax",
@@ -157,7 +157,7 @@ const mascotMap: Record<string, MascotInfo> = {
     cheerMessage: "Your analytical skills are truly poetic! 📚",
   },
   psychology: {
-    image: "/assets/pysche.png",
+    image: "/assets/psyche.png",
     name: "Psyche",
     emoji: "🧠",
     personality: "The Thinker",
@@ -226,29 +226,49 @@ const mascotMap: Record<string, MascotInfo> = {
     streakLostMessage: "Übung macht den Meister! Practice makes perfect — let's get back to it! 🇩🇪",
     cheerMessage: "Dein Deutsch ist ausgezeichnet! 🇩🇪",
   },
+} satisfies Record<string, MascotInfo>;
+
+export type CoachId = "stemcoach" | keyof typeof mascotMap;
+export const DEFAULT_COACH_ID: CoachId = "stemcoach";
+
+const coachStem: MascotInfo = {
+  image: "/assets/coach-stem.png",
+  name: "STEMCoach",
+  emoji: "👨‍🏫",
+  personality: "The Mentor",
+  bio: "STEMCoach is your ultimate guide — calm, intelligent, and always one step ahead. With years of knowledge across every subject, he helps you build the right strategy, stay focused, and succeed in exams. Whether you're stuck or aiming for top grades, STEMCoach keeps you on track.",
+  catchphrase: "Let's get you exam-ready.",
+  traits: ["Wise", "Supportive", "Strategic"],
+  tips: [
+    "Consistency beats cramming — study a little every day",
+    "Teach what you've learned to someone else — it's the best test",
+    "Take breaks — your brain needs time to consolidate",
+    "Focus on understanding, not just memorising",
+  ],
+  streakLostMessage: "The whole Squad is waiting for you! Let's get back on track together — one question at a time! 🚀",
+  cheerMessage: "The Squad is proud of you! 🌟",
 };
+
+export function isCoachId(value: unknown): value is CoachId {
+  return value === DEFAULT_COACH_ID || (typeof value === "string" && value in mascotMap);
+}
+
+export function getCoachById(coachId: string): MascotInfo {
+  return coachId === DEFAULT_COACH_ID ? coachStem : getMascot(coachId);
+}
+
+export function getCoachChoices(): Array<MascotInfo & { id: CoachId }> {
+  return [
+    { ...coachStem, id: DEFAULT_COACH_ID },
+    ...Object.entries(mascotMap).map(([id, info]) => ({ ...info, id: id as CoachId })),
+  ];
+}
 export function getMascot(subjectId: string): MascotInfo {
   return mascotMap[subjectId] || getCoachStem();
 }
 
 export function getCoachStem(): MascotInfo {
-  return {
-    image: "/assets/coach-stem.png",
-    name: "STEMCoach",
-    emoji: "👨‍🏫",
-    personality: "The Mentor",
-    bio: "STEMCoach is your ultimate guide — calm, intelligent, and always one step ahead. With years of knowledge across every subject, he helps you build the right strategy, stay focused, and succeed in exams. Whether you're stuck or aiming for top grades, STEMCoach keeps you on track.",
-    catchphrase: "Let's get you exam-ready.",
-    traits: ["Wise", "Supportive", "Strategic"],
-    tips: [
-      "Consistency beats cramming — study a little every day",
-      "Teach what you've learned to someone else — it's the best test",
-      "Take breaks — your brain needs time to consolidate",
-      "Focus on understanding, not just memorising",
-    ],
-    streakLostMessage: "The whole Squad is waiting for you! Let's get back on track together — one question at a time! 🚀",
-    cheerMessage: "The Squad is proud of you! 🌟",
-  };
+  return coachStem;
 }
 
 export function getAllMascots(): MascotInfo[] {

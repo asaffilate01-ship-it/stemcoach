@@ -108,7 +108,7 @@ export const blogArticles: Record<string, ArticleSection[]> = {
       ],
     },
     {
-      heading: "Using it with STEMcoach",
+      heading: "Using it with STEMCoach",
       paragraphs: [
         "After answering a practice question, write your own one-paragraph explanation before opening the worked solution. Then compare. The differences are your revision list for the week.",
       ],
@@ -213,7 +213,7 @@ export const blogArticles: Record<string, ArticleSection[]> = {
       heading: "What to put on a card",
       paragraphs: [
         "One idea per card, phrased as a question with a single unambiguous answer. If the answer is a list of six things, split it into six cards — long answers are the main reason people abandon flashcards.",
-        "STEMcoach turns every question you get wrong into a flashcard automatically and schedules it using the SM-2 algorithm, so the spacing is handled for you.",
+        "STEMCoach turns every question you get wrong into a flashcard automatically and schedules it using the SM-2 algorithm, so the spacing is handled for you.",
       ],
     },
   ],

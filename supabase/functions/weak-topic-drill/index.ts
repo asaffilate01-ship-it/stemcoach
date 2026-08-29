@@ -38,6 +38,12 @@ serve(async (req) => {
       });
     }
 
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } },
+    );
+
     // Rate limit: 15 requests per minute per user
     if (!rateLimit(user.id, 15, 60_000)) {
       return new Response(JSON.stringify({ error: "Too many requests. Please wait." }), {
@@ -46,7 +52,7 @@ serve(async (req) => {
     }
 
     // Get user's attempts with question info
-    const { data: attempts } = await supabase
+    const { data: attempts } = await admin
       .from("attempts")
       .select("correct, question_id")
       .eq("user_id", user.id)
@@ -61,10 +67,11 @@ serve(async (req) => {
 
     // Get question details for these attempts
     const questionIds = [...new Set(attempts.map(a => a.question_id))];
-    const { data: questions } = await supabase
+    const { data: questions } = await admin
       .from("questions")
       .select("id, subject, topic, subtopic, difficulty")
-      .in("id", questionIds);
+      .in("id", questionIds)
+      .eq("review_status", "published");
 
     const questionMap: Record<string, any> = {};
     questions?.forEach(q => { questionMap[q.id] = q; });
@@ -160,11 +167,12 @@ serve(async (req) => {
     // Fetch drill questions from weak topics
     const drillQuestions: any[] = [];
     for (const wt of weakTopics.slice(0, 3)) {
-      const { data: topicQuestions } = await supabase
+      const { data: topicQuestions } = await admin
         .from("questions")
-        .select("id, question_text, subject, topic, subtopic, difficulty, question_type, correct_answer, options, explanation")
+        .select("id, question_text, subject, topic, subtopic, difficulty, question_type, options, formula, points, boards, allow_multiple_answers, max_marks")
         .eq("subject", wt.subject)
         .eq("topic", wt.topic)
+        .eq("review_status", "published")
         .order("difficulty", { ascending: true })
         .limit(5);
 

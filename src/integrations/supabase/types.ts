@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -574,15 +574,86 @@ export type Database = {
           },
         ]
       }
+      coach_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      generation_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          generated_questions: number
+          id: string
+          name: string
+          published_questions: number
+          reviewed_questions: number
+          status: string
+          target_questions: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          generated_questions?: number
+          id?: string
+          name: string
+          published_questions?: number
+          reviewed_questions?: number
+          status?: string
+          target_questions: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          generated_questions?: number
+          id?: string
+          name?: string
+          published_questions?: number
+          reviewed_questions?: number
+          status?: string
+          target_questions?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generation_queue: {
         Row: {
+          attempts: number
           boards: string[]
+          campaign_id: string | null
+          claimed_at: string | null
           completed_at: string | null
           count: number
           created_at: string
           curriculum: string
           difficulty: number
+          generated_count: number
           id: string
+          last_error: string | null
           question_type: string
           status: string
           subject: string
@@ -590,13 +661,18 @@ export type Database = {
           topic: string
         }
         Insert: {
+          attempts?: number
           boards?: string[]
+          campaign_id?: string | null
+          claimed_at?: string | null
           completed_at?: string | null
           count?: number
           created_at?: string
           curriculum: string
           difficulty: number
+          generated_count?: number
           id?: string
+          last_error?: string | null
           question_type: string
           status?: string
           subject: string
@@ -604,13 +680,18 @@ export type Database = {
           topic: string
         }
         Update: {
+          attempts?: number
           boards?: string[]
+          campaign_id?: string | null
+          claimed_at?: string | null
           completed_at?: string | null
           count?: number
           created_at?: string
           curriculum?: string
           difficulty?: number
+          generated_count?: number
           id?: string
+          last_error?: string | null
           question_type?: string
           status?: string
           subject?: string
@@ -747,7 +828,8 @@ export type Database = {
           allow_multiple_answers: boolean
           boards: string[]
           command_word: string | null
-          content_origin: string
+          content_hash: string
+          generation_campaign_id: string | null
           correct_answer: string
           correct_answers: string[] | null
           created_at: string
@@ -762,9 +844,10 @@ export type Database = {
           model_answer: string | null
           options: Json | null
           points: number
-          quality_flags: Json
           question_text: string
           question_type: string
+          quality_flags: string[]
+          content_origin: string
           review_status: string
           reviewed_at: string | null
           reviewed_by: string | null
@@ -780,7 +863,8 @@ export type Database = {
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
-          content_origin?: string
+          content_hash?: string
+          generation_campaign_id?: string | null
           correct_answer?: string
           correct_answers?: string[] | null
           created_at?: string
@@ -795,9 +879,10 @@ export type Database = {
           model_answer?: string | null
           options?: Json | null
           points?: number
-          quality_flags?: Json
           question_text: string
           question_type?: string
+          quality_flags?: string[]
+          content_origin?: string
           review_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -813,7 +898,8 @@ export type Database = {
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
-          content_origin?: string
+          content_hash?: string
+          generation_campaign_id?: string | null
           correct_answer?: string
           correct_answers?: string[] | null
           created_at?: string
@@ -828,9 +914,10 @@ export type Database = {
           model_answer?: string | null
           options?: Json | null
           points?: number
-          quality_flags?: Json
           question_text?: string
           question_type?: string
+          quality_flags?: string[]
+          content_origin?: string
           review_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1110,6 +1197,7 @@ export type Database = {
           id: string
           notification_prefs: Json
           onboarding_complete: boolean
+          preferred_mascot: string
           subjects: string[]
           updated_at: string
           user_id: string
@@ -1120,6 +1208,7 @@ export type Database = {
           id?: string
           notification_prefs?: Json
           onboarding_complete?: boolean
+          preferred_mascot?: string
           subjects?: string[]
           updated_at?: string
           user_id: string
@@ -1130,6 +1219,7 @@ export type Database = {
           id?: string
           notification_prefs?: Json
           onboarding_complete?: boolean
+          preferred_mascot?: string
           subjects?: string[]
           updated_at?: string
           user_id?: string
@@ -1464,6 +1554,8 @@ export type Database = {
           subject: string
         }[]
       }
+      publish_question: { Args: { _question_id: string }; Returns: Json }
+      question_quality_flags: { Args: { _question_id: string }; Returns: Json }
       grant_dev_quota: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
@@ -1506,8 +1598,6 @@ export type Database = {
           name: string
         }[]
       }
-      publish_question: { Args: { _question_id: string }; Returns: Json }
-      question_quality_flags: { Args: { _question_id: string }; Returns: Json }
       record_answer_stats: {
         Args: { _correct: boolean; _user_id: string; _xp_gain: number }
         Returns: Json

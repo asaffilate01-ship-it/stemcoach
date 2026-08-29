@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { usePushNotifications } from "@/hooks/useNotifications";
 import { motion } from "framer-motion";
-import { User, Shield, Bell, Link2, Check, X, BellRing, Download, Trash2, Loader2 } from "lucide-react";
+import { User, Shield, Bell, Link2, Check, X, BellRing, Download, Trash2, Loader2, Sparkles } from "lucide-react";
 import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
 import {
@@ -27,6 +27,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from "react-i18next";
+import { getCoachChoices, type CoachId } from "@/lib/mascots";
+import { usePreferredCoach } from "@/hooks/usePreferredCoach";
 
 interface PendingLink {
   id: string;
@@ -47,6 +49,10 @@ export default function Settings() {
   const [deleting, setDeleting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [pendingLinks, setPendingLinks] = useState<PendingLink[]>([]);
+  const { preferredCoachId, setPreferredCoachId } = usePreferredCoach();
+  const coachChoices = getCoachChoices().filter((coach, index, all) =>
+    all.findIndex((candidate) => candidate.name === coach.name) === index,
+  );
   const [notifPrefs, setNotifPrefs] = useState({
     badge_alerts: true,
     streak_reminders: true,
@@ -114,6 +120,13 @@ export default function Settings() {
     } else {
       toast({ title: t("settings.profileUpdated") });
     }
+  };
+
+  const chooseCoach = async (coachId: CoachId, name: string) => {
+    const { error } = await setPreferredCoachId(coachId);
+    toast(error
+      ? { title: "Coach saved on this device", description: "It will sync to your account after the database update is applied." }
+      : { title: `${name} is now your coach`, description: "This choice will follow you across STEMCoach sessions." });
   };
 
   const handleLinkAction = async (linkId: string, action: "approved" | "rejected") => {
@@ -191,6 +204,36 @@ export default function Settings() {
               <Button onClick={saveProfile} disabled={saving} className="rounded">
                 {saving ? t("settings.saving") : t("settings.saveProfile")}
               </Button>
+            </div>
+          </motion.div>
+
+          {/* Persistent STEM Coach preference */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }} className="stem-card rounded-xl p-6">
+            <h3 className="mb-1 flex items-center gap-2 font-semibold">
+              <Icon3D icon={Sparkles} variant="purple" size="sm" /> Your STEM Coach
+            </h3>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Choose the coach who stays with you throughout the app. Your choice is saved to this device and your account.
+            </p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {coachChoices.map((coach) => {
+                const selected = preferredCoachId === coach.id;
+                return (
+                  <button
+                    key={coach.id}
+                    type="button"
+                    onClick={() => chooseCoach(coach.id, coach.name)}
+                    aria-pressed={selected}
+                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${selected ? "border-primary bg-primary/5 ring-2 ring-primary/15" : "border-border/60 hover:border-primary/30"}`}
+                  >
+                    <img src={coach.image} alt="" className="h-11 w-11 shrink-0 rounded-xl bg-muted object-cover" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold">{coach.name}</span>
+                      <span className="block truncate text-[10px] text-muted-foreground">{coach.personality}</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
 

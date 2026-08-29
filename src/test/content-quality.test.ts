@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { curricula, sampleQuestions } from "@/data/questions";
 import { mockExamTemplates, examBoardGroups } from "@/data/mockExamTemplates";
 import { curriculumAuthorities } from "@/data/curriculumAuthorities";
-import { getSquadMembers } from "@/lib/mascots";
+import { DEFAULT_COACH_ID, getCoachChoices, getSquadMembers, isCoachId } from "@/lib/mascots";
 import { tutorials } from "@/data/tutorials";
 
 const unique = (values: string[]) => new Set(values).size === values.length;
@@ -61,14 +61,22 @@ describe("content integrity", () => {
     }
     expect(byName.has("Psyche")).toBe(true);
     expect(byName.has(["Py", "sche"].join(""))).toBe(false);
+    const choices = getCoachChoices();
+    expect(unique(choices.map((choice) => choice.id))).toBe(true);
+    expect(choices.every((choice) => choice.image.startsWith("/assets/"))).toBe(true);
+    expect(isCoachId(DEFAULT_COACH_ID)).toBe(true);
   });
 
   it("ships tutorials with checked answers", () => {
-    expect(tutorials.length).toBeGreaterThanOrEqual(10);
+    expect(tutorials.length).toBeGreaterThanOrEqual(20);
     for (const tutorial of tutorials) {
       expect(tutorial.objectives.length).toBeGreaterThanOrEqual(3);
       expect(tutorial.lesson.length).toBeGreaterThanOrEqual(3);
       expect(tutorial.checkpoint.options).toContain(tutorial.checkpoint.answer);
+      for (const checkpoint of tutorial.practice || []) {
+        expect(checkpoint.options).toContain(checkpoint.answer);
+        expect(checkpoint.explanation.length).toBeGreaterThan(15);
+      }
     }
   });
 });

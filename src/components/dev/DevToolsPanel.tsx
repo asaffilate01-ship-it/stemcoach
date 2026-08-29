@@ -7,14 +7,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const DEV_ACCOUNTS = [
-  { label: "Student", email: "dev-student@stemcoach.test", password: "DevStudent123!", role: "student", emoji: "📚" },
-  { label: "Teacher", email: "dev-teacher@stemcoach.test", password: "DevTeacher123!", role: "teacher", emoji: "👩‍🏫" },
-  { label: "Parent", email: "dev-parent@stemcoach.test", password: "DevParent123!", role: "parent", emoji: "👨‍👩‍👧" },
-  { label: "Admin", email: "dev-admin@stemcoach.test", password: "DevAdmin123!", role: "admin", emoji: "🛡️" },
-];
+  { label: "Student", email: import.meta.env.VITE_DEV_STUDENT_EMAIL, password: import.meta.env.VITE_DEV_STUDENT_PASSWORD, role: "student", emoji: "📚" },
+  { label: "Teacher", email: import.meta.env.VITE_DEV_TEACHER_EMAIL, password: import.meta.env.VITE_DEV_TEACHER_PASSWORD, role: "teacher", emoji: "👩‍🏫" },
+  { label: "Parent", email: import.meta.env.VITE_DEV_PARENT_EMAIL, password: import.meta.env.VITE_DEV_PARENT_PASSWORD, role: "parent", emoji: "👨‍👩‍👧" },
+  { label: "Admin", email: import.meta.env.VITE_DEV_ADMIN_EMAIL, password: import.meta.env.VITE_DEV_ADMIN_PASSWORD, role: "admin", emoji: "🛡️" },
+].filter((account): account is typeof account & { email: string; password: string } => Boolean(account.email && account.password));
 
-// Temporarily enabled in all environments for testing
-const IS_DEV = true;
+const IS_DEV = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_TOOLS === "true";
 
 export function DevToolsPanel() {
   const [open, setOpen] = useState(false);
@@ -26,7 +25,7 @@ export function DevToolsPanel() {
 
   if (!IS_DEV) return null;
 
-  const handleLogin = async (account: typeof DEV_ACCOUNTS[0]) => {
+  const handleLogin = async (account: (typeof DEV_ACCOUNTS)[number]) => {
     setLoggingIn(account.role);
     try {
       if (user) await signOut();
@@ -69,7 +68,7 @@ export function DevToolsPanel() {
     }
   };
 
-  const handleCopy = (account: typeof DEV_ACCOUNTS[0]) => {
+  const handleCopy = (account: (typeof DEV_ACCOUNTS)[number]) => {
     navigator.clipboard.writeText(`${account.email} / ${account.password}`);
     setCopied(account.role);
     setTimeout(() => setCopied(null), 1500);
@@ -115,6 +114,9 @@ export function DevToolsPanel() {
 
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Quick Login</p>
+              {DEV_ACCOUNTS.length === 0 && (
+                <p className="rounded-lg border p-2 text-xs text-muted-foreground">Add optional VITE_DEV_* credentials to your local .env file.</p>
+              )}
               <div className="space-y-1.5">
                 {DEV_ACCOUNTS.map((account) => (
                   <div key={account.role} className="flex items-center gap-2 rounded-lg border p-2">

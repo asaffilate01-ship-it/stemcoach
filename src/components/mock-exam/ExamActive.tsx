@@ -150,7 +150,8 @@ export function ExamActive({
                   onClick={() =>
                     setFlagged((prev: Set<number>) => {
                       const next = new Set(prev);
-                      next.has(currentQ) ? next.delete(currentQ) : next.add(currentQ);
+                      if (next.has(currentQ)) next.delete(currentQ);
+                      else next.add(currentQ);
                       return next;
                     })
                   }

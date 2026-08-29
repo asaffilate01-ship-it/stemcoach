@@ -66,19 +66,19 @@ export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) 
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">Exam Centre</span>
               </div>
               <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
-                Real Exam<br className="hidden md:block" /> Simulations
+                Exam-Style<br className="hidden md:block" /> Simulations
               </h1>
               <p className="max-w-md text-sm leading-relaxed text-white/55 md:text-[15px]">
-                Timed practice papers modelled on AQA, Edexcel, OCR, Cambridge, IB, AP, CBSE, JEE, NEET and 20+ exam boards.
+                Timed practice blueprints for major curricula. Always confirm the current board specification for your examination series.
               </p>
             </div>
 
             {/* Stats chips */}
             <div className="flex flex-wrap gap-3 md:flex-col md:items-end">
               {[
-                { icon: GraduationCap, label: "60+ templates", sublabel: "Real board papers" },
-                { icon: Clock, label: "Timed exams", sublabel: "Authentic conditions" },
-                { icon: Target, label: "Auto-graded", sublabel: "Instant feedback" },
+                { icon: GraduationCap, label: `${mockExamTemplates.length} blueprints`, sublabel: "Exam-style practice" },
+                { icon: Clock, label: "Timed practice", sublabel: "Adjustable pacing" },
+                { icon: Target, label: "Server graded", sublabel: "Instant feedback" },
               ].map((chip) => (
                 <div
                   key={chip.label}

@@ -42,10 +42,14 @@ serve(async (req) => {
 
     const { data: challenge } = await admin
       .from("daily_challenges")
-      .select("id, xp_reward, question_count, date")
+      .select("id, xp_reward, question_count, date, subject, curriculum")
       .eq("id", challengeId)
       .maybeSingle();
     if (!challenge) return json({ error: "Unknown challenge" }, 400);
+    const uniqueIds = new Set(answers.map((answer) => answer.question_id));
+    if (answers.length !== challenge.question_count || uniqueIds.size !== challenge.question_count) {
+      return json({ error: `Exactly ${challenge.question_count} unique answers are required` }, 400);
+    }
 
     const { data: existing } = await admin
       .from("daily_challenge_attempts")
@@ -58,7 +62,11 @@ serve(async (req) => {
     const { data: questions } = await admin
       .from("questions")
       .select("id, correct_answer, explanation")
-      .in("id", ids);
+      .in("id", ids)
+      .eq("review_status", "published")
+      .eq("subject", challenge.subject)
+      .eq("curriculum", challenge.curriculum);
+    if ((questions || []).length !== challenge.question_count) return json({ error: "Challenge questions do not match this challenge" }, 400);
 
     const byId = new Map((questions || []).map((q) => [q.id, q]));
     const results = answers.map((a) => {

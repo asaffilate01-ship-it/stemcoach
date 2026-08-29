@@ -19,8 +19,8 @@ import { useSubjectCounts } from "@/hooks/useSubjectCounts";
 
 const countryGroups = [
   { id: "uk", label: "United Kingdom", flag: "🇬🇧", keys: ["uk-gcse", "uk-alevel", "uk-btec", "uk-scottish-nat5", "uk-scottish-higher", "uk-scottish-adv-higher", "uni-uk"] },
-  { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uk-pre-u", "uni-intl"] },
-  { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl", "ib-dp-further"] },
+  { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uni-intl"] },
+  { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl"] },
   { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act", "uni-us"] },
   { id: "au", label: "Australia", flag: "🇦🇺", keys: ["au-hsc", "au-vce", "au-qce", "au-wace", "au-sace", "au-atar", "uni-au"] },
   { id: "nz", label: "New Zealand", flag: "🇳🇿", keys: ["nz-ncea-1", "nz-ncea-2", "nz-ncea-3", "nz-scholarship", "uni-nz"] },
@@ -29,8 +29,8 @@ const countryGroups = [
   { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat", "uni-pk"] },
   { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc", "uni-bd"] },
   { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol", "uni-lk"] },
-  { id: "ae", label: "UAE", flag: "🇦🇪", keys: ["uae-moe-9", "uae-moe-10", "uae-moe-11", "uae-moe-12", "uae-emsat"] },
-  { id: "fr", label: "France", flag: "🇫🇷", keys: ["fr-seconde", "fr-premiere", "fr-bac-general", "fr-bac-techno", "fr-bac-pro", "fr-bts", "fr-cpge", "fr-dut-but", "uni-fr"] },
+  { id: "ae", label: "UAE", flag: "🇦🇪", keys: ["uae-moe-9", "uae-moe-10", "uae-moe-11", "uae-moe-12", "uae-emsat-legacy"] },
+  { id: "fr", label: "France", flag: "🇫🇷", keys: ["fr-seconde", "fr-premiere", "fr-bac-general", "fr-bac-techno", "fr-bac-pro", "fr-bts", "fr-cpge", "fr-but", "uni-fr"] },
   { id: "ph", label: "Philippines", flag: "🇵🇭", keys: ["ph-grade10", "ph-grade11", "ph-grade12", "ph-stem", "ph-abm", "ph-humss"] },
   { id: "de", label: "Deutschland", flag: "🇩🇪", keys: ["de-mittlerer", "de-oberstufe", "de-abitur", "de-fachabitur", "de-berufliches-gym", "uni-de"] },
   { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
@@ -48,7 +48,6 @@ const boardBranding: Record<string, { abbr: string; color: string }> = {
   "Edexcel International (IAL)": { abbr: "IAL", color: "hsl(340,75%,45%)" },
   "Oxford AQA": { abbr: "OAQA", color: "hsl(210,60%,45%)" },
   "Oxford AQA International": { abbr: "OAQA", color: "hsl(210,60%,45%)" },
-  "Cambridge Pre-U": { abbr: "PreU", color: "hsl(0,70%,48%)" },
   "SQA": { abbr: "SQA", color: "hsl(220,65%,42%)" },
   "Pearson BTEC Level 2": { abbr: "BT2", color: "hsl(285,60%,45%)" },
   "Pearson BTEC Level 3": { abbr: "BT3", color: "hsl(285,60%,45%)" },
@@ -534,7 +533,8 @@ export default function Subjects() {
   const toggleCountry = (id: string) => {
     setSelectedCountries(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
     // Reset levels and boards when countries change
@@ -555,7 +555,8 @@ export default function Subjects() {
   const toggleLevel = (id: string) => {
     setSelectedLevels(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
     setSelectedBoards(new Set());
@@ -574,7 +575,8 @@ export default function Subjects() {
   const toggleBoard = (board: string) => {
     setSelectedBoards(prev => {
       const next = new Set(prev);
-      next.has(board) ? next.delete(board) : next.add(board);
+      if (next.has(board)) next.delete(board);
+      else next.add(board);
       return next;
     });
   };

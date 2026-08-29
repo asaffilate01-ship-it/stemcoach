@@ -201,7 +201,7 @@ function ArticleView({ slug }: { slug: string }) {
 
         <div className="mt-10 rounded-2xl border border-primary/10 bg-primary/5 p-6 text-center">
           <h2 className="text-base font-semibold text-foreground">Put this into practice</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Try a timed practice set with STEMcoach feedback on every answer.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Try a timed practice set with STEMCoach feedback on every answer.</p>
           <Link to="/subjects" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
             Start practising <ChevronRight className="h-4 w-4" />
           </Link>

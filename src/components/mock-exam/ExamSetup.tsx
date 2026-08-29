@@ -77,6 +77,9 @@ export function ExamSetup({
               ? `${selectedTemplate.board} · ${selectedTemplate.paper} · ${selectedTemplate.description}`
               : "Configure your own exam from the question bank"}
           </p>
+          {selectedTemplate && (
+            <p className="mx-auto mt-2 max-w-md text-xs text-muted-foreground">Practice blueprint only. Check the board's current specification and examination notice for the official format.</p>
+          )}
         </div>
 
         <div className="rounded-2xl border border-border/40 bg-card p-6 md:p-8 shadow-[var(--stem-card-shadow)]">

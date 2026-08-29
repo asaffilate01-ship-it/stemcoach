@@ -41,11 +41,24 @@ serve(async (req) => {
 
     if (submissions.length === 0) throw new Error("No submissions provided");
 
+    const { data: quota, error: quotaError } = await admin
+      .from("user_quotas")
+      .select("mock_exams_total, mock_exams_used")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (quotaError) throw quotaError;
+    if (!quota || quota.mock_exams_total <= quota.mock_exams_used) {
+      return new Response(JSON.stringify({ error: "Mock-exam allowance exhausted" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const ids = [...new Set(submissions.map((s) => String(s.question_id)))];
     const { data: questions, error: qErr } = await admin
       .from("questions")
       .select("id, correct_answer, correct_answers, explanation, worked_solution, exam_tip")
-      .in("id", ids);
+      .in("id", ids)
+      .eq("review_status", "published");
     if (qErr) throw qErr;
 
     const byId = new Map((questions || []).map((q) => [q.id, q]));
@@ -54,7 +67,7 @@ serve(async (req) => {
     const results = submissions.map((s) => {
       const q = byId.get(String(s.question_id));
       const answer = typeof s.answer === "string" ? s.answer : null;
-      const correct = !!q && !!answer && answer === q.correct_answer;
+      const correct = !!q && !!answer && answer.normalize("NFKC").trim().toLowerCase() === q.correct_answer.normalize("NFKC").trim().toLowerCase();
       if (correct) score++;
       return {
         question_id: String(s.question_id),
@@ -79,11 +92,13 @@ serve(async (req) => {
         correct: r.correct,
       }));
     if (attempts.length > 0) {
-      await admin.from("attempts").insert(attempts);
+      const { error } = await admin.from("attempts").insert(attempts);
+      if (error) throw error;
     }
 
     // Consume one mock exam credit
-    await admin.rpc("increment_mock_exams_used", { _user_id: userId });
+    const { error: incrementError } = await admin.rpc("increment_mock_exams_used", { _user_id: userId });
+    if (incrementError) throw incrementError;
 
     let certificate_issued = false;
     if (percent >= 60) {

@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("APP_ORIGIN") || "https://stemcoach.app",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
@@ -75,6 +75,13 @@ serve(async (req) => {
       "multi-select": "Multiple choice with 4-6 options where 2-3 are correct. Set allow_multiple_answers to true and list all correct answers in correct_answers array.",
       essay: "Extended written response question. Include command_word, mark_scheme with bullet points, model_answer, and max_marks (4-8).",
       numerical: "Numerical calculation question. The answer should be a specific number with units.",
+      "multi-step": "A multi-stage written problem. Include a detailed mark_scheme, complete model_answer and max_marks (4-10).",
+      code: "A code-tracing question with a short code sample, exactly 4 options and one correct output.",
+      "data-interpretation": "Supply a compact text table or data series in the question, exactly 4 options and one correct interpretation.",
+      "assertion-reason": "Give an assertion and a reason with the four standard truth/link options and one correct answer.",
+      "true-false": "A precise statement with options exactly ['True', 'False'] and one correct answer.",
+      ordering: "Give 3-6 shuffled step labels in options. correct_answer must contain every label in order joined exactly with ' → '.",
+      "short-answer": "A concise recall question whose correct_answer is one unambiguous key term or short phrase; do not provide options. Put harmless spelling or terminology variants in correct_answers.",
     };
 
     const { instruction: langInstruction } = getLanguageForCurriculum(curriculum);
@@ -161,11 +168,36 @@ ${langInstruction}`,
       });
     }
 
-    const rows = generated.questions.map((q: any) => ({
+    const structurallyValid = generated.questions.filter((q: any) => {
+      if (typeof q.question_text !== "string" || q.question_text.trim().length < 12) return false;
+      if (typeof q.explanation !== "string" || q.explanation.trim().length < 20) return false;
+      if (typeof q.worked_solution !== "string" || q.worked_solution.trim().length < 20) return false;
+      if (!Array.isArray(q.tuition_tips) || q.tuition_tips.length === 0) return false;
+      if (["mcq", "code", "data-interpretation", "assertion-reason"].includes(question_type)) {
+        if (!Array.isArray(q.options) || q.options.length < 3 || new Set(q.options).size !== q.options.length) return false;
+        if (!q.options.includes(q.correct_answer)) return false;
+      }
+      if (question_type === "multi-select") {
+        if (!Array.isArray(q.options) || !Array.isArray(q.correct_answers) || q.correct_answers.length < 2) return false;
+        if (!q.correct_answers.every((answer: string) => q.options.includes(answer))) return false;
+      }
+      if (question_type === "true-false") {
+        if (JSON.stringify(q.options) !== JSON.stringify(["True", "False"]) || !q.options.includes(q.correct_answer)) return false;
+      }
+      if (question_type === "ordering") {
+        if (!Array.isArray(q.options) || q.options.length < 3 || typeof q.correct_answer !== "string" || !q.correct_answer.includes(" → ")) return false;
+        const orderedParts = q.correct_answer.split(" → ");
+        if (orderedParts.length !== q.options.length || !orderedParts.every((part: string) => q.options.includes(part))) return false;
+      }
+      if (question_type === "short-answer" && (typeof q.correct_answer !== "string" || q.correct_answer.trim().length < 2)) return false;
+      return true;
+    });
+
+    const rows = structurallyValid.map((q: any) => ({
       subject, topic, subtopic, curriculum,
       boards: boards || [], difficulty, question_type,
       question_text: q.question_text,
-      options: q.options ? JSON.stringify(q.options) : null,
+      options: Array.isArray(q.options) ? q.options : null,
       correct_answer: q.correct_answer || '',
       correct_answers: q.correct_answers || [],
       allow_multiple_answers: q.allow_multiple_answers || false,
@@ -179,6 +211,9 @@ ${langInstruction}`,
       model_answer: q.model_answer || null,
       max_marks: q.max_marks || q.points || 1,
       command_word: q.command_word || null,
+      review_status: "needs_review",
+      content_origin: "ai-generated",
+      specification_version: `${curriculum}:${boards?.join("|") || "all"}:2026-review-required`,
     }));
 
     const { data, error } = await supabase.from("questions").insert(rows).select("id");
@@ -186,7 +221,7 @@ ${langInstruction}`,
 
     return new Response(JSON.stringify({
       inserted: data?.length || 0,
-      message: `Successfully generated ${data?.length || 0} questions for ${subject} > ${topic}`
+      message: `Generated ${data?.length || 0} draft questions for academic review before publication`
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("generate-questions error:", e);

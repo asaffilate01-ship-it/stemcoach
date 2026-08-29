@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { requireCronOrAdmin } from "../_shared/gate.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("APP_ORIGIN") || "https://stemcoach.app",
   "Access-Control-Allow-Headers": "authorization, x-cron-secret, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
@@ -18,7 +18,7 @@ function getLanguageForCurriculum(curriculum: string): { lang: string; instructi
   return { lang: "en", instruction: "" };
 }
 
-// Expanded subjects with granular subtopics for 1M+ question coverage
+// Expanded subjects with granular subtopics for the governed 200k+ bank.
 const SUBJECTS = [
   {
     id: "mathematics",
@@ -151,15 +151,6 @@ const SUBJECTS = [
     ],
   },
   {
-    id: "history",
-    topics: [
-      { name: "Modern History", subtopics: ["World War I", "World War II", "Cold War", "Decolonisation", "Civil Rights Movement", "Russian Revolution", "Chinese Revolution", "Vietnam War", "Fall of the Berlin Wall", "9/11 & War on Terror"] },
-      { name: "British History", subtopics: ["Tudor Period", "Stuart Period", "Industrial Revolution", "Victorian Era", "British Empire", "Suffragettes", "Welfare State", "Post-War Britain", "Thatcherism", "Norman Conquest"] },
-      { name: "Source Analysis", subtopics: ["Primary Sources", "Secondary Sources", "Reliability", "Bias & Perspective", "Provenance", "Utility", "Cross-Referencing", "Causation", "Consequence", "Significance"] },
-      { name: "Political History", subtopics: ["Democracy & Dictatorship", "Fascism", "Communism", "Nationalism", "Imperialism", "Human Rights", "International Relations", "United Nations", "European Union", "Political Ideologies"] },
-    ],
-  },
-  {
     id: "psychology",
     topics: [
       { name: "Approaches", subtopics: ["Biological Approach", "Cognitive Approach", "Behaviourist Approach", "Psychodynamic Approach", "Humanistic Approach", "Social Learning Theory", "Biopsychosocial Model", "Evolutionary Psychology", "Comparison of Approaches", "Origins of Psychology"] },
@@ -232,7 +223,7 @@ const CURRICULUM_BOARDS: { id: string; boards: string[] }[] = [
   { id: "fr-bac-pro", boards: ["Éducation Nationale"] },
   { id: "fr-bts", boards: ["Éducation Nationale", "Rectorat"] },
   { id: "fr-cpge", boards: ["Concours CCP", "Concours Mines-Ponts", "Concours X-ENS", "Concours Centrale-Supélec", "BCE", "Ecricome"] },
-  { id: "fr-dut-but", boards: ["IUT / Éducation Nationale"] },
+  { id: "fr-but", boards: ["IUT / Ministère de l'Enseignement supérieur"] },
   { id: "uni-fr", boards: ["Sorbonne Université", "Université de Paris", "Grande École"] },
   // Germany
   { id: "de-mittlerer", boards: ["Kultusministerkonferenz"] },
@@ -241,17 +232,102 @@ const CURRICULUM_BOARDS: { id: string; boards: string[] }[] = [
   { id: "de-fachabitur", boards: ["Kultusministerkonferenz", "FOS Bayern", "FOS NRW", "FOS Hessen"] },
   { id: "de-berufliches-gym", boards: ["Kultusministerkonferenz", "BG Baden-Württemberg", "BG NRW"] },
   { id: "uni-de", boards: ["TU9 Universitäten", "Universität München (LMU)", "TU München", "Universität Heidelberg", "RWTH Aachen", "Fachhochschule"] },
+  // Australia, New Zealand and Canada
+  { id: "au-hsc", boards: ["NESA"] },
+  { id: "au-vce", boards: ["VCAA"] },
+  { id: "au-qce", boards: ["QCAA"] },
+  { id: "au-wace", boards: ["SCSA"] },
+  { id: "au-sace", boards: ["SACE Board"] },
+  { id: "au-act", boards: ["ACT Board of Senior Secondary Studies"] },
+  { id: "au-tce", boards: ["TASC"] },
+  { id: "au-ntcet", boards: ["Northern Territory Board of Studies"] },
+  { id: "nz-ncea-1", boards: ["NZQA"] },
+  { id: "nz-ncea-2", boards: ["NZQA"] },
+  { id: "nz-ncea-3", boards: ["NZQA"] },
+  { id: "ca-ontario-12", boards: ["Ontario Ministry of Education"] },
+  { id: "ca-bc-12", boards: ["BC Ministry of Education and Child Care"] },
+  { id: "ca-alberta-12", boards: ["Alberta Education and Childcare"] },
+  // Bangladesh, Sri Lanka, UAE and Philippines
+  { id: "bd-ssc", boards: ["Dhaka Board", "Rajshahi Board", "Chattogram Board", "Cumilla Board"] },
+  { id: "bd-hsc", boards: ["Dhaka Board", "Rajshahi Board", "Chattogram Board", "Cumilla Board"] },
+  { id: "lk-ol", boards: ["NIE Sri Lanka"] },
+  { id: "lk-al", boards: ["NIE Sri Lanka"] },
+  { id: "uae-moe-9", boards: ["UAE MoE"] },
+  { id: "uae-moe-10", boards: ["UAE MoE"] },
+  { id: "uae-moe-11", boards: ["UAE MoE"] },
+  { id: "uae-moe-12", boards: ["UAE MoE"] },
+  { id: "ph-grade10", boards: ["DepEd Philippines"] },
+  { id: "ph-grade11", boards: ["DepEd Philippines"] },
+  { id: "ph-grade12", boards: ["DepEd Philippines"] },
+  { id: "ph-stem", boards: ["DepEd Philippines"] },
 ];
+
+const SPECIALISED_CURRICULUM_SUBJECTS: Record<string, string[]> = {
+  "us-sat": ["mathematics"],
+  "us-act": ["mathematics"],
+  "us-ap": ["mathematics", "physics", "chemistry", "biology", "computer-science", "economics", "english-literature", "psychology", "geography", "french", "german"],
+  "india-jee": ["mathematics", "physics", "chemistry"],
+  "india-neet": ["physics", "chemistry", "biology"],
+  "pakistan-ecat-mdcat": ["mathematics", "physics", "chemistry", "biology"],
+  "ielts-academic": ["ielts"],
+  "ielts-general": ["ielts"],
+  "celta": ["celta"],
+  "ph-stem": ["mathematics", "physics", "chemistry", "biology", "computer-science"],
+};
+
+function curriculumSupportsSubject(curriculum: string, subject: string): boolean {
+  if (curriculum.startsWith("uni-")) return false; // Degree programmes require institution/module-specific source approval.
+  const specialised = SPECIALISED_CURRICULUM_SUBJECTS[curriculum];
+  if (specialised) return specialised.includes(subject);
+  if (subject === "ielts" || subject === "celta") return false;
+  return true;
+}
+
+function curriculumSource(curriculum: string): string {
+  if (curriculum === "us-sat") return "https://satsuite.collegeboard.org/sat/whats-on-the-test";
+  if (curriculum === "us-ap") return "https://apstudents.collegeboard.org/courses";
+  if (curriculum === "us-act") return "https://www.act.org/content/act/en/products-and-services/the-act/test-preparation/act-exam-sections-and-structure.html";
+  if (curriculum === "india-jee") return "https://nta.ac.in/Engineeringexam";
+  if (curriculum === "india-neet") return "https://nta.ac.in/Download/Notice/Notice_20260108180635.pdf";
+  if (curriculum.startsWith("uk-scottish")) return "https://www.sqa.org.uk/sqa/45625.html";
+  if (curriculum.startsWith("uk-btec")) return "https://qualifications.pearson.com/en/qualifications/btec-nationals.html";
+  if (curriculum.startsWith("uk-")) return "https://www.gov.uk/government/collections/gcse-as-and-a-level-subject-content";
+  if (curriculum.startsWith("ib-")) return "https://ibo.org/programmes/diploma-programme/curriculum/";
+  if (curriculum.startsWith("us-")) return "https://www.nextgenscience.org/";
+  if (curriculum.startsWith("au-")) return "https://www.australiancurriculum.edu.au/";
+  if (curriculum.startsWith("nz-")) return "https://www2.nzqa.govt.nz/ncea/subjects/";
+  if (curriculum.startsWith("ca-")) return "https://www.cmec.ca/299/Education-in-Canada-An-Overview/index.html";
+  if (curriculum.startsWith("india-")) return "https://cbseacademic.nic.in/curriculum_2027.html";
+  if (curriculum.startsWith("pakistan-")) return "https://mail.fbise.edu.pk/curriculum_model_paper.php";
+  if (curriculum.startsWith("bd-")) return "https://nctb.gov.bd/";
+  if (curriculum.startsWith("lk-")) return "https://nie.lk/selesyll";
+  if (curriculum.startsWith("uae-")) return "https://www.moe.gov.ae/En/ImportantLinks/Pages/Curriculum.aspx";
+  if (curriculum.startsWith("fr-")) return "https://www.education.gouv.fr/reussir-au-lycee/les-programmes-du-lycee-general-et-technologique-9812";
+  if (curriculum.startsWith("de-")) return "https://www.kmk.org/bildungsministerkonferenz/bildungsthemen/bildungsstandards.html";
+  if (curriculum.startsWith("ph-")) return "https://www.deped.gov.ph/k-to-12/about/k-to-12-basic-education-curriculum/";
+  if (curriculum.startsWith("ielts-")) return "https://ielts.org/organisations/ielts-for-organisations/test-format";
+  if (curriculum === "celta") return "https://www.cambridgeenglish.org/teaching-english/teaching-qualifications/celta/";
+  return "";
+}
 
 // Question type distribution optimised for variety and accuracy
 const QUESTION_TYPES = [
-  { type: "mcq", count: 20, weight: "Single correct answer from 4 options" },
-  { type: "multi-select", count: 15, weight: "2-3 correct answers from 4-6 options" },
-  { type: "essay", count: 8, weight: "Extended written response with mark scheme" },
-  { type: "numerical", count: 12, weight: "Calculation with exact numerical answer" },
-];
+  "mcq", "multi-select", "numerical", "short-answer", "true-false", "ordering",
+  "code", "data-interpretation", "assertion-reason", "essay", "multi-step",
+] as const;
 
 const DIFFICULTIES = [1, 2, 3, 4, 5];
+
+const BANK_SUBJECT_IDS = new Set([
+  "mathematics", "physics", "chemistry", "biology", "computer-science", "ielts", "celta",
+  "economics", "english-literature", "psychology", "geography", "business-studies", "french", "german",
+]);
+
+function questionTypeSupportsSubject(type: string, subject: string): boolean {
+  if (type === "numerical") return ["mathematics", "physics", "chemistry", "biology", "economics", "business-studies", "geography"].includes(subject);
+  if (type === "code") return subject === "computer-science";
+  return true;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -271,45 +347,63 @@ serve(async (req) => {
     const action = body.action || "process";
 
     if (action === "seed") {
-      console.log("[BATCH] Seeding generation queue for 1M+ questions...");
+      const targetQuestions = Math.min(250_000, Math.max(1_000, Number(body.target_questions) || 200_000));
+      const questionsPerJob = Math.min(20, Math.max(5, Number(body.questions_per_job) || 10));
+      const { data: campaign, error: campaignError } = await supabase.from("generation_campaigns").insert({
+        name: typeof body.name === "string" ? body.name.slice(0, 120) : "200k curriculum bank",
+        target_questions: targetQuestions,
+        status: "planning",
+      }).select("id").single();
+      if (campaignError || !campaign) throw new Error(`Unable to create campaign: ${campaignError?.message || "unknown error"}`);
 
-      const { count: existingCount } = await supabase
-        .from("generation_queue")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
-
-      if ((existingCount || 0) > 5000) {
-        return new Response(JSON.stringify({ message: "Queue already has pending items", pending: existingCount }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const rows: any[] = [];
-      let estimatedTotal = 0;
-
-      for (const subject of SUBJECTS) {
+      console.log(`[BATCH] Planning ${targetQuestions} curriculum-aware draft questions...`);
+      const activeSubjects = SUBJECTS.filter((subject) => BANK_SUBJECT_IDS.has(subject.id));
+      const candidatesBySubject = activeSubjects.map((subject) => {
+        const candidates: any[] = [];
         for (const topic of subject.topics) {
           for (const subtopic of topic.subtopics) {
-            for (const curr of CURRICULA) {
-              for (const qType of QUESTION_TYPES) {
-                for (const diff of DIFFICULTIES) {
-                  rows.push({
-                    subject: subject.id,
-                    topic: topic.name,
-                    subtopic,
-                    curriculum: curr.id,
-                    boards: curr.boards,
-                    difficulty: diff,
-                    question_type: qType.type,
-                    count: qType.count,
-                    status: "pending",
-                  });
-                  estimatedTotal += qType.count;
+            for (const curr of CURRICULUM_BOARDS) {
+              if (!curriculumSupportsSubject(curr.id, subject.id)) continue;
+              for (const board of curr.boards) {
+                for (const questionType of QUESTION_TYPES) {
+                  if (!questionTypeSupportsSubject(questionType, subject.id)) continue;
+                  for (const difficulty of DIFFICULTIES) {
+                    candidates.push({
+                      campaign_id: campaign.id,
+                      subject: subject.id,
+                      topic: topic.name,
+                      subtopic,
+                      curriculum: curr.id,
+                      boards: [board],
+                      difficulty,
+                      question_type: questionType,
+                      count: questionsPerJob,
+                      status: "pending",
+                    });
+                  }
                 }
               }
             }
           }
         }
+        return candidates;
+      });
+
+      const rows: any[] = [];
+      const subjectPositions = activeSubjects.map(() => 0);
+      let estimatedTotal = 0;
+      while (estimatedTotal < targetQuestions) {
+        let addedThisRound = false;
+        for (let subjectIndex = 0; subjectIndex < candidatesBySubject.length && estimatedTotal < targetQuestions; subjectIndex += 1) {
+          const candidate = candidatesBySubject[subjectIndex][subjectPositions[subjectIndex]];
+          if (!candidate) continue;
+          subjectPositions[subjectIndex] += 1;
+          const remaining = targetQuestions - estimatedTotal;
+          rows.push({ ...candidate, count: Math.min(candidate.count, remaining) });
+          estimatedTotal += Math.min(candidate.count, remaining);
+          addedThisRound = true;
+        }
+        if (!addedThisRound) break;
       }
 
       // Insert in batches of 500
@@ -321,32 +415,45 @@ serve(async (req) => {
         else inserted += batch.length;
       }
 
+      await supabase.from("generation_campaigns").update({ status: "queued", updated_at: new Date().toISOString() }).eq("id", campaign.id);
+
       return new Response(JSON.stringify({
-        message: "Queue seeded for 1M+ questions",
+        message: "Governed curriculum draft queue seeded",
+        campaign_id: campaign.id,
         total_combinations: rows.length,
         inserted,
         estimated_questions: estimatedTotal,
-        subjects: SUBJECTS.length,
-        curricula: CURRICULA.length,
+        subjects: activeSubjects.length,
+        curricula: CURRICULUM_BOARDS.length,
         question_types: QUESTION_TYPES.length,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (action === "status") {
-      const [pending, done, failed, total] = await Promise.all([
-        supabase.from("generation_queue").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("generation_queue").select("*", { count: "exact", head: true }).eq("status", "done"),
-        supabase.from("generation_queue").select("*", { count: "exact", head: true }).eq("status", "failed"),
+      let queueQuery = supabase.from("generation_queue").select("status,count,generated_count").limit(50_000);
+      if (typeof body.campaign_id === "string") queueQuery = queueQuery.eq("campaign_id", body.campaign_id);
+      const [queue, total, published, review] = await Promise.all([
+        queueQuery,
         supabase.from("questions").select("*", { count: "exact", head: true }),
+        supabase.from("questions").select("*", { count: "exact", head: true }).eq("review_status", "published"),
+        supabase.from("questions").select("*", { count: "exact", head: true }).eq("review_status", "needs_review"),
       ]);
-
+      const jobs = queue.data || [];
+      const target = jobs.reduce((sum: number, item: any) => sum + (item.count || 0), 0);
+      const generated = jobs.reduce((sum: number, item: any) => sum + (item.generated_count || 0), 0);
       return new Response(JSON.stringify({
-        queue_pending: pending.count || 0,
-        queue_done: done.count || 0,
-        queue_failed: failed.count || 0,
+        queue_pending: jobs.filter((item: any) => item.status === "pending").length,
+        queue_processing: jobs.filter((item: any) => item.status === "processing").length,
+        queue_done: jobs.filter((item: any) => item.status === "done").length,
+        queue_failed: jobs.filter((item: any) => item.status === "failed").length,
         total_questions: total.count || 0,
-        target: 2000000,
-        progress_pct: Math.round(((total.count || 0) / 2000000) * 100 * 10) / 10,
+        published_questions: published.count || 0,
+        awaiting_review: review.count || 0,
+        target,
+        generated,
+        progress_pct: target > 0
+          ? Math.round((generated / target) * 1000) / 10
+          : 0,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -355,9 +462,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const { data: pendingItems } = await supabase
-      .from("generation_queue").select("*")
-      .eq("status", "pending").order("created_at", { ascending: true }).limit(BATCH_SIZE);
+    const { data: pendingItems, error: claimError } = await supabase.rpc("claim_generation_queue", { _limit: BATCH_SIZE });
+    if (claimError) throw new Error(`Unable to claim generation work: ${claimError.message}`);
 
     if (!pendingItems || pendingItems.length === 0) {
       return new Response(JSON.stringify({ message: "No pending items in queue" }), {
@@ -369,8 +475,6 @@ serve(async (req) => {
     const results: any[] = [];
 
     for (const item of pendingItems) {
-      await supabase.from("generation_queue").update({ status: "processing" }).eq("id", item.id);
-
       try {
         const typeInstructions: Record<string, string> = {
           mcq: `Multiple choice question with EXACTLY 4 options labelled A, B, C, D. Only ONE option is correct. 
@@ -388,7 +492,14 @@ The correct_answer should be a brief summary. The model_answer should be compreh
           numerical: `Numerical calculation question. The answer MUST be a specific number with units.
 Show the complete worked_solution with step-by-step calculations.
 Include the formula used. Double-check all arithmetic is correct.
-The correct_answer must include the numerical value AND the unit (e.g. "24.5 m/s", "3.14 mol").`,
+	The correct_answer must include the numerical value AND the unit (e.g. "24.5 m/s", "3.14 mol").`,
+          "short-answer": `One concise recall or application question with no options. The correct_answer must be one unambiguous key term or short phrase. Put harmless spelling or terminology variants in correct_answers.`,
+          "true-false": `Write one precise statement. options MUST be exactly ["True", "False"] and correct_answer must exactly match one option.`,
+          ordering: `Give 3-6 short step labels in a shuffled options array. correct_answer MUST contain every step in the right sequence joined exactly with " → ".`,
+          code: `Give a short code sample to trace, four output options and one correct answer. State the programming language and avoid undefined behaviour.`,
+          "data-interpretation": `Include a compact, self-contained text table or data series, four options, and one correct interpretation.`,
+          "assertion-reason": `Give an Assertion and Reason with the four standard truth/link options and exactly one correct answer.`,
+          "multi-step": `Create a multi-stage written problem with a detailed mark_scheme, complete model_answer and max_marks between 4 and 10.`,
         };
 
         const accuracyPrompt = `
@@ -499,46 +610,63 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
           continue;
         }
 
-        // Validate: for MCQ, correct_answer must match one of the options
+        // Structural validation only. Factual/editorial review is still mandatory before publication.
         const validatedQuestions = generated.questions.filter((q: any) => {
-          if (!q.question_text || !q.correct_answer) return false;
+          if (!q.question_text || q.question_text.trim().length < 12) return false;
+          if (!q.explanation || q.explanation.trim().length < 20) return false;
+          if (!q.worked_solution || q.worked_solution.trim().length < 20) return false;
+          if (!Array.isArray(q.tuition_tips) || q.tuition_tips.length === 0) return false;
           if (item.question_type === "mcq" && q.options) {
             const opts = Array.isArray(q.options) ? q.options : [];
             if (opts.length < 4) return false;
-            if (!opts.includes(q.correct_answer)) {
-              // Try to fix: check if answer text is a partial match
-              const match = opts.find((o: string) => o.includes(q.correct_answer) || q.correct_answer.includes(o));
-              if (match) q.correct_answer = match;
-              else return false;
-            }
+            if (new Set(opts).size !== opts.length) return false;
+            if (!opts.includes(q.correct_answer)) return false;
           }
           if (item.question_type === "multi-select" && q.correct_answers) {
             const opts = Array.isArray(q.options) ? q.options : [];
             if (!q.correct_answers.every((a: string) => opts.includes(a))) return false;
           }
+          if (item.question_type === "true-false") {
+            if (JSON.stringify(q.options) !== JSON.stringify(["True", "False"]) || !q.options.includes(q.correct_answer)) return false;
+          }
+          if (item.question_type === "ordering") {
+            const opts = Array.isArray(q.options) ? q.options : [];
+            const parts = typeof q.correct_answer === "string" ? q.correct_answer.split(" → ") : [];
+            if (opts.length < 3 || parts.length !== opts.length || !parts.every((part: string) => opts.includes(part))) return false;
+          }
+          if (item.question_type === "short-answer" && (!q.correct_answer || q.correct_answer.trim().length < 2)) return false;
           return true;
         });
 
-        const rows = validatedQuestions.map((q: any) => ({
-          subject: item.subject, topic: item.topic, subtopic: item.subtopic,
-          curriculum: item.curriculum, boards: item.boards,
-          difficulty: item.difficulty, question_type: item.question_type,
-          question_text: q.question_text,
-          options: q.options ? JSON.stringify(q.options) : null,
-          correct_answer: q.correct_answer || "",
-          correct_answers: q.correct_answers || [],
-          allow_multiple_answers: q.allow_multiple_answers || (item.question_type === "multi-select"),
-          explanation: q.explanation || "",
-          worked_solution: q.worked_solution || "",
-          tuition_tips: q.tuition_tips || [],
-          exam_tip: q.exam_tip || "",
-          formula: q.formula || null,
-          points: q.points || 1,
-          mark_scheme: q.mark_scheme || null,
-          model_answer: q.model_answer || null,
-          max_marks: q.max_marks || q.points || 1,
-          command_word: q.command_word || null,
-        }));
+        const rows = [];
+        for (const q of validatedQuestions) {
+          rows.push({
+            subject: item.subject, topic: item.topic, subtopic: item.subtopic,
+            curriculum: item.curriculum, boards: item.boards,
+            difficulty: item.difficulty, question_type: item.question_type,
+            question_text: q.question_text,
+            options: Array.isArray(q.options) ? q.options : null,
+            correct_answer: q.correct_answer || "",
+            correct_answers: q.correct_answers || [],
+            allow_multiple_answers: q.allow_multiple_answers || (item.question_type === "multi-select"),
+            explanation: q.explanation || "",
+            worked_solution: q.worked_solution || "",
+            tuition_tips: q.tuition_tips || [],
+            exam_tip: q.exam_tip || "",
+            formula: q.formula || null,
+            points: q.points || 1,
+            mark_scheme: q.mark_scheme || null,
+            model_answer: q.model_answer || null,
+            max_marks: q.max_marks || q.points || 1,
+            command_word: q.command_word || null,
+            review_status: "needs_review",
+            content_origin: "ai-batch-generated",
+            specification_version: `${item.curriculum}:${(item.boards || []).join("|")}:2026-review-required`,
+            source_url: curriculumSource(item.curriculum),
+            content_hash: await contentHash(item.subject, item.curriculum, q.question_text),
+            generation_campaign_id: item.campaign_id,
+          });
+        }
 
         if (rows.length === 0) {
           await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id);
@@ -546,7 +674,8 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
           continue;
         }
 
-        const { data: inserted, error: insertError } = await supabase.from("questions").insert(rows).select("id");
+        const { data: inserted, error: insertError } = await supabase.from("questions")
+          .upsert(rows, { onConflict: "subject,curriculum,content_hash", ignoreDuplicates: true }).select("id");
         if (insertError) {
           console.error(`[BATCH] DB insert error: ${insertError.message}`);
           await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id);
@@ -556,14 +685,14 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
 
         const count = inserted?.length || 0;
         totalInserted += count;
-        await supabase.from("generation_queue").update({ status: "done", completed_at: new Date().toISOString() }).eq("id", item.id);
+        await supabase.from("generation_queue").update({ status: "done", generated_count: count, completed_at: new Date().toISOString() }).eq("id", item.id);
         results.push({ id: item.id, status: "done", inserted: count, subject: item.subject, topic: item.topic, subtopic: item.subtopic });
 
         // Delay between requests to avoid rate limiting
         await new Promise(r => setTimeout(r, 800));
       } catch (e) {
         console.error(`[BATCH] Error processing ${item.id}:`, e);
-        await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id);
+        await supabase.from("generation_queue").update({ status: item.attempts < 3 ? "pending" : "failed", last_error: (e as Error).message }).eq("id", item.id);
         results.push({ id: item.id, status: "error", error: (e as Error).message });
       }
     }
@@ -578,3 +707,9 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
     });
   }
 });
+
+async function contentHash(subject: string, curriculum: string, questionText: string): Promise<string> {
+  const normalized = `${subject}|${curriculum}|${questionText}`.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}

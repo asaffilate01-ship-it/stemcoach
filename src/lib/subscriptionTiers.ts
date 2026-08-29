@@ -24,7 +24,7 @@ export const PACKS: Record<string, QuestionPack> = {
       "5,000 curriculum-aligned questions",
       "20 mock exams with certificates",
       "Choose your subjects, boards & levels",
-      "STEMcoach coaching when you're stuck",
+      "STEMCoach coaching when you're stuck",
       "Full tutorial explanations on every answer",
       "Streaks, XP, levels & leaderboards",
       "Detailed analytics & weak-topic drills",

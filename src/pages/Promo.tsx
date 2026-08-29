@@ -32,10 +32,10 @@ const featureGroups: { label: string; items: Feature[] }[] = [
   {
     label: "Learn",
     items: [
-      { icon: BookOpen, variant: "primary", title: "170,000+ exam questions", description: "A curated bank across Maths, Physics, Chemistry, Biology, IELTS and CELTA — with more subjects landing every week." },
-      { icon: Bot, variant: "purple", title: "STEMcoaching, not answers", description: "Every question comes with tutor-style feedback, distractor reasoning and a worked solution — cached so learning stays instant and affordable." },
+      { icon: BookOpen, variant: "primary", title: "Reviewed practice questions", description: "Published questions pass structural checks and human review; draft AI content stays out of student practice." },
+      { icon: Bot, variant: "purple", title: "STEMCoaching, not answers", description: "Every question comes with tutor-style feedback, distractor reasoning and a worked solution — cached so learning stays instant and affordable." },
       { icon: Layers, variant: "accent", title: "Spaced-repetition flashcards", description: "Missed questions automatically convert into SM-2 scheduled flashcards so weak topics resurface at the perfect moment." },
-      { icon: Brain, variant: "warning", title: "Adaptive weak-topic drills", description: "Drop below 60% accuracy in a topic and STEMcoach builds a targeted drill to close the gap." },
+      { icon: Brain, variant: "warning", title: "Adaptive weak-topic drills", description: "Drop below 60% accuracy in a topic and STEMCoach builds a targeted drill to close the gap." },
     ],
   },
   {
@@ -52,7 +52,7 @@ const featureGroups: { label: string; items: Feature[] }[] = [
     items: [
       { icon: Users, variant: "purple", title: "Parent & teacher portals", description: "Approved parent links, class rosters and progress reports for every stakeholder around the learner." },
       { icon: Building2, variant: "primary", title: "White-label for schools", description: "Multi-tenant branding, seat tiers and institution admin — your logo, your colours, our engine." },
-      { icon: Globe, variant: "success", title: "50+ curricula, 3 languages", description: "Country, level, exam board and difficulty filters, with the interface localised in English, French and German." },
+      { icon: Globe, variant: "success", title: "Global curricula, 3 languages", description: "Country, level, exam board and difficulty filters, with the interface localised in English, French and German." },
       { icon: CreditCard, variant: "accent", title: "Localised pay-as-you-go", description: "No subscriptions. Region-aware pricing in GBP, USD, EUR and PHP with server-verified purchases." },
     ],
   },
@@ -66,15 +66,15 @@ const platformPoints = [
 
 const stats = [
   { value: "170K+", label: "Questions live" },
-  { value: "50+", label: "Curricula" },
+  { value: "Global", label: "Curricula" },
   { value: "14", label: "Coach mascots" },
-  { value: "40+", label: "Product screens" },
+  { value: "Full", label: "Study workflow" },
 ];
 
 const faqs = [
-  { q: "What exactly is STEMcoach?", a: "A virtual tuition centre. Learners practise real exam questions with a squad of 14 subject coaches that explain the thinking behind every answer — not just whether it was right." },
-  { q: "Is this a subscription?", a: "No. STEMcoach is pay-as-you-go with regionally priced question and exam packs, so families only pay for what they actually use." },
-  { q: "Which subjects and curricula are covered?", a: "Live content spans Mathematics, Physics, Chemistry, Biology, IELTS and CELTA, filtered across 50+ global curricula by country, level, exam board and difficulty. Remaining subjects are marked 'coming soon' in-app until their banks are complete." },
+  { q: "What exactly is STEMCoach?", a: "A virtual tuition centre. Learners use reviewed, exam-style practice with a squad of subject coaches that explain the thinking behind each answer — not just whether it was right." },
+  { q: "Is this a subscription?", a: "No. STEMCoach is pay-as-you-go with regionally priced question and exam packs, so families only pay for what they actually use." },
+  { q: "Which subjects and curricula are covered?", a: "The platform maps practice to global qualification frameworks by country, level and exam board. Availability is based on the reviewed questions currently published for each subject." },
   { q: "How do parents and teachers fit in?", a: "Parents request a link that the student approves, then see progress reports and streaks. Teachers get class rosters, assignments and cohort analytics; institutions get a white-label admin portal." },
   { q: "Does it work on phones and offline?", a: "Yes. It installs as a PWA with offline caching, uses a native-style bottom navigation on mobile, and ships as Capacitor iOS and Android builds." },
   { q: "How is learner data protected?", a: "Every table is behind row-level security, sensitive lookups run through ownership-checked functions, grading happens server-side, and GDPR export plus right-to-erasure flows are built in." },
@@ -94,7 +94,7 @@ function scrollToId(id: string) {
 }
 
 export default function Promo() {
-  useDocumentTitle("STEMcoach — The virtual tuition centre for exam success");
+  useDocumentTitle("STEMCoach — The virtual tuition centre for exam success");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -103,7 +103,7 @@ export default function Promo() {
 
   const submit = () => {
     if (unlockPreview(code)) {
-      toast({ title: "Preview unlocked", description: "Welcome to STEMcoach." });
+      toast({ title: "Preview unlocked", description: "Welcome to STEMCoach." });
       navigate("/home");
     } else {
       setError(true);
@@ -116,7 +116,7 @@ export default function Promo() {
       <header className="sticky top-0 z-50 border-b border-border/20 bg-background/80 backdrop-blur-2xl backdrop-saturate-150">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <button onClick={() => scrollToId("overview")} className="flex items-center gap-2.5">
-            <img src="/assets/coach-stem.png" alt="STEMcoach" className="h-9 w-9 rounded-xl object-cover ring-1 ring-border/30" />
+            <img src="/assets/coach-stem.png" alt="STEMCoach" className="h-9 w-9 rounded-xl object-cover ring-1 ring-border/30" />
             <div className="text-left leading-none">
               <div className="text-base font-extrabold tracking-tight">STEM<span className="stem-gradient-text">coach</span></div>
               <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Virtual tuition centre</div>
@@ -177,7 +177,7 @@ export default function Promo() {
                 <span className="stem-gradient-text">packaged as software</span>
               </h1>
               <p className="mb-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                STEMcoach turns exam preparation into deliberate practice: 170,000+ curriculum-mapped
+                STEMCoach turns exam preparation into deliberate practice: reviewed, curriculum-mapped
                 questions, 14 subject coaches, secure mock exams, adaptive drills and portals for
                 students, parents, teachers and whole institutions.
               </p>
@@ -215,7 +215,7 @@ export default function Promo() {
               <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/15 via-transparent to-[hsl(258_60%_52%/0.12)] blur-3xl" />
               <img
                 src={promoHero}
-                alt="STEMcoach learning platform interface"
+                alt="STEMCoach learning platform interface"
                 width={1536}
                 height={1024}
                 className="relative w-full rounded-2xl shadow-2xl shadow-primary/15 ring-1 ring-border/30"
@@ -289,7 +289,7 @@ export default function Promo() {
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                 className="lg:col-span-2 overflow-hidden rounded-2xl border border-border/40 bg-card/60 p-3 backdrop-blur-xl shadow-premium-lg"
               >
-                <img src={dashboardPreview} alt="STEMcoach student dashboard on desktop" loading="lazy" className="w-full rounded-xl ring-1 ring-border/20" />
+                <img src={dashboardPreview} alt="STEMCoach student dashboard on desktop" loading="lazy" className="w-full rounded-xl ring-1 ring-border/20" />
                 <figcaption className="px-2 py-3 text-sm font-semibold">Student dashboard — streaks, XP, accuracy and next best action</figcaption>
               </motion.figure>
 
@@ -297,7 +297,7 @@ export default function Promo() {
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.08 }}
                 className="overflow-hidden rounded-2xl border border-border/40 bg-card/60 p-3 backdrop-blur-xl shadow-premium-lg"
               >
-                <img src={promoMobile} alt="STEMcoach mobile app on a smartphone" loading="lazy" width={1024} height={1024} className="w-full rounded-xl ring-1 ring-border/20" />
+                <img src={promoMobile} alt="STEMCoach mobile app on a smartphone" loading="lazy" width={1024} height={1024} className="w-full rounded-xl ring-1 ring-border/20" />
                 <figcaption className="px-2 py-3 text-sm font-semibold">Mobile app — native bottom navigation, offline ready</figcaption>
               </motion.figure>
 
@@ -305,8 +305,8 @@ export default function Promo() {
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.12 }}
                 className="lg:col-span-3 overflow-hidden rounded-2xl border border-border/40 bg-card/60 p-3 backdrop-blur-xl shadow-premium-lg"
               >
-                <img src={tutorPreview} alt="STEMcoaching session explaining a question" loading="lazy" className="w-full rounded-xl ring-1 ring-border/20" />
-                <figcaption className="px-2 py-3 text-sm font-semibold">STEMcoaching clinic — hints, distractor reasoning and worked solutions</figcaption>
+                <img src={tutorPreview} alt="STEMCoaching session explaining a question" loading="lazy" className="w-full rounded-xl ring-1 ring-border/20" />
+                <figcaption className="px-2 py-3 text-sm font-semibold">STEMCoaching clinic — hints, distractor reasoning and worked solutions</figcaption>
               </motion.figure>
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function Promo() {
           <div className="container mx-auto px-4">
             <div className="mb-12 text-center">
               <div className="stem-label mb-3">FAQ</div>
-              <h2 className="stem-section-heading">What STEMcoach <span className="stem-gradient-text">offers</span></h2>
+              <h2 className="stem-section-heading">What STEMCoach <span className="stem-gradient-text">offers</span></h2>
             </div>
             <div className="mx-auto max-w-3xl">
               <Accordion type="single" collapsible className="space-y-3">
@@ -356,7 +356,7 @@ export default function Promo() {
         <footer className="border-t border-border/30 py-10">
           <div className="container mx-auto flex flex-col items-center gap-3 px-4 text-center">
             <img src="/assets/coach-stem.png" alt="" className="h-10 w-10 rounded-xl object-cover ring-1 ring-border/30" />
-            <p className="text-sm font-semibold">STEMcoach</p>
+            <p className="text-sm font-semibold">STEMCoach</p>
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
               <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link>
               <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link>
@@ -371,7 +371,7 @@ export default function Promo() {
               <a href="mailto:support@stemcoach.app" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Contact</a>
             </nav>
             <p className="text-xs text-muted-foreground">
-              STEMcoach is a trading name of iTechLounge Ltd
+              STEMCoach is a trading name of iTechLounge Ltd
             </p>
             <p className="text-xs text-muted-foreground/70">
               © {new Date().getFullYear()} iTechLounge Ltd. All rights reserved.
@@ -409,7 +409,7 @@ export default function Promo() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Lock className="h-4 w-4 text-primary" /> Preview access</DialogTitle>
             <DialogDescription>
-              STEMcoach is in private preview. Enter the access code you were given to open the full platform.
+              STEMCoach is in private preview. Enter the access code you were given to open the full platform.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">

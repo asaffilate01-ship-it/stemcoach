@@ -19,6 +19,13 @@ const questionTypes = [
   { id: "multi-select", label: "Multiple Choice (multi-answer)" },
   { id: "essay", label: "Essay / Extended Response" },
   { id: "numerical", label: "Numerical Entry" },
+  { id: "multi-step", label: "Multi-step Worked Response" },
+  { id: "code", label: "Code Trace" },
+  { id: "data-interpretation", label: "Data Interpretation" },
+  { id: "assertion-reason", label: "Assertion and Reason" },
+  { id: "true-false", label: "True or False" },
+  { id: "ordering", label: "Ordering / Sequencing" },
+  { id: "short-answer", label: "Short Answer" },
 ];
 
 export default function AdminGenerate() {
@@ -36,6 +43,7 @@ export default function AdminGenerate() {
   const [selectedDifficulty, setSelectedDifficulty] = useState(3);
   const [selectedType, setSelectedType] = useState("mcq");
   const [count, setCount] = useState(10);
+  const [bankTarget, setBankTarget] = useState(200000);
   const [log, setLog] = useState<string[]>([]);
 
   const subjectInfo = subjects.find((s) => s.id === selectedSubject);
@@ -142,14 +150,14 @@ export default function AdminGenerate() {
 
   const handleSeedQueue = async () => {
     setSeeding(true);
-    addLog("🌱 Seeding batch generation queue with all 2M combinations...");
+    addLog(`🌱 Planning a governed ${bankTarget.toLocaleString()}-question draft bank...`);
     try {
       const { data, error } = await supabase.functions.invoke("batch-generate", {
-        body: { action: "seed" },
+        body: { action: "seed", target_questions: bankTarget, questions_per_job: 10, name: `${bankTarget.toLocaleString()} question curriculum bank` },
       });
       if (error) throw error;
-      addLog(`✅ Queue seeded: ${data.pending} pending combos (~${data.estimated_questions?.toLocaleString()} questions)`);
-      toast({ title: "Queue seeded!", description: `${data.pending} combinations queued for generation.` });
+      addLog(`✅ Queue seeded: ${data.inserted?.toLocaleString()} jobs (${data.estimated_questions?.toLocaleString()} draft questions)`);
+      toast({ title: "200k bank planned", description: `${data.estimated_questions?.toLocaleString()} drafts queued across ${data.subjects} subjects.` });
       refetchBatch();
     } catch (e: any) {
       addLog(`❌ Seed failed: ${e.message}`);
@@ -234,7 +242,7 @@ export default function AdminGenerate() {
     setGenerating(false);
   };
 
-  const progressPct = batchStatus?.progress_pct || ((dbCount || 0) / 2000000) * 100;
+  const progressPct = batchStatus?.progress_pct || 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -244,41 +252,45 @@ export default function AdminGenerate() {
           <div className="stem-label mb-2">Admin Panel</div>
           <h1 className="stem-heading text-3xl">Question Generator</h1>
           <p className="mt-2 text-muted-foreground">
-            Generate exam-accurate questions using STEMcoach. Target: 2,000,000 questions.
+            Generate question drafts for structural validation and expert review before publication.
           </p>
         </div>
 
-        {/* Progress to 1M */}
+        {/* Draft queue progress */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 stem-card rounded-xl p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold flex items-center gap-2">
-              <Rocket className="h-4 w-4 text-primary" /> Progress to 2,000,000 Questions
+              <Rocket className="h-4 w-4 text-primary" /> Draft generation progress
             </h3>
             <span className="text-sm font-bold text-primary">{progressPct.toFixed(1)}%</span>
           </div>
           <Progress value={progressPct} className="h-3 mb-3" />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 text-center text-sm">
             <div>
-              <div className="text-xl font-bold">{(dbCount || 0).toLocaleString()}</div>
-              <div className="stem-label">Total Questions</div>
+              <div className="text-xl font-bold">{(batchStatus?.generated || 0).toLocaleString()}</div>
+              <div className="stem-label">Drafts Generated</div>
             </div>
             <div>
               <div className="text-xl font-bold">{(batchStatus?.queue_pending || 0).toLocaleString()}</div>
               <div className="stem-label">Queue Pending</div>
             </div>
             <div>
-              <div className="text-xl font-bold">{(batchStatus?.queue_done || 0).toLocaleString()}</div>
-              <div className="stem-label">Queue Done</div>
+              <div className="text-xl font-bold">{(batchStatus?.published_questions || 0).toLocaleString()}</div>
+              <div className="stem-label">Published</div>
             </div>
             <div>
-              <div className="text-xl font-bold">2,000,000</div>
-              <div className="stem-label">Target</div>
+              <div className="text-xl font-bold">{(batchStatus?.awaiting_review || 0).toLocaleString()}</div>
+              <div className="stem-label">Awaiting Review</div>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
+            <div className="flex items-center gap-2 rounded-lg border bg-background px-3">
+              <Label htmlFor="bank-target" className="whitespace-nowrap text-xs">Bank target</Label>
+              <Input id="bank-target" type="number" min={1000} max={250000} step={1000} value={bankTarget} onChange={(event) => setBankTarget(Math.min(250000, Math.max(1000, Number(event.target.value) || 1000)))} className="h-9 w-28 border-0 px-1" />
+            </div>
             <Button onClick={handleSeedQueue} disabled={seeding || generating} variant="outline" className="gap-2 rounded">
               {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
-              1. Seed Queue (All Combos)
+              1. Plan governed bank
             </Button>
             <Button onClick={handleProcessBatch} disabled={generating} variant="outline" className="gap-2 rounded">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -396,12 +408,12 @@ export default function AdminGenerate() {
             <div className="h-[500px] overflow-y-auto rounded-lg bg-muted/50 p-4 font-mono text-xs">
               {log.length === 0 ? (
                 <span className="text-muted-foreground">
-                  How to generate 2M questions:{"\n\n"}
-                  1. Click "Seed Queue" to create all subject×curriculum×type×difficulty combos{"\n"}
-                  2. Click "Auto-Generate (Loop)" to start processing{"\n"}
-                  3. The system will auto-pause on rate limits and resume{"\n"}
-                  4. You can close this page and come back — progress is saved{"\n\n"}
-                  Each batch processes 3 items (~30-45 questions) per iteration.
+                  Safe question publishing workflow:{"\n\n"}
+                  1. Plan a target bank distributed across every supported subject and curriculum{"\n"}
+                  2. Scheduled workers claim jobs atomically and generate draft questions{"\n"}
+                  3. Duplicate and structural checks run before a draft enters review{"\n"}
+                  4. Only approved questions become visible to learners{"\n\n"}
+                  Each worker processes up to 3 jobs; progress is durable and safe to resume.
                 </span>
               ) : (
                 log.map((l, i) => (

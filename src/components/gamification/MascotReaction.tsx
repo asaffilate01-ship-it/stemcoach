@@ -5,6 +5,7 @@ interface MascotReactionProps {
   subjectId: string;
   correct: boolean | null;
   show: boolean;
+  reactionKey?: string;
 }
 
 const reactions = {
@@ -12,12 +13,18 @@ const reactions = {
   incorrect: ["Not quite — let's review! 📖", "Keep going, you'll get it! 💪", "Almost there! Try again 🧠"],
 };
 
-export function MascotReaction({ subjectId, correct, show }: MascotReactionProps) {
+function stableIndex(value: string, length: number): number {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
+  return Math.abs(hash) % length;
+}
+
+export function MascotReaction({ subjectId, correct, show, reactionKey = "default" }: MascotReactionProps) {
   const mascot = getMascot(subjectId);
   if (!show || correct === null) return null;
 
   const msgs = correct ? reactions.correct : reactions.incorrect;
-  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+  const msg = msgs[stableIndex(`${subjectId}:${reactionKey}:${correct}`, msgs.length)];
 
   return (
     <motion.div
