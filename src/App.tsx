@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TenantBrandingProvider } from "@/hooks/useTenantBranding";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { PromoGate } from "@/components/PromoGate";
 import { SessionGuard } from "@/components/SessionGuard";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -18,7 +17,6 @@ import { SkipToContent } from "@/components/layout/SkipToContent";
 
 // Lazy-loaded pages for code-splitting
 const Index = lazy(() => import("./pages/Index"));
-const Promo = lazy(() => import("./pages/Promo"));
 const Subjects = lazy(() => import("./pages/Subjects"));
 const Practice = lazy(() => import("./pages/Practice"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -59,9 +57,12 @@ const MeetTheSquad = lazy(() => import("./pages/MeetTheSquad"));
 const RegisterInstitution = lazy(() => import("./pages/RegisterInstitution"));
 const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 const Support = lazy(() => import("./pages/Support"));
+const Tutorials = lazy(() => import("./pages/Tutorials"));
 
-// DevTools available in all environments for testing
-const DevToolsPanel = lazy(() => import("./components/dev/DevToolsPanel").then(m => ({ default: m.DevToolsPanel })));
+// Keep test credentials and development helpers out of production bundles.
+const DevToolsPanel = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_TOOLS === "true"
+  ? lazy(() => import("./components/dev/DevToolsPanel").then(m => ({ default: m.DevToolsPanel })))
+  : null;
 
 const queryClient = new QueryClient();
 
@@ -79,18 +80,11 @@ const Pub = ({ children }: { children: React.ReactNode }) => (
   <PageTransition>{children}</PageTransition>
 );
 
-// Everything past the promo landing page requires the preview access code
-const P = ({ children }: { children: React.ReactNode }) => (
-  <PromoGate>
-    <PageTransition>{children}</PageTransition>
-  </PromoGate>
-);
-
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-                  <TenantBrandingProvider>
+        <TenantBrandingProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -101,57 +95,60 @@ const App = () => (
               <div className="pb-16 lg:pb-0">
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
-                    {/* Public */}
-                    <Route path="/" element={<Promo />} />
-                    <Route path="/home" element={<P><Index /></P>} />
-                    <Route path="/auth" element={<P><Auth /></P>} />
-                    <Route path="/reset-password" element={<P><ResetPassword /></P>} />
-                    <Route path="/pricing" element={<P><Pricing /></P>} />
+                    {/* Public landing */}
+                    <Route path="/" element={<Pub><Index /></Pub>} />
+                    <Route path="/home" element={<Pub><Index /></Pub>} />
+
+                    {/* Auth pages remain available for those who want accounts */}
+                    <Route path="/auth" element={<Pub><Auth /></Pub>} />
+                    <Route path="/reset-password" element={<Pub><ResetPassword /></Pub>} />
+
+                    {/* Public app surfaces */}
+                    <Route path="/pricing" element={<Pub><Pricing /></Pub>} />
                     <Route path="/privacy" element={<Pub><PrivacyPolicy /></Pub>} />
-                    <Route path="/install" element={<P><InstallApp /></P>} />
+                    <Route path="/install" element={<Pub><InstallApp /></Pub>} />
                     <Route path="/terms" element={<Pub><TermsOfService /></Pub>} />
                     <Route path="/cookies" element={<Pub><CookiePolicy /></Pub>} />
-                    <Route path="/blog" element={<P><Blog /></P>} />
-                    <Route path="/blog/:slug" element={<P><Blog /></P>} />
-                    <Route path="/meet-the-squad" element={<P><MeetTheSquad /></P>} />
-                    <Route path="/register-institution" element={<P><RegisterInstitution /></P>} />
-                    <Route path="/join-institution" element={<P><JoinInstitution /></P>} />
-                    <Route path="/formulas" element={<P><FormulaSheets /></P>} />
-                    <Route path="/support" element={<P><Support /></P>} />
+                    <Route path="/blog" element={<Pub><Blog /></Pub>} />
+                    <Route path="/blog/:slug" element={<Pub><Blog /></Pub>} />
+                    <Route path="/meet-the-squad" element={<Pub><MeetTheSquad /></Pub>} />
+                    <Route path="/register-institution" element={<Pub><RegisterInstitution /></Pub>} />
+                    <Route path="/join-institution" element={<Pub><JoinInstitution /></Pub>} />
+                    <Route path="/formulas" element={<Pub><FormulaSheets /></Pub>} />
+                    <Route path="/support" element={<Pub><Support /></Pub>} />
+                    <Route path="/tutorials" element={<Pub><Tutorials /></Pub>} />
 
-                    {/* Auth-required public */}
-                    <Route path="/onboarding" element={<ProtectedRoute><P><Onboarding /></P></ProtectedRoute>} />
-                    <Route path="/select-subjects" element={<ProtectedRoute><P><SelectSubjects /></P></ProtectedRoute>} />
+                    {/* Student features — available without login; pages handle anonymous state */}
+                    <Route path="/subjects" element={<Pub><Subjects /></Pub>} />
+                    <Route path="/practice/:subjectId" element={<Pub><Practice /></Pub>} />
+                    <Route path="/mock-exam" element={<Pub><MockExam /></Pub>} />
+                    <Route path="/ai-tutor" element={<Pub><AITutor /></Pub>} />
+                    <Route path="/badges" element={<Pub><Badges /></Pub>} />
+                    <Route path="/leaderboard" element={<Pub><Leaderboard /></Pub>} />
+                    <Route path="/weak-drills" element={<Pub><WeakTopicDrill /></Pub>} />
+                    <Route path="/flashcards" element={<Pub><Flashcards /></Pub>} />
+                    <Route path="/live-classroom" element={<Pub><LiveClassroom /></Pub>} />
+                    <Route path="/daily-challenge" element={<Pub><DailyChallenge /></Pub>} />
+                    <Route path="/past-papers" element={<Pub><PastPapers /></Pub>} />
+                    <Route path="/study-groups" element={<Pub><StudyGroups /></Pub>} />
 
-                    {/* Student — require auth */}
-                    <Route path="/subjects" element={<ProtectedRoute><P><Subjects /></P></ProtectedRoute>} />
-                    <Route path="/practice/:subjectId" element={<ProtectedRoute><P><Practice /></P></ProtectedRoute>} />
-                    <Route path="/mock-exam" element={<ProtectedRoute><P><MockExam /></P></ProtectedRoute>} />
-                    <Route path="/ai-tutor" element={<ProtectedRoute><P><AITutor /></P></ProtectedRoute>} />
-                    <Route path="/badges" element={<ProtectedRoute><P><Badges /></P></ProtectedRoute>} />
-                    <Route path="/leaderboard" element={<ProtectedRoute><P><Leaderboard /></P></ProtectedRoute>} />
-                    <Route path="/weak-drills" element={<ProtectedRoute><P><WeakTopicDrill /></P></ProtectedRoute>} />
-                    <Route path="/flashcards" element={<ProtectedRoute><P><Flashcards /></P></ProtectedRoute>} />
-                    <Route path="/live-classroom" element={<ProtectedRoute><P><LiveClassroom /></P></ProtectedRoute>} />
-                    <Route path="/daily-challenge" element={<ProtectedRoute><P><DailyChallenge /></P></ProtectedRoute>} />
-                    <Route path="/past-papers" element={<ProtectedRoute><P><PastPapers /></P></ProtectedRoute>} />
-                    <Route path="/study-groups" element={<ProtectedRoute><P><StudyGroups /></P></ProtectedRoute>} />
-
-                    {/* Protected */}
-                    <Route path="/dashboard" element={<ProtectedRoute><P><Dashboard /></P></ProtectedRoute>} />
-                    <Route path="/certificates" element={<ProtectedRoute><P><Certificates /></P></ProtectedRoute>} />
-                    <Route path="/my-classes" element={<ProtectedRoute><P><StudentClasses /></P></ProtectedRoute>} />
-                    <Route path="/analytics" element={<ProtectedRoute><P><Analytics /></P></ProtectedRoute>} />
-                    <Route path="/study-planner" element={<ProtectedRoute><P><StudyPlanner /></P></ProtectedRoute>} />
-                    <Route path="/progress-report" element={<ProtectedRoute><P><ProgressReports /></P></ProtectedRoute>} />
-                    <Route path="/settings" element={<ProtectedRoute><P><Settings /></P></ProtectedRoute>} />
+                    {/* Account-only features */}
+                    <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+                    <Route path="/select-subjects" element={<ProtectedRoute><SelectSubjects /></ProtectedRoute>} />
+                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+                    <Route path="/my-classes" element={<ProtectedRoute><StudentClasses /></ProtectedRoute>} />
+                    <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                    <Route path="/study-planner" element={<ProtectedRoute><StudyPlanner /></ProtectedRoute>} />
+                    <Route path="/progress-report" element={<ProtectedRoute><ProgressReports /></ProtectedRoute>} />
+                    <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
                     {/* Role-protected */}
-                    <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><P><TeacherDashboard /></P></ProtectedRoute>} />
-                    <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><P><ParentDashboard /></P></ProtectedRoute>} />
-                    <Route path="/institution" element={<ProtectedRoute><P><TenantAdmin /></P></ProtectedRoute>} />
-                    <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><P><AdminGenerate /></P></ProtectedRoute>} />
-                    <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><P><AdminQuestions /></P></ProtectedRoute>} />
+                    <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherDashboard /></ProtectedRoute>} />
+                    <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><ParentDashboard /></ProtectedRoute>} />
+                    <Route path="/institution" element={<ProtectedRoute><TenantAdmin /></ProtectedRoute>} />
+                    <Route path="/admin/generate" element={<ProtectedRoute requiredRole="admin"><AdminGenerate /></ProtectedRoute>} />
+                    <Route path="/admin/questions" element={<ProtectedRoute requiredRole="admin"><AdminQuestions /></ProtectedRoute>} />
 
                     <Route path="*" element={<NotFound />} />
                   </Routes>
@@ -159,13 +156,15 @@ const App = () => (
               </div>
               <MobileBottomNav />
               <CookieConsent />
-              <Suspense fallback={null}>
-                <DevToolsPanel />
-              </Suspense>
+              {DevToolsPanel && (
+                <Suspense fallback={null}>
+                  <DevToolsPanel />
+                </Suspense>
+              )}
             </BrowserRouter>
           </TooltipProvider>
-          </TenantBrandingProvider>
-                </AuthProvider>
+        </TenantBrandingProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

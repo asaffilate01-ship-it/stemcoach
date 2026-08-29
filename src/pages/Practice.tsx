@@ -7,6 +7,7 @@ import { subjects, type Question as LocalQuestion } from "@/data/questions";
 import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2, Lock, CreditCard, Trophy, Zap, ChevronLeft, Timer, Target, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -53,7 +54,7 @@ export default function Practice() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { stats, recordAnswer, newBadges, dismissBadge, fetchStats } = useGameStats();
+  const { stats, newBadges, dismissBadge, fetchStats } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
   useDocumentTitle(subject ? t("practice.practiceSubject", { subject: subject.name }) : t("practice.title"));
@@ -127,7 +128,7 @@ export default function Practice() {
       if (questions.length === 0 || dbLoading) return;
       const q = questions[currentIndex];
       if (!q) return;
-      const isEssayQ = q.question_type === "essay";
+      const isEssayQ = q.question_type === "essay" || q.question_type === "multi-step";
       const opts: string[] = typeof q.options === "string" ? JSON.parse(q.options) : (Array.isArray(q.options) ? q.options : []);
 
       // Don't intercept keys when typing in textarea
@@ -223,7 +224,8 @@ export default function Practice() {
 
   const question = questions[currentIndex];
   const isMultiSelect = question.allow_multiple_answers || question.question_type === "multi-select";
-  const isEssay = question.question_type === "essay";
+  const isEssay = question.question_type === "essay" || question.question_type === "multi-step";
+  const isNumerical = question.question_type === "numerical" && !question.options?.length;
   const parsedOptions: string[] = typeof question.options === "string"
     ? JSON.parse(question.options)
     : (Array.isArray(question.options) ? question.options : []);
@@ -268,16 +270,8 @@ export default function Practice() {
         setTimeout(() => setShowCorrectAnim(false), 2000);
         setTimeout(() => setShowMascotReaction(false), 3000);
         setScore((prev) => ({ correct: prev.correct + (passed ? 1 : 0), total: prev.total + 1 }));
-        if (user) {
-          await supabase.from("attempts").insert({
-            user_id: user.id, question_id: question.id,
-            answer: essayAnswer.slice(0, 500), correct: passed,
-            time_taken_seconds: timeTaken, ai_score: data.grading?.score,
-            ai_feedback: data.grading?.feedback?.slice(0, 500),
-          });
-        }
-        const result = await recordAnswer(passed, question.points);
-        showXPPopup(result.xpGained);
+        showXPPopup(data.xp_gained || 0);
+        if (data.stats) fetchStats();
         incrementCount();
       } catch (e: any) {
         toast({ title: t("practice.gradingFailed"), description: e.message, variant: "destructive" });
@@ -386,7 +380,8 @@ export default function Practice() {
   const toggleMultiSelect = (option: string) => {
     setSelectedAnswers((prev) => {
       const next = new Set(prev);
-      next.has(option) ? next.delete(option) : next.add(option);
+      if (next.has(option)) next.delete(option);
+      else next.add(option);
       return next;
     });
   };
@@ -545,7 +540,7 @@ export default function Practice() {
               {isEssay && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-medium text-primary">
                   <Sparkles className="h-3.5 w-3.5" />
-                  Extended response · STEMcoach graded
+                  {question.question_type === "multi-step" ? "Multi-step solution" : "Extended response"} · STEMCoach graded
                 </div>
               )}
 
@@ -583,7 +578,8 @@ export default function Practice() {
                         whileTap={!showFeedback ? { scale: 0.995 } : {}}
                         onClick={() => {
                           if (showFeedback) return;
-                          isMultiSelect ? toggleMultiSelect(option) : setSelectedAnswer(option);
+                          if (isMultiSelect) toggleMultiSelect(option);
+                          else setSelectedAnswer(option);
                         }}
                         disabled={showFeedback}
                         className={`flex w-full items-center gap-4 rounded-xl p-4 text-left transition-all duration-200 ${optionClasses}`}
@@ -605,6 +601,20 @@ export default function Practice() {
                       </motion.button>
                     );
                   })}
+                </div>
+              )}
+
+              {isNumerical && !showFeedback && (
+                <div className="mb-6 max-w-md">
+                  <label htmlFor="numerical-answer" className="mb-2 block text-sm font-medium">Your answer (include units where appropriate)</label>
+                  <Input
+                    id="numerical-answer"
+                    value={selectedAnswer || ""}
+                    onChange={(event) => setSelectedAnswer(event.target.value)}
+                    placeholder="e.g. 9.81 m/s²"
+                    inputMode="decimal"
+                    className="rounded-xl"
+                  />
                 </div>
               )}
 
@@ -745,7 +755,7 @@ export default function Practice() {
               </motion.div>
             )}
 
-            {/* Essay STEMcoach Grading */}
+            {/* Essay STEMCoach Grading */}
             {showFeedback && isEssay && aiGrading && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-4 space-y-4">
                 <div className={`rounded-2xl border p-6 ${aiGrading.score >= aiGrading.max_marks * 0.7 ? "bg-emerald-500/5 border-emerald-500/20" : aiGrading.score >= aiGrading.max_marks * 0.4 ? "bg-amber-500/5 border-amber-500/20" : "bg-destructive/5 border-destructive/20"}`}>
@@ -796,14 +806,14 @@ export default function Practice() {
               </motion.div>
             )}
 
-            {/* STEMcoach Explanation */}
+            {/* STEMCoach Explanation */}
             {aiExplanation && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-2xl border border-border/60 bg-card p-6">
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
                     <MessageSquare className="h-4 w-4 text-primary" />
                   </div>
-                  STEMcoach Explanation
+                  STEMCoach Explanation
                 </div>
                 <div className="prose prose-sm dark:prose-invert max-w-none">
                   <ReactMarkdown>{aiExplanation}</ReactMarkdown>

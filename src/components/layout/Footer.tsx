@@ -17,6 +17,7 @@ export function Footer() {
     [t("footer.resources")]: [
       { label: t("footer.formulaSheets"), to: "/formulas" },
       { label: t("footer.blog"), to: "/blog" },
+      { label: t("footer.tutorials"), to: "/tutorials" },
       { label: t("footer.meetTheSquad"), to: "/meet-the-squad" },
     ],
     [t("footer.company")]: [
