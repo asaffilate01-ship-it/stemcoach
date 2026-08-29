@@ -747,6 +747,7 @@ export type Database = {
           allow_multiple_answers: boolean
           boards: string[]
           command_word: string | null
+          content_origin: string
           correct_answer: string
           correct_answers: string[] | null
           created_at: string
@@ -761,8 +762,14 @@ export type Database = {
           model_answer: string | null
           options: Json | null
           points: number
+          quality_flags: Json
           question_text: string
           question_type: string
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_url: string | null
+          specification_version: string | null
           subject: string
           subtopic: string
           topic: string
@@ -773,6 +780,7 @@ export type Database = {
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
+          content_origin?: string
           correct_answer?: string
           correct_answers?: string[] | null
           created_at?: string
@@ -787,8 +795,14 @@ export type Database = {
           model_answer?: string | null
           options?: Json | null
           points?: number
+          quality_flags?: Json
           question_text: string
           question_type?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_url?: string | null
+          specification_version?: string | null
           subject: string
           subtopic: string
           topic: string
@@ -799,6 +813,7 @@ export type Database = {
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
+          content_origin?: string
           correct_answer?: string
           correct_answers?: string[] | null
           created_at?: string
@@ -813,8 +828,14 @@ export type Database = {
           model_answer?: string | null
           options?: Json | null
           points?: number
+          quality_flags?: Json
           question_text?: string
           question_type?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_url?: string | null
+          specification_version?: string | null
           subject?: string
           subtopic?: string
           topic?: string
@@ -1370,6 +1391,10 @@ export type Database = {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
       }
+      create_flashcards_from_mistakes: {
+        Args: { _limit?: number }
+        Returns: number
+      }
       get_daily_challenge_leaderboard: {
         Args: { _challenge_id: string }
         Returns: {
@@ -1481,6 +1506,8 @@ export type Database = {
           name: string
         }[]
       }
+      publish_question: { Args: { _question_id: string }; Returns: Json }
+      question_quality_flags: { Args: { _question_id: string }; Returns: Json }
       record_answer_stats: {
         Args: { _correct: boolean; _user_id: string; _xp_gain: number }
         Returns: Json
