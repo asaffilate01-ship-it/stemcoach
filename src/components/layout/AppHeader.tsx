@@ -193,7 +193,7 @@ export function AppHeader() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-0.5 lg:flex">
           {topNav.slice(0, 4).map(item => <NavLink key={item.to} item={item} />)}
-          {user && <GroupDropdown label={t("nav.groupStudy")} items={studyItems} />}
+          <GroupDropdown label={t("nav.groupStudy")} items={studyItems} />
           <GroupDropdown label={t("nav.groupRewards")} items={socialItems} />
           {classItems.length > 0 && <GroupDropdown label={t("nav.groupClasses")} items={classItems} />}
           <GroupDropdown label={t("nav.groupResources")} items={resourceItems} />
