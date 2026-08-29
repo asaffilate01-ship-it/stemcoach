@@ -87,6 +87,7 @@ const navItems: NavItem[] = [
   { to: "/live-classroom", labelKey: "nav.liveClass", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true, variant: "destructive" },
   { to: "/formulas", labelKey: "nav.formulaSheets", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
   { to: "/blog", labelKey: "nav.blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
+  { to: "/tutorials", labelKey: "nav.tutorials", label: "Tutorials", icon: BookOpen, group: "resources", variant: "primary" },
   { to: "/parent", labelKey: "nav.parentPortal", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
   { to: "/teacher", labelKey: "nav.teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },
   { to: "/institution", labelKey: "nav.myInstitution", label: "My Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
