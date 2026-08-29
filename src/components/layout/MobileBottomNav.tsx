@@ -16,7 +16,7 @@ interface NavItem {
 }
 
 const items: NavItem[] = [
-  { to: "/home", labelKey: "nav.home", icon: Home, variant: "primary" },
+  { to: "/", labelKey: "nav.home", icon: Home, variant: "primary" },
   { to: "/subjects", labelKey: "nav.subjects", icon: BookOpen, variant: "success" },
   { to: "/ai-tutor", labelKey: "nav.aiTutor", image: "/assets/coach-stem.png", variant: "purple" },
   { to: "/tutorials", labelKey: "nav.tutorials", icon: Library, variant: "primary" },
