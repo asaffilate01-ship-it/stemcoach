@@ -211,7 +211,7 @@ export function AppHeader() {
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
           {user && <NotificationBell />}
-          {user ? (
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" variant="ghost" className="gap-1.5 rounded-lg text-xs h-8 px-2 sm:h-9 sm:px-3">
@@ -240,10 +240,6 @@ export function AppHeader() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button size="sm" onClick={() => navigate("/auth")} className="rounded-lg shadow-sm h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
-              {t("nav.login")}
-            </Button>
           )}
         </div>
       </div>
