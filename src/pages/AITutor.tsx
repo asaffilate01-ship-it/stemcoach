@@ -5,13 +5,14 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, User, Loader2, Trash2, Sparkles, Lock, CreditCard, GraduationCap } from "lucide-react";
+import { Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getMascot, getCoachStem } from "@/lib/mascots";
 import { usePreferredCoach } from "@/hooks/usePreferredCoach";
+import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -59,6 +60,7 @@ export default function AITutor() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { preferredCoachId, setPreferredCoachId } = usePreferredCoach();
+  const { curriculumId, curriculum } = useLearnerCurriculum();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -174,7 +176,7 @@ export default function AITutor() {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ messages: allMessages, subject: SUBJECT_LABELS[subjectId], curriculum: "International" }),
+        body: JSON.stringify({ messages: allMessages, subject: subjectId, curriculum: curriculumId }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -278,6 +280,11 @@ export default function AITutor() {
                 </button>
               );
             })}
+            {curriculum && (
+              <span className="flex items-center gap-1.5 rounded-xl border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary">
+                <GraduationCap className="h-3.5 w-3.5" /> {curriculum.label}
+              </span>
+            )}
             {messages.length > 0 && (
               <button
                 onClick={clearConversation}
@@ -305,8 +312,9 @@ export default function AITutor() {
                   <h3 className="text-lg font-semibold">{mascot.name}</h3>
                   <p className="mt-1 text-xs italic text-muted-foreground">"{mascot.personality}"</p>
                   <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                    Ask me anything about {SUBJECT_LABELS[subjectId]}. I'll explain concepts, solve problems, and give you exam tips — like a private tutor.
+                    Ask me anything about {SUBJECT_LABELS[subjectId]}. I'll explain concepts, solve problems, and give you exam tips{curriculum ? ` for ${curriculum.label}` : ""} — like a private tutor.
                   </p>
+                  {user && <p className="mt-2 max-w-md text-xs text-primary/80">Your coach uses your selected curriculum and recent weak topics to personalise explanations.</p>}
 
                   {/* Quick prompts */}
                   <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -363,6 +371,17 @@ export default function AITutor() {
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               </div>
+            )}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate(`/practice/${subjectId}`)}>
+              <GraduationCap className="h-4 w-4" /> Practise {SUBJECT_LABELS[subjectId]}
+            </Button>
+            {user && (
+              <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate("/weak-drills")}>
+                <Target className="h-4 w-4" /> Open weak-topic drill
+              </Button>
             )}
           </div>
 

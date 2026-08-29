@@ -23,6 +23,7 @@ import ReactMarkdown from "react-markdown";
 import { getCachedQuestions, cacheQuestions } from "@/lib/questionCache";
 import { getMascot } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
+import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
 
 interface DBQuestion {
   id: string;
@@ -64,6 +65,7 @@ export default function Practice() {
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { curriculumId, curriculum, loading: curriculumLoading } = useLearnerCurriculum();
   const { toast } = useToast();
   const { stats, newBadges, dismissBadge, fetchStats } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject } = useSubscriptionGate();
@@ -96,25 +98,26 @@ export default function Practice() {
   const [revealedAnswer, setRevealedAnswer] = useState<any>(null);
 
   useEffect(() => {
-    if (!subjectId) return;
+    if (!subjectId || curriculumLoading) return;
     const loadQuestions = async () => {
       setDbLoading(true);
 
       // Try network first, fall back to IndexedDB cache for offline support
       try {
-        const { data } = await supabase
+        let questionQuery = supabase
           .from("questions_safe" as any)
           .select("*")
-          .eq("subject", subjectId)
-          .limit(50);
+          .eq("subject", subjectId);
+        if (curriculumId) questionQuery = questionQuery.eq("curriculum", curriculumId);
+        const { data } = await questionQuery.limit(50);
         if (data && (data as any[]).length > 0) {
           const shuffled = (data as unknown as DBQuestion[]).sort(() => Math.random() - 0.5);
           setQuestions(shuffled);
           // Cache for offline use
-          cacheQuestions(subjectId, shuffled);
+          cacheQuestions(subjectId, shuffled, curriculumId);
         } else {
           // No data from network — try cache
-          const cached = await getCachedQuestions(subjectId);
+          const cached = await getCachedQuestions(subjectId, curriculumId);
           if (cached && cached.length > 0) {
             setQuestions(cached as DBQuestion[]);
             toast({ title: t("practice.offlineMode"), description: t("practice.showingCached") });
@@ -122,7 +125,7 @@ export default function Practice() {
         }
       } catch {
         // Network error — use cached questions
-        const cached = await getCachedQuestions(subjectId);
+        const cached = await getCachedQuestions(subjectId, curriculumId);
         if (cached && cached.length > 0) {
           setQuestions(cached as DBQuestion[]);
           toast({ title: t("practice.youreOffline"), description: t("practice.practicingCached") });
@@ -132,7 +135,7 @@ export default function Practice() {
       setDbLoading(false);
     };
     loadQuestions();
-  }, [subjectId]);
+  }, [curriculumId, curriculumLoading, subjectId, t, toast]);
 
   // Keyboard shortcuts: 1-4 for options, Enter to submit/next, → for next
   useEffect(() => {
@@ -195,7 +198,7 @@ export default function Practice() {
     );
   }
 
-  if (dbLoading) {
+  if (dbLoading || curriculumLoading) {
     const mascot = getMascot(subjectId || "");
     return (
       <div className="min-h-screen bg-background">
@@ -225,7 +228,7 @@ export default function Practice() {
               <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">{t("practice.noQuestionsYet")}</h2>
-            <p className="mb-8 text-muted-foreground">{mascot.name} {t("practice.preparingQuestions")} {subject.name}. {t("practice.checkBackSoon")}</p>
+            <p className="mb-8 text-muted-foreground">{mascot.name} {t("practice.preparingQuestions")} {subject.name}{curriculum ? ` for ${curriculum.label}` : ""}. {t("practice.checkBackSoon")}</p>
             <Button onClick={() => navigate("/subjects")} className="gap-2">
               <ChevronLeft className="h-4 w-4" /> Back to Subjects
             </Button>

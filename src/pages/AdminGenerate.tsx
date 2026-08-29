@@ -28,6 +28,9 @@ const questionTypes = [
   { id: "short-answer", label: "Short Answer" },
 ];
 
+const DEFAULT_BANK_TARGET = 2_000_000;
+const MAX_BANK_TARGET = 2_500_000;
+
 export default function AdminGenerate() {
   useDocumentTitle("Generate Questions");
   const { user } = useAuth();
@@ -43,39 +46,24 @@ export default function AdminGenerate() {
   const [selectedDifficulty, setSelectedDifficulty] = useState(3);
   const [selectedType, setSelectedType] = useState("mcq");
   const [count, setCount] = useState(10);
-  const [bankTarget, setBankTarget] = useState(200000);
+  const [bankTarget, setBankTarget] = useState(DEFAULT_BANK_TARGET);
   const [log, setLog] = useState<string[]>([]);
 
   const subjectInfo = subjects.find((s) => s.id === selectedSubject);
   const curriculumInfo = curricula.find((c) => c.id === selectedCurriculum);
 
-  const { data: dbCount, refetch: refetchCount } = useQuery({
-    queryKey: ["question-count"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("questions")
-        .select("*", { count: "exact", head: true });
-      if (error) return 0;
-      return count || 0;
-    },
-    refetchInterval: 5000,
-  });
-
-  const { data: subjectCounts } = useQuery({
+  const { data: subjectCounts, refetch: refetchCount } = useQuery({
     queryKey: ["subject-counts"],
     queryFn: async () => {
       const counts: Record<string, number> = {};
-      for (const s of subjects) {
-        const { count } = await supabase
-          .from("questions")
-          .select("*", { count: "exact", head: true })
-          .eq("subject", s.id);
-        counts[s.id] = count || 0;
-      }
+      const { data, error } = await supabase.rpc("get_question_bank_subject_counts");
+      if (error) throw error;
+      for (const row of data || []) counts[row.subject] = Number(row.question_count) || 0;
       return counts;
     },
-    refetchInterval: 10000,
+    refetchInterval: 60000,
   });
+  const dbCount = Object.values(subjectCounts || {}).reduce((total, subjectCount) => total + subjectCount, 0);
 
   const { data: batchStatus, refetch: refetchBatch } = useQuery({
     queryKey: ["batch-status"],
@@ -153,14 +141,34 @@ export default function AdminGenerate() {
     addLog(`🌱 Planning a governed ${bankTarget.toLocaleString()}-question draft bank...`);
     try {
       const { data, error } = await supabase.functions.invoke("batch-generate", {
-        body: { action: "seed", target_questions: bankTarget, questions_per_job: 10, name: `${bankTarget.toLocaleString()} question curriculum bank` },
+        body: { action: "seed", target_questions: bankTarget, questions_per_job: 20, name: `${bankTarget.toLocaleString()} question curriculum bank` },
       });
       if (error) throw error;
-      addLog(`✅ Queue seeded: ${data.inserted?.toLocaleString()} jobs (${data.estimated_questions?.toLocaleString()} draft questions)`);
-      toast({ title: "200k bank planned", description: `${data.estimated_questions?.toLocaleString()} drafts queued across ${data.subjects} subjects.` });
+      addLog(`✅ Campaign created: ${data.inserted?.toLocaleString()} jobs in this checkpoint (${data.planned_questions?.toLocaleString()} of ${data.target_questions?.toLocaleString()} drafts planned)`);
+      addLog("ℹ️ Queue planning is resumable. Scheduled processing extends it in safe 1,000-job checkpoints.");
+      toast({ title: "2M bank campaign started", description: `${data.planned_questions?.toLocaleString()} of ${data.target_questions?.toLocaleString()} drafts planned across ${data.subjects} subjects.` });
       refetchBatch();
     } catch (e: any) {
       addLog(`❌ Seed failed: ${e.message}`);
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const handleContinuePlanning = async () => {
+    setSeeding(true);
+    addLog("🧭 Extending the campaign queue by one durable planning checkpoint...");
+    try {
+      const { data, error } = await supabase.functions.invoke("batch-generate", {
+        body: { action: "seed-next", campaign_id: batchStatus?.campaign_id },
+      });
+      if (error) throw error;
+      addLog(`✅ ${data.message}: ${(data.planned_questions || 0).toLocaleString()} of ${(data.target_questions || bankTarget).toLocaleString()} questions planned`);
+      toast({ title: data.planning_complete ? "Queue planning complete" : "Planning checkpoint saved", description: `${(data.planned_questions || 0).toLocaleString()} questions planned.` });
+      refetchBatch();
+    } catch (e: any) {
+      addLog(`❌ Planning failed: ${e.message}`);
       toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally {
       setSeeding(false);
@@ -178,7 +186,7 @@ export default function AdminGenerate() {
       addLog(`✅ Batch complete: ${data.inserted} questions inserted from ${data.processed} items`);
       data.results?.forEach((r: any) => {
         if (r.status === "done") addLog(`  ✅ ${r.subject}/${r.topic}: ${r.inserted} questions`);
-        else if (r.status === "rate_limited") addLog(`  ⏳ Rate limited — will retry`);
+        else if (r.status === "rate_limited" || r.status?.startsWith("retrying_")) addLog(`  ⏳ ${r.subject || "Queue item"}: ${r.status.replace(/_/g, " ")} — will retry`);
         else addLog(`  ❌ ${r.status}: ${r.error || ""}`);
       });
       toast({ title: "Batch processed!", description: `${data.inserted} questions generated.` });
@@ -243,6 +251,9 @@ export default function AdminGenerate() {
   };
 
   const progressPct = batchStatus?.progress_pct || 0;
+  const planningPct = batchStatus?.target > 0
+    ? Math.min(100, Math.round(((batchStatus?.planned_questions || 0) / batchStatus.target) * 1000) / 10)
+    : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -265,6 +276,12 @@ export default function AdminGenerate() {
             <span className="text-sm font-bold text-primary">{progressPct.toFixed(1)}%</span>
           </div>
           <Progress value={progressPct} className="h-3 mb-3" />
+          {batchStatus?.campaign_id && (
+            <p className="mb-3 text-xs text-muted-foreground">
+              Queue planning: {(batchStatus.planned_questions || 0).toLocaleString()} / {(batchStatus.target || 0).toLocaleString()} ({planningPct.toFixed(1)}%)
+              {batchStatus.planning_complete ? " — complete" : " — safely resumable"}
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 text-center text-sm">
             <div>
               <div className="text-xl font-bold">{(batchStatus?.generated || 0).toLocaleString()}</div>
@@ -286,12 +303,18 @@ export default function AdminGenerate() {
           <div className="mt-4 flex flex-wrap gap-2">
             <div className="flex items-center gap-2 rounded-lg border bg-background px-3">
               <Label htmlFor="bank-target" className="whitespace-nowrap text-xs">Bank target</Label>
-              <Input id="bank-target" type="number" min={1000} max={250000} step={1000} value={bankTarget} onChange={(event) => setBankTarget(Math.min(250000, Math.max(1000, Number(event.target.value) || 1000)))} className="h-9 w-28 border-0 px-1" />
+              <Input id="bank-target" type="number" min={1000} max={MAX_BANK_TARGET} step={10000} value={bankTarget} onChange={(event) => setBankTarget(Math.min(MAX_BANK_TARGET, Math.max(1000, Number(event.target.value) || 1000)))} className="h-9 w-32 border-0 px-1" />
             </div>
             <Button onClick={handleSeedQueue} disabled={seeding || generating} variant="outline" className="gap-2 rounded">
               {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
               1. Plan governed bank
             </Button>
+            {batchStatus?.campaign_id && !batchStatus?.planning_complete && (
+              <Button onClick={handleContinuePlanning} disabled={seeding || generating} variant="outline" className="gap-2 rounded">
+                {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
+                Continue queue planning
+              </Button>
+            )}
             <Button onClick={handleProcessBatch} disabled={generating} variant="outline" className="gap-2 rounded">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               2. Process Next Batch
