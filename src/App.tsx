@@ -65,7 +65,6 @@ const DevToolsPanel = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_TOO
   : null;
 
 const queryClient = new QueryClient();
-const previewEnabled = import.meta.env.VITE_PREVIEW_GATE_ENABLED !== "false";
 
 const PageLoader = () => (
   <div className="flex min-h-screen items-center justify-center bg-background">
@@ -79,12 +78,6 @@ const PageLoader = () => (
 // Public (always reachable) page wrapper
 const Pub = ({ children }: { children: React.ReactNode }) => (
   <PageTransition>{children}</PageTransition>
-);
-
-const P = ({ children }: { children: React.ReactNode }) => (
-  previewEnabled
-    ? <PromoGate><PageTransition>{children}</PageTransition></PromoGate>
-    : <PageTransition>{children}</PageTransition>
 );
 
 const App = () => (
