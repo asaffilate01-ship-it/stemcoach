@@ -31,9 +31,6 @@ export function MobileBottomNav() {
 
   const visible = items.filter(i => !i.auth || user);
 
-  // The promo landing page ships its own native-style bottom navigation
-  if (pathname === "/") return null;
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/15 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 lg:hidden safe-area-bottom">
       <div className="flex items-center justify-around px-2 py-1.5">
