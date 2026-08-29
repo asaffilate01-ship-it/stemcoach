@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, Archive, Edit3, Save, X, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert, Eye, Ban } from "lucide-react";
+import { Search, Archive, Edit3, Save, X, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert, Eye, Ban, ClipboardCheck, Loader2, RotateCcw, History } from "lucide-react";
 import { CSVImport } from "@/components/admin/CSVImport";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { curricula, subjects } from "@/data/questions";
 
 export default function AdminQuestions() {
   useDocumentTitle("Question Bank");
@@ -19,17 +20,21 @@ export default function AdminQuestions() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [filterSubject, setFilterSubject] = useState("");
+  const [filterCurriculum, setFilterCurriculum] = useState("");
   const [filterTopic, setFilterTopic] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterClaimedByMe, setFilterClaimedByMe] = useState(false);
   const [page, setPage] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<any>({});
   const [reviewQuestion, setReviewQuestion] = useState<any | null>(null);
   const [reviewAttested, setReviewAttested] = useState(false);
+  const [reviewNotes, setReviewNotes] = useState("");
+  const [claiming, setClaiming] = useState(false);
   const pageSize = 20;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-questions", filterSubject, filterTopic, filterStatus, search, page],
+    queryKey: ["admin-questions", filterSubject, filterCurriculum, filterTopic, filterStatus, filterClaimedByMe, search, page, user?.id],
     queryFn: async () => {
       let q = supabase
         .from("questions")
@@ -38,8 +43,10 @@ export default function AdminQuestions() {
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
       if (filterSubject) q = q.eq("subject", filterSubject);
+      if (filterCurriculum) q = q.eq("curriculum", filterCurriculum);
       if (filterTopic) q = q.ilike("topic", `%${filterTopic}%`);
       if (filterStatus) q = q.eq("review_status", filterStatus);
+      if (filterClaimedByMe && user) q = q.eq("review_claimed_by", user.id);
       if (search) q = q.ilike("question_text", `%${search}%`);
 
       const { data, count, error } = await q;
@@ -48,12 +55,28 @@ export default function AdminQuestions() {
     },
   });
 
-  const { data: subjectList } = useQuery({
-    queryKey: ["distinct-subjects"],
+  const { data: reviewMetrics } = useQuery({
+    queryKey: ["review-queue-metrics"],
     queryFn: async () => {
-      const { data } = await supabase.from("questions").select("subject");
-      const unique = [...new Set(data?.map(d => d.subject) || [])];
-      return unique.sort();
+      const { data, error } = await (supabase.rpc as any)("get_review_queue_metrics");
+      if (error) throw error;
+      return data as { needs_review: number; unclaimed: number; claimed_by_me: number; published: number; rejected: number; reviewed_today: number };
+    },
+    refetchInterval: 15_000,
+  });
+
+  const { data: reviewHistory } = useQuery({
+    queryKey: ["question-review-history", reviewQuestion?.id],
+    enabled: Boolean(reviewQuestion?.id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("question_review_events")
+        .select("id, action, notes, created_at, reviewer_id, flags_snapshot")
+        .eq("question_id", reviewQuestion.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data || [];
     },
   });
 
@@ -77,50 +100,104 @@ export default function AdminQuestions() {
     if (!editingId) return;
     const { error } = await supabase
       .from("questions")
-      .update({ ...editData, review_status: "needs_review", reviewed_at: null, reviewed_by: null })
+      .update({ ...editData, review_status: "needs_review", reviewed_at: null, reviewed_by: null, review_claimed_by: null, review_claimed_at: null })
       .eq("id", editingId);
     if (error) {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Question updated!" });
       setEditingId(null);
-      queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+      refreshReviewData();
     }
   };
 
-  const publishQuestion = async (id: string) => {
-    const { data: result, error } = await supabase.rpc("publish_question", { _question_id: id });
+  const refreshReviewData = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+    queryClient.invalidateQueries({ queryKey: ["review-queue-metrics"] });
+  };
+
+  const openReview = async (question: any) => {
+    const { data, error } = await (supabase.rpc as any)("claim_question_review", { _question_id: question.id });
+    if (error || !data) {
+      toast({ title: "Question is already being reviewed", description: error?.message || "Another reviewer currently owns this question.", variant: "destructive" });
+      refreshReviewData();
+      return;
+    }
+    setReviewQuestion({ ...question, review_claimed_by: user?.id, review_claimed_at: new Date().toISOString() });
+    setReviewAttested(false);
+    setReviewNotes(question.review_notes || "");
+    refreshReviewData();
+  };
+
+  const decideReview = async (decision: "published" | "rejected" | "needs_review") => {
+    if (!reviewQuestion) return;
+    const { data: result, error } = await (supabase.rpc as any)("review_question_decision", {
+      _question_id: reviewQuestion.id,
+      _decision: decision,
+      _notes: reviewNotes || null,
+      _attested: decision === "published" ? reviewAttested : false,
+    });
     if (error) {
       toast({ title: "Review failed", description: error.message, variant: "destructive" });
       return;
     }
-    const outcome = result as unknown as { published: boolean; flags: string[] };
-    if (!outcome.published) {
+    const outcome = result as { success: boolean; error?: string; flags?: string[] };
+    if (!outcome.success) {
       toast({
         title: "Question needs more work",
-        description: outcome.flags.join(", ").replace(/_/g, " "),
+        description: outcome.flags?.length ? outcome.flags.join(", ").replace(/_/g, " ") : (outcome.error || "Review decision was not saved").replace(/_/g, " "),
         variant: "destructive",
       });
       return;
     }
-    toast({ title: "Question reviewed and published" });
+    toast({ title: decision === "published" ? "Question reviewed and published" : decision === "rejected" ? "Question rejected with audit notes" : "Question returned to the review queue" });
     setReviewQuestion(null);
     setReviewAttested(false);
-    queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+    setReviewNotes("");
+    refreshReviewData();
   };
 
-  const setReviewState = async (id: string, reviewStatus: "rejected" | "archived") => {
-    const { error } = await supabase.from("questions").update({
-      review_status: reviewStatus,
-      reviewed_at: new Date().toISOString(),
-      reviewed_by: user?.id || null,
-    }).eq("id", id);
+  const claimReviewBatch = async () => {
+    setClaiming(true);
+    const { data, error } = await (supabase.rpc as any)("claim_question_review_batch", {
+      _limit: 20,
+      _subject: filterSubject || null,
+      _curriculum: filterCurriculum || null,
+    });
+    setClaiming(false);
     if (error) {
-      toast({ title: `Error marking question ${reviewStatus}`, description: error.message, variant: "destructive" });
+      toast({ title: "Unable to claim review batch", description: error.message, variant: "destructive" });
+      return;
+    }
+    const count = Array.isArray(data) ? data.length : 0;
+    setFilterStatus("needs_review");
+    setFilterClaimedByMe(true);
+    setPage(0);
+    toast({ title: count ? `${count} questions assigned to you` : "No unclaimed questions matched these filters" });
+    refreshReviewData();
+  };
+
+  const releaseReview = async () => {
+    if (!reviewQuestion) return;
+    const { data, error } = await (supabase.rpc as any)("release_question_review", { _question_id: reviewQuestion.id, _notes: reviewNotes || null });
+    if (error || !data) {
+      toast({ title: "Unable to release question", description: error?.message || "The review claim is no longer active.", variant: "destructive" });
+      return;
+    }
+    setReviewQuestion(null);
+    setReviewAttested(false);
+    setReviewNotes("");
+    refreshReviewData();
+  };
+
+  const archiveQuestion = async (id: string) => {
+    const { data, error } = await (supabase.rpc as any)("archive_question", { _question_id: id, _notes: "Archived from content management" });
+    if (error || !data) {
+      toast({ title: "Error archiving question", description: error?.message || "The question could not be archived.", variant: "destructive" });
     } else {
-      toast({ title: reviewStatus === "rejected" ? "Question rejected" : "Question archived" });
+      toast({ title: "Question archived with an audit event" });
       setReviewQuestion(null);
-      queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+      refreshReviewData();
     }
   };
 
@@ -136,6 +213,22 @@ export default function AdminQuestions() {
           <p className="mt-2 text-sm text-muted-foreground">
             Review full answers, edit drafts, publish approved content, and archive unsuitable questions. {data?.total.toLocaleString()} total questions.
           </p>
+        </div>
+
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+          {[
+            ["Needs review", reviewMetrics?.needs_review || 0],
+            ["Unclaimed", reviewMetrics?.unclaimed || 0],
+            ["Assigned to me", reviewMetrics?.claimed_by_me || 0],
+            ["Reviewed today", reviewMetrics?.reviewed_today || 0],
+            ["Published", reviewMetrics?.published || 0],
+            ["Rejected", reviewMetrics?.rejected || 0],
+          ].map(([label, value]) => (
+            <div key={String(label)} className="stem-card rounded-xl p-3 text-center">
+              <div className="text-xl font-bold">{Number(value).toLocaleString()}</div>
+              <div className="stem-label">{label}</div>
+            </div>
+          ))}
         </div>
 
         {/* CSV Import */}
@@ -159,7 +252,16 @@ export default function AdminQuestions() {
               className="rounded-md border bg-background px-3 py-2 text-sm"
             >
               <option value="">All Subjects</option>
-              {subjectList?.map(s => <option key={s} value={s}>{s}</option>)}
+              {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
+            </select>
+            <select
+              value={filterCurriculum}
+              onChange={(e) => { setFilterCurriculum(e.target.value); setPage(0); }}
+              className="rounded-md border bg-background px-3 py-2 text-sm"
+              aria-label="Filter by curriculum"
+            >
+              <option value="">All curricula</option>
+              {curricula.map((curriculum) => <option key={curriculum.id} value={curriculum.id}>{curriculum.label}</option>)}
             </select>
             <Input
               value={filterTopic}
@@ -179,6 +281,12 @@ export default function AdminQuestions() {
               <option value="rejected">Rejected</option>
               <option value="archived">Archived</option>
             </select>
+            <Button type="button" variant={filterClaimedByMe ? "default" : "outline"} onClick={() => { setFilterClaimedByMe((value) => !value); setPage(0); }} className="gap-2 rounded-md">
+              <ClipboardCheck className="h-4 w-4" /> My batch
+            </Button>
+            <Button type="button" onClick={claimReviewBatch} disabled={claiming} className="gap-2 rounded-md">
+              {claiming ? <Loader2 className="h-4 w-4 animate-spin" /> : <ClipboardCheck className="h-4 w-4" />} Claim next 20
+            </Button>
           </div>
         </div>
 
@@ -249,9 +357,9 @@ export default function AdminQuestions() {
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <p className="text-sm leading-relaxed">{q.question_text.slice(0, 200)}{q.question_text.length > 200 ? "..." : ""}</p>
                       <div className="flex shrink-0 gap-1">
-                        {q.review_status !== "published" && (
+                        {q.review_status === "needs_review" && (
                           <button
-                            onClick={() => { setReviewQuestion(q); setReviewAttested(false); }}
+                            onClick={() => void openReview(q)}
                             className="rounded p-1.5 text-muted-foreground hover:text-emerald-600"
                             title="Open full academic review"
                             aria-label="Open full academic review"
@@ -262,7 +370,7 @@ export default function AdminQuestions() {
                         <button onClick={() => startEdit(q)} className="rounded p-1.5 text-muted-foreground hover:text-primary">
                           <Edit3 className="h-4 w-4" />
                         </button>
-                        <button onClick={() => setReviewState(q.id, "archived")} className="rounded p-1.5 text-muted-foreground hover:text-destructive" title="Archive question" aria-label="Archive question">
+                        <button onClick={() => archiveQuestion(q.id)} className="rounded p-1.5 text-muted-foreground hover:text-destructive" title="Archive question" aria-label="Archive question">
                           <Archive className="h-4 w-4" />
                         </button>
                       </div>
@@ -279,6 +387,7 @@ export default function AdminQuestions() {
                         {q.review_status !== "published" && <ShieldAlert className="h-3 w-3" />}
                         {q.review_status || "needs_review"}
                       </span>
+                      {q.review_claimed_by && <span className={`rounded px-2 py-0.5 text-[10px] font-semibold ${q.review_claimed_by === user?.id ? "bg-blue-500/10 text-blue-700" : "bg-muted text-muted-foreground"}`}>{q.review_claimed_by === user?.id ? "assigned to me" : "claimed"}</span>}
                     </div>
                   </div>
                 )}
@@ -314,7 +423,7 @@ export default function AdminQuestions() {
           </div>
         )}
 
-        <Dialog open={Boolean(reviewQuestion)} onOpenChange={(open) => { if (!open) { setReviewQuestion(null); setReviewAttested(false); } }}>
+        <Dialog open={Boolean(reviewQuestion)} onOpenChange={(open) => { if (!open) { setReviewQuestion(null); setReviewAttested(false); setReviewNotes(""); } }}>
           <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Academic content review</DialogTitle>
@@ -331,12 +440,16 @@ export default function AdminQuestions() {
               {reviewQuestion.model_answer && <section><h3 className="mb-1 font-semibold">Model answer</h3><p className="whitespace-pre-wrap leading-6">{reviewQuestion.model_answer}</p></section>}
               <section className="grid gap-3 sm:grid-cols-2"><div><h3 className="font-semibold">Specification version</h3><p className="text-muted-foreground">{reviewQuestion.specification_version || "Missing"}</p></div><div><h3 className="font-semibold">Source</h3>{reviewQuestion.source_url ? <a className="break-all text-primary underline underline-offset-2" href={reviewQuestion.source_url} target="_blank" rel="noreferrer">{reviewQuestion.source_url}</a> : <p className="text-muted-foreground">No source recorded — verify independently</p>}</div></section>
               {reviewQuestion.quality_flags?.length > 0 && <p className="rounded-xl bg-amber-500/10 p-3 text-amber-800 dark:text-amber-300">Flags: {reviewQuestion.quality_flags.join(", ")}</p>}
+              {reviewHistory?.length > 0 && <section className="rounded-xl border p-4"><h3 className="mb-3 flex items-center gap-2 font-semibold"><History className="h-4 w-4" />Review history</h3><div className="space-y-2">{reviewHistory.map((event) => <div key={event.id} className="flex items-start justify-between gap-3 text-xs"><div><span className="font-semibold capitalize">{event.action}</span>{event.notes && <p className="mt-0.5 text-muted-foreground">{event.notes}</p>}</div><time className="shrink-0 text-muted-foreground" dateTime={event.created_at}>{new Date(event.created_at).toLocaleString()}</time></div>)}</div></section>}
+              <label className="block"><span className="mb-1 block font-semibold">Reviewer notes</span><textarea value={reviewNotes} onChange={(event) => setReviewNotes(event.target.value)} maxLength={4000} rows={3} className="w-full rounded-xl border bg-background p-3 text-sm" placeholder="Record corrections, rejection reasons or verification notes for the audit history."/><span className="mt-1 block text-right text-[10px] text-muted-foreground">{reviewNotes.length}/4000</span></label>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4"><input type="checkbox" checked={reviewAttested} onChange={(event) => setReviewAttested(event.target.checked)} className="mt-1 h-4 w-4"/><span><span className="block font-semibold">Academic verification complete</span><span className="text-xs leading-5 text-muted-foreground">I checked the answer, working, distractors, board mapping and exact current specification against the official source.</span></span></label>
             </div>}
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setReviewQuestion(null)}>Cancel</Button>
-              <Button variant="outline" className="gap-2 border-destructive/30 text-destructive" onClick={() => reviewQuestion && setReviewState(reviewQuestion.id, "rejected")}><Ban className="h-4 w-4" />Reject</Button>
-              <Button className="gap-2" disabled={!reviewAttested} onClick={() => reviewQuestion && publishQuestion(reviewQuestion.id)}><CheckCircle2 className="h-4 w-4" />Approve and publish</Button>
+            <DialogFooter className="flex-wrap gap-2 sm:gap-2">
+              <Button variant="ghost" className="gap-2" onClick={releaseReview}><RotateCcw className="h-4 w-4" />Release claim</Button>
+              <Button variant="outline" onClick={() => { setReviewQuestion(null); setReviewAttested(false); setReviewNotes(""); }}>Close</Button>
+              <Button variant="outline" className="gap-2" onClick={() => decideReview("needs_review")}><RotateCcw className="h-4 w-4" />Return</Button>
+              <Button variant="outline" disabled={reviewNotes.trim().length < 10} className="gap-2 border-destructive/30 text-destructive" onClick={() => decideReview("rejected")}><Ban className="h-4 w-4" />Reject</Button>
+              <Button className="gap-2" disabled={!reviewAttested} onClick={() => decideReview("published")}><CheckCircle2 className="h-4 w-4" />Approve and publish</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

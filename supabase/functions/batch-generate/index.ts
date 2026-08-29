@@ -18,7 +18,7 @@ function getLanguageForCurriculum(curriculum: string): { lang: string; instructi
   return { lang: "en", instruction: "" };
 }
 
-// Expanded subjects with granular subtopics for the governed 200k+ bank.
+// Expanded subjects with granular subtopics for the governed 2M+ bank.
 const SUBJECTS = [
   {
     id: "mathematics",
@@ -323,10 +323,133 @@ const BANK_SUBJECT_IDS = new Set([
   "economics", "english-literature", "psychology", "geography", "business-studies", "french", "german",
 ]);
 
+const DEFAULT_BANK_TARGET = 2_000_000;
+const MAX_BANK_TARGET = 2_500_000;
+const DEFAULT_QUESTIONS_PER_JOB = 20;
+const PLANNING_CHUNK_JOBS = 1_000;
+
 function questionTypeSupportsSubject(type: string, subject: string): boolean {
   if (type === "numerical") return ["mathematics", "physics", "chemistry", "biology", "economics", "business-studies", "geography"].includes(subject);
   if (type === "code") return subject === "computer-science";
   return true;
+}
+
+function* subjectCandidates(subject: any, campaignId: string, questionsPerJob: number, variant: number) {
+  for (const topic of subject.topics) {
+    for (const subtopic of topic.subtopics) {
+      for (const curriculum of CURRICULUM_BOARDS) {
+        if (!curriculumSupportsSubject(curriculum.id, subject.id)) continue;
+        for (const board of curriculum.boards) {
+          for (const questionType of QUESTION_TYPES) {
+            if (!questionTypeSupportsSubject(questionType, subject.id)) continue;
+            for (const difficulty of DIFFICULTIES) {
+              yield {
+                campaign_id: campaignId,
+                subject: subject.id,
+                topic: topic.name,
+                subtopic,
+                curriculum: curriculum.id,
+                boards: [board],
+                difficulty,
+                question_type: questionType,
+                count: questionsPerJob,
+                variant,
+                status: "pending",
+              };
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Yield one job per subject in turn. A variant permits further unique batches for the
+// same syllabus dimension without holding the complete 2M plan in Edge memory.
+function* campaignCandidateStream(campaignId: string, questionsPerJob: number) {
+  const activeSubjects = SUBJECTS.filter((subject) => BANK_SUBJECT_IDS.has(subject.id));
+  for (let variant = 0; ; variant += 1) {
+    const generators = activeSubjects.map((subject) => subjectCandidates(subject, campaignId, questionsPerJob, variant));
+    let yieldedForVariant = false;
+    while (true) {
+      let activeGenerators = 0;
+      for (const generator of generators) {
+        const candidate = generator.next();
+        if (!candidate.done) {
+          activeGenerators += 1;
+          yieldedForVariant = true;
+          yield candidate.value;
+        }
+      }
+      if (activeGenerators === 0) break;
+    }
+    if (!yieldedForVariant) return;
+  }
+}
+
+async function planCampaignChunk(supabase: any, campaign: any) {
+  const cursor = Number(campaign.planning_cursor) || 0;
+  const alreadyPlanned = Number(campaign.planned_questions) || 0;
+  const target = Number(campaign.target_questions);
+  const questionsPerJob = Math.min(20, Math.max(5, Number(campaign.questions_per_job) || DEFAULT_QUESTIONS_PER_JOB));
+  const remainingTarget = Math.max(0, target - alreadyPlanned);
+
+  if (remainingTarget === 0 || campaign.planning_complete) {
+    return { campaign_id: campaign.id, planned_questions: alreadyPlanned, planning_complete: true, inserted: 0 };
+  }
+
+  const rows: any[] = [];
+  let streamPosition = 0;
+  let questionsInChunk = 0;
+  for (const candidate of campaignCandidateStream(campaign.id, questionsPerJob)) {
+    if (streamPosition++ < cursor) continue;
+    const count = Math.min(candidate.count, remainingTarget - questionsInChunk);
+    if (count <= 0) break;
+    rows.push({ ...candidate, count });
+    questionsInChunk += count;
+    if (rows.length >= PLANNING_CHUNK_JOBS || questionsInChunk >= remainingTarget) break;
+  }
+
+  if (rows.length === 0) throw new Error("Unable to plan further generation queue jobs");
+
+  const conflictColumns = "campaign_id,subject,topic,subtopic,curriculum,boards,difficulty,question_type,variant";
+  const { data: insertedRows, error: insertError } = await supabase
+    .from("generation_queue")
+    .upsert(rows, { onConflict: conflictColumns, ignoreDuplicates: true })
+    .select("id");
+  if (insertError) throw new Error(`Unable to extend campaign queue: ${insertError.message}`);
+
+  const nextPlanned = alreadyPlanned + questionsInChunk;
+  const planningComplete = nextPlanned >= target;
+  const { data: updated, error: updateError } = await supabase
+    .from("generation_campaigns")
+    .update({
+      planning_cursor: cursor + rows.length,
+      planned_questions: nextPlanned,
+      queue_jobs: (Number(campaign.queue_jobs) || 0) + rows.length,
+      planning_complete: planningComplete,
+      status: planningComplete ? "queued" : "planning",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", campaign.id)
+    .eq("planning_cursor", cursor)
+    .select("*")
+    .maybeSingle();
+  if (updateError) throw new Error(`Unable to checkpoint campaign planning: ${updateError.message}`);
+
+  // Another authorised planner may have advanced the same campaign. The queue upsert
+  // is idempotent, so return the authoritative campaign state rather than double-count.
+  if (!updated) {
+    const { data: current, error: currentError } = await supabase
+      .from("generation_campaigns")
+      .select("*")
+      .eq("id", campaign.id)
+      .single();
+    if (currentError) throw new Error(`Unable to reload campaign planning state: ${currentError.message}`);
+    return { ...current, inserted: insertedRows?.length || 0 };
+  }
+
+  return { ...updated, inserted: insertedRows?.length || 0 };
 }
 
 serve(async (req) => {
@@ -347,117 +470,80 @@ serve(async (req) => {
     const action = body.action || "process";
 
     if (action === "seed") {
-      const targetQuestions = Math.min(250_000, Math.max(1_000, Number(body.target_questions) || 200_000));
-      const questionsPerJob = Math.min(20, Math.max(5, Number(body.questions_per_job) || 10));
+      const targetQuestions = Math.min(MAX_BANK_TARGET, Math.max(1_000, Number(body.target_questions) || DEFAULT_BANK_TARGET));
+      const questionsPerJob = Math.min(20, Math.max(5, Number(body.questions_per_job) || DEFAULT_QUESTIONS_PER_JOB));
       const { data: campaign, error: campaignError } = await supabase.from("generation_campaigns").insert({
-        name: typeof body.name === "string" ? body.name.slice(0, 120) : "200k curriculum bank",
+        name: typeof body.name === "string" ? body.name.slice(0, 120) : "2M curriculum bank",
         target_questions: targetQuestions,
+        questions_per_job: questionsPerJob,
         status: "planning",
-      }).select("id").single();
+      }).select("*").single();
       if (campaignError || !campaign) throw new Error(`Unable to create campaign: ${campaignError?.message || "unknown error"}`);
 
-      console.log(`[BATCH] Planning ${targetQuestions} curriculum-aware draft questions...`);
-      const activeSubjects = SUBJECTS.filter((subject) => BANK_SUBJECT_IDS.has(subject.id));
-      const candidatesBySubject = activeSubjects.map((subject) => {
-        const candidates: any[] = [];
-        for (const topic of subject.topics) {
-          for (const subtopic of topic.subtopics) {
-            for (const curr of CURRICULUM_BOARDS) {
-              if (!curriculumSupportsSubject(curr.id, subject.id)) continue;
-              for (const board of curr.boards) {
-                for (const questionType of QUESTION_TYPES) {
-                  if (!questionTypeSupportsSubject(questionType, subject.id)) continue;
-                  for (const difficulty of DIFFICULTIES) {
-                    candidates.push({
-                      campaign_id: campaign.id,
-                      subject: subject.id,
-                      topic: topic.name,
-                      subtopic,
-                      curriculum: curr.id,
-                      boards: [board],
-                      difficulty,
-                      question_type: questionType,
-                      count: questionsPerJob,
-                      status: "pending",
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
-        return candidates;
-      });
-
-      const rows: any[] = [];
-      const subjectPositions = activeSubjects.map(() => 0);
-      let estimatedTotal = 0;
-      while (estimatedTotal < targetQuestions) {
-        let addedThisRound = false;
-        for (let subjectIndex = 0; subjectIndex < candidatesBySubject.length && estimatedTotal < targetQuestions; subjectIndex += 1) {
-          const candidate = candidatesBySubject[subjectIndex][subjectPositions[subjectIndex]];
-          if (!candidate) continue;
-          subjectPositions[subjectIndex] += 1;
-          const remaining = targetQuestions - estimatedTotal;
-          rows.push({ ...candidate, count: Math.min(candidate.count, remaining) });
-          estimatedTotal += Math.min(candidate.count, remaining);
-          addedThisRound = true;
-        }
-        if (!addedThisRound) break;
-      }
-
-      // Insert in batches of 500
-      let inserted = 0;
-      for (let i = 0; i < rows.length; i += 500) {
-        const batch = rows.slice(i, i + 500);
-        const { error } = await supabase.from("generation_queue").insert(batch);
-        if (error) console.error("[BATCH] Insert error:", error.message);
-        else inserted += batch.length;
-      }
-
-      await supabase.from("generation_campaigns").update({ status: "queued", updated_at: new Date().toISOString() }).eq("id", campaign.id);
+      console.log(`[BATCH] Starting resumable planning for ${targetQuestions} curriculum-aware draft questions...`);
+      const planning = await planCampaignChunk(supabase, campaign);
 
       return new Response(JSON.stringify({
-        message: "Governed curriculum draft queue seeded",
+        message: "Governed curriculum draft campaign created",
         campaign_id: campaign.id,
-        total_combinations: rows.length,
-        inserted,
-        estimated_questions: estimatedTotal,
-        subjects: activeSubjects.length,
+        inserted: planning.inserted,
+        planned_questions: planning.planned_questions,
+        target_questions: targetQuestions,
+        planning_complete: planning.planning_complete,
+        subjects: BANK_SUBJECT_IDS.size,
         curricula: CURRICULUM_BOARDS.length,
         question_types: QUESTION_TYPES.length,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    if (action === "status") {
-      let queueQuery = supabase.from("generation_queue").select("status,count,generated_count").limit(50_000);
-      if (typeof body.campaign_id === "string") queueQuery = queueQuery.eq("campaign_id", body.campaign_id);
-      const [queue, total, published, review] = await Promise.all([
-        queueQuery,
-        supabase.from("questions").select("*", { count: "exact", head: true }),
-        supabase.from("questions").select("*", { count: "exact", head: true }).eq("review_status", "published"),
-        supabase.from("questions").select("*", { count: "exact", head: true }).eq("review_status", "needs_review"),
-      ]);
-      const jobs = queue.data || [];
-      const target = jobs.reduce((sum: number, item: any) => sum + (item.count || 0), 0);
-      const generated = jobs.reduce((sum: number, item: any) => sum + (item.generated_count || 0), 0);
+    if (action === "seed-next") {
+      let campaignQuery = supabase.from("generation_campaigns").select("*").eq("planning_complete", false);
+      if (typeof body.campaign_id === "string") campaignQuery = campaignQuery.eq("id", body.campaign_id);
+      const { data: campaign, error: campaignError } = await campaignQuery.order("created_at", { ascending: true }).limit(1).maybeSingle();
+      if (campaignError) throw new Error(`Unable to load planning campaign: ${campaignError.message}`);
+      if (!campaign) {
+        return new Response(JSON.stringify({ message: "No campaign requires further queue planning", planning_complete: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const planning = await planCampaignChunk(supabase, campaign);
       return new Response(JSON.stringify({
-        queue_pending: jobs.filter((item: any) => item.status === "pending").length,
-        queue_processing: jobs.filter((item: any) => item.status === "processing").length,
-        queue_done: jobs.filter((item: any) => item.status === "done").length,
-        queue_failed: jobs.filter((item: any) => item.status === "failed").length,
-        total_questions: total.count || 0,
-        published_questions: published.count || 0,
-        awaiting_review: review.count || 0,
-        target,
-        generated,
-        progress_pct: target > 0
-          ? Math.round((generated / target) * 1000) / 10
-          : 0,
+        message: planning.planning_complete ? "Campaign queue planning complete" : "Campaign queue planning checkpoint saved",
+        campaign_id: campaign.id,
+        inserted: planning.inserted,
+        planned_questions: planning.planned_questions,
+        target_questions: campaign.target_questions,
+        planning_complete: planning.planning_complete,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "status") {
+      const [campaignStatus, bankMetrics] = await Promise.all([
+        supabase.rpc("get_generation_campaign_status", {
+          _campaign_id: typeof body.campaign_id === "string" ? body.campaign_id : null,
+        }),
+        supabase.rpc("get_question_bank_metrics"),
+      ]);
+      if (campaignStatus.error) throw new Error(`Unable to aggregate campaign status: ${campaignStatus.error.message}`);
+      if (bankMetrics.error) throw new Error(`Unable to aggregate question bank status: ${bankMetrics.error.message}`);
+      const status = campaignStatus.data || {};
+      return new Response(JSON.stringify({
+        ...status,
+        ...(bankMetrics.data || {}),
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Process: pick next pending items and generate
+    const { data: planningCampaign, error: planningCampaignError } = await supabase
+      .from("generation_campaigns")
+      .select("*")
+      .eq("planning_complete", false)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (planningCampaignError) throw new Error(`Unable to load campaign planner: ${planningCampaignError.message}`);
+    const planningUpdate = planningCampaign ? await planCampaignChunk(supabase, planningCampaign) : null;
+
     const BATCH_SIZE = 3;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
@@ -476,6 +562,8 @@ serve(async (req) => {
 
     for (const item of pendingItems) {
       try {
+        const previouslyGenerated = Number(item.generated_count) || 0;
+        const requestedCount = Math.max(1, Number(item.count) - previouslyGenerated);
         const typeInstructions: Record<string, string> = {
           mcq: `Multiple choice question with EXACTLY 4 options labelled A, B, C, D. Only ONE option is correct. 
 The correct_answer field MUST exactly match one of the options.
@@ -529,7 +617,7 @@ ACCURACY RULES — VIOLATIONS WILL CAUSE REJECTION:
               {
                 role: "system",
                 content: `You are a senior ${item.subject} examiner and question writer for ${item.curriculum} exams (${item.boards.join(", ")}).
-Create ${item.count} HIGH QUALITY, EXAM-STANDARD questions.
+Create ${requestedCount} HIGH QUALITY, EXAM-STANDARD questions.
 Subject: ${item.subject} | Topic: ${item.topic} | Subtopic: ${item.subtopic}
 Difficulty: ${item.difficulty}/5 | Type: ${item.question_type}
 
@@ -540,7 +628,7 @@ ${langInstruction}`,
               },
               {
                 role: "user",
-                content: `Generate exactly ${item.count} ${item.question_type} questions for "${item.subtopic}" (under ${item.topic}) at difficulty ${item.difficulty}/5.
+                content: `Generate exactly ${requestedCount} ${item.question_type} questions for "${item.subtopic}" (under ${item.topic}) at difficulty ${item.difficulty}/5.
 Each question must be unique, exam-quality, and have verified correct answers.`,
               },
             ],
@@ -605,8 +693,9 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
         const generated = toolCall ? JSON.parse(toolCall.function.arguments) : { questions: [] };
 
         if (!generated.questions || generated.questions.length === 0) {
-          await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id);
-          results.push({ id: item.id, status: "no_questions" });
+          const retry = item.attempts < 3;
+          await supabase.from("generation_queue").update({ status: retry ? "pending" : "failed", last_error: "AI returned no questions" }).eq("id", item.id);
+          results.push({ id: item.id, status: retry ? "retrying_no_questions" : "no_questions" });
           continue;
         }
 
@@ -669,8 +758,9 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
         }
 
         if (rows.length === 0) {
-          await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id);
-          results.push({ id: item.id, status: "validation_failed" });
+          const retry = item.attempts < 3;
+          await supabase.from("generation_queue").update({ status: retry ? "pending" : "failed", last_error: "All generated questions failed structural validation" }).eq("id", item.id);
+          results.push({ id: item.id, status: retry ? "retrying_validation" : "validation_failed" });
           continue;
         }
 
@@ -684,9 +774,26 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
         }
 
         const count = inserted?.length || 0;
+        const cumulativeCount = previouslyGenerated + count;
+        const complete = cumulativeCount >= Number(item.count);
+        const retry = !complete && item.attempts < 3;
         totalInserted += count;
-        await supabase.from("generation_queue").update({ status: "done", generated_count: count, completed_at: new Date().toISOString() }).eq("id", item.id);
-        results.push({ id: item.id, status: "done", inserted: count, subject: item.subject, topic: item.topic, subtopic: item.subtopic });
+        await supabase.from("generation_queue").update({
+          status: complete ? "done" : retry ? "pending" : "failed",
+          generated_count: cumulativeCount,
+          completed_at: complete ? new Date().toISOString() : null,
+          last_error: complete ? null : `Generated ${cumulativeCount} of ${item.count} required unique drafts`,
+        }).eq("id", item.id);
+        results.push({
+          id: item.id,
+          status: complete ? "done" : retry ? "retrying_shortfall" : "shortfall_failed",
+          inserted: count,
+          generated_count: cumulativeCount,
+          target_count: item.count,
+          subject: item.subject,
+          topic: item.topic,
+          subtopic: item.subtopic,
+        });
 
         // Delay between requests to avoid rate limiting
         await new Promise(r => setTimeout(r, 800));
@@ -697,7 +804,7 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
       }
     }
 
-    return new Response(JSON.stringify({ processed: results.length, inserted: totalInserted, results }), {
+    return new Response(JSON.stringify({ processed: results.length, inserted: totalInserted, results, planning: planningUpdate }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

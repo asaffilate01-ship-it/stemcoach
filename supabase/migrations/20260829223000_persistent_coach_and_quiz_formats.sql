@@ -18,7 +18,8 @@ ALTER TABLE public.questions ADD CONSTRAINT questions_question_type_check
     'data-interpretation', 'assertion-reason', 'true-false', 'ordering', 'short-answer'
   ));
 
--- Scalable, restartable generation campaigns for the 200k+ governed content bank.
+-- Initial scalable campaign schema. The later two-million migration raises the target
+-- and adds resumable queue planning without rewriting this applied migration.
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 CREATE TABLE IF NOT EXISTS public.generation_campaigns (

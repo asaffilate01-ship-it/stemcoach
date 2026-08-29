@@ -3,15 +3,25 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const migration = readFileSync(resolve(process.cwd(), "supabase/migrations/20260829223000_persistent_coach_and_quiz_formats.sql"), "utf8");
+const twoMillionMigration = readFileSync(resolve(process.cwd(), "supabase/migrations/20260829234500_two_million_question_bank.sql"), "utf8");
 const batchGenerator = readFileSync(resolve(process.cwd(), "supabase/functions/batch-generate/index.ts"), "utf8");
 const answerChecker = readFileSync(resolve(process.cwd(), "supabase/functions/check-answer/index.ts"), "utf8");
 
-describe("governed 200k content pipeline", () => {
-  it("supports a 200,000-question target without auto-publishing generated drafts", () => {
-    expect(batchGenerator).toContain("200_000");
+describe("governed 2M content pipeline", () => {
+  it("supports a resumable 2,000,000-question target without auto-publishing generated drafts", () => {
+    expect(batchGenerator).toContain("2_000_000");
+    expect(batchGenerator).toContain("2_500_000");
+    expect(batchGenerator).toContain("PLANNING_CHUNK_JOBS = 1_000");
+    expect(batchGenerator).toContain('action === "seed-next"');
+    expect(batchGenerator).toContain("campaignCandidateStream");
+    expect(batchGenerator).toContain('status: complete ? "done" : retry ? "pending" : "failed"');
+    expect(batchGenerator).toContain("previouslyGenerated + count");
+    expect(batchGenerator).not.toContain(".limit(50_000)");
     expect(batchGenerator).toContain('review_status: "needs_review"');
     expect(batchGenerator).not.toContain('review_status: "published"');
-    expect(migration).toContain("target_questions BETWEEN 1000 AND 250000");
+    expect(twoMillionMigration).toContain("target_questions BETWEEN 1000 AND 2500000");
+    expect(twoMillionMigration).toContain("generation_queue_campaign_dimension_variant_key");
+    expect(twoMillionMigration).toContain("get_generation_campaign_status");
     expect(migration).toContain("FOR UPDATE SKIP LOCKED");
   });
 

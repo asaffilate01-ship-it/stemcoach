@@ -28,13 +28,17 @@ export interface CachedQuestionSet {
   cachedAt: number;
 }
 
-export async function getCachedQuestions(subject: string): Promise<any[] | null> {
+function cacheKey(subject: string, curriculum?: string | null): string {
+  return curriculum ? `${subject}:${curriculum}` : `${subject}:all`;
+}
+
+export async function getCachedQuestions(subject: string, curriculum?: string | null): Promise<any[] | null> {
   try {
     const db = await openDB();
     return new Promise((resolve) => {
       const tx = db.transaction(STORE_NAME, "readonly");
       const store = tx.objectStore(STORE_NAME);
-      const req = store.get(subject);
+      const req = store.get(cacheKey(subject, curriculum));
       req.onsuccess = () => {
         const result = req.result as CachedQuestionSet | undefined;
         if (result && Date.now() - result.cachedAt < CACHE_TTL) {
@@ -50,12 +54,12 @@ export async function getCachedQuestions(subject: string): Promise<any[] | null>
   }
 }
 
-export async function cacheQuestions(subject: string, questions: any[]): Promise<void> {
+export async function cacheQuestions(subject: string, questions: any[], curriculum?: string | null): Promise<void> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
-    store.put({ subject, questions, cachedAt: Date.now() } satisfies CachedQuestionSet);
+    store.put({ subject: cacheKey(subject, curriculum), questions, cachedAt: Date.now() } satisfies CachedQuestionSet);
     await new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
