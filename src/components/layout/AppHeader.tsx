@@ -175,7 +175,7 @@ export function AppHeader() {
     <header className="sticky top-0 z-50 border-b border-border/20 bg-background/70 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300">
       <div className="container mx-auto flex h-12 items-center justify-between px-4 sm:h-14">
         {/* Logo */}
-        <Link to="/home" className="group flex items-center gap-2">
+        <Link to="/" className="group flex items-center gap-2">
           <img
             src={tenant.logoUrl || "/assets/coach-stem.png"}
             alt={tenant.name || "Coach Stem"}
