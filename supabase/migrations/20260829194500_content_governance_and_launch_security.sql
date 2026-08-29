@@ -292,3 +292,12 @@ $$;
 
 REVOKE ALL ON FUNCTION public.create_flashcards_from_mistakes(integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.create_flashcards_from_mistakes(integer) TO authenticated;
+
+-- Preserve existing student-visible content: legacy questions are kept published
+-- while the review workflow applies to all future generated or imported content.
+UPDATE public.questions
+SET review_status = 'published',
+    content_origin = COALESCE(NULLIF(content_origin, ''), 'legacy'),
+    quality_flags = '[]'::jsonb
+WHERE review_status = 'needs_review'
+  AND content_origin = 'legacy';
