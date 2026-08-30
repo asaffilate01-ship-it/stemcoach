@@ -608,7 +608,12 @@ export type Database = {
           generated_questions: number
           id: string
           name: string
+          planned_questions: number
+          planning_complete: boolean
+          planning_cursor: number
           published_questions: number
+          questions_per_job: number
+          queue_jobs: number
           reviewed_questions: number
           status: string
           target_questions: number
@@ -620,7 +625,12 @@ export type Database = {
           generated_questions?: number
           id?: string
           name: string
+          planned_questions?: number
+          planning_complete?: boolean
+          planning_cursor?: number
           published_questions?: number
+          questions_per_job?: number
+          queue_jobs?: number
           reviewed_questions?: number
           status?: string
           target_questions: number
@@ -632,7 +642,12 @@ export type Database = {
           generated_questions?: number
           id?: string
           name?: string
+          planned_questions?: number
+          planning_complete?: boolean
+          planning_cursor?: number
           published_questions?: number
+          questions_per_job?: number
+          queue_jobs?: number
           reviewed_questions?: number
           status?: string
           target_questions?: number
@@ -659,6 +674,7 @@ export type Database = {
           subject: string
           subtopic: string
           topic: string
+          variant: number
         }
         Insert: {
           attempts?: number
@@ -678,6 +694,7 @@ export type Database = {
           subject: string
           subtopic: string
           topic: string
+          variant?: number
         }
         Update: {
           attempts?: number
@@ -697,6 +714,7 @@ export type Database = {
           subject?: string
           subtopic?: string
           topic?: string
+          variant?: number
         }
         Relationships: [
           {
@@ -1574,6 +1592,7 @@ export type Database = {
           subject: string
           subtopic: string
           topic: string
+          variant: number
         }[]
         SetofOptions: {
           from: "*"
@@ -1666,6 +1685,10 @@ export type Database = {
           subject: string
         }[]
       }
+      get_generation_campaign_status: {
+        Args: { _campaign_id?: string }
+        Returns: Json
+      }
       get_mock_exam_questions: {
         Args: {
           _board?: string
@@ -1701,6 +1724,14 @@ export type Database = {
           subject: string
           time_limit_seconds: number
           xp_reward: number
+        }[]
+      }
+      get_question_bank_metrics: { Args: never; Returns: Json }
+      get_question_bank_subject_counts: {
+        Args: never
+        Returns: {
+          question_count: number
+          subject: string
         }[]
       }
       get_review_queue_metrics: { Args: never; Returns: Json }
