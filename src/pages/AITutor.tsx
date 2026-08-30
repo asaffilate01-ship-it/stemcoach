@@ -83,7 +83,7 @@ export default function AITutor() {
     const trimmed = thread.slice(-60).map((message) => ({ role: message.role, content: message.content.slice(0, 12_000) }));
     try { localStorage.setItem(conversationKey, JSON.stringify(trimmed)); } catch { /* storage unavailable */ }
     if (!user) return;
-    await supabase.from("coach_conversations").upsert({
+    await (supabase as any).from("coach_conversations").upsert({
       user_id: user.id,
       subject: subjectId,
       messages: trimmed,
@@ -94,7 +94,7 @@ export default function AITutor() {
   const clearConversation = async () => {
     setMessages([]);
     try { localStorage.removeItem(conversationKey); } catch { /* storage unavailable */ }
-    if (user) await supabase.from("coach_conversations").delete().eq("user_id", user.id).eq("subject", subjectId);
+    if (user) await (supabase as any).from("coach_conversations").delete().eq("user_id", user.id).eq("subject", subjectId);
   };
 
   useEffect(() => {
@@ -111,10 +111,10 @@ export default function AITutor() {
       setConversationLoading(false);
       return () => { active = false; };
     }
-    supabase.from("coach_conversations").select("messages").eq("user_id", user.id).eq("subject", subjectId).maybeSingle()
+    (supabase as any).from("coach_conversations").select("messages").eq("user_id", user.id).eq("subject", subjectId).maybeSingle()
       .then(({ data }) => {
         if (!active) return;
-        const remote = data?.messages;
+        const remote = (data as any)?.messages;
         if (Array.isArray(remote)) {
           const valid = remote.filter((message): message is Msg =>
             typeof message === "object" && message !== null &&

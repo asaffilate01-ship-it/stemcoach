@@ -56,9 +56,9 @@ export default function AdminGenerate() {
     queryKey: ["subject-counts"],
     queryFn: async () => {
       const counts: Record<string, number> = {};
-      const { data, error } = await supabase.rpc("get_question_bank_subject_counts");
+      const { data, error } = await (supabase.rpc as any)("get_question_bank_subject_counts");
       if (error) throw error;
-      for (const row of data || []) counts[row.subject] = Number(row.question_count) || 0;
+      for (const row of (data || []) as { subject: string; question_count: number }[]) counts[row.subject] = Number(row.question_count) || 0;
       return counts;
     },
     refetchInterval: 60000,
