@@ -3,8 +3,10 @@ import { Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { guessMascotFromText } from "@/lib/mascots";
+import { useTranslation } from "react-i18next";
 
 export function NotificationBell() {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -56,6 +58,7 @@ export function NotificationBell() {
       <button
         onClick={() => { setOpen(!open); if (!open && unreadCount > 0) markAllRead(); }}
         className="relative rounded p-1.5 text-muted-foreground hover:text-foreground"
+        aria-label={t("notifications.title")}
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
@@ -69,9 +72,9 @@ export function NotificationBell() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border bg-card p-2 shadow-lg">
-            <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">Notifications</div>
+            <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">{t("notifications.title")}</div>
             {notifications.length === 0 ? (
-              <div className="px-2 py-4 text-center text-xs text-muted-foreground">No notifications yet</div>
+              <div className="px-2 py-4 text-center text-xs text-muted-foreground">{t("notifications.empty")}</div>
             ) : (
               <div className="max-h-64 space-y-1 overflow-y-auto">
                 {notifications.map(n => {
@@ -84,7 +87,7 @@ export function NotificationBell() {
                       <div className="min-w-0 flex-1">
                         <div className="font-medium text-xs">{n.title}</div>
                         <div className="text-[11px] text-muted-foreground">{n.message}</div>
-                        <div className="mt-1 text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleDateString()}</div>
+                        <div className="mt-1 text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleDateString(i18n.resolvedLanguage)}</div>
                       </div>
                     </div>
                   );

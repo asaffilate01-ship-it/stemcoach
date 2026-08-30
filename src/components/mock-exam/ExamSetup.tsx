@@ -3,6 +3,7 @@ import { Clock, BookOpen, Award, Loader2, ChevronLeft, Target, Sparkles, Shield 
 import { Button } from "@/components/ui/button";
 import { subjects, curricula } from "@/data/questions";
 import { type MockExamTemplate } from "@/data/mockExamTemplates";
+import { useTranslation } from "react-i18next";
 
 interface ExamSetupProps {
   selectedTemplate: MockExamTemplate | null;
@@ -39,6 +40,7 @@ export function ExamSetup({
   mockExamsTotal,
   canTakeMockExam = true,
 }: ExamSetupProps) {
+  const { t } = useTranslation();
   const subjectInfo = selectedTemplate
     ? subjects.find((s) => s.id === selectedTemplate.subject)
     : subjects.find((s) => s.id === examSubject);
@@ -52,7 +54,7 @@ export function ExamSetup({
           onClick={onBack}
           className="mb-6 gap-1.5 text-muted-foreground hover:text-foreground rounded-xl"
         >
-          <ChevronLeft className="h-4 w-4" /> Back to Exams
+          <ChevronLeft className="h-4 w-4" /> {t("mockExam.backToExams")}
         </Button>
 
         <div className="mb-8 text-center">
@@ -70,15 +72,15 @@ export function ExamSetup({
             )}
           </motion.div>
           <h1 className="mb-2 text-2xl font-extrabold tracking-tight md:text-3xl">
-            {selectedTemplate ? selectedTemplate.name : "Custom Mock Exam"}
+            {selectedTemplate ? selectedTemplate.name : t("mockExam.customMockExam")}
           </h1>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             {selectedTemplate
               ? `${selectedTemplate.board} · ${selectedTemplate.paper} · ${selectedTemplate.description}`
-              : "Configure your own exam from the question bank"}
+              : t("mockExam.configureOwn")}
           </p>
           {selectedTemplate && (
-            <p className="mx-auto mt-2 max-w-md text-xs text-muted-foreground">Practice blueprint only. Check the board's current specification and examination notice for the official format.</p>
+            <p className="mx-auto mt-2 max-w-md text-xs text-muted-foreground">{t("mockExam.blueprintNotice")}</p>
           )}
         </div>
 
@@ -87,10 +89,10 @@ export function ExamSetup({
             {selectedTemplate ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 p-6 ring-1 ring-border/20">
                 {[
-                  { label: "Questions", value: selectedTemplate.questionCount, icon: Target, color: "text-primary" },
-                  { label: "Duration", value: `${selectedTemplate.durationMinutes}m`, icon: Clock, color: "text-amber-500" },
-                  { label: "Marks", value: selectedTemplate.totalMarks, icon: Award, color: "text-emerald-500" },
-                  { label: "Board", value: selectedTemplate.board.split(" ")[0], icon: BookOpen, color: "text-violet-500" },
+                  { label: t("mockExam.questions"), value: selectedTemplate.questionCount, icon: Target, color: "text-primary" },
+                  { label: t("mockExam.durationLabel"), value: `${selectedTemplate.durationMinutes}m`, icon: Clock, color: "text-amber-500" },
+                  { label: t("mockExam.marks"), value: selectedTemplate.totalMarks, icon: Award, color: "text-emerald-500" },
+                  { label: t("mockExam.board"), value: selectedTemplate.board.split(" ")[0], icon: BookOpen, color: "text-violet-500" },
                 ].map((stat) => (
                   <motion.div
                     key={stat.label}
@@ -111,19 +113,19 @@ export function ExamSetup({
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-sm font-semibold">Subject</label>
+                    <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.subject")}</label>
                     <select
                       value={examSubject}
                       onChange={(e) => setExamSubject(e.target.value)}
                       className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
                       {subjects.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
+                        <option key={s.id} value={s.id}>{t(`subjects.names.${s.id}`)}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-semibold">Curriculum</label>
+                    <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.curriculum")}</label>
                     <select
                       value={examCurriculum}
                       onChange={(e) => setExamCurriculum(e.target.value)}
@@ -137,35 +139,35 @@ export function ExamSetup({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1.5 block text-sm font-semibold">Questions</label>
+                    <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.questions")}</label>
                     <select
                       value={questionCount}
                       onChange={(e) => setQuestionCount(Number(e.target.value))}
                       className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
                       {[10, 20, 30, 40, 50].map((n) => (
-                        <option key={n} value={n}>{n} questions</option>
+                        <option key={n} value={n}>{t("mockExam.questionOption", { count: n })}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-semibold">Duration</label>
+                    <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.durationLabel")}</label>
                     <select
                       value={duration}
                       onChange={(e) => setDuration(Number(e.target.value))}
                       className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
                       {[30, 45, 60, 90, 120, 150, 180].map((n) => (
-                        <option key={n} value={n}>{n} minutes</option>
+                        <option key={n} value={n}>{t("mockExam.minuteOption", { count: n })}</option>
                       ))}
                     </select>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 p-5 ring-1 ring-border/20">
                   {[
-                    { label: "Questions", value: questionCount, icon: Target },
-                    { label: "Duration", value: `${duration}m`, icon: Clock },
-                    { label: "Subject", value: subjectInfo?.name?.slice(0, 8) || "", icon: BookOpen },
+                    { label: t("mockExam.questions"), value: questionCount, icon: Target },
+                    { label: t("mockExam.durationLabel"), value: `${duration}m`, icon: Clock },
+                    { label: t("mockExam.subject"), value: subjectInfo ? t(`subjects.names.${subjectInfo.id}`).slice(0, 8) : "", icon: BookOpen },
                   ].map((stat) => (
                     <div key={stat.label} className="text-center">
                       <stat.icon className="mx-auto mb-1.5 h-4 w-4 text-primary/60" />
@@ -183,8 +185,8 @@ export function ExamSetup({
                 <Target className={`h-4 w-4 shrink-0 ${canTakeMockExam ? 'text-success/60' : 'text-destructive/60'}`} />
                 <p className="text-[11px] leading-relaxed text-muted-foreground">
                   {canTakeMockExam
-                    ? `${mockExamsRemaining} of ${mockExamsTotal} mock exams remaining`
-                    : "No mock exams remaining. Purchase a Top-Up pack for more."}
+                    ? t("mockExam.remaining", { remaining: mockExamsRemaining, total: mockExamsTotal })
+                    : t("mockExam.noRemainingDesc")}
                 </p>
               </div>
             )}
@@ -193,7 +195,7 @@ export function ExamSetup({
             <div className="flex items-center gap-3 rounded-xl bg-primary/[0.04] px-4 py-3 ring-1 ring-primary/10">
               <Shield className="h-4 w-4 text-primary/60 shrink-0" />
               <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Exam conditions: timed, auto-submitted when time expires. Score ≥ 60% earns a certificate.
+                {t("mockExam.conditions")}
               </p>
             </div>
 
@@ -205,15 +207,15 @@ export function ExamSetup({
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Loading Questions…
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("mockExam.loadingQuestions")}
                 </>
               ) : !canTakeMockExam ? (
                 <>
-                  <Shield className="h-4 w-4" /> No Exams Remaining
+                  <Shield className="h-4 w-4" /> {t("mockExam.noExamsRemaining")}
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" /> Start Exam
+                  <Sparkles className="h-4 w-4" /> {t("mockExam.start")}
                 </>
               )}
             </Button>

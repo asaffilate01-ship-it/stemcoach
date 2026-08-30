@@ -13,6 +13,7 @@ import { ExamBrowse } from "@/components/mock-exam/ExamBrowse";
 import { ExamSetup } from "@/components/mock-exam/ExamSetup";
 import { ExamActive } from "@/components/mock-exam/ExamActive";
 import { ExamReview } from "@/components/mock-exam/ExamReview";
+import { useTranslation } from "react-i18next";
 
 type ExamState = "browse" | "setup" | "loading" | "active" | "review";
 
@@ -31,7 +32,8 @@ interface ExamQuestion {
 }
 
 export default function MockExam() {
-  useDocumentTitle("Mock Exam");
+  const { t } = useTranslation();
+  useDocumentTitle(t("mockExam.title"));
   const { user } = useAuth();
   const { toast } = useToast();
   const { canTakeMockExam, mockExamsRemaining, mockExamsTotal, hasPurchased, refresh: refreshQuota } = useQuotaGate();
@@ -112,20 +114,20 @@ export default function MockExam() {
 
       if (data?.certificate_issued) {
         toast({
-          title: "🏆 Certificate earned!",
-          description: `You scored ${data.percent}% — a certificate has been added to your profile.`,
+          title: `🏆 ${t("mockExam.certificateEarned")}`,
+          description: t("mockExam.certificateDesc", { percent: data.percent }),
         });
       }
     } catch (e: any) {
       toast({
-        title: "Could not grade exam",
-        description: e?.message || "Please try again.",
+        title: t("mockExam.gradingFailed"),
+        description: t("common.tryAgain"),
         variant: "destructive",
       });
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast, refreshQuota]);
+  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast, refreshQuota, t]);
 
   useEffect(() => {
     if (state !== "active") return;
@@ -144,10 +146,10 @@ export default function MockExam() {
   const startExam = async () => {
     if (!canTakeMockExam) {
       toast({
-        title: "Mock exam limit reached",
+        title: t("mockExam.limitReached"),
         description: hasPurchased
-          ? "You've used all your mock exams. Purchase a Top-Up pack for more."
-          : "Purchase a question pack to unlock mock exams.",
+          ? t("mockExam.purchaseTopUp")
+          : t("mockExam.purchasePack"),
         variant: "destructive",
       });
       return;
@@ -171,8 +173,8 @@ export default function MockExam() {
       if (error) throw error;
       if (!data || data.length === 0) {
         toast({
-          title: "No questions found",
-          description: "No questions available for this exam yet. Try a different selection.",
+          title: t("mockExam.noQuestionsFound"),
+          description: t("mockExam.noQuestionsDesc"),
           variant: "destructive",
         });
         setState(selectedTemplate ? "browse" : "setup");
@@ -187,7 +189,7 @@ export default function MockExam() {
       setCurrentQ(0);
       setState("active");
     } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: t("common.tryAgain"), variant: "destructive" });
       setState(selectedTemplate ? "browse" : "setup");
     }
   };

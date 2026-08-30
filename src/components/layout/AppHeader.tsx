@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Icon3D } from "@/components/ui/icon-3d";
@@ -17,6 +18,9 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import type { Icon3DVariant } from "@/components/ui/icon-3d";
+import { normalizeLanguage } from "@/i18n/language";
+import type { SupportedLanguage } from "@/i18n/language";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavItem {
   to: string;
@@ -34,16 +38,50 @@ const LANGUAGES = [
   { code: "en", label: "English", flag: "🇬🇧" },
   { code: "fr", label: "Français", flag: "🇫🇷" },
   { code: "de", label: "Deutsch", flag: "🇩🇪" },
-];
+] as const;
 
 function LanguageSelector() {
   const { t, i18n } = useTranslation();
-  const current = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
+  const { user } = useAuth();
+  const currentCode = normalizeLanguage(i18n.resolvedLanguage || i18n.language);
+  const current = LANGUAGES.find(l => l.code === currentCode) || LANGUAGES[0];
+
+  useEffect(() => {
+    if (!user) return;
+
+    let active = true;
+    supabase
+      .from("user_preferences")
+      .select("preferred_language")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!active || !data?.preferred_language) return;
+        const preferredLanguage = normalizeLanguage(data.preferred_language);
+        if (preferredLanguage !== normalizeLanguage(i18n.resolvedLanguage || i18n.language)) {
+          void i18n.changeLanguage(preferredLanguage);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [i18n, user]);
+
+  const handleLanguageChange = async (language: SupportedLanguage) => {
+    await i18n.changeLanguage(language);
+    if (!user) return;
+
+    await supabase.from("user_preferences").upsert(
+      { user_id: user.id, preferred_language: language },
+      { onConflict: "user_id" },
+    );
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors sm:p-2 flex items-center gap-1" aria-label="Language">
+        <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors sm:p-2 flex items-center gap-1" aria-label={t("common.language")}>
           <span className="text-sm">{current.flag}</span>
           <Globe className="h-3.5 w-3.5 hidden sm:block" />
         </button>
@@ -54,8 +92,9 @@ function LanguageSelector() {
         {LANGUAGES.map(lang => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => i18n.changeLanguage(lang.code)}
-            className={`gap-2 ${i18n.language === lang.code ? "bg-primary/10 text-primary" : ""}`}
+            onClick={() => void handleLanguageChange(lang.code)}
+            className={`gap-2 ${currentCode === lang.code ? "bg-primary/10 text-primary" : ""}`}
+            aria-current={currentCode === lang.code ? "true" : undefined}
           >
             <span>{lang.flag}</span>
             <span className="text-sm">{lang.label}</span>
@@ -86,7 +125,7 @@ const navItems: NavItem[] = [
   { to: "/my-classes", labelKey: "nav.myClasses", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes", variant: "primary" },
   { to: "/live-classroom", labelKey: "nav.liveClass", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true, variant: "destructive" },
   { to: "/formulas", labelKey: "nav.formulaSheets", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
-  { to: "/tutorials", label: "Tutorials", icon: BookOpen, group: "resources", variant: "success" },
+  { to: "/tutorials", labelKey: "nav.tutorials", label: "Tutorials", icon: BookOpen, group: "resources", variant: "success" },
   { to: "/blog", labelKey: "nav.blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
   { to: "/parent", labelKey: "nav.parentPortal", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
   { to: "/teacher", labelKey: "nav.teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },

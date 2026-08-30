@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { subjects } from "@/data/questions";
 import { mockExamTemplates, examBoardGroups, type MockExamTemplate } from "@/data/mockExamTemplates";
 import { getMascot } from "@/lib/mascots";
+import { useTranslation } from "react-i18next";
 
 interface ExamBrowseProps {
   onSelectTemplate: (template: MockExamTemplate) => void;
@@ -12,6 +13,7 @@ interface ExamBrowseProps {
 }
 
 export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterSubject, setFilterSubject] = useState<string | null>(null);
 
@@ -63,22 +65,22 @@ export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) 
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/10">
                   <Trophy className="h-4.5 w-4.5 text-amber-300" />
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">Exam Centre</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">{t("mockExam.examCentre")}</span>
               </div>
               <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-white md:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
-                Exam-Style<br className="hidden md:block" /> Simulations
+                {t("mockExam.simulationsTitle")}
               </h1>
               <p className="max-w-md text-sm leading-relaxed text-white/55 md:text-[15px]">
-                Timed practice blueprints for major curricula. Always confirm the current board specification for your examination series.
+                {t("mockExam.simulationsDesc")}
               </p>
             </div>
 
             {/* Stats chips */}
             <div className="flex flex-wrap gap-3 md:flex-col md:items-end">
               {[
-                { icon: GraduationCap, label: `${mockExamTemplates.length} blueprints`, sublabel: "Exam-style practice" },
-                { icon: Clock, label: "Timed practice", sublabel: "Adjustable pacing" },
-                { icon: Target, label: "Server graded", sublabel: "Instant feedback" },
+                { icon: GraduationCap, label: t("mockExam.blueprints", { count: mockExamTemplates.length }), sublabel: t("mockExam.examStylePractice") },
+                { icon: Clock, label: t("mockExam.timedPractice"), sublabel: t("mockExam.adjustablePacing") },
+                { icon: Target, label: t("mockExam.serverGraded"), sublabel: t("mockExam.instantFeedback") },
               ].map((chip) => (
                 <div
                   key={chip.label}
@@ -109,7 +111,7 @@ export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search exams (e.g. AQA Physics, AP Biology, JEE Main...)"
+            placeholder={t("mockExam.searchPlaceholder")}
             className="w-full rounded-2xl border border-border/60 bg-card pl-11 pr-4 py-3 text-sm shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 focus:shadow-md"
           />
         </div>
@@ -119,10 +121,10 @@ export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) 
             onChange={(e) => setFilterSubject(e.target.value || null)}
             className="rounded-2xl border border-border/60 bg-card px-4 py-3 text-xs font-medium shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
           >
-            <option value="">All Subjects</option>
+            <option value="">{t("mockExam.allSubjects")}</option>
             {subjects.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.name}
+                {t(`subjects.names.${s.id}`)}
               </option>
             ))}
           </select>
@@ -132,7 +134,7 @@ export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) 
             className="rounded-2xl gap-2 text-xs whitespace-nowrap px-5 py-3 h-auto border-border/60 shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
             onClick={onCustomExam}
           >
-            <Sparkles className="h-3.5 w-3.5" /> Custom Exam
+            <Sparkles className="h-3.5 w-3.5" /> {t("mockExam.customExam")}
           </Button>
         </div>
       </motion.div>
@@ -235,8 +237,8 @@ export function ExamBrowse({ onSelectTemplate, onCustomExam }: ExamBrowseProps) 
             <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-muted/30 ring-1 ring-border/30">
               <Search className="h-9 w-9 text-muted-foreground/50" />
             </div>
-            <h3 className="mb-2 text-lg font-bold">No exams found</h3>
-            <p className="text-sm text-muted-foreground">Try a different search or clear your filters.</p>
+            <h3 className="mb-2 text-lg font-bold">{t("mockExam.noExamsFound")}</h3>
+            <p className="text-sm text-muted-foreground">{t("mockExam.noExamsFoundDesc")}</p>
           </motion.div>
         )}
       </div>

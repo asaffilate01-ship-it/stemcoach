@@ -188,6 +188,7 @@ const CURRICULUM_BOARDS: { id: string; boards: string[] }[] = [
   { id: "uk-btec", boards: ["Pearson BTEC"] },
   { id: "uk-scottish-nat5", boards: ["SQA"] },
   { id: "uk-scottish-higher", boards: ["SQA"] },
+  { id: "uk-scottish-adv-higher", boards: ["SQA"] },
   { id: "uk-igcse", boards: ["Cambridge", "Edexcel International"] },
   { id: "uk-ial", boards: ["Edexcel IAL", "Cambridge"] },
   { id: "uk-olevel", boards: ["Cambridge"] },
@@ -241,12 +242,15 @@ const CURRICULUM_BOARDS: { id: string; boards: string[] }[] = [
   { id: "au-act", boards: ["ACT Board of Senior Secondary Studies"] },
   { id: "au-tce", boards: ["TASC"] },
   { id: "au-ntcet", boards: ["Northern Territory Board of Studies"] },
+  { id: "au-atar", boards: ["ACARA Senior Secondary"] },
   { id: "nz-ncea-1", boards: ["NZQA"] },
   { id: "nz-ncea-2", boards: ["NZQA"] },
   { id: "nz-ncea-3", boards: ["NZQA"] },
+  { id: "nz-scholarship", boards: ["NZQA"] },
   { id: "ca-ontario-12", boards: ["Ontario Ministry of Education"] },
   { id: "ca-bc-12", boards: ["BC Ministry of Education and Child Care"] },
   { id: "ca-alberta-12", boards: ["Alberta Education and Childcare"] },
+  { id: "ca-quebec-cegep", boards: ["Ministère de l'Éducation du Québec"] },
   // Bangladesh, Sri Lanka, UAE and Philippines
   { id: "bd-ssc", boards: ["Dhaka Board", "Rajshahi Board", "Chattogram Board", "Cumilla Board"] },
   { id: "bd-hsc", boards: ["Dhaka Board", "Rajshahi Board", "Chattogram Board", "Cumilla Board"] },
@@ -260,6 +264,8 @@ const CURRICULUM_BOARDS: { id: string; boards: string[] }[] = [
   { id: "ph-grade11", boards: ["DepEd Philippines"] },
   { id: "ph-grade12", boards: ["DepEd Philippines"] },
   { id: "ph-stem", boards: ["DepEd Philippines"] },
+  { id: "ph-abm", boards: ["DepEd Philippines"] },
+  { id: "ph-humss", boards: ["DepEd Philippines"] },
 ];
 
 const SPECIALISED_CURRICULUM_SUBJECTS: Record<string, string[]> = {
@@ -273,6 +279,9 @@ const SPECIALISED_CURRICULUM_SUBJECTS: Record<string, string[]> = {
   "ielts-general": ["ielts"],
   "celta": ["celta"],
   "ph-stem": ["mathematics", "physics", "chemistry", "biology", "computer-science"],
+  "ph-abm": ["mathematics", "economics", "business-studies", "computer-science"],
+  "ph-humss": ["english-literature", "psychology", "geography", "economics", "french", "german"],
+  "ca-quebec-cegep": ["mathematics", "physics", "chemistry", "biology", "computer-science", "french"],
 };
 
 function curriculumSupportsSubject(curriculum: string, subject: string): boolean {
@@ -296,6 +305,7 @@ function curriculumSource(curriculum: string): string {
   if (curriculum.startsWith("us-")) return "https://www.nextgenscience.org/";
   if (curriculum.startsWith("au-")) return "https://www.australiancurriculum.edu.au/";
   if (curriculum.startsWith("nz-")) return "https://www2.nzqa.govt.nz/ncea/subjects/";
+  if (curriculum === "ca-quebec-cegep") return "https://www.quebec.ca/en/education/cegeps-private-colleges/services/programmes/pre-university-programs";
   if (curriculum.startsWith("ca-")) return "https://www.cmec.ca/299/Education-in-Canada-An-Overview/index.html";
   if (curriculum.startsWith("india-")) return "https://cbseacademic.nic.in/curriculum_2027.html";
   if (curriculum.startsWith("pakistan-")) return "https://mail.fbise.edu.pk/curriculum_model_paper.php";

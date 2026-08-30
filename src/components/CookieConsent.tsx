@@ -9,8 +9,10 @@ import {
   initConsent,
   saveConsent,
 } from "@/lib/cookieConsent";
+import { useTranslation } from "react-i18next";
 
 export function CookieConsent() {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [functional, setFunctional] = useState(false);
@@ -51,7 +53,7 @@ export function CookieConsent() {
     <AnimatePresence>
       <motion.div
         role="dialog"
-        aria-label="Cookie preferences"
+        aria-label={t("cookies.preferences")}
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
@@ -65,15 +67,14 @@ export function CookieConsent() {
                 <Cookie className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground mb-1">We respect your privacy</p>
+                <p className="text-sm font-medium text-foreground mb-1">{t("cookies.title")}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  We use essential cookies to keep you signed in and secure. Functional and analytics
-                  storage are only used with your consent.{" "}
-                  <a href="/cookies" className="text-primary underline hover:text-primary/80 transition-colors">Cookie Policy</a>
+                  {t("cookies.description")}{" "}
+                  <a href="/cookies" className="text-primary underline hover:text-primary/80 transition-colors">{t("cookies.cookiePolicy")}</a>
                   {" · "}
-                  <a href="/privacy" className="text-primary underline hover:text-primary/80 transition-colors">Privacy Policy</a>
+                  <a href="/privacy" className="text-primary underline hover:text-primary/80 transition-colors">{t("auth.privacyPolicy")}</a>
                   {" · "}
-                  <a href="/terms" className="text-primary underline hover:text-primary/80 transition-colors">Terms</a>
+                  <a href="/terms" className="text-primary underline hover:text-primary/80 transition-colors">{t("cookies.terms")}</a>
                 </p>
               </div>
             </div>
@@ -86,7 +87,7 @@ export function CookieConsent() {
                 aria-expanded={expanded}
               >
                 <Settings className="h-3.5 w-3.5" />
-                Customise
+                {t("cookies.customise")}
                 {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               </Button>
               <Button
@@ -95,14 +96,14 @@ export function CookieConsent() {
                 onClick={() => save({ functional: false, analytics: false })}
                 className="rounded-lg text-xs"
               >
-                Reject All
+                {t("cookies.rejectAll")}
               </Button>
               <Button
                 size="sm"
                 onClick={() => save({ functional: true, analytics: true })}
                 className="rounded-lg text-xs shadow-sm shadow-primary/20"
               >
-                Accept All
+                {t("cookies.acceptAll")}
               </Button>
             </div>
           </div>
@@ -119,29 +120,29 @@ export function CookieConsent() {
                 <div className="mt-4 grid gap-3 border-t border-border/50 pt-4 sm:grid-cols-3">
                   <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 px-4 py-3">
                     <div>
-                      <p className="text-xs font-medium text-foreground">Essential</p>
-                      <p className="text-[10px] text-muted-foreground">Auth &amp; security</p>
+                      <p className="text-xs font-medium text-foreground">{t("cookies.essential")}</p>
+                      <p className="text-[10px] text-muted-foreground">{t("cookies.essentialDesc")}</p>
                     </div>
-                    <Switch checked disabled aria-label="Essential cookies always on" className="opacity-50" />
+                    <Switch checked disabled aria-label={t("cookies.essentialAria")} className="opacity-50" />
                   </div>
                   <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 px-4 py-3">
                     <div>
-                      <p className="text-xs font-medium text-foreground">Functional</p>
-                      <p className="text-[10px] text-muted-foreground">Preferences &amp; layout</p>
+                      <p className="text-xs font-medium text-foreground">{t("cookies.functional")}</p>
+                      <p className="text-[10px] text-muted-foreground">{t("cookies.functionalDesc")}</p>
                     </div>
-                    <Switch checked={functional} onCheckedChange={setFunctional} aria-label="Functional cookies" />
+                    <Switch checked={functional} onCheckedChange={setFunctional} aria-label={t("cookies.functionalAria")} />
                   </div>
                   <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 px-4 py-3">
                     <div>
-                      <p className="text-xs font-medium text-foreground">Analytics</p>
-                      <p className="text-[10px] text-muted-foreground">Usage insights</p>
+                      <p className="text-xs font-medium text-foreground">{t("cookies.analytics")}</p>
+                      <p className="text-[10px] text-muted-foreground">{t("cookies.analyticsDesc")}</p>
                     </div>
-                    <Switch checked={analytics} onCheckedChange={setAnalytics} aria-label="Analytics cookies" />
+                    <Switch checked={analytics} onCheckedChange={setAnalytics} aria-label={t("cookies.analyticsAria")} />
                   </div>
                 </div>
                 <div className="mt-3 flex justify-end">
                   <Button size="sm" onClick={() => save({ functional, analytics })} className="rounded-lg text-xs">
-                    Save Preferences
+                    {t("cookies.savePreferences")}
                   </Button>
                 </div>
               </motion.div>

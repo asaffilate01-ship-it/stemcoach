@@ -13,48 +13,17 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { getMascot, getCoachStem } from "@/lib/mascots";
 import { usePreferredCoach } from "@/hooks/usePreferredCoach";
 import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
+import { useTranslation } from "react-i18next";
+import { normalizeLanguage } from "@/i18n/language";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
 const SUBJECT_IDS = ["mathematics", "physics", "chemistry", "biology", "computer-science", "economics", "english-literature", "psychology", "geography", "business-studies", "ielts", "celta", "french", "german"];
-const SUBJECT_LABELS: Record<string, string> = {
-  mathematics: "Mathematics",
-  physics: "Physics",
-  chemistry: "Chemistry",
-  biology: "Biology",
-  "computer-science": "Computer Science",
-  economics: "Economics",
-  "english-literature": "English Literature",
-  psychology: "Psychology",
-  geography: "Geography",
-  "business-studies": "Business Studies",
-  ielts: "IELTS",
-  celta: "CELTA",
-  french: "French",
-  german: "German",
-};
-
-const QUICK_PROMPTS: Record<string, string[]> = {
-  mathematics: ["Explain the quadratic formula", "How do I solve simultaneous equations?", "What is differentiation?"],
-  physics: ["Explain Newton's 3 laws", "What is Ohm's law?", "How does radioactive decay work?"],
-  chemistry: ["What is ionic bonding?", "Explain Le Chatelier's principle", "What are moles in chemistry?"],
-  biology: ["Explain mitosis vs meiosis", "How does photosynthesis work?", "What is natural selection?"],
-  "computer-science": ["Explain binary search", "Help me trace this algorithm", "How does authentication work?"],
-  economics: ["Explain price elasticity", "How do interest rates affect demand?", "Help me structure an evaluation paragraph"],
-  "english-literature": ["How do I analyse a quotation?", "Help me structure a comparison", "Explain dramatic irony"],
-  psychology: ["Explain reliability and validity", "How do I evaluate a study?", "Compare experimental designs"],
-  geography: ["Explain river erosion", "Help me evaluate fieldwork data", "How should I use a case study?"],
-  "business-studies": ["Explain break-even", "How do I evaluate a business decision?", "What is cash flow?"],
-  ielts: ["Tips for Writing Task 2", "How to improve my speaking score?", "Common grammar mistakes to avoid"],
-  celta: ["What is TTT vs STT?", "How to write a lesson plan?", "Explain concept checking questions"],
-  french: ["Help me revise verb tenses", "Correct this French paragraph", "Give me an oral practice question"],
-  german: ["Help me revise German cases", "Correct this German paragraph", "Give me an oral practice question"],
-};
-
 export default function AITutor() {
-  useDocumentTitle("STEMCoach");
+  const { t, i18n } = useTranslation();
+  useDocumentTitle(t("nav.aiTutor"));
   const { user } = useAuth();
   const { canUseCoaching, loading: quotaLoading } = useQuotaGate();
   const navigate = useNavigate();
@@ -76,6 +45,8 @@ export default function AITutor() {
 
   const mascot = getMascot(subjectId);
   const coach = getCoachStem();
+  const subjectLabel = t(`subjects.names.${subjectId}`);
+  const quickPrompts = [1, 2, 3].map((index) => t(`coach.prompts.${subjectId}.${index}`));
 
   const conversationKey = `stemcoach:coach-thread:${user?.id || "guest"}:${subjectId}`;
 
@@ -163,7 +134,7 @@ export default function AITutor() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        const errorMessage = "Please sign in again to continue coaching.";
+        const errorMessage = t("coach.errors.signInAgain");
         upsertAssistant(errorMessage);
         await persistConversation([...allMessages, { role: "assistant", content: errorMessage }]);
         setIsLoading(false);
@@ -176,16 +147,20 @@ export default function AITutor() {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ messages: allMessages, subject: subjectId, curriculum: curriculumId }),
+        body: JSON.stringify({
+          messages: allMessages,
+          subject: subjectId,
+          curriculum: curriculumId,
+          language: normalizeLanguage(i18n.resolvedLanguage || i18n.language),
+        }),
       });
 
       if (!resp.ok || !resp.body) {
-        const errData = await resp.json().catch(() => ({}));
         const errorMessage = resp.status === 429
-          ? "⏳ Rate limit reached. Please wait a moment and try again."
+          ? t("coach.errors.rateLimit")
           : resp.status === 402
-            ? "💳 Coaching credits exhausted. Please contact support."
-            : errData.error || "Sorry, something went wrong. Please try again.";
+            ? t("coach.errors.credits")
+            : t("coach.errors.generic");
         upsertAssistant(errorMessage);
         await persistConversation([...allMessages, { role: "assistant", content: errorMessage }]);
         setIsLoading(false);
@@ -222,7 +197,7 @@ export default function AITutor() {
       if (assistantSoFar) await persistConversation([...allMessages, { role: "assistant", content: assistantSoFar }]);
     } catch (e) {
       console.error(e);
-      const errorMessage = "Sorry, I couldn't connect. Please try again.";
+      const errorMessage = t("coach.errors.connection");
       upsertAssistant(errorMessage);
       await persistConversation([...allMessages, { role: "assistant", content: errorMessage }]);
     }
@@ -238,12 +213,12 @@ export default function AITutor() {
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-primary/10">
               <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">STEMCoach Coaching — Premium Feature</h2>
+            <h2 className="mb-2 text-2xl font-bold">{t("coach.premiumTitle")}</h2>
             <p className="mb-6 max-w-md text-muted-foreground">
-              Purchase a question pack to unlock STEMCoach coaching. Get personalised explanations, exam tips, and essay grading from your virtual tutor.
+              {t("coach.premiumDesc")}
             </p>
             <Button onClick={() => navigate("/pricing")} className="gap-2 rounded-xl">
-              <CreditCard className="h-4 w-4" /> View Plans
+              <CreditCard className="h-4 w-4" /> {t("coach.viewPlans")}
             </Button>
           </main>
         </PageTransition>
@@ -258,7 +233,7 @@ export default function AITutor() {
         <main className="container mx-auto flex flex-1 flex-col px-4 py-4">
           {/* Subject selector with mascot avatars */}
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Tutor:</span>
+            <span className="text-sm font-medium text-muted-foreground">{t("coach.tutorLabel")}</span>
             {SUBJECT_IDS.map(id => {
               const m = getMascot(id);
               const isActive = subjectId === id;
@@ -290,7 +265,7 @@ export default function AITutor() {
                 onClick={clearConversation}
                 className="ml-auto flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Trash2 className="h-3.5 w-3.5" /> Clear
+                <Trash2 className="h-3.5 w-3.5" /> {t("common.clear")}
               </button>
             )}
           </div>
@@ -310,15 +285,17 @@ export default function AITutor() {
                     <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
                   </div>
                   <h3 className="text-lg font-semibold">{mascot.name}</h3>
-                  <p className="mt-1 text-xs italic text-muted-foreground">"{mascot.personality}"</p>
+                  <p className="mt-1 text-xs italic text-muted-foreground">“{t("coach.readyToHelp")}”</p>
                   <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                    Ask me anything about {SUBJECT_LABELS[subjectId]}. I'll explain concepts, solve problems, and give you exam tips{curriculum ? ` for ${curriculum.label}` : ""} — like a private tutor.
+                    {curriculum
+                      ? t("coach.introWithCurriculum", { subject: subjectLabel, curriculum: curriculum.label })
+                      : t("coach.intro", { subject: subjectLabel })}
                   </p>
-                  {user && <p className="mt-2 max-w-md text-xs text-primary/80">Your coach uses your selected curriculum and recent weak topics to personalise explanations.</p>}
+                  {user && <p className="mt-2 max-w-md text-xs text-primary/80">{t("coach.personalised")}</p>}
 
                   {/* Quick prompts */}
                   <div className="mt-6 flex flex-wrap justify-center gap-2">
-                    {(QUICK_PROMPTS[subjectId] || []).map(prompt => (
+                    {quickPrompts.map(prompt => (
                       <button
                         key={prompt}
                         onClick={() => send(prompt)}
@@ -376,11 +353,11 @@ export default function AITutor() {
 
           <div className="mt-3 flex flex-wrap gap-2">
             <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate(`/practice/${subjectId}`)}>
-              <GraduationCap className="h-4 w-4" /> Practise {SUBJECT_LABELS[subjectId]}
+              <GraduationCap className="h-4 w-4" /> {t("coach.practiseSubject", { subject: subjectLabel })}
             </Button>
             {user && (
               <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate("/weak-drills")}>
-                <Target className="h-4 w-4" /> Open weak-topic drill
+                <Target className="h-4 w-4" /> {t("coach.openWeakDrill")}
               </Button>
             )}
           </div>
@@ -391,11 +368,11 @@ export default function AITutor() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && send()}
-              placeholder={`Ask ${mascot.name} about ${SUBJECT_LABELS[subjectId]}...`}
+              placeholder={t("coach.inputPlaceholder", { name: mascot.name, subject: subjectLabel })}
               className="flex-1 rounded-xl border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               disabled={isLoading}
             />
-            <Button onClick={() => send()} disabled={isLoading || !input.trim()} className="rounded-xl">
+            <Button onClick={() => send()} disabled={isLoading || !input.trim()} className="rounded-xl" aria-label={t("coach.send")}>
               <Send className="h-4 w-4" />
             </Button>
           </div>
