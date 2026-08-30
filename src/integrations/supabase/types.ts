@@ -726,6 +726,75 @@ export type Database = {
           },
         ]
       }
+      learner_topic_mastery: {
+        Row: {
+          attempts: number
+          confidence_score: number
+          correct_attempts: number
+          correct_streak: number
+          created_at: string
+          curriculum: string
+          id: string
+          last_practised_at: string | null
+          last_question_id: string | null
+          mastery_score: number
+          next_review_at: string
+          subject: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          confidence_score?: number
+          correct_attempts?: number
+          correct_streak?: number
+          created_at?: string
+          curriculum: string
+          id?: string
+          last_practised_at?: string | null
+          last_question_id?: string | null
+          mastery_score?: number
+          next_review_at?: string
+          subject: string
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          confidence_score?: number
+          correct_attempts?: number
+          correct_streak?: number
+          created_at?: string
+          curriculum?: string
+          id?: string
+          last_practised_at?: string | null
+          last_question_id?: string | null
+          mastery_score?: number
+          next_review_at?: string
+          subject?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_topic_mastery_last_question_id_fkey"
+            columns: ["last_question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learner_topic_mastery_last_question_id_fkey"
+            columns: ["last_question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1723,6 +1792,33 @@ export type Database = {
         Args: { _limit?: number }
         Returns: number
       }
+      get_adaptive_practice_questions: {
+        Args: {
+          _count?: number
+          _curriculum?: string
+          _mode?: string
+          _subject: string
+        }
+        Returns: {
+          allow_multiple_answers: boolean
+          boards: string[]
+          command_word: string
+          curriculum: string
+          difficulty: number
+          formula: string
+          id: string
+          mastery_score: number
+          max_marks: number
+          next_review_at: string
+          options: Json
+          points: number
+          question_text: string
+          question_type: string
+          subject: string
+          subtopic: string
+          topic: string
+        }[]
+      }
       get_content_quality_matrix: {
         Args: never
         Returns: {
@@ -1768,6 +1864,22 @@ export type Database = {
       get_generation_campaign_status: {
         Args: { _campaign_id?: string }
         Returns: Json
+      }
+      get_learner_mastery_dashboard: {
+        Args: { _curriculum?: string }
+        Returns: {
+          attempts: number
+          confidence_score: number
+          correct_attempts: number
+          correct_streak: number
+          curriculum: string
+          last_practised_at: string
+          mastery_level: string
+          mastery_score: number
+          next_review_at: string
+          subject: string
+          topic: string
+        }[]
       }
       get_mock_exam_questions: {
         Args: {
@@ -1927,6 +2039,15 @@ export type Database = {
       reviewer_can_claim_question: {
         Args: { _question_id: string }
         Returns: boolean
+      }
+      update_learner_topic_mastery: {
+        Args: {
+          _correct: boolean
+          _question_id: string
+          _time_taken_seconds?: number
+          _user_id: string
+        }
+        Returns: Json
       }
       validate_session: {
         Args: { _session_token: string; _user_id: string }
