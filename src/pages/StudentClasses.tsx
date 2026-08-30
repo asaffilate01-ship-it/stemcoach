@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,9 +12,11 @@ import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { StudentLearningPaths } from "@/components/classroom/StudentLearningPaths";
 
 export default function StudentClasses() {
-  useDocumentTitle("My Classes");
+  const { t } = useTranslation();
+  useDocumentTitle(t("studentClasses.documentTitle"));
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -72,14 +75,14 @@ export default function StudentClasses() {
         _join_code: joinCode.trim(),
       });
       if (error) throw error;
-      if (!classId) throw new Error("Invalid join code. Please check and try again.");
+      if (!classId) throw new Error(t("studentClasses.invalidJoinCode"));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["student-classes"] });
       setJoinCode("");
-      toast({ title: "Joined class!", description: "You can now view assignments for this class." });
+      toast({ title: t("studentClasses.joined"), description: t("studentClasses.joinedDescription") });
     },
-    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+    onError: (e: any) => toast({ title: t("common.error"), description: e.message, variant: "destructive" }),
   });
 
   const startAssignment = useMutation({
@@ -98,7 +101,7 @@ export default function StudentClasses() {
         navigate(`/practice/${assignment.subject}`);
       }
     },
-    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+    onError: (e: any) => toast({ title: t("common.error"), description: e.message, variant: "destructive" }),
   });
 
   if (!user) {
@@ -107,8 +110,8 @@ export default function StudentClasses() {
         <AppHeader />
         <main className="container mx-auto px-4 py-16 text-center">
           <LogIn className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-          <h2 className="stem-heading mb-2 text-2xl">Sign in to view your classes</h2>
-          <Button onClick={() => navigate("/auth")} className="mt-4 rounded">Sign In</Button>
+          <h2 className="stem-heading mb-2 text-2xl">{t("studentClasses.signInTitle")}</h2>
+          <Button onClick={() => navigate("/auth")} className="mt-4 rounded">{t("auth.signIn")}</Button>
         </main>
       </div>
     );
@@ -122,24 +125,24 @@ export default function StudentClasses() {
       <AppHeader />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="stem-label mb-2">My Classes</div>
-          <h1 className="stem-heading text-3xl">Classes & Assignments</h1>
+          <div className="stem-label mb-2">{t("studentClasses.label")}</div>
+          <h1 className="stem-heading text-3xl">{t("studentClasses.title")}</h1>
         </div>
 
         {/* Join a class */}
         <div className="stem-card mb-6 rounded-xl p-5">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-            <LogIn className="h-4 w-4 text-primary" /> Join a Class
+            <LogIn className="h-4 w-4 text-primary" /> {t("studentClasses.joinClass")}
           </h3>
           <div className="flex gap-2">
             <Input
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value)}
-              placeholder="Enter class join code"
+              placeholder={t("studentClasses.joinCodePlaceholder")}
               className="max-w-xs font-mono"
             />
             <Button onClick={() => joinClass.mutate()} disabled={!joinCode.trim()} className="rounded">
-              Join
+              {t("studentClasses.join")}
             </Button>
           </div>
         </div>
@@ -147,7 +150,7 @@ export default function StudentClasses() {
         {/* My classes */}
         {myClasses.length > 0 && (
           <div className="mb-8">
-            <h2 className="mb-3 text-lg font-semibold">Your Classes</h2>
+            <h2 className="mb-3 text-lg font-semibold">{t("studentClasses.yourClasses")}</h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {myClasses.map((cls: any, i: number) => (
                 <motion.div
@@ -161,18 +164,20 @@ export default function StudentClasses() {
                     <BookOpen className="h-4 w-4 text-primary" />
                     <span className="text-sm font-semibold">{cls.name}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground capitalize">{cls.subject} · {cls.curriculum}</p>
+                  <p className="text-xs text-muted-foreground">{t(`subjects.names.${cls.subject}`)} · {cls.curriculum}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         )}
 
+        {myClasses.length > 0 && <StudentLearningPaths classes={myClasses} userId={user.id} />}
+
         {/* Pending assignments */}
         {pendingAssignments.length > 0 && (
           <div className="mb-8">
             <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-              <ClipboardList className="h-5 w-5 text-warning" /> Due Assignments ({pendingAssignments.length})
+              <ClipboardList className="h-5 w-5 text-warning" /> {t("studentClasses.dueAssignments", { count: pendingAssignments.length })}
             </h2>
             <div className="space-y-2">
               {pendingAssignments.map((a: any) => {
@@ -183,14 +188,13 @@ export default function StudentClasses() {
                     <div>
                       <div className="text-sm font-semibold">{a.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {a.question_count} questions · {a.subject}
+                        {t("studentClasses.questionCount", { count: a.question_count })} · {t(`subjects.names.${a.subject}`)}
                         {a.topics?.length > 0 && ` · ${a.topics.join(", ")}`}
                       </div>
                       {a.due_date && (
                         <div className={`mt-1 flex items-center gap-1 text-xs ${isOverdue ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
                           <Calendar className="h-3 w-3" />
-                          {isOverdue ? "OVERDUE — " : "Due "}
-                          {new Date(a.due_date).toLocaleDateString()}
+                          {t(isOverdue ? "studentClasses.overdue" : "studentClasses.due", { date: new Date(a.due_date).toLocaleDateString() })}
                         </div>
                       )}
                     </div>
@@ -199,7 +203,7 @@ export default function StudentClasses() {
                       onClick={() => startAssignment.mutate(a.id)}
                       className="gap-1.5 rounded"
                     >
-                      {started ? "Continue" : "Start"} <ArrowRight className="h-3.5 w-3.5" />
+                      {t(started ? "studentClasses.continue" : "studentClasses.start")} <ArrowRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 );
@@ -212,14 +216,14 @@ export default function StudentClasses() {
         {completedAssignments.length > 0 && (
           <div>
             <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-              <CheckCircle2 className="h-5 w-5 text-success" /> Completed ({completedAssignments.length})
+              <CheckCircle2 className="h-5 w-5 text-success" /> {t("studentClasses.completed", { count: completedAssignments.length })}
             </h2>
             <div className="space-y-2">
               {completedAssignments.map((a: any) => (
                 <div key={a.id} className="stem-card flex items-center justify-between rounded-xl px-5 py-3">
                   <div>
                     <div className="text-sm font-semibold">{a.title}</div>
-                    <div className="text-xs text-muted-foreground">{a.subject}</div>
+                    <div className="text-xs text-muted-foreground">{t(`subjects.names.${a.subject}`)}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-bold text-success">
@@ -238,8 +242,8 @@ export default function StudentClasses() {
         {myClasses.length === 0 && (
           <div className="stem-card rounded-xl p-12 text-center">
             <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-            <h3 className="mb-2 text-lg font-semibold">No classes yet</h3>
-            <p className="text-sm text-muted-foreground">Ask your teacher for a join code to get started.</p>
+            <h3 className="mb-2 text-lg font-semibold">{t("studentClasses.noClasses")}</h3>
+            <p className="text-sm text-muted-foreground">{t("studentClasses.noClassesDescription")}</p>
           </div>
         )}
       </main>
