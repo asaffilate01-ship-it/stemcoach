@@ -21,14 +21,14 @@ export const PACKS: Record<string, QuestionPack> = {
     questions: 5000,
     mock_exams: 20,
     features: [
-      "5,000 curriculum-aligned questions",
+      "5,000 curriculum-filtered question credits",
       "20 mock exams with certificates",
       "Choose your subjects, boards & levels",
       "STEMCoach coaching when you're stuck",
-      "Full tutorial explanations on every answer",
+      "Worked explanations for available questions",
       "Streaks, XP, levels & leaderboards",
       "Detailed analytics & weak-topic drills",
-      "Offline mode (PWA)",
+      "Installable PWA with offline app shell",
     ],
     regional: {
       uk: { price: "£14.99", price_id: "price_1TCNddFFogsDQVs4QyDkGoa6" },

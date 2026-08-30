@@ -48,7 +48,7 @@ export function FAQSection() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">
                   <div className="flex items-start gap-3">
-                    <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-6 w-6 shrink-0 rounded-full object-cover mt-0.5" />
+                    <img src="/assets/coach-stem.png" alt="STEMCoach" className="h-6 w-6 shrink-0 rounded-full object-cover mt-0.5" />
                     <span>{faq.a}</span>
                   </div>
                 </AccordionContent>

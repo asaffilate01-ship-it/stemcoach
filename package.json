@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "release:preflight": "npm run typecheck && npm run lint -- --max-warnings 30 && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",

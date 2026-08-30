@@ -218,7 +218,7 @@ export function AppHeader() {
         <Link to="/home" className="group flex items-center gap-2">
           <img
             src={tenant.logoUrl || "/assets/coach-stem.png"}
-            alt={tenant.name || "Coach Stem"}
+            alt={tenant.name || "STEMCoach"}
             className="h-7 w-7 rounded-lg shadow-sm shadow-primary/20 transition-transform duration-300 group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-xl object-cover"
           />
           <span className="font-bold tracking-tight text-foreground text-sm sm:text-base">

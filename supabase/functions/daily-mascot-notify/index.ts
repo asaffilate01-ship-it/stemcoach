@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { requireCronOrAdmin } from "../_shared/gate.ts";
+import { MASCOT_IDENTITIES, STEMCOACH_IDENTITY } from "../_shared/mascotCatalog.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,15 +8,35 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
-// Mascot data for notification personalization
-const mascotMap: Record<string, { name: string; emoji: string; image: string; cheer: string; nudge: string }> = {
-  mathematics: { name: "MathMax", emoji: "🧮", image: "/assets/mathmax.png", cheer: "Your maths skills are adding up! 🎉", nudge: "Numbers are waiting! Let's solve some problems together 🧮" },
-  physics: { name: "PhysiX", emoji: "⚡", image: "/assets/physix.png", cheer: "You're an unstoppable force! ⚡", nudge: "Let's get moving with some physics! ⚡" },
-  chemistry: { name: "Chemi", emoji: "🧪", image: "/assets/chemi.png", cheer: "You've got perfect chemistry! 🧪", nudge: "Time for a reaction! Come practice chemistry 🧪" },
-  biology: { name: "BioBee", emoji: "🐝", image: "/assets/biobee.png", cheer: "You're buzzing through biology! 🐝", nudge: "The hive misses you! Let's get buzzing 🐝" },
-  "computer-science": { name: "Codey", emoji: "💻", image: "/assets/codey.png", cheer: "Your code is compiling perfectly! 💻", nudge: "Time to debug some problems! 💻" },
+const notificationCopy: Record<keyof typeof MASCOT_IDENTITIES, { cheer: string; nudge: string }> = {
+  mathematics: { cheer: "Your maths skills are adding up! 🎉", nudge: "Numbers are waiting! Let's solve some problems together 🧮" },
+  physics: { cheer: "You're an unstoppable force! ⚡", nudge: "Let's get moving with some physics! ⚡" },
+  chemistry: { cheer: "You've got perfect chemistry! 🧪", nudge: "Time for a reaction! Come practise chemistry 🧪" },
+  biology: { cheer: "You're buzzing through biology! 🐝", nudge: "The hive misses you! Let's get buzzing 🐝" },
+  "computer-science": { cheer: "Your code is compiling perfectly! 💻", nudge: "Time to debug some problems! 💻" },
+  ielts: { cheer: "Your communication is getting stronger! 🌍", nudge: "Lexi has a quick language challenge ready for you 🌍" },
+  celta: { cheer: "Your teaching toolkit is growing! 🌍", nudge: "Lexi is ready for your next teaching-practice challenge 🌍" },
+  economics: { cheer: "Your analysis is paying dividends! 📈", nudge: "EconiQ has a market problem ready for you 📈" },
+  "english-literature": { cheer: "That analysis was beautifully argued! 📚", nudge: "Litera has another text to explore with you 📚" },
+  psychology: { cheer: "Your psychological insight is growing! 🧠", nudge: "Psyche has a new idea for you to investigate 🧠" },
+  geography: { cheer: "You're mapping your way to success! 🌎", nudge: "Geo has another part of the world to explore 🌎" },
+  "business-studies": { cheer: "You're thinking like a strategist! 💼", nudge: "BizPro has a business decision for you to tackle 💼" },
+  french: { cheer: "Ton français est magnifique! 🇫🇷", nudge: "François est prêt — allons-y! 🇫🇷" },
+  german: { cheer: "Dein Deutsch ist ausgezeichnet! 🇩🇪", nudge: "Hans ist bereit — Schritt für Schritt! 🇩🇪" },
 };
-const coachStem = { name: "Coach Stem", emoji: "🧑‍🔬", image: "/assets/coach-stem.png", cheer: "The Squad is proud of you! 🌟", nudge: "The whole Squad is waiting for you! Let's study 🚀" };
+
+const mascotMap = Object.fromEntries(
+  Object.entries(MASCOT_IDENTITIES).map(([subject, identity]) => [
+    subject,
+    { ...identity, ...notificationCopy[subject as keyof typeof MASCOT_IDENTITIES] },
+  ]),
+) as Record<string, { name: string; emoji: string; image: string; cheer: string; nudge: string }>;
+
+const coachStem = {
+  ...STEMCOACH_IDENTITY,
+  cheer: "The Squad is proud of you! 🌟",
+  nudge: "The whole Squad is waiting for you! Let's study 🚀",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {

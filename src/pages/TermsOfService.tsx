@@ -38,7 +38,6 @@ export default function TermsOfService() {
               <li>Free tier users are limited to 5 practice questions per subject.</li>
               <li>Question packs are one-time purchases processed via Stripe.</li>
               <li>Refunds are handled on a case-by-case basis within 14 days of purchase.</li>
-              <li>Refunds are handled on a case-by-case basis within 14 days of purchase.</li>
               <li>Prices vary by region and are displayed in local currency.</li>
             </ul>
           </section>

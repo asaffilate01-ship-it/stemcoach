@@ -1,61 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@17.7.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-// Map of valid price IDs to their grants for server-side validation
-const VALID_PRICES: Record<string, { questions: number; mock_exams: number; pack: string }> = {
-  // Standard pack (Ultimate Pack) — 5,000 questions + 20 mock exams
-  "price_1TCNddFFogsDQVs4QyDkGoa6": { questions: 5000, mock_exams: 20, pack: "standard" }, // GBP
-  "price_1TCYoCFFogsDQVs4n5EaIpC4": { questions: 5000, mock_exams: 20, pack: "standard" }, // USD
-  "price_1TCYoDFFogsDQVs4a7IAliJs": { questions: 5000, mock_exams: 20, pack: "standard" }, // AED
-  "price_1TCYoEFFogsDQVs43ZduOOov": { questions: 5000, mock_exams: 20, pack: "standard" }, // INR
-  "price_1TCYoEFFogsDQVs45swS26PC": { questions: 5000, mock_exams: 20, pack: "standard" }, // PKR
-  "price_1TCxysFFogsDQVs4yklywQ3W": { questions: 5000, mock_exams: 20, pack: "standard" }, // AUD
-  "price_1TCxyuFFogsDQVs4tS6qul6W": { questions: 5000, mock_exams: 20, pack: "standard" }, // NZD
-  "price_1TCxywFFogsDQVs4rI3DVCmN": { questions: 5000, mock_exams: 20, pack: "standard" }, // CAD
-  "price_1TCxyyFFogsDQVs43c1p47T9": { questions: 5000, mock_exams: 20, pack: "standard" }, // BDT
-  "price_1TCxyzFFogsDQVs4r94WHEqY": { questions: 5000, mock_exams: 20, pack: "standard" }, // LKR
-  "price_1U3wLUFFogsDQVs4xvBnXg8K": { questions: 5000, mock_exams: 20, pack: "standard" }, // EUR (FR/DE)
-  "price_1U4zEsFFogsDQVs4YqJFAlH8": { questions: 5000, mock_exams: 20, pack: "standard" }, // PHP
-  // Top-up pack — 1,000 questions + 5 mock exams
-  "price_1TCNdeFFogsDQVs4WutIKPQw": { questions: 1000, mock_exams: 5, pack: "topup" }, // GBP
-  "price_1TCZCNFFogsDQVs4dhoer5AL": { questions: 1000, mock_exams: 5, pack: "topup" }, // USD
-  "price_1TCZCRFFogsDQVs4vHB63taY": { questions: 1000, mock_exams: 5, pack: "topup" }, // AED
-  "price_1TCZCSFFogsDQVs4eBhjzG9k": { questions: 1000, mock_exams: 5, pack: "topup" }, // INR
-  "price_1TCZCSFFogsDQVs4hueexI5c": { questions: 1000, mock_exams: 5, pack: "topup" }, // PKR
-  "price_1TCxytFFogsDQVs4bGUZPFnj": { questions: 1000, mock_exams: 5, pack: "topup" }, // AUD
-  "price_1TCxyvFFogsDQVs4D3w5jslB": { questions: 1000, mock_exams: 5, pack: "topup" }, // NZD
-  "price_1TCxyyFFogsDQVs4XlzjR3xR": { questions: 1000, mock_exams: 5, pack: "topup" }, // CAD
-  "price_1TCxyyFFogsDQVs4AemajlYo": { questions: 1000, mock_exams: 5, pack: "topup" }, // BDT
-  "price_1TCxz0FFogsDQVs4bwezp7QL": { questions: 1000, mock_exams: 5, pack: "topup" }, // LKR
-  "price_1U3yIyFFogsDQVs4fUYgEjq2": { questions: 1000, mock_exams: 5, pack: "topup" }, // EUR (FR/DE)
-  "price_1U4zF6FFogsDQVs44UX0jPq5": { questions: 1000, mock_exams: 5, pack: "topup" }, // PHP
-};
-
-function currencyToRegion(currency: string | null): string {
-  switch (currency?.toLowerCase()) {
-    case "gbp": return "uk";
-    case "usd": return "us";
-    case "aed": return "ae";
-    case "inr": return "in";
-    case "pkr": return "pk";
-    case "aud": return "au";
-    case "nzd": return "nz";
-    case "cad": return "ca";
-    case "bdt": return "bd";
-    case "lkr": return "lk";
-    case "eur": return "fr";
-    case "php": return "ph";
-    default: return "uk";
-  }
-}
+import { corsHeadersFor, grantForPrice } from "../_shared/productCatalog.ts";
 
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const supabaseClient = createClient(
@@ -85,103 +34,76 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("Stripe not configured");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const requestBody = await req.json().catch(() => ({})) as { sessionId?: unknown };
+    let sessions: Stripe.Checkout.Session[] = [];
 
-    const customers = await stripe.customers.list({ email: user.email!, limit: 1 });
-    if (customers.data.length === 0) {
+    if (typeof requestBody.sessionId === "string" && /^cs_[A-Za-z0-9_]+$/.test(requestBody.sessionId)) {
+      sessions = [await stripe.checkout.sessions.retrieve(requestBody.sessionId)];
+    } else if (user.email) {
+      // Backward-compatible recovery for an older success URL. New checkouts
+      // always verify the exact session returned by Stripe.
+      const customers = await stripe.customers.list({ email: user.email, limit: 10 });
+      for (const customer of customers.data) {
+        const customerSessions = await stripe.checkout.sessions.list({
+          customer: customer.id,
+          status: "complete",
+          limit: 50,
+        });
+        sessions.push(...customerSessions.data);
+      }
+    }
+
+    if (sessions.length === 0) {
       return new Response(JSON.stringify({ granted: false, message: "No purchases found" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const sessions = await stripe.checkout.sessions.list({
-      customer: customers.data[0].id,
-      status: "complete",
-      limit: 50,
-    });
-
-    const { data: existingPurchases } = await supabaseClient
-      .from("purchases")
-      .select("stripe_session_id")
-      .eq("user_id", user.id);
-
-    const existingIds = new Set((existingPurchases || []).map((p: any) => p.stripe_session_id));
     let totalNewQuestions = 0;
     let totalNewMockExams = 0;
 
-    for (const session of sessions.data) {
-      if (existingIds.has(session.id)) continue;
+    for (const session of sessions) {
       if (session.payment_status !== "paid") continue;
+      // A completed payment belongs only to the account that created it. Email
+      // matching alone is not a safe ownership boundary.
+      if (session.metadata?.user_id !== user.id) continue;
 
       let questionsGranted = 0;
       let mockExamsGranted = 0;
-      let packType = "standard";
-      const region = currencyToRegion(session.currency);
+      let packType: "standard" | "topup" | null = null;
+      let region: string | null = null;
 
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 5 });
       for (const item of lineItems.data) {
-        const priceId = item.price?.id;
-        if (priceId && VALID_PRICES[priceId]) {
+        const grant = grantForPrice(item.price?.id);
+        if (grant) {
           const qty = item.quantity || 1;
-          questionsGranted += VALID_PRICES[priceId].questions * qty;
-          mockExamsGranted += VALID_PRICES[priceId].mock_exams * qty;
-          packType = VALID_PRICES[priceId].pack;
+          questionsGranted += grant.questions * qty;
+          mockExamsGranted += grant.mockExams * qty;
+          packType = grant.pack;
+          region = grant.region;
         }
       }
 
-      // Fallback for legacy sessions
-      if (questionsGranted === 0) {
-        const metaQuestions = parseInt(session.metadata?.questions_granted || "0");
-        const metaPack = session.metadata?.pack_type || "standard";
-        if (metaQuestions === 5000) {
-          questionsGranted = 5000;
-          mockExamsGranted = 20;
-          packType = metaPack;
-        } else if (metaQuestions === 1000) {
-          questionsGranted = 1000;
-          mockExamsGranted = 5;
-          packType = metaPack;
-        }
-      }
-
-      if (questionsGranted > 0) {
-        await supabaseClient.from("purchases").insert({
-          user_id: user.id,
-          stripe_session_id: session.id,
-          pack_type: packType,
-          questions_granted: questionsGranted,
-          amount_paid: session.amount_total || 0,
-          currency: session.currency || "gbp",
-          region: region,
+      // Unknown or mixed catalogue items never receive STEMCoach quota. The
+      // database function inserts the purchase and increments quota in one
+      // transaction, returning false when the session was already applied.
+      if (questionsGranted > 0 && packType && region) {
+        const { data: applied, error: grantError } = await supabaseClient.rpc("grant_verified_purchase", {
+          _user_id: user.id,
+          _stripe_session_id: session.id,
+          _pack_type: packType,
+          _questions_granted: questionsGranted,
+          _mock_exams_granted: mockExamsGranted,
+          _amount_paid: session.amount_total || 0,
+          _currency: session.currency || "gbp",
+          _region: region,
         });
-        totalNewQuestions += questionsGranted;
-        totalNewMockExams += mockExamsGranted;
-      }
-    }
-
-    if (totalNewQuestions > 0) {
-      const { data: existing } = await supabaseClient
-        .from("user_quotas")
-        .select("total_questions, mock_exams_total")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (existing) {
-        await supabaseClient
-          .from("user_quotas")
-          .update({
-            total_questions: existing.total_questions + totalNewQuestions,
-            mock_exams_total: (existing.mock_exams_total || 0) + totalNewMockExams,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", user.id);
-      } else {
-        await supabaseClient
-          .from("user_quotas")
-          .insert({
-            user_id: user.id,
-            total_questions: totalNewQuestions,
-            mock_exams_total: totalNewMockExams,
-          });
+        if (grantError) throw grantError;
+        if (applied) {
+          totalNewQuestions += questionsGranted;
+          totalNewMockExams += mockExamsGranted;
+        }
       }
     }
 

@@ -40,7 +40,7 @@ export function CTASection() {
                   { src: "/assets/bizpro.png", name: "BizPro", delay: 0.3 },
                   { src: "/assets/francois.png", name: "François", delay: 0.15 },
                   { src: "/assets/hans.png", name: "Hans", delay: 0.2 },
-                  { src: "/assets/coach-stem.png", name: "Coach Stem", delay: 0.05 },
+                  { src: "/assets/coach-stem.png", name: "STEMCoach", delay: 0.05 },
                 ].map((m) => (
                   <motion.div
                     key={m.name}

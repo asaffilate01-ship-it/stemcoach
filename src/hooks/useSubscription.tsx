@@ -7,11 +7,13 @@ export function useSubscription() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const checkout = useCallback(async (priceId: string, packType: PackKey = "standard", questionsGranted: number = 5000) => {
+  const checkout = useCallback(async (priceId: string, _packType: PackKey = "standard", _questionsGranted: number = 5000) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId, packType, questionsGranted },
+        // Entitlements are derived from a server-side price catalogue. Only the
+        // Stripe price identifier crosses the trust boundary.
+        body: { priceId },
       });
       if (error) throw error;
       if (data?.url) {

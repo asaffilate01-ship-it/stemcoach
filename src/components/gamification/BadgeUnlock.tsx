@@ -9,7 +9,7 @@ interface BadgeUnlockProps {
 }
 
 export function BadgeUnlock({ badge, onDismiss }: BadgeUnlockProps) {
-  // Try to match badge to a subject mascot via name, fall back to Coach Stem
+  // Try to match badge to a subject mascot via name, fall back to STEMCoach.
   const subjectGuess = badge?.name?.toLowerCase().includes("math") ? "mathematics"
     : badge?.name?.toLowerCase().includes("phys") ? "physics"
     : badge?.name?.toLowerCase().includes("chem") ? "chemistry"

@@ -195,7 +195,7 @@ export default function Dashboard() {
       <AppHeader />
       <PageTransition>
         <main id="main-content" className="container mx-auto px-4 py-5 pb-28 flex-1 md:py-8">
-          {/* Welcome header with Coach Stem */}
+          {/* Welcome header with STEMCoach */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -208,7 +208,7 @@ export default function Dashboard() {
                 transition={{ delay: 0.1, type: "spring", damping: 15 }}
                 className="hidden sm:block h-14 w-14 shrink-0 overflow-hidden rounded-2xl shadow-md ring-1 ring-border/30"
               >
-                <img src={getCoachStem().image} alt="Coach Stem" className="h-full w-full object-cover" />
+                <img src={getCoachStem().image} alt="STEMCoach" className="h-full w-full object-cover" />
               </motion.div>
               <div>
                 <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">{t("dashboard.studentDashboard")}</div>

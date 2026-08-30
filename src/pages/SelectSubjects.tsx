@@ -42,7 +42,10 @@ export default function SelectSubjects() {
 
     const verify = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("verify-purchase");
+        const sessionId = new URLSearchParams(window.location.search).get("session_id");
+        const { data, error } = await supabase.functions.invoke("verify-purchase", {
+          body: sessionId ? { sessionId } : {},
+        });
         if (error) throw error;
 
         if (data?.quota?.total_questions > 0) {
