@@ -431,27 +431,6 @@ export type Database = {
         }
         Relationships: []
       }
-      coach_request_windows: {
-        Row: {
-          request_count: number
-          updated_at: string
-          user_id: string
-          window_started_at: string
-        }
-        Insert: {
-          request_count?: number
-          updated_at?: string
-          user_id: string
-          window_started_at?: string
-        }
-        Update: {
-          request_count?: number
-          updated_at?: string
-          user_id?: string
-          window_started_at?: string
-        }
-        Relationships: []
-      }
       coach_conversations: {
         Row: {
           created_at: string
@@ -476,6 +455,27 @@ export type Database = {
           subject?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      coach_request_windows: {
+        Row: {
+          request_count: number
+          updated_at: string
+          user_id: string
+          window_started_at: string
+        }
+        Insert: {
+          request_count?: number
+          updated_at?: string
+          user_id: string
+          window_started_at?: string
+        }
+        Update: {
+          request_count?: number
+          updated_at?: string
+          user_id?: string
+          window_started_at?: string
         }
         Relationships: []
       }
@@ -1476,30 +1476,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_tutorial_progress: {
-        Row: {
-          completed_at: string | null
-          last_opened_at: string
-          tutorial_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          last_opened_at?: string
-          tutorial_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          last_opened_at?: string
-          tutorial_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_quotas: {
         Row: {
           created_at: string
@@ -1596,6 +1572,30 @@ export type Database = {
           updated_at?: string
           user_id?: string
           xp?: number
+        }
+        Relationships: []
+      }
+      user_tutorial_progress: {
+        Row: {
+          completed_at: string | null
+          last_opened_at: string
+          tutorial_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          last_opened_at?: string
+          tutorial_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          last_opened_at?: string
+          tutorial_id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
