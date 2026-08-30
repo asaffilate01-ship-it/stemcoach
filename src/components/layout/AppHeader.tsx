@@ -132,8 +132,8 @@ const navItems: NavItem[] = [
   { to: "/institution", labelKey: "nav.myInstitution", label: "My Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
   { to: "/join-institution", labelKey: "nav.joinInstitution", label: "Join Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
   { to: "/admin/generate", labelKey: "nav.generate", label: "Generate", icon: Sparkles, roles: ["admin"], variant: "warning" },
-  { to: "/admin/questions", labelKey: "nav.content", label: "Content", icon: Database, roles: ["admin"], variant: "accent" },
-  { to: "/settings", labelKey: "nav.settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin"], variant: "primary" },
+  { to: "/admin/questions", labelKey: "nav.content", label: "Content", icon: Database, roles: ["admin", "reviewer"], variant: "accent" },
+  { to: "/settings", labelKey: "nav.settings", label: "Settings", icon: Settings, roles: ["student", "teacher", "parent", "admin", "reviewer"], variant: "primary" },
   { to: "/pricing", labelKey: "nav.pricing", label: "Pricing", icon: CreditCard, variant: "success" },
 ];
 

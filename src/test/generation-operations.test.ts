@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
-const migration = read("supabase/migrations/20260830210000_generation_campaign_operations.sql");
+const migration = read("supabase/migrations/20260830114458_92ae136b-406c-41f1-8478-f925b9fce6c5.sql");
 const generator = read("supabase/functions/batch-generate/index.ts");
 const adminPage = read("src/pages/AdminGenerate.tsx");
 const config = read("supabase/config.toml");

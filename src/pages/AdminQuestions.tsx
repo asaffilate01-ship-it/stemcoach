@@ -6,18 +6,20 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, Archive, Edit3, Save, X, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert, Eye, Ban, ClipboardCheck, Loader2, RotateCcw, History, ShieldCheck, Users } from "lucide-react";
+import { Search, Archive, Edit3, Save, X, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert, Eye, Ban, ClipboardCheck, Loader2, RotateCcw, History, ShieldCheck, Users, UserPlus, Gauge } from "lucide-react";
 import { CSVImport } from "@/components/admin/CSVImport";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { curricula, subjects } from "@/data/questions";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function AdminQuestions() {
   useDocumentTitle("Question Bank");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [search, setSearch] = useState("");
   const [filterSubject, setFilterSubject] = useState("");
   const [filterCurriculum, setFilterCurriculum] = useState("");
@@ -31,6 +33,11 @@ export default function AdminQuestions() {
   const [reviewAttested, setReviewAttested] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
   const [claiming, setClaiming] = useState(false);
+  const [reviewerEmail, setReviewerEmail] = useState("");
+  const [reviewerSubject, setReviewerSubject] = useState("");
+  const [reviewerCurriculum, setReviewerCurriculum] = useState("");
+  const [reviewerDailyLimit, setReviewerDailyLimit] = useState(100);
+  const [savingReviewer, setSavingReviewer] = useState(false);
   const pageSize = 20;
 
   const { data, isLoading } = useQuery({
@@ -86,6 +93,47 @@ export default function AdminQuestions() {
     },
     staleTime: 300_000,
     refetchInterval: 300_000,
+  });
+
+  const { data: releaseReadiness } = useQuery({
+    queryKey: ["content-release-readiness"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.rpc as any)("get_content_release_readiness");
+      if (error) throw error;
+      return data as {
+        release_ready: boolean;
+        review_passes_remaining: number;
+        daily_review_velocity_7d: number;
+        estimated_days_to_clear: number | null;
+        active_reviewers: number;
+        published_missing_source: number;
+        published_missing_specification: number;
+        flagged: number;
+      };
+    },
+    refetchInterval: 300_000,
+  });
+
+  const { data: reviewerWorkload } = useQuery({
+    queryKey: ["reviewer-workload"],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const { data, error } = await (supabase.rpc as any)("get_reviewer_workload");
+      if (error) throw error;
+      return (data || []) as Array<{
+        user_id: string;
+        display_name: string;
+        subjects: string[];
+        curricula: string[];
+        daily_review_limit: number;
+        active: boolean;
+        active_claims: number;
+        verified_today: number;
+        published_today: number;
+        rejected_today: number;
+      }>;
+    },
+    refetchInterval: 60_000,
   });
 
   const { data: reviewHistory } = useQuery({
@@ -229,6 +277,30 @@ export default function AdminQuestions() {
     refreshReviewData();
   };
 
+  const configureReviewer = async (active: boolean) => {
+    if (!reviewerEmail.trim()) {
+      toast({ title: "Enter the reviewer’s account email", variant: "destructive" });
+      return;
+    }
+    setSavingReviewer(true);
+    const { data, error } = await (supabase.rpc as any)("configure_content_reviewer", {
+      _email: reviewerEmail.trim(),
+      _active: active,
+      _subjects: reviewerSubject ? [reviewerSubject] : [],
+      _curricula: reviewerCurriculum ? [reviewerCurriculum] : [],
+      _question_types: [],
+      _daily_review_limit: reviewerDailyLimit,
+    });
+    setSavingReviewer(false);
+    if (error || !data?.success) {
+      toast({ title: "Reviewer setup failed", description: error?.message || String(data?.error || "User not found"), variant: "destructive" });
+      return;
+    }
+    toast({ title: active ? "Reviewer activated" : "Reviewer deactivated", description: active ? "Their access is limited to the selected academic review work." : "Their reviewer role has been removed." });
+    queryClient.invalidateQueries({ queryKey: ["reviewer-workload"] });
+    queryClient.invalidateQueries({ queryKey: ["content-release-readiness"] });
+  };
+
   const releaseReview = async () => {
     if (!reviewQuestion) return;
     const { data, error } = await (supabase.rpc as any)("release_question_review", { _question_id: reviewQuestion.id, _notes: reviewNotes || null });
@@ -260,13 +332,32 @@ export default function AdminQuestions() {
       <AppHeader />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="stem-label mb-2">Admin Panel</div>
-          <h1 className="stem-heading text-3xl">Content Management</h1>
+          <div className="stem-label mb-2">Editorial Operations</div>
+          <h1 className="stem-heading text-3xl">Content Review</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Review full answers, edit drafts, publish approved content, and archive unsuitable questions. {data?.total.toLocaleString()} total questions.
           </p>
         </div>
 
+        <div className="stem-card mb-6 rounded-xl p-5">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 font-semibold"><Gauge className="h-4 w-4 text-primary" />Release readiness</h2>
+              <p className="mt-1 text-xs text-muted-foreground">Calculated from two-pass review progress, published-content flags and source/specification completeness.</p>
+            </div>
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${releaseReadiness?.release_ready ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"}`}>{releaseReadiness?.release_ready ? "Content ready" : "Review in progress"}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              ["Passes remaining", releaseReadiness?.review_passes_remaining || 0],
+              ["Daily velocity", releaseReadiness?.daily_review_velocity_7d || 0],
+              ["Est. days", releaseReadiness?.estimated_days_to_clear ?? "—"],
+              ["Active reviewers", releaseReadiness?.active_reviewers || 0],
+              ["Missing source/spec", (releaseReadiness?.published_missing_source || 0) + (releaseReadiness?.published_missing_specification || 0)],
+              ["Flagged", releaseReadiness?.flagged || 0],
+            ].map(([label, value]) => <div key={String(label)} className="rounded-lg bg-muted/40 p-3 text-center"><div className="text-lg font-bold">{typeof value === "number" ? value.toLocaleString() : value}</div><div className="stem-label">{label}</div></div>)}
+          </div>
+        </div>
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
           {[
             ["Needs review", reviewMetrics?.needs_review || 0],
@@ -320,8 +411,22 @@ export default function AdminQuestions() {
           </div>
         </div>
 
-        {/* CSV Import */}
-        <CSVImport />
+        {isAdmin && (
+          <div className="stem-card mb-6 rounded-xl p-4">
+            <div className="mb-3 flex items-center gap-2"><UserPlus className="h-4 w-4 text-primary" /><div><h2 className="font-semibold">Reviewer team</h2><p className="text-xs text-muted-foreground">Activate an existing STEMCoach account with least-privilege review access. Empty expertise filters mean all subjects or curricula.</p></div></div>
+            <div className="grid gap-2 md:grid-cols-5">
+              <Input type="email" value={reviewerEmail} onChange={(event) => setReviewerEmail(event.target.value)} placeholder="Reviewer account email" />
+              <select value={reviewerSubject} onChange={(event) => setReviewerSubject(event.target.value)} className="rounded-md border bg-background px-3 py-2 text-sm"><option value="">All subjects</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}</select>
+              <select value={reviewerCurriculum} onChange={(event) => setReviewerCurriculum(event.target.value)} className="rounded-md border bg-background px-3 py-2 text-sm"><option value="">All curricula</option>{curricula.map((curriculum) => <option key={curriculum.id} value={curriculum.id}>{curriculum.label}</option>)}</select>
+              <Input type="number" min={1} max={500} value={reviewerDailyLimit} onChange={(event) => setReviewerDailyLimit(Math.min(500, Math.max(1, Number(event.target.value) || 1)))} aria-label="Daily review limit" />
+              <div className="flex gap-2"><Button onClick={() => configureReviewer(true)} disabled={savingReviewer} className="flex-1 gap-1">{savingReviewer && <Loader2 className="h-4 w-4 animate-spin" />}Activate</Button><Button onClick={() => configureReviewer(false)} disabled={savingReviewer} variant="outline">Deactivate</Button></div>
+            </div>
+            {reviewerWorkload && reviewerWorkload.length > 0 && <div className="mt-4 overflow-x-auto rounded-lg border"><table className="w-full min-w-[760px] text-left text-xs"><thead className="bg-muted"><tr>{["Reviewer", "Expertise", "Claims", "Verified", "Published", "Rejected", "Daily limit", "Status"].map((heading) => <th key={heading} className="px-3 py-2">{heading}</th>)}</tr></thead><tbody>{reviewerWorkload.map((reviewer) => <tr key={reviewer.user_id} className="border-t"><td className="px-3 py-2 font-medium">{reviewer.display_name}</td><td className="px-3 py-2">{reviewer.subjects.length ? reviewer.subjects.join(", ") : "All subjects"}{reviewer.curricula.length ? ` · ${reviewer.curricula.join(", ")}` : ""}</td><td className="px-3 py-2">{reviewer.active_claims}</td><td className="px-3 py-2">{reviewer.verified_today}</td><td className="px-3 py-2">{reviewer.published_today}</td><td className="px-3 py-2">{reviewer.rejected_today}</td><td className="px-3 py-2">{reviewer.daily_review_limit}</td><td className="px-3 py-2">{reviewer.active ? "Active" : "Inactive"}</td></tr>)}</tbody></table></div>}
+          </div>
+        )}
+
+        {/* CSV imports are an administrator-only content operation. */}
+        {isAdmin && <CSVImport />}
 
         {/* Filters */}
         <div className="stem-card mb-6 rounded-xl p-4">
@@ -456,12 +561,12 @@ export default function AdminQuestions() {
                             <Eye className="h-4 w-4" />
                           </button>
                         )}
-                        <button onClick={() => startEdit(q)} className="rounded p-1.5 text-muted-foreground hover:text-primary">
+                        {isAdmin && <button onClick={() => startEdit(q)} className="rounded p-1.5 text-muted-foreground hover:text-primary">
                           <Edit3 className="h-4 w-4" />
-                        </button>
-                        <button onClick={() => archiveQuestion(q.id)} className="rounded p-1.5 text-muted-foreground hover:text-destructive" title="Archive question" aria-label="Archive question">
+                        </button>}
+                        {isAdmin && <button onClick={() => archiveQuestion(q.id)} className="rounded p-1.5 text-muted-foreground hover:text-destructive" title="Archive question" aria-label="Archive question">
                           <Archive className="h-4 w-4" />
-                        </button>
+                        </button>}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
