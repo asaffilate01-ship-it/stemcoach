@@ -33,6 +33,7 @@ export function useUserRole() {
     roles,
     loading,
     isAdmin: roles.includes("admin"),
+    isReviewer: roles.includes("reviewer"),
     isTeacher: roles.includes("teacher"),
     isParent: roles.includes("parent"),
     isStudent: roles.includes("student"),

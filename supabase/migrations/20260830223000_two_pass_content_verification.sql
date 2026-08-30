@@ -178,8 +178,8 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Admin role required' USING ERRCODE = '42501';
+  IF NOT public.can_review_questions(auth.uid()) THEN
+    RAISE EXCEPTION 'Content reviewer role required' USING ERRCODE = '42501';
   END IF;
 
   UPDATE public.questions
@@ -201,8 +201,8 @@ AS $$
 DECLARE
   claimed public.questions%ROWTYPE;
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Admin role required' USING ERRCODE = '42501';
+  IF NOT public.can_review_questions(auth.uid()) THEN
+    RAISE EXCEPTION 'Content reviewer role required' USING ERRCODE = '42501';
   END IF;
 
   UPDATE public.questions
@@ -249,8 +249,8 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Admin role required' USING ERRCODE = '42501';
+  IF NOT public.can_review_questions(auth.uid()) THEN
+    RAISE EXCEPTION 'Content reviewer role required' USING ERRCODE = '42501';
   END IF;
 
   RETURN QUERY
@@ -318,8 +318,8 @@ DECLARE
   clean_notes text := left(nullif(trim(_notes), ''), 4000);
   event_action text;
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Admin role required' USING ERRCODE = '42501';
+  IF NOT public.can_review_questions(auth.uid()) THEN
+    RAISE EXCEPTION 'Content reviewer role required' USING ERRCODE = '42501';
   END IF;
   IF _decision NOT IN ('published', 'rejected', 'needs_review', 'archived') THEN
     RAISE EXCEPTION 'Unsupported review decision' USING ERRCODE = '22023';
@@ -441,8 +441,8 @@ STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Admin role required' USING ERRCODE = '42501';
+  IF NOT public.can_review_questions(auth.uid()) THEN
+    RAISE EXCEPTION 'Content reviewer role required' USING ERRCODE = '42501';
   END IF;
   RETURN jsonb_build_object(
     'needs_review', (SELECT count(*) FROM public.questions WHERE review_status = 'needs_review'),
@@ -478,8 +478,8 @@ STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Admin role required' USING ERRCODE = '42501';
+  IF NOT public.can_review_questions(auth.uid()) THEN
+    RAISE EXCEPTION 'Content reviewer role required' USING ERRCODE = '42501';
   END IF;
 
   RETURN QUERY
