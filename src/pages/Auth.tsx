@@ -127,7 +127,7 @@ export default function Auth() {
         <div className="relative z-10 max-w-md px-12 text-primary-foreground">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <div className="mb-8 flex items-center gap-3">
-              <img src="/assets/coach-stem.png" alt="Coach Stem" className="h-12 w-12 rounded-2xl object-cover shadow-lg shadow-black/20 ring-2 ring-white/20" />
+              <img src="/assets/coach-stem.png" alt="STEMCoach" className="h-12 w-12 rounded-2xl object-cover shadow-lg shadow-black/20 ring-2 ring-white/20" />
               <span className="text-2xl font-bold tracking-tight">
                 STEM<span className="opacity-80">Coach</span>
               </span>
@@ -174,7 +174,7 @@ export default function Auth() {
         >
           {/* Mobile logo */}
           <div className="mb-8 text-center lg:hidden">
-            <img src="/assets/coach-stem.png" alt="Coach Stem" className="mx-auto mb-4 h-14 w-14 rounded-2xl object-cover shadow-lg shadow-primary/25 ring-2 ring-primary/20" />
+            <img src="/assets/coach-stem.png" alt="STEMCoach" className="mx-auto mb-4 h-14 w-14 rounded-2xl object-cover shadow-lg shadow-primary/25 ring-2 ring-primary/20" />
             <h1 className="stem-heading text-3xl">STEMCoach</h1>
           </div>
 

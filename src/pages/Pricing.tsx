@@ -11,23 +11,22 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 
 const packIcons: Record<PackKey, typeof Zap> = {
   standard: Package,
   topup: Plus,
 };
 
-const faqs = [
-  { q: "How does question allocation work?", a: "Your 5,000 questions are split evenly across the subjects and levels you choose after purchase." },
-  { q: "Can I add more subjects later?", a: "Yes! Buy a Top-Up pack to add 1,000 more questions and 5 mock exams to new or existing subjects." },
-  { q: "Is this a subscription?", a: "No! Pay only when you need more questions. No recurring charges, no auto-renewals — your credits never expire." },
-  { q: "Can I share my account?", a: "Each account allows one active login at a time. Logging in elsewhere will sign out the other device." },
-  { q: "What do I get for free?", a: `You get ${FREE_QUESTIONS_PER_SUBJECT} free questions per subject to try before purchasing. Full tutorial explanations included.` },
-  { q: "What is STEMCoach coaching?", a: "When you're stuck on a question, STEMCoach explains the concept step-by-step — like having a private tutor on demand." },
-];
+const faqIds = [1, 2, 3, 4, 5, 6] as const;
+const featureIds: Record<PackKey, readonly number[]> = {
+  standard: [1, 2, 3, 4, 5, 6, 7, 8],
+  topup: [1, 2, 3, 4, 5],
+};
 
 export default function Pricing() {
-  useDocumentTitle("Pricing");
+  const { t } = useTranslation();
+  useDocumentTitle(t("pricingPage.title"));
   const { user } = useAuth();
   const { checkout, loading } = useSubscription();
   const { region, setRegion, loading: geoLoading } = useGeoRegion();
@@ -45,8 +44,8 @@ export default function Pricing() {
 
     try {
       await checkout(priceId, key, pack.questions);
-    } catch (e) {
-      toast({ title: "Error", description: "Could not start checkout. Please try again.", variant: "destructive" });
+    } catch {
+      toast({ title: t("pricingPage.errorTitle"), description: t("pricingPage.errorDescription"), variant: "destructive" });
     }
   };
 
@@ -64,26 +63,26 @@ export default function Pricing() {
               transition={{ duration: 0.5 }}
             >
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Zap className="h-3.5 w-3.5" /> No Subscription · Pay As You Go
+                <Zap className="h-3.5 w-3.5" /> {t("pricingPage.badge")}
               </div>
               <h1 className="stem-section-heading mb-4">
-                Buy what you need,{" "}
-                <span className="stem-gradient-text">keep it forever</span>
+                {t("pricingPage.headingPrefix")}{" "}
+                <span className="stem-gradient-text">{t("pricingPage.headingAccent")}</span>
               </h1>
               <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-                No subscriptions, no recurring fees. Purchase question packs and top up whenever you need more.
+                {t("pricingPage.intro")}
               </p>
 
               {/* Free tier callout */}
               <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--success)/0.3)] bg-[hsl(var(--success)/0.05)] px-4 py-2 text-sm font-medium text-[hsl(var(--success))]">
                 <Gift className="h-4 w-4" />
-                Try {FREE_QUESTIONS_PER_SUBJECT} free questions per subject — no payment required
+                {t("pricingPage.freeCallout", { count: FREE_QUESTIONS_PER_SUBJECT })}
               </div>
 
               {!geoLoading && (
                 <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Globe className="h-4 w-4" />
-                  <span>Showing prices for {regionLabels[region]}</span>
+                  <span>{t("pricingPage.showingPrices", { region: regionLabels[region] })}</span>
                 </div>
               )}
             </motion.div>
@@ -113,7 +112,7 @@ export default function Pricing() {
                   >
                     {isMain && (
                       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/30">
-                        Best Value
+                        {t("pricingPage.bestValue")}
                       </div>
                     )}
 
@@ -124,23 +123,23 @@ export default function Pricing() {
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold">{pack.name}</h3>
+                        <h3 className="text-lg font-bold">{t(`pricingPage.pack.${key}.name`)}</h3>
                         <p className="text-xs text-muted-foreground">
-                          {pack.questions.toLocaleString()} questions · {pack.mock_exams} mock exams
+                          {t("pricingPage.questionsAndExams", { questions: pack.questions.toLocaleString(), exams: pack.mock_exams })}
                         </p>
                       </div>
                     </div>
 
                     <div className="mb-6">
                       <span className="text-4xl font-extrabold tracking-tight">{regionalPrice.price}</span>
-                      <span className="ml-2 text-sm text-muted-foreground">{isMain ? "no subscription" : "per top-up"}</span>
+                      <span className="ml-2 text-sm text-muted-foreground">{t(isMain ? "pricingPage.noSubscription" : "pricingPage.perTopup")}</span>
                     </div>
 
                     <ul className="mb-8 space-y-3">
-                      {pack.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2.5 text-sm">
+                      {featureIds[key].map((featureId) => (
+                        <li key={featureId} className="flex items-start gap-2.5 text-sm">
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span className="text-muted-foreground">{f}</span>
+                          <span className="text-muted-foreground">{t(`pricingPage.pack.${key}.feature${featureId}`)}</span>
                         </li>
                       ))}
                     </ul>
@@ -155,7 +154,7 @@ export default function Pricing() {
                       onClick={() => handleSelect(key)}
                       disabled={loading || geoLoading}
                     >
-                      {user ? "Buy Now" : "Sign in to purchase"}
+                      {t(user ? "pricingPage.buyNow" : "pricingPage.signInToPurchase")}
                       {isMain && <ArrowRight className="h-4 w-4" />}
                     </Button>
                   </motion.div>
@@ -170,23 +169,23 @@ export default function Pricing() {
               transition={{ delay: 0.3 }}
               className="mx-auto mt-10 max-w-2xl rounded-xl border border-primary/10 bg-primary/5 p-6"
             >
-              <h3 className="mb-3 text-center text-sm font-bold text-primary">How It Works</h3>
+              <h3 className="mb-3 text-center text-sm font-bold text-primary">{t("pricingPage.howItWorks")}</h3>
               <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Try free</strong> → {FREE_QUESTIONS_PER_SUBJECT} questions per subject, no card needed</span>
+                  <span><strong className="text-foreground">{t("pricingPage.tryFreeTitle")}</strong> → {t("pricingPage.tryFreeText", { count: FREE_QUESTIONS_PER_SUBJECT })}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">5,000 questions</strong> → Split across your chosen subjects & levels</span>
+                  <span><strong className="text-foreground">{t("pricingPage.standardTitle")}</strong> → {t("pricingPage.standardText")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">Need more?</strong> → Buy Top-Up for 1,000 extra questions + 5 exams</span>
+                  <span><strong className="text-foreground">{t("pricingPage.topupTitle")}</strong> → {t("pricingPage.topupText")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Zap className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <span><strong className="text-foreground">No subscription</strong> → Buy credits, keep them forever, top up anytime</span>
+                  <span><strong className="text-foreground">{t("pricingPage.noSubscriptionTitle")}</strong> → {t("pricingPage.noSubscriptionText")}</span>
                 </div>
               </div>
             </motion.div>
@@ -198,7 +197,7 @@ export default function Pricing() {
               className="mx-auto mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground"
             >
               <Shield className="h-4 w-4" />
-              <span>Payments secured by Stripe · 256-bit SSL encryption</span>
+              <span>{t("pricingPage.paymentSecurity")}</span>
             </motion.div>
           </div>
         </section>
@@ -207,20 +206,20 @@ export default function Pricing() {
         <section className="border-t py-16 md:py-20">
           <div className="container mx-auto px-4">
             <div className="mb-10 text-center">
-              <h2 className="stem-section-heading text-2xl md:text-3xl">Frequently Asked Questions</h2>
+              <h2 className="stem-section-heading text-2xl md:text-3xl">{t("pricingPage.faqTitle")}</h2>
             </div>
             <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-              {faqs.map((faq, i) => (
+              {faqIds.map((faqId, i) => (
                 <motion.div
-                  key={faq.q}
+                  key={faqId}
                   initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
                   className="stem-card rounded-xl p-5"
                 >
-                  <h4 className="mb-2 text-sm font-semibold text-foreground">{faq.q}</h4>
-                  <p className="text-sm text-muted-foreground">{faq.a}</p>
+                  <h4 className="mb-2 text-sm font-semibold text-foreground">{t(`pricingPage.faq${faqId}q`)}</h4>
+                  <p className="text-sm text-muted-foreground">{t(`pricingPage.faq${faqId}a`, { count: FREE_QUESTIONS_PER_SUBJECT })}</p>
                 </motion.div>
               ))}
             </div>

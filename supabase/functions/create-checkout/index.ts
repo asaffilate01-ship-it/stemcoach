@@ -1,13 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@17.7.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { corsHeadersFor, grantForPrice, requestAppOrigin } from "../_shared/productCatalog.ts";
 
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
@@ -25,8 +22,14 @@ serve(async (req) => {
     if (userError || !userData.user?.email) throw new Error("User not authenticated");
     const user = userData.user;
 
-    const { priceId, packType, questionsGranted } = await req.json();
-    if (!priceId || typeof priceId !== "string") throw new Error("Valid priceId is required");
+    const { priceId } = await req.json();
+    const grant = grantForPrice(priceId);
+    if (!grant) {
+      return new Response(JSON.stringify({ error: "Unsupported product price" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("Stripe not configured");
@@ -36,19 +39,17 @@ serve(async (req) => {
     let customerId: string | undefined;
     if (customers.data.length > 0) customerId = customers.data[0].id;
 
-    const origin = req.headers.get("origin") || "https://stemcoach.app";
+    const origin = requestAppOrigin(req);
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "payment",
-      success_url: `${origin}/select-subjects?checkout=success`,
+      success_url: `${origin}/select-subjects?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing?checkout=cancelled`,
       metadata: {
         user_id: user.id,
-        pack_type: packType || "standard",
-        questions_granted: String(questionsGranted || 5000),
       },
     });
 

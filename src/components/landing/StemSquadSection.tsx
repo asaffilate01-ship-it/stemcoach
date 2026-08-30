@@ -37,7 +37,7 @@ export function StemSquadSection() {
           >
               <img
                 src={coach.image}
-                alt="Coach Stem — leader of the STEM Squad"
+                alt="STEMCoach — leader of the STEM Squad"
                 className="h-full w-full object-contain p-1"
               />
           </motion.div>

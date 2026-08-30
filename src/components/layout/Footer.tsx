@@ -36,7 +36,7 @@ export function Footer() {
             <div className="flex items-center gap-2.5 mb-4">
               <img
                 src="/assets/coach-stem.png"
-                alt="Coach Stem"
+                alt="STEMCoach"
                 className="h-9 w-9 rounded-xl object-cover shadow-md shadow-primary/20"
               />
               <span className="text-lg font-bold tracking-tight text-foreground">

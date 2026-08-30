@@ -45,7 +45,7 @@ export default function MeetTheSquad() {
             </div>
           </motion.div>
 
-          {/* Coach Stem - Leader card */}
+          {/* STEMCoach - Leader card */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

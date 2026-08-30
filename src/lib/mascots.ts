@@ -1,3 +1,5 @@
+import { MASCOT_IDENTITIES, STEMCOACH_IDENTITY } from "../../supabase/functions/_shared/mascotCatalog";
+
 /** Map of subject id → mascot image path, name, and personality */
 export interface MascotInfo {
   image: string;
@@ -14,9 +16,7 @@ export interface MascotInfo {
 
 const mascotMap = {
   mathematics: {
-    image: "/assets/mathmax.png",
-    name: "MathMax",
-    emoji: "🧮",
+    ...MASCOT_IDENTITIES.mathematics,
     personality: "The Problem Solver",
     bio: "MathMax loves numbers and patterns. He can break down even the toughest equations into simple steps. Fast, logical, and precise — he'll help you master maths with confidence and speed.",
     catchphrase: "I'll show you the fastest way.",
@@ -31,9 +31,7 @@ const mascotMap = {
     cheerMessage: "Your maths skills are adding up! 🎉",
   },
   physics: {
-    image: "/assets/physix.png",
-    name: "PhysiX",
-    emoji: "⚡",
+    ...MASCOT_IDENTITIES.physics,
     personality: "The Explainer",
     bio: "PhysiX makes complex concepts feel simple. From forces to energy, he explains everything clearly and visually so you truly understand how the world works.",
     catchphrase: "Let's break this down simply.",
@@ -48,9 +46,7 @@ const mascotMap = {
     cheerMessage: "You're an unstoppable force! ⚡",
   },
   chemistry: {
-    image: "/assets/chemi.png",
-    name: "Chemi",
-    emoji: "🧪",
+    ...MASCOT_IDENTITIES.chemistry,
     personality: "The Experimenter",
     bio: "Chemi brings reactions to life. She helps you understand formulas, elements, and experiments with fun and clarity — making chemistry exciting and easy to remember.",
     catchphrase: "Let's test it!",
@@ -65,9 +61,7 @@ const mascotMap = {
     cheerMessage: "You've got perfect chemistry with this subject! 🧪",
   },
   biology: {
-    image: "/assets/biobee.png",
-    name: "BioBee",
-    emoji: "🌿",
+    ...MASCOT_IDENTITIES.biology,
     personality: "The Explorer",
     bio: "BioBee explores the living world — from cells to ecosystems. She helps you understand how life works with curiosity and real-world connections.",
     catchphrase: "Let's see how it works.",
@@ -82,9 +76,7 @@ const mascotMap = {
     cheerMessage: "You're buzzing through biology! 🌿",
   },
   "computer-science": {
-    image: "/assets/codey.png",
-    name: "Codey",
-    emoji: "💻",
+    ...MASCOT_IDENTITIES["computer-science"],
     personality: "The Builder",
     bio: "Codey turns ideas into reality through code. Whether it's logic, programming, or systems, he helps you think like a developer and solve problems step by step.",
     catchphrase: "Let's crack this code.",
@@ -99,9 +91,7 @@ const mascotMap = {
     cheerMessage: "Your code is compiling perfectly! 💻",
   },
   ielts: {
-    image: "/assets/lexi.png",
-    name: "Lexi",
-    emoji: "🌍",
+    ...MASCOT_IDENTITIES.ielts,
     personality: "The Communicator",
     bio: "Lexi helps you express yourself clearly and confidently. From essays to speaking skills, she makes language simple, powerful, and effective.",
     catchphrase: "Let's express it perfectly.",
@@ -116,9 +106,7 @@ const mascotMap = {
     cheerMessage: "Your language skills are eloquent! 🌍",
   },
   celta: {
-    image: "/assets/lexi.png",
-    name: "Lexi",
-    emoji: "🌍",
+    ...MASCOT_IDENTITIES.celta,
     personality: "The Communicator",
     bio: "Lexi also coaches future teachers! From lesson planning to classroom management, she knows exactly what it takes to become an outstanding English language teacher.",
     catchphrase: "Let's express it perfectly.",
@@ -133,9 +121,7 @@ const mascotMap = {
     cheerMessage: "You're becoming an amazing teacher! 🎓",
   },
   economics: {
-    image: "/assets/econiq.png",
-    name: "EconiQ",
-    emoji: "📈",
+    ...MASCOT_IDENTITIES.economics,
     personality: "The Strategist",
     bio: "EconiQ understands how money, markets, and systems work. He helps you think critically about supply, demand, and real-world economics with clarity and insight.",
     catchphrase: "Let's understand the system.",
@@ -145,9 +131,7 @@ const mascotMap = {
     cheerMessage: "Your economic understanding is booming! 📈",
   },
   "english-literature": {
-    image: "/assets/litera.png",
-    name: "Litera",
-    emoji: "📚",
+    ...MASCOT_IDENTITIES["english-literature"],
     personality: "The Storyteller",
     bio: "Litera brings stories, poetry, and texts to life. She helps you understand themes, characters, and meaning in a way that makes literature engaging and powerful.",
     catchphrase: "Let's explore the meaning.",
@@ -157,9 +141,7 @@ const mascotMap = {
     cheerMessage: "Your analytical skills are truly poetic! 📚",
   },
   psychology: {
-    image: "/assets/psyche.png",
-    name: "Psyche",
-    emoji: "🧠",
+    ...MASCOT_IDENTITIES.psychology,
     personality: "The Thinker",
     bio: "Psyche helps you understand how the mind works — from behaviour to emotions. She breaks down complex theories into simple ideas you can relate to.",
     catchphrase: "Let's understand how we think.",
@@ -169,9 +151,7 @@ const mascotMap = {
     cheerMessage: "Your psychological insight is remarkable! 🧠",
   },
   geography: {
-    image: "/assets/geo.png",
-    name: "Geo",
-    emoji: "🌎",
+    ...MASCOT_IDENTITIES.geography,
     personality: "The Explorer",
     bio: "Geo takes you around the world — from landscapes to climate systems. He connects what you learn to real-world environments and global issues.",
     catchphrase: "Let's explore the world.",
@@ -181,9 +161,7 @@ const mascotMap = {
     cheerMessage: "You're mapping your way to success! 🌎",
   },
   "business-studies": {
-    image: "/assets/bizpro.png",
-    name: "BizPro",
-    emoji: "💼",
+    ...MASCOT_IDENTITIES["business-studies"],
     personality: "The Entrepreneur",
     bio: "BizPro is all about ideas, growth, and success. He teaches you how businesses work — from startups to global companies — and how to think like a leader.",
     catchphrase: "Let's build something big.",
@@ -193,9 +171,7 @@ const mascotMap = {
     cheerMessage: "You're a business mastermind! 💼",
   },
   french: {
-    image: "/assets/francois.png",
-    name: "François",
-    emoji: "🇫🇷",
+    ...MASCOT_IDENTITIES.french,
     personality: "The Artiste",
     bio: "François brings the beauty of French language and culture to life. From grammar to literature, he helps you express yourself with elegance, precision, and a touch of Parisian flair.",
     catchphrase: "Allons-y — let's master it with style.",
@@ -210,9 +186,7 @@ const mascotMap = {
     cheerMessage: "Ton français est magnifique! 🇫🇷",
   },
   german: {
-    image: "/assets/hans.png",
-    name: "Hans",
-    emoji: "🇩🇪",
+    ...MASCOT_IDENTITIES.german,
     personality: "The Engineer",
     bio: "Hans approaches German with structure and precision. From grammar cases to essay writing, he breaks down the language systematically so you can build fluency with confidence.",
     catchphrase: "Schritt für Schritt — step by step to fluency.",
@@ -232,9 +206,7 @@ export type CoachId = "stemcoach" | keyof typeof mascotMap;
 export const DEFAULT_COACH_ID: CoachId = "stemcoach";
 
 const coachStem: MascotInfo = {
-  image: "/assets/coach-stem.png",
-  name: "STEMCoach",
-  emoji: "👨‍🏫",
+  ...STEMCOACH_IDENTITY,
   personality: "The Mentor",
   bio: "STEMCoach is your ultimate guide — calm, intelligent, and always one step ahead. With years of knowledge across every subject, he helps you build the right strategy, stay focused, and succeed in exams. Whether you're stuck or aiming for top grades, STEMCoach keeps you on track.",
   catchphrase: "Let's get you exam-ready.",
