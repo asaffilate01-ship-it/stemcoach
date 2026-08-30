@@ -899,6 +899,8 @@ export type Database = {
       }
       questions: {
         Row: {
+          academic_verified_at: string | null
+          academic_verified_by: string | null
           allow_multiple_answers: boolean
           boards: string[]
           command_word: string | null
@@ -925,6 +927,7 @@ export type Database = {
           review_claimed_at: string | null
           review_claimed_by: string | null
           review_notes: string | null
+          review_revision: number
           review_status: string
           reviewed_at: string | null
           reviewed_by: string | null
@@ -937,6 +940,8 @@ export type Database = {
           worked_solution: string
         }
         Insert: {
+          academic_verified_at?: string | null
+          academic_verified_by?: string | null
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
@@ -963,6 +968,7 @@ export type Database = {
           review_claimed_at?: string | null
           review_claimed_by?: string | null
           review_notes?: string | null
+          review_revision?: number
           review_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -975,6 +981,8 @@ export type Database = {
           worked_solution?: string
         }
         Update: {
+          academic_verified_at?: string | null
+          academic_verified_by?: string | null
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
@@ -1001,6 +1009,7 @@ export type Database = {
           review_claimed_at?: string | null
           review_claimed_by?: string | null
           review_notes?: string | null
+          review_revision?: number
           review_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1611,6 +1620,8 @@ export type Database = {
       claim_question_review_batch: {
         Args: { _curriculum?: string; _limit?: number; _subject?: string }
         Returns: {
+          academic_verified_at: string | null
+          academic_verified_by: string | null
           allow_multiple_answers: boolean
           boards: string[]
           command_word: string | null
@@ -1637,6 +1648,7 @@ export type Database = {
           review_claimed_at: string | null
           review_claimed_by: string | null
           review_notes: string | null
+          review_revision: number
           review_status: string
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1662,6 +1674,22 @@ export type Database = {
       create_flashcards_from_mistakes: {
         Args: { _limit?: number }
         Returns: number
+      }
+      get_content_quality_matrix: {
+        Args: never
+        Returns: {
+          awaiting_first_review: number
+          awaiting_second_review: number
+          curriculum: string
+          flagged_questions: number
+          missing_source: number
+          missing_specification: number
+          publication_pct: number
+          published_questions: number
+          rejected_questions: number
+          subject: string
+          total_questions: number
+        }[]
       }
       get_daily_challenge_leaderboard: {
         Args: { _challenge_id: string }
@@ -1817,6 +1845,10 @@ export type Database = {
       }
       release_question_review: {
         Args: { _notes?: string; _question_id: string }
+        Returns: boolean
+      }
+      renew_question_review: {
+        Args: { _question_id: string }
         Returns: boolean
       }
       review_question_decision: {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, Archive, Edit3, Save, X, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert, Eye, Ban, ClipboardCheck, Loader2, RotateCcw, History } from "lucide-react";
+import { Search, Archive, Edit3, Save, X, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert, Eye, Ban, ClipboardCheck, Loader2, RotateCcw, History, ShieldCheck, Users } from "lucide-react";
 import { CSVImport } from "@/components/admin/CSVImport";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,9 +60,32 @@ export default function AdminQuestions() {
     queryFn: async () => {
       const { data, error } = await (supabase.rpc as any)("get_review_queue_metrics");
       if (error) throw error;
-      return data as { needs_review: number; unclaimed: number; claimed_by_me: number; published: number; rejected: number; reviewed_today: number };
+      return data as { needs_review: number; awaiting_first_review: number; awaiting_second_review: number; unclaimed: number; claimed_by_me: number; published: number; rejected: number; reviewed_today: number };
     },
-    refetchInterval: 15_000,
+    refetchInterval: 60_000,
+  });
+
+  const { data: qualityMatrix } = useQuery({
+    queryKey: ["content-quality-matrix"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.rpc as any)("get_content_quality_matrix");
+      if (error) throw error;
+      return (data || []) as Array<{
+        curriculum: string;
+        subject: string;
+        total_questions: number;
+        awaiting_first_review: number;
+        awaiting_second_review: number;
+        published_questions: number;
+        rejected_questions: number;
+        flagged_questions: number;
+        missing_source: number;
+        missing_specification: number;
+        publication_pct: number;
+      }>;
+    },
+    staleTime: 300_000,
+    refetchInterval: 300_000,
   });
 
   const { data: reviewHistory } = useQuery({
@@ -100,7 +123,7 @@ export default function AdminQuestions() {
     if (!editingId) return;
     const { error } = await supabase
       .from("questions")
-      .update({ ...editData, review_status: "needs_review", reviewed_at: null, reviewed_by: null, review_claimed_by: null, review_claimed_at: null })
+      .update(editData)
       .eq("id", editingId);
     if (error) {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });
@@ -115,6 +138,26 @@ export default function AdminQuestions() {
     queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
     queryClient.invalidateQueries({ queryKey: ["review-queue-metrics"] });
   };
+
+  useEffect(() => {
+    if (!reviewQuestion?.id) return;
+
+    const timer = window.setInterval(() => {
+      void (async () => {
+        const { data, error } = await (supabase.rpc as any)("renew_question_review", { _question_id: reviewQuestion.id });
+        if (error || !data) {
+          setReviewQuestion(null);
+          setReviewAttested(false);
+          setReviewNotes("");
+          toast({ title: "Review claim expired", description: "The question returned to the queue or was claimed by another reviewer.", variant: "destructive" });
+          queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
+          queryClient.invalidateQueries({ queryKey: ["review-queue-metrics"] });
+        }
+      })();
+    }, 10 * 60 * 1000);
+
+    return () => window.clearInterval(timer);
+  }, [queryClient, reviewQuestion?.id, toast]);
 
   const openReview = async (question: any) => {
     const { data, error } = await (supabase.rpc as any)("claim_question_review", { _question_id: question.id });
@@ -141,7 +184,7 @@ export default function AdminQuestions() {
       toast({ title: "Review failed", description: error.message, variant: "destructive" });
       return;
     }
-    const outcome = result as { success: boolean; error?: string; flags?: string[] };
+    const outcome = result as { success: boolean; decision?: string; requires_second_review?: boolean; error?: string; flags?: string[] };
     if (!outcome.success) {
       toast({
         title: "Question needs more work",
@@ -150,7 +193,16 @@ export default function AdminQuestions() {
       });
       return;
     }
-    toast({ title: decision === "published" ? "Question reviewed and published" : decision === "rejected" ? "Question rejected with audit notes" : "Question returned to the review queue" });
+    toast({
+      title: outcome.requires_second_review
+        ? "First academic review complete"
+        : decision === "published"
+          ? "Independently reviewed and published"
+          : decision === "rejected"
+            ? "Question rejected with audit notes"
+            : "Question returned to the review queue",
+      description: outcome.requires_second_review ? "A different reviewer must complete the second pass before learners can see it." : undefined,
+    });
     setReviewQuestion(null);
     setReviewAttested(false);
     setReviewNotes("");
@@ -215,9 +267,11 @@ export default function AdminQuestions() {
           </p>
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
           {[
             ["Needs review", reviewMetrics?.needs_review || 0],
+            ["First pass", reviewMetrics?.awaiting_first_review || 0],
+            ["Second pass", reviewMetrics?.awaiting_second_review || 0],
             ["Unclaimed", reviewMetrics?.unclaimed || 0],
             ["Assigned to me", reviewMetrics?.claimed_by_me || 0],
             ["Reviewed today", reviewMetrics?.reviewed_today || 0],
@@ -229,6 +283,41 @@ export default function AdminQuestions() {
               <div className="stem-label">{label}</div>
             </div>
           ))}
+        </div>
+
+        <div className="stem-card mb-6 rounded-xl p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 font-semibold"><ShieldCheck className="h-4 w-4 text-primary" />Curriculum quality matrix</h2>
+              <p className="mt-1 text-xs text-muted-foreground">Largest review backlogs first. Publication requires two independent academic reviewers. Metrics refresh every five minutes.</p>
+            </div>
+            <span className="text-xs text-muted-foreground">{(qualityMatrix?.length || 0).toLocaleString()} curriculum/subject groups</span>
+          </div>
+          <div className="max-h-80 overflow-auto rounded-lg border">
+            <table className="w-full min-w-[900px] text-left text-xs">
+              <thead className="sticky top-0 bg-muted">
+                <tr>
+                  {["Curriculum", "Subject", "Total", "First pass", "Second pass", "Published", "Rejected", "Flags", "Missing source/spec", "Published %"].map((heading) => <th key={heading} className="px-3 py-2 font-semibold">{heading}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {(qualityMatrix || []).map((row) => (
+                  <tr key={`${row.curriculum}:${row.subject}`} className="border-t">
+                    <td className="px-3 py-2 font-medium">{row.curriculum}</td>
+                    <td className="px-3 py-2">{row.subject}</td>
+                    <td className="px-3 py-2">{Number(row.total_questions).toLocaleString()}</td>
+                    <td className="px-3 py-2">{Number(row.awaiting_first_review).toLocaleString()}</td>
+                    <td className="px-3 py-2">{Number(row.awaiting_second_review).toLocaleString()}</td>
+                    <td className="px-3 py-2 text-emerald-700">{Number(row.published_questions).toLocaleString()}</td>
+                    <td className="px-3 py-2">{Number(row.rejected_questions).toLocaleString()}</td>
+                    <td className={`px-3 py-2 ${Number(row.flagged_questions) > 0 ? "text-destructive" : ""}`}>{Number(row.flagged_questions).toLocaleString()}</td>
+                    <td className={`px-3 py-2 ${Number(row.missing_source) + Number(row.missing_specification) > 0 ? "text-amber-700" : ""}`}>{Number(row.missing_source).toLocaleString()} / {Number(row.missing_specification).toLocaleString()}</td>
+                    <td className="px-3 py-2 font-semibold">{Number(row.publication_pct).toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* CSV Import */}
@@ -388,6 +477,7 @@ export default function AdminQuestions() {
                         {q.review_status || "needs_review"}
                       </span>
                       {q.review_claimed_by && <span className={`rounded px-2 py-0.5 text-[10px] font-semibold ${q.review_claimed_by === user?.id ? "bg-blue-500/10 text-blue-700" : "bg-muted text-muted-foreground"}`}>{q.review_claimed_by === user?.id ? "assigned to me" : "claimed"}</span>}
+                      {q.academic_verified_by && <span className="inline-flex items-center gap-1 rounded bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-700"><Users className="h-3 w-3" />first pass verified</span>}
                     </div>
                   </div>
                 )}
@@ -430,6 +520,10 @@ export default function AdminQuestions() {
               <DialogDescription>Verify the curriculum fit, calculation, answer, distractors and teaching explanation before publication.</DialogDescription>
             </DialogHeader>
             {reviewQuestion && <div className="space-y-5 text-sm">
+              <div className={`rounded-xl border p-3 ${reviewQuestion.academic_verified_by ? "border-violet-500/30 bg-violet-500/5" : "border-primary/20 bg-primary/5"}`}>
+                <p className="flex items-center gap-2 font-semibold">{reviewQuestion.academic_verified_by ? <Users className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}{reviewQuestion.academic_verified_by ? "Second independent review" : "First academic review"}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{reviewQuestion.academic_verified_by ? `The first pass was completed ${reviewQuestion.academic_verified_at ? new Date(reviewQuestion.academic_verified_at).toLocaleString() : "previously"}. Confirm it independently before publication.` : "A second, different reviewer will be required after this verification."}</p>
+              </div>
               <div className="flex flex-wrap gap-2">{[reviewQuestion.subject, reviewQuestion.curriculum, reviewQuestion.question_type, `Difficulty ${reviewQuestion.difficulty}`, ...(reviewQuestion.boards || [])].map((label: string) => <span key={label} className="rounded bg-muted px-2 py-1 text-xs">{label}</span>)}</div>
               <section><h3 className="mb-1 font-semibold">Question</h3><p className="whitespace-pre-wrap leading-6">{reviewQuestion.question_text}</p></section>
               {Array.isArray(reviewQuestion.options) && <section><h3 className="mb-1 font-semibold">Options</h3><ol className="list-inside list-[upper-alpha] space-y-1">{reviewQuestion.options.map((option: string) => <li key={option}>{option}</li>)}</ol></section>}
@@ -442,14 +536,14 @@ export default function AdminQuestions() {
               {reviewQuestion.quality_flags?.length > 0 && <p className="rounded-xl bg-amber-500/10 p-3 text-amber-800 dark:text-amber-300">Flags: {reviewQuestion.quality_flags.join(", ")}</p>}
               {reviewHistory?.length > 0 && <section className="rounded-xl border p-4"><h3 className="mb-3 flex items-center gap-2 font-semibold"><History className="h-4 w-4" />Review history</h3><div className="space-y-2">{reviewHistory.map((event) => <div key={event.id} className="flex items-start justify-between gap-3 text-xs"><div><span className="font-semibold capitalize">{event.action}</span>{event.notes && <p className="mt-0.5 text-muted-foreground">{event.notes}</p>}</div><time className="shrink-0 text-muted-foreground" dateTime={event.created_at}>{new Date(event.created_at).toLocaleString()}</time></div>)}</div></section>}
               <label className="block"><span className="mb-1 block font-semibold">Reviewer notes</span><textarea value={reviewNotes} onChange={(event) => setReviewNotes(event.target.value)} maxLength={4000} rows={3} className="w-full rounded-xl border bg-background p-3 text-sm" placeholder="Record corrections, rejection reasons or verification notes for the audit history."/><span className="mt-1 block text-right text-[10px] text-muted-foreground">{reviewNotes.length}/4000</span></label>
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4"><input type="checkbox" checked={reviewAttested} onChange={(event) => setReviewAttested(event.target.checked)} className="mt-1 h-4 w-4"/><span><span className="block font-semibold">Academic verification complete</span><span className="text-xs leading-5 text-muted-foreground">I checked the answer, working, distractors, board mapping and exact current specification against the official source.</span></span></label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4"><input type="checkbox" checked={reviewAttested} onChange={(event) => setReviewAttested(event.target.checked)} className="mt-1 h-4 w-4"/><span><span className="block font-semibold">Independent academic verification complete</span><span className="text-xs leading-5 text-muted-foreground">I independently checked the answer, working, distractors, board mapping and exact current specification against the official source.</span></span></label>
             </div>}
             <DialogFooter className="flex-wrap gap-2 sm:gap-2">
               <Button variant="ghost" className="gap-2" onClick={releaseReview}><RotateCcw className="h-4 w-4" />Release claim</Button>
               <Button variant="outline" onClick={() => { setReviewQuestion(null); setReviewAttested(false); setReviewNotes(""); }}>Close</Button>
               <Button variant="outline" className="gap-2" onClick={() => decideReview("needs_review")}><RotateCcw className="h-4 w-4" />Return</Button>
               <Button variant="outline" disabled={reviewNotes.trim().length < 10} className="gap-2 border-destructive/30 text-destructive" onClick={() => decideReview("rejected")}><Ban className="h-4 w-4" />Reject</Button>
-              <Button className="gap-2" disabled={!reviewAttested} onClick={() => decideReview("published")}><CheckCircle2 className="h-4 w-4" />Approve and publish</Button>
+              <Button className="gap-2" disabled={!reviewAttested} onClick={() => decideReview("published")}><CheckCircle2 className="h-4 w-4" />{reviewQuestion?.academic_verified_by ? "Approve and publish" : "Complete first review"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
