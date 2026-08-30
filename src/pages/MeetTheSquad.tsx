@@ -8,9 +8,12 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Lightbulb, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import stemsquadImg from "@/assets/stemsquad-hero.png";
+import { useTranslation } from "react-i18next";
+import { normalizeLanguage } from "@/i18n/language";
 
 export default function MeetTheSquad() {
-  useDocumentTitle("Meet the STEM Squad");
+  const { t, i18n } = useTranslation();
+  useDocumentTitle(t("squad.documentTitle"));
   const navigate = useNavigate();
   const members = getSquadMembers();
   const coach = getCoachStem();
@@ -29,16 +32,15 @@ export default function MeetTheSquad() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_-20%,rgba(255,255,255,0.15),transparent_60%)]" />
             <div className="relative z-10">
               <h1 className="mb-3 text-3xl font-extrabold tracking-tight md:text-5xl">
-                Meet the STEM Squad
+                {t("squad.heroTitle")}
               </h1>
               <p className="mx-auto max-w-2xl text-sm opacity-80 md:text-base">
-                Your team of expert mascots, each specialising in a different subject.
-                They'll guide you, motivate you, and celebrate every milestone with you!
+                {t("squad.heroDescription")}
               </p>
               <div className="mt-8 flex justify-center">
                 <img
                   src={stemsquadImg}
-                  alt="The full STEM Squad team"
+                  alt={t("squad.teamAlt")}
                   className="max-h-32 w-auto md:max-h-48"
                 />
               </div>
@@ -57,7 +59,7 @@ export default function MeetTheSquad() {
                 <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
               </div>
               <div className="text-center md:text-left">
-                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">Squad Leader · {coach.personality}</div>
+                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">{t("squad.leader")} · {coach.personality}</div>
                 <h2 className="mb-2 text-2xl font-extrabold">{coach.name} {coach.emoji}</h2>
                 <p className="mb-2 text-sm italic text-primary/80">"{coach.catchphrase}"</p>
                 <div className="mb-3 flex flex-wrap items-center gap-1.5">
@@ -69,6 +71,10 @@ export default function MeetTheSquad() {
               </div>
             </div>
           </motion.div>
+
+          {normalizeLanguage(i18n.resolvedLanguage || i18n.language) !== "en" && (
+            <p className="mb-6 rounded-xl border bg-muted/30 px-4 py-3 text-center text-xs text-muted-foreground">{t("squad.contentLanguageNotice")}</p>
+          )}
 
           {/* Squad Members Grid */}
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -86,7 +92,11 @@ export default function MeetTheSquad() {
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-lg font-bold">{member.name} {member.emoji}</h3>
-                    <p className="text-xs font-medium text-primary/70">{member.personality}</p>
+                    <p className="text-xs font-medium text-primary/70">
+                      {member.subjectId === "ielts"
+                        ? `${t("subjects.names.ielts")} & ${t("subjects.names.celta")}`
+                        : t(`subjects.names.${member.subjectId}`)} · {member.personality}
+                    </p>
                   </div>
                 </div>
                 <div className="border-t border-border/30 px-5 py-4">
@@ -117,7 +127,7 @@ export default function MeetTheSquad() {
                     className="w-full gap-2 text-xs"
                     onClick={() => navigate(`/practice/${member.subjectId}`)}
                   >
-                    Study with {member.name} <ArrowRight className="h-3 w-3" />
+                    {t("squad.studyWith", { name: member.name })} <ArrowRight className="h-3 w-3" />
                   </Button>
                 </div>
               </motion.div>

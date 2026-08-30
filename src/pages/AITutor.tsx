@@ -5,7 +5,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target } from "lucide-react";
+import { BookOpen, Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
@@ -15,6 +15,7 @@ import { usePreferredCoach } from "@/hooks/usePreferredCoach";
 import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
 import { useTranslation } from "react-i18next";
 import { normalizeLanguage } from "@/i18n/language";
+import { tutorials } from "@/data/tutorials";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -35,11 +36,12 @@ export default function AITutor() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationLoading, setConversationLoading] = useState(false);
   const requestedSubject = searchParams.get("subject");
-  const initialSubject = requestedSubject && SUBJECT_IDS.includes(requestedSubject)
+  const requestedTutorial = tutorials.find((tutorial) => tutorial.id === searchParams.get("tutorial")) || null;
+  const initialSubject = requestedTutorial?.subject || (requestedSubject && SUBJECT_IDS.includes(requestedSubject)
     ? requestedSubject
     : preferredCoachId !== "stemcoach" && SUBJECT_IDS.includes(preferredCoachId)
       ? preferredCoachId
-      : "mathematics";
+      : "mathematics");
   const [subjectId, setSubjectId] = useState(initialSubject);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +49,7 @@ export default function AITutor() {
   const coach = getCoachStem();
   const subjectLabel = t(`subjects.names.${subjectId}`);
   const quickPrompts = [1, 2, 3].map((index) => t(`coach.prompts.${subjectId}.${index}`));
+  const activeTutorial = requestedTutorial?.subject === subjectId ? requestedTutorial : null;
 
   const conversationKey = `stemcoach:coach-thread:${user?.id || "guest"}:${subjectId}`;
 
@@ -152,6 +155,7 @@ export default function AITutor() {
           subject: subjectId,
           curriculum: curriculumId,
           language: normalizeLanguage(i18n.resolvedLanguage || i18n.language),
+          tutorialId: activeTutorial?.id,
         }),
       });
 
@@ -269,6 +273,19 @@ export default function AITutor() {
               </button>
             )}
           </div>
+
+          {activeTutorial && (
+            <div className="mb-3 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 sm:flex-row sm:items-center">
+              <BookOpen className="h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-primary">{t("coach.tutorialContext")}</p>
+                <p className="truncate text-sm font-semibold">{activeTutorial.title}</p>
+              </div>
+              <Button size="sm" variant="outline" disabled={isLoading} onClick={() => send(t("coach.tutorialPrompt", { title: activeTutorial.title }))}>
+                {t("coach.workThroughLesson")}
+              </Button>
+            </div>
+          )}
 
           {/* Chat area */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-xl border bg-card p-4 space-y-4" style={{ maxHeight: "calc(100vh - 260px)" }}>

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { findTutorialContext } from "../_shared/tutorialCatalog.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": Deno.env.get("APP_ORIGIN") || "https://stemcoach.app",
@@ -75,7 +76,29 @@ serve(async (req) => {
       });
     }
 
-    const { messages, subject: requestedSubject, curriculum: requestedCurriculum, language: requestedLanguage } = await req.json();
+    const { data: distributedRateAllowed, error: distributedRateError } = await supabase.rpc(
+      "consume_coach_rate_limit",
+      { _user_id: userData.user.id, _max_requests: 20, _window_seconds: 60 },
+    );
+    if (distributedRateError) {
+      console.error("Distributed coach rate limit failed:", distributedRateError.message);
+      return new Response(JSON.stringify({ error: "Coaching is temporarily unavailable" }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!distributedRateAllowed) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please slow down." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "30" },
+      });
+    }
+
+    const {
+      messages,
+      subject: requestedSubject,
+      curriculum: requestedCurriculum,
+      language: requestedLanguage,
+      tutorialId: requestedTutorialId,
+    } = await req.json();
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages array is required" }), {
@@ -97,6 +120,8 @@ serve(async (req) => {
       ? requestedSubject
       : "mathematics";
     const subjectLabel = SUBJECT_LABELS[subjectId];
+    const matchedTutorial = findTutorialContext(requestedTutorialId);
+    const tutorialContext = matchedTutorial?.subject === subjectId ? matchedTutorial : null;
     const responseLanguage = typeof requestedLanguage === "string" && requestedLanguage in RESPONSE_LANGUAGES
       ? RESPONSE_LANGUAGES[requestedLanguage]
       : RESPONSE_LANGUAGES.en;
@@ -152,11 +177,15 @@ serve(async (req) => {
     const learnerContext = weakTopics.length
       ? `Recent weak-topic evidence: ${weakTopics.join("; ")}. Use this only when relevant and never imply a diagnosis or certainty from limited attempt data.`
       : "No recent weak-topic evidence is available. Do not invent learner performance history.";
+    const lessonContext = tutorialContext
+      ? `The learner opened the reviewed STEMCoach tutorial “${tutorialContext.title}”. Use that lesson as context when relevant, but answer the learner's actual question and do not invent tutorial content that was not supplied.`
+      : "No tutorial context is active.";
 
     const systemPrompt = `You are STEMCoach — an expert, friendly tutor for a student studying ${subjectLabel} under curriculum identifier ${curriculum}.
 
 Learner context:
 ${learnerContext}
+${lessonContext}
 
 Your role:
 - Respond in ${responseLanguage}, unless the learner explicitly asks to practise or translate another language

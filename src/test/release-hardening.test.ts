@@ -67,4 +67,20 @@ describe("release hardening", () => {
     expect(studentClasses).toContain('"join_class_by_code"');
     expect(studentClasses).not.toContain('.from("class_members").insert');
   });
+
+  it("syncs tutorial continuity and enforces a distributed coach rate limit", () => {
+    const migration = source("supabase/migrations/20260831010000_tutorial_learning_continuity.sql");
+    const tutorialsPage = source("src/pages/Tutorials.tsx");
+    const tutorPage = source("src/pages/AITutor.tsx");
+    const coachFunction = source("supabase/functions/ai-chat/index.ts");
+    expect(migration).toContain("user_tutorial_progress");
+    expect(migration).toContain("sync_tutorial_completions");
+    expect(migration).toContain("consume_coach_rate_limit");
+    expect(migration).toContain("FROM PUBLIC, anon, authenticated");
+    expect(tutorialsPage).toContain('rpc("save_tutorial_progress"');
+    expect(tutorialsPage).toContain("&tutorial=");
+    expect(tutorPage).toContain("tutorialId: activeTutorial?.id");
+    expect(coachFunction).toContain('"consume_coach_rate_limit"');
+    expect(coachFunction).toContain("findTutorialContext");
+  });
 });

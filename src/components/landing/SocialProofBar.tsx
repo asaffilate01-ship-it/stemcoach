@@ -1,14 +1,16 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { getSquadMembers } from "@/lib/mascots";
 
 export function SocialProofBar() {
   const { t } = useTranslation();
+  const tutorCount = new Set(getSquadMembers().map((member) => member.name)).size + 1;
 
   const counters = [
     { value: "Reviewed", key: "landing.examQuestions" },
     { value: "Global", key: "landing.curriculaCovered" },
     { value: "14", key: "landing.subjects" },
-    { value: "14", key: "landing.aiMascotTutors" },
+    { value: String(tutorCount), key: "landing.aiMascotTutors" },
   ];
 
   return (
