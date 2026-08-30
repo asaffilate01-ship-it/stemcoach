@@ -1288,6 +1288,7 @@ export type Database = {
           id: string
           notification_prefs: Json
           onboarding_complete: boolean
+          preferred_language: string | null
           preferred_mascot: string
           subjects: string[]
           updated_at: string
@@ -1299,6 +1300,7 @@ export type Database = {
           id?: string
           notification_prefs?: Json
           onboarding_complete?: boolean
+          preferred_language?: string | null
           preferred_mascot?: string
           subjects?: string[]
           updated_at?: string
@@ -1310,6 +1312,7 @@ export type Database = {
           id?: string
           notification_prefs?: Json
           onboarding_complete?: boolean
+          preferred_language?: string | null
           preferred_mascot?: string
           subjects?: string[]
           updated_at?: string
