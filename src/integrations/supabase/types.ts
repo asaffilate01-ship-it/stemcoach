@@ -1031,6 +1031,42 @@ export type Database = {
           },
         ]
       }
+      reviewer_profiles: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          curricula: string[]
+          daily_review_limit: number
+          question_types: string[]
+          subjects: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          curricula?: string[]
+          daily_review_limit?: number
+          question_types?: string[]
+          subjects?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          curricula?: string[]
+          daily_review_limit?: number
+          question_types?: string[]
+          subjects?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       study_goals: {
         Row: {
           completed_minutes: number
@@ -1668,6 +1704,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      configure_content_reviewer: {
+        Args: {
+          _active?: boolean
+          _curricula?: string[]
+          _daily_review_limit?: number
+          _email: string
+          _question_types?: string[]
+          _subjects?: string[]
+        }
+        Returns: Json
+      }
       confirm_subject_selection: {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
@@ -1692,6 +1739,7 @@ export type Database = {
           total_questions: number
         }[]
       }
+      get_content_release_readiness: { Args: never; Returns: Json }
       get_daily_challenge_leaderboard: {
         Args: { _challenge_id: string }
         Returns: {
@@ -1767,6 +1815,21 @@ export type Database = {
         }[]
       }
       get_review_queue_metrics: { Args: never; Returns: Json }
+      get_reviewer_workload: {
+        Args: never
+        Returns: {
+          active: boolean
+          active_claims: number
+          curricula: string[]
+          daily_review_limit: number
+          display_name: string
+          published_today: number
+          rejected_today: number
+          subjects: string[]
+          user_id: string
+          verified_today: number
+        }[]
+      }
       get_subject_question_counts: {
         Args: never
         Returns: {
@@ -1860,6 +1923,10 @@ export type Database = {
           _question_id: string
         }
         Returns: Json
+      }
+      reviewer_can_claim_question: {
+        Args: { _question_id: string }
+        Returns: boolean
       }
       validate_session: {
         Args: { _session_token: string; _user_id: string }
