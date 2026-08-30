@@ -7,7 +7,10 @@ export interface TutorialCheckpoint {
 
 export interface Tutorial {
   id: string;
-  subject: "mathematics" | "physics" | "chemistry" | "biology" | "computer-science";
+  subject:
+    | "mathematics" | "physics" | "chemistry" | "biology" | "computer-science"
+    | "economics" | "english-literature" | "psychology" | "geography"
+    | "business-studies" | "ielts" | "celta" | "french" | "german";
   title: string;
   level: "Foundation" | "Intermediate" | "Advanced";
   minutes: number;
@@ -189,5 +192,86 @@ export const tutorials: Tutorial[] = [
     workedExample: "For password storage, use a slow password-hashing function with a unique salt. Do not store decryptable plaintext-equivalent passwords.",
     checkpoint: { question: "Which control most directly reduces harm from a stolen password?", options: ["Multi-factor authentication", "A larger monitor", "File compression", "A faster processor"], answer: "Multi-factor authentication", explanation: "A second independent factor can prevent a password alone from granting access." },
     practice: [{ question: "What is the main purpose of a firewall?", options: ["Filter network traffic using rules", "Hash every file", "Physically repair cables", "Create strong passwords"], answer: "Filter network traffic using rules", explanation: "A firewall permits or blocks traffic according to configured security rules." }],
+  },
+  {
+    id: "price-elasticity", subject: "economics", title: "Price Elasticity of Demand", level: "Intermediate", minutes: 14,
+    summary: "Calculate responsiveness and explain why elasticity matters to revenue decisions.",
+    objectives: ["Calculate price elasticity of demand", "Interpret elastic and inelastic values", "Connect elasticity to total revenue"],
+    lesson: ["Price elasticity of demand (PED) measures how strongly quantity demanded responds to a price change.", "PED = percentage change in quantity demanded ÷ percentage change in price; discussion often uses its absolute magnitude.", "Demand is elastic when the magnitude exceeds 1 and inelastic when it is below 1."],
+    workedExample: "If price rises by 10% and quantity demanded falls by 20%, PED = −20% ÷ 10% = −2. The magnitude is 2, so demand is elastic.",
+    checkpoint: { question: "Quantity demanded falls by 6% after price rises by 12%. What is the PED magnitude?", options: ["0.5", "2", "6", "18"], answer: "0.5", explanation: "The magnitude is 6 ÷ 12 = 0.5, so demand is inelastic over this change." },
+    practice: [{ question: "Which PED magnitude represents elastic demand?", options: ["1.6", "0.8", "0.2", "0"], answer: "1.6", explanation: "A PED magnitude greater than 1 means quantity is proportionately more responsive than price." }],
+  },
+  {
+    id: "analysing-quotations", subject: "english-literature", title: "Analysing a Quotation", level: "Intermediate", minutes: 13,
+    summary: "Build a precise interpretation from language, form, structure, and context.",
+    objectives: ["Select a focused quotation", "Analyse a deliberate writer's choice", "Link evidence to an interpretive argument"],
+    lesson: ["Begin with a clear claim that answers the question rather than retelling the plot.", "Select a short piece of evidence and identify a specific word, image, structural choice, or contrast.", "Explain more than one plausible effect where the wording supports it, then connect the analysis back to the whole text."],
+    workedExample: "Instead of writing ‘the storm is bad’, analyse the violent verb in a storm description, explain how it personifies nature as threatening, and relate that threat to the character's loss of control.",
+    checkpoint: { question: "Which sentence is the strongest analytical move after a quotation?", options: ["The verb suggests force and makes the setting feel hostile", "This quote is on page ten", "The story continues after this", "The quotation has six words"], answer: "The verb suggests force and makes the setting feel hostile", explanation: "It identifies a specific language choice and explains how that choice develops an interpretation." },
+    practice: [{ question: "Why are short, focused quotations often useful?", options: ["They make close analysis easier", "They remove the need for explanation", "They prove every interpretation", "They replace the argument"], answer: "They make close analysis easier", explanation: "A concise selection lets the response examine precise writer choices instead of copying a long passage." }],
+  },
+  {
+    id: "reliability-validity", subject: "psychology", title: "Reliability and Validity", level: "Intermediate", minutes: 14,
+    summary: "Evaluate whether a measure is consistent and whether it measures what it claims.",
+    objectives: ["Distinguish reliability from validity", "Recognise common checks", "Suggest a proportionate improvement"],
+    lesson: ["Reliability concerns consistency: a reliable measure produces similar results under comparable conditions.", "Validity concerns whether the study or measure supports the conclusion it claims to support.", "A measure can be reliable but invalid, such as a miscalibrated instrument that gives the same wrong value repeatedly."],
+    workedExample: "Two observers independently code the same behaviour. Comparing their coding assesses inter-observer reliability; a clear coding frame can improve agreement.",
+    checkpoint: { question: "A questionnaire gives similar scores when repeated a week later. What does this most directly support?", options: ["Test–retest reliability", "Ecological validity", "Population validity", "Demand characteristics"], answer: "Test–retest reliability", explanation: "Consistency across two administrations of the same measure is evidence of test–retest reliability." },
+    practice: [{ question: "Can a measure be reliable but not valid?", options: ["Yes", "No", "Only in experiments", "Only with interviews"], answer: "Yes", explanation: "A measure may consistently produce the same result while failing to measure the intended construct." }],
+  },
+  {
+    id: "river-processes", subject: "geography", title: "River Erosion and Transport", level: "Foundation", minutes: 12,
+    summary: "Distinguish the main river processes and connect them to changing channel conditions.",
+    objectives: ["Describe four erosion processes", "Identify transport processes", "Explain when deposition occurs"],
+    lesson: ["Hydraulic action is the force of water on the channel; abrasion is scraping by carried sediment.", "Attrition makes transported particles collide and become smaller and rounder; solution dissolves soluble material.", "Deposition occurs when the river loses energy and can no longer carry all of its load."],
+    workedExample: "When a river enters flatter land, its velocity may fall. Larger sediment is deposited first because the river no longer has enough energy to transport it.",
+    checkpoint: { question: "Which process makes river sediment smaller and rounder through collisions?", options: ["Attrition", "Hydraulic action", "Suspension", "Evaporation"], answer: "Attrition", explanation: "During attrition, transported particles collide with each other and gradually become smaller and smoother." },
+    practice: [{ question: "Why does a river deposit material?", options: ["It loses energy", "Its discharge always rises", "The load becomes weightless", "Gravity stops acting"], answer: "It loses energy", explanation: "A lower-energy flow has less capacity and competence to carry sediment." }],
+  },
+  {
+    id: "break-even", subject: "business-studies", title: "Break-Even Analysis", level: "Intermediate", minutes: 13,
+    summary: "Calculate contribution and break-even output, then interpret the margin of safety.",
+    objectives: ["Calculate contribution per unit", "Calculate break-even output", "Explain margin of safety"],
+    lesson: ["Contribution per unit = selling price per unit − variable cost per unit.", "Break-even output = fixed costs ÷ contribution per unit.", "Margin of safety = actual or forecast sales − break-even sales; a larger positive margin provides more protection against a sales fall."],
+    workedExample: "A product sells for £20, has £12 variable cost and £4,000 fixed costs. Contribution is £8, so break-even output is 4,000 ÷ 8 = 500 units.",
+    checkpoint: { question: "Price is £15 and variable cost is £9. What is contribution per unit?", options: ["£6", "£9", "£15", "£24"], answer: "£6", explanation: "Contribution per unit equals selling price minus variable cost: £15 − £9 = £6." },
+    practice: [{ question: "Forecast sales are 900 units and break-even is 650. What is the margin of safety?", options: ["250 units", "650 units", "900 units", "1,550 units"], answer: "250 units", explanation: "Margin of safety = 900 − 650 = 250 units." }],
+  },
+  {
+    id: "ielts-paragraph-cohesion", subject: "ielts", title: "Building a Cohesive Academic Paragraph", level: "Intermediate", minutes: 13,
+    summary: "Organise one central idea with a clear claim, relevant support, and logical connections.",
+    objectives: ["Write a focused topic sentence", "Develop rather than list ideas", "Use referencing and linking naturally"],
+    lesson: ["Give each paragraph one controlling idea that directly contributes to the response.", "Support the idea with explanation, evidence, or a concrete example, then show why that support matters.", "Use pronouns, repeated key terms, synonyms, and logical connectors accurately; too many memorised linking phrases can make writing less natural."],
+    workedExample: "A paragraph about public transport can state its main benefit, explain how fewer private journeys reduce congestion, illustrate the effect with a city example, and connect the result back to urban quality of life.",
+    checkpoint: { question: "What is the main role of a topic sentence?", options: ["State the paragraph's controlling idea", "Add an unrelated example", "Repeat the entire introduction", "List every possible opinion"], answer: "State the paragraph's controlling idea", explanation: "A focused topic sentence establishes the idea that the rest of the paragraph will explain and support." },
+    practice: [{ question: "Which approach usually improves cohesion?", options: ["Use clear logical references between sentences", "Start every sentence with however", "Change topic in every sentence", "Avoid repeating any key term"], answer: "Use clear logical references between sentences", explanation: "Cohesion comes from meaningful connections, not from inserting connectors mechanically." }],
+  },
+  {
+    id: "celta-concept-checking", subject: "celta", title: "Concept-Checking Questions", level: "Intermediate", minutes: 14,
+    summary: "Check meaning with short questions that reveal understanding instead of asking learners to self-report it.",
+    objectives: ["Identify the target concept", "Write focused checking questions", "Avoid questions that merely invite yes or no"],
+    lesson: ["First identify the essential meaning features learners must understand, including time, completion, possibility, or speaker attitude where relevant.", "Ask simple questions whose answers demonstrate those features; keep their language easier than the target item.", "Avoid relying on ‘Do you understand?’ because learners can answer yes without showing what they understood."],
+    workedExample: "For ‘She used to live here’, useful checks include ‘Does she live here now?’ (No) and ‘Did she live here in the past?’ (Yes).",
+    checkpoint: { question: "Which is the strongest concept-checking question for ‘must’?", options: ["Is it necessary?", "Do you understand must?", "Can you repeat must?", "How many letters are in must?"], answer: "Is it necessary?", explanation: "The question checks the core concept of obligation using language simpler than a long definition." },
+    practice: [{ question: "Why should checking questions use simple language?", options: ["So difficulty in the question does not hide understanding", "So learners never speak", "So the teacher supplies every answer", "So form is ignored"], answer: "So difficulty in the question does not hide understanding", explanation: "A linguistically complex checking question may test the question itself rather than the target concept." }],
+  },
+  {
+    id: "french-perfect-tense", subject: "french", title: "Le passé composé avec avoir", level: "Foundation", minutes: 13,
+    summary: "Form and use the French perfect tense with a present-tense auxiliary and past participle.",
+    objectives: ["Choose the correct form of avoir", "Form common past participles", "Place common negatives correctly"],
+    lesson: ["For many verbs, the passé composé uses the present tense of avoir followed by a past participle.", "Regular patterns include -er → -é, -ir → -i, and -re → -u, although important irregular participles must be learned.", "In a basic negative sentence, ne and pas usually surround the conjugated auxiliary: je n'ai pas regardé."],
+    workedExample: "Nous avons fini combines nous + avons with the past participle fini, meaning ‘we finished’ or ‘we have finished’ according to context.",
+    checkpoint: { question: "Which sentence correctly means ‘I watched’?", options: ["J'ai regardé", "Je suis regarder", "J'avoir regardé", "Je regardé ai"], answer: "J'ai regardé", explanation: "The first-person form ai is followed by the past participle regardé." },
+    practice: [{ question: "What is the regular past participle of finir?", options: ["fini", "finé", "finu", "finiré"], answer: "fini", explanation: "Regular -ir verbs commonly form the past participle by replacing -ir with -i." }],
+  },
+  {
+    id: "german-accusative", subject: "german", title: "Nominative and Accusative Cases", level: "Foundation", minutes: 14,
+    summary: "Identify the subject and direct object, then choose the appropriate definite or indefinite article.",
+    objectives: ["Identify nominative subjects", "Identify accusative direct objects", "Apply the masculine article change"],
+    lesson: ["The nominative case normally marks the subject that performs the verb.", "The accusative case commonly marks the direct object affected by the verb.", "Masculine singular articles change in the accusative: der → den and ein → einen; feminine, neuter, and plural definite articles do not change between these two cases."],
+    workedExample: "Der Mann sieht den Hund: der Mann is the nominative subject, while den Hund is the masculine accusative direct object.",
+    checkpoint: { question: "Complete: Ich sehe ___ Mann.", options: ["den", "der", "dem", "des"], answer: "den", explanation: "Mann is masculine and functions as the direct object, so the accusative definite article is den." },
+    practice: [{ question: "In ‘Die Frau kauft einen Apfel’, what is the direct object?", options: ["einen Apfel", "die Frau", "kauft", "no direct object"], answer: "einen Apfel", explanation: "The apple receives the action of buying and is marked by the masculine accusative article einen." }],
   },
 ];

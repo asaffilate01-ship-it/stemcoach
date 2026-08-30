@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -8,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
 import { subjects } from "@/data/questions";
-import { type MockExamTemplate } from "@/data/mockExamTemplates";
+import { mockExamTemplates, type MockExamTemplate } from "@/data/mockExamTemplates";
 import { ExamBrowse } from "@/components/mock-exam/ExamBrowse";
 import { ExamSetup } from "@/components/mock-exam/ExamSetup";
 import { ExamActive } from "@/components/mock-exam/ExamActive";
@@ -35,16 +36,18 @@ export default function MockExam() {
   const { t } = useTranslation();
   useDocumentTitle(t("mockExam.title"));
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTemplate = mockExamTemplates.find((template) => template.id === searchParams.get("template")) || null;
   const { toast } = useToast();
   const { canTakeMockExam, mockExamsRemaining, mockExamsTotal, hasPurchased, refresh: refreshQuota } = useQuotaGate();
-  const [state, setState] = useState<ExamState>("browse");
+  const [state, setState] = useState<ExamState>(initialTemplate ? "setup" : "browse");
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [flagged, setFlagged] = useState<Set<number>>(new Set());
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<MockExamTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<MockExamTemplate | null>(initialTemplate);
 
   // Custom exam options
   const [examSubject, setExamSubject] = useState("physics");
@@ -195,6 +198,9 @@ export default function MockExam() {
   };
 
   const handleBrowse = () => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("template");
+    setSearchParams(nextParams, { replace: true });
     setState("browse");
     setQuestions([]);
     setSelectedTemplate(null);
@@ -208,10 +214,12 @@ export default function MockExam() {
         <PageTransition>
           <ExamBrowse
             onSelectTemplate={(t) => {
+              setSearchParams({ template: t.id }, { replace: true });
               setSelectedTemplate(t);
               setState("setup");
             }}
             onCustomExam={() => {
+              setSearchParams({}, { replace: true });
               setState("setup");
               setSelectedTemplate(null);
             }}
@@ -241,6 +249,7 @@ export default function MockExam() {
             isLoading={state === "loading"}
             onStart={startExam}
             onBack={() => {
+              setSearchParams({}, { replace: true });
               setState("browse");
               setSelectedTemplate(null);
             }}

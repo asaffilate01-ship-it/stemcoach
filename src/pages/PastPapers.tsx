@@ -1,177 +1,134 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppHeader } from "@/components/layout/AppHeader";
-import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, ArrowRight, Calendar, Building2, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
-
-const boards = [
-  { id: "aqa", name: "AQA", country: "🇬🇧" },
-  { id: "edexcel", name: "Edexcel / Pearson", country: "🇬🇧" },
-  { id: "ocr", name: "OCR", country: "🇬🇧" },
-  { id: "ocr-mei", name: "OCR MEI", country: "🇬🇧" },
-  { id: "wjec", name: "WJEC / Eduqas", country: "🏴" },
-  { id: "caie", name: "Cambridge (CAIE)", country: "🌍" },
-  { id: "ib", name: "IB", country: "🌍" },
-  { id: "ap", name: "AP (College Board)", country: "🇺🇸" },
-  { id: "cbse", name: "CBSE", country: "🇮🇳" },
-  { id: "fbise", name: "FBISE", country: "🇵🇰" },
-  { id: "uae-moe", name: "UAE MoE", country: "🇦🇪" },
-  { id: "emsat", name: "EmSAT", country: "🇦🇪" },
-  { id: "ednat", name: "Éducation Nationale (France)", country: "🇫🇷" },
-  { id: "deped", name: "DepEd Philippines", country: "🇵🇭" },
-  { id: "kmk", name: "Kultusministerkonferenz (Deutschland)", country: "🇩🇪" },
-];
-
-const subjects = [
-  "Mathematics", "Physics", "Chemistry", "Biology", "Computer Science",
-  "Economics", "Business Studies", "Geography", "History", "Psychology",
-];
-
-const years = Array.from({ length: 10 }, (_, i) => (2024 - i).toString());
-
-const sessions = ["May/June", "October/November", "January"];
-
-// Mock past paper data
-const mockPapers = [
-  { id: "1", board: "aqa", subject: "Mathematics", year: "2024", session: "May/June", paper: "Paper 1 (Non-Calculator)", level: "GCSE", duration: "1h 30m", marks: 80 },
-  { id: "2", board: "aqa", subject: "Mathematics", year: "2024", session: "May/June", paper: "Paper 2 (Calculator)", level: "GCSE", duration: "1h 30m", marks: 80 },
-  { id: "3", board: "aqa", subject: "Mathematics", year: "2024", session: "May/June", paper: "Paper 3 (Calculator)", level: "GCSE", duration: "1h 30m", marks: 80 },
-  { id: "4", board: "edexcel", subject: "Mathematics", year: "2024", session: "May/June", paper: "Paper 1 (Non-Calculator)", level: "GCSE", duration: "1h 30m", marks: 80 },
-  { id: "5", board: "edexcel", subject: "Mathematics", year: "2024", session: "May/June", paper: "Paper 2 (Calculator)", level: "GCSE", duration: "1h 30m", marks: 80 },
-  { id: "6", board: "aqa", subject: "Physics", year: "2024", session: "May/June", paper: "Paper 1", level: "GCSE", duration: "1h 45m", marks: 100 },
-  { id: "7", board: "aqa", subject: "Physics", year: "2024", session: "May/June", paper: "Paper 2", level: "GCSE", duration: "1h 45m", marks: 100 },
-  { id: "8", board: "edexcel", subject: "Chemistry", year: "2024", session: "May/June", paper: "Paper 1", level: "GCSE", duration: "1h 45m", marks: 100 },
-  { id: "9", board: "ocr", subject: "Biology", year: "2023", session: "May/June", paper: "Paper 1 (Breadth)", level: "A-Level", duration: "2h", marks: 100 },
-  { id: "10", board: "caie", subject: "Physics", year: "2023", session: "October/November", paper: "Paper 1 (MCQ)", level: "AS-Level", duration: "1h 15m", marks: 40 },
-  { id: "11", board: "caie", subject: "Physics", year: "2023", session: "October/November", paper: "Paper 2 (Structured)", level: "AS-Level", duration: "1h 15m", marks: 60 },
-  { id: "12", board: "ib", subject: "Mathematics", year: "2023", session: "May/June", paper: "Paper 1 (No Calculator)", level: "SL", duration: "1h 30m", marks: 80 },
-  { id: "13", board: "cbse", subject: "Physics", year: "2024", session: "May/June", paper: "Set 1", level: "Class 12", duration: "3h", marks: 70 },
-  { id: "14", board: "aqa", subject: "Computer Science", year: "2024", session: "May/June", paper: "Paper 1", level: "GCSE", duration: "1h 30m", marks: 80 },
-  { id: "15", board: "edexcel", subject: "Economics", year: "2024", session: "May/June", paper: "Paper 1 (Microeconomics)", level: "A-Level", duration: "2h", marks: 100 },
-  { id: "16", board: "aqa", subject: "Psychology", year: "2024", session: "May/June", paper: "Paper 1", level: "A-Level", duration: "2h", marks: 96 },
-  { id: "17", board: "aqa", subject: "Geography", year: "2023", session: "May/June", paper: "Paper 1 (Physical)", level: "GCSE", duration: "1h 30m", marks: 88 },
-  { id: "18", board: "edexcel", subject: "History", year: "2023", session: "May/June", paper: "Paper 1", level: "GCSE", duration: "1h 15m", marks: 52 },
-  { id: "19", board: "aqa", subject: "Business Studies", year: "2024", session: "May/June", paper: "Paper 1", level: "A-Level", duration: "2h", marks: 100 },
-  { id: "20", board: "ap", subject: "Physics", year: "2024", session: "May/June", paper: "AP Physics 1", level: "AP", duration: "3h", marks: 50 },
-];
+import { ArrowRight, BookOpen, Building2, Clock, FileCheck2, Filter, Search, ShieldCheck, Target } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { curricula, subjects } from "@/data/questions";
+import { mockExamTemplates } from "@/data/mockExamTemplates";
+import { getMascot } from "@/lib/mascots";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { normalizeLanguage } from "@/i18n/language";
 
 export default function PastPapers() {
-  useDocumentTitle("Past Papers | STEMCoach");
+  const { t, i18n } = useTranslation();
+  useDocumentTitle(t("examLibrary.documentTitle"));
   const navigate = useNavigate();
-  const [board, setBoard] = useState<string>("all");
-  const [subject, setSubject] = useState<string>("all");
-  const [year, setYear] = useState<string>("all");
+  const [board, setBoard] = useState("all");
+  const [subject, setSubject] = useState("all");
+  const [curriculum, setCurriculum] = useState("all");
+  const [search, setSearch] = useState("");
 
-  const filtered = mockPapers.filter((p) => {
-    if (board !== "all" && p.board !== board) return false;
-    if (subject !== "all" && p.subject !== subject) return false;
-    if (year !== "all" && p.year !== year) return false;
-    return true;
-  });
+  const boards = useMemo(
+    () => [...new Set(mockExamTemplates.map((template) => template.board))].sort((a, b) => a.localeCompare(b)),
+    [],
+  );
+  const availableSubjectIds = useMemo(() => new Set(mockExamTemplates.map((template) => template.subject)), []);
+  const availableCurriculumIds = useMemo(() => new Set(mockExamTemplates.map((template) => template.curriculum)), []);
 
-  const getBoardName = (id: string) => boards.find((b) => b.id === id)?.name || id;
-  const getBoardFlag = (id: string) => boards.find((b) => b.id === id)?.country || "";
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return mockExamTemplates.filter((template) => {
+      if (board !== "all" && template.board !== board) return false;
+      if (subject !== "all" && template.subject !== subject) return false;
+      if (curriculum !== "all" && template.curriculum !== curriculum) return false;
+      if (query && !`${template.name} ${template.board} ${template.paper} ${template.description}`.toLowerCase().includes(query)) return false;
+      return true;
+    });
+  }, [board, curriculum, search, subject]);
+
+  const clearFilters = () => {
+    setBoard("all");
+    setSubject("all");
+    setCurriculum("all");
+    setSearch("");
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main id="main-content" className="container mx-auto px-4 py-6 pb-28 lg:pb-12">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">📝 Past Papers</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Practice with real exam-style questions from past papers</p>
+      <main id="main-content" className="container mx-auto max-w-7xl px-4 py-7 pb-28 lg:py-12">
+        <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-[hsl(258,60%,48%)] px-6 py-9 text-primary-foreground md:px-10 md:py-12">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.18),transparent_38%)]" />
+          <div className="relative max-w-3xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] ring-1 ring-white/15">
+              <FileCheck2 className="h-3.5 w-3.5" /> {t("examLibrary.label")}
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">{t("examLibrary.title")}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75 md:text-base">{t("examLibrary.description")}</p>
+            <div className="mt-5 flex items-start gap-2 rounded-xl bg-black/10 p-3 text-xs leading-5 text-white/75 ring-1 ring-white/10">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-200" />
+              <span>{t("examLibrary.copyrightNotice")}</span>
+            </div>
+            {normalizeLanguage(i18n.resolvedLanguage || i18n.language) !== "en" && <p className="mt-3 text-xs text-white/65">{t("examLibrary.contentLanguageNotice")}</p>}
+          </div>
+        </section>
+
+        <section aria-label={t("examLibrary.filters")} className="mb-7 rounded-2xl border bg-card p-4 shadow-sm">
+          <div className="grid gap-3 md:grid-cols-[1.4fr_repeat(3,minmax(0,1fr))]">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("examLibrary.search")} className="pl-9" />
+            </div>
+            <Select value={board} onValueChange={setBoard}>
+              <SelectTrigger><Building2 className="mr-2 h-4 w-4 text-muted-foreground" /><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">{t("examLibrary.allBoards")}</SelectItem>{boards.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={subject} onValueChange={setSubject}>
+              <SelectTrigger><BookOpen className="mr-2 h-4 w-4 text-muted-foreground" /><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">{t("examLibrary.allSubjects")}</SelectItem>{subjects.filter((item) => availableSubjectIds.has(item.id)).map((item) => <SelectItem key={item.id} value={item.id}>{t(`subjects.names.${item.id}`)}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={curriculum} onValueChange={setCurriculum}>
+              <SelectTrigger><Filter className="mr-2 h-4 w-4 text-muted-foreground" /><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">{t("examLibrary.allCurricula")}</SelectItem>{curricula.filter((item) => availableCurriculumIds.has(item.id)).map((item) => <SelectItem key={item.id} value={item.id}>{item.label}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        </section>
+
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <p className="text-sm font-medium text-muted-foreground">{t("examLibrary.results", { count: filtered.length })}</p>
+          {(board !== "all" || subject !== "all" || curriculum !== "all" || search) && <Button variant="ghost" size="sm" onClick={clearFilters}>{t("examLibrary.clear")}</Button>}
         </div>
 
-        {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Select value={board} onValueChange={setBoard}>
-            <SelectTrigger>
-              <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="All Boards" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Boards</SelectItem>
-              {boards.map((b) => (
-                <SelectItem key={b.id} value={b.id}>{b.country} {b.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={subject} onValueChange={setSubject}>
-            <SelectTrigger>
-              <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="All Subjects" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Subjects</SelectItem>
-              {subjects.map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={year} onValueChange={setYear}>
-            <SelectTrigger>
-              <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="All Years" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Years</SelectItem>
-              {years.map((y) => (
-                <SelectItem key={y} value={y}>{y}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Results Count */}
-        <p className="mb-4 text-sm text-muted-foreground">{filtered.length} paper{filtered.length !== 1 ? "s" : ""} found</p>
-
-        {/* Papers Grid */}
         {filtered.length === 0 ? (
-          <div className="py-16 text-center text-muted-foreground">No papers match your filters</div>
+          <div className="rounded-2xl border border-dashed py-16 text-center">
+            <FileCheck2 className="mx-auto mb-3 h-9 w-9 text-muted-foreground/35" />
+            <h2 className="font-semibold">{t("examLibrary.noResults")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t("examLibrary.noResultsDescription")}</p>
+            <Button variant="outline" className="mt-4" onClick={clearFilters}>{t("examLibrary.clear")}</Button>
+          </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((paper, i) => (
-              <motion.div
-                key={paper.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-              >
-                <Card className="group cursor-pointer border-border/50 transition-all hover:border-primary/30 hover:shadow-md">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs">{getBoardFlag(paper.board)}</span>
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{getBoardName(paper.board)}</span>
-                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{paper.level}</span>
-                        </div>
-                        <h3 className="mt-2 text-sm font-semibold text-foreground">{paper.subject}</h3>
-                        <p className="text-xs text-muted-foreground">{paper.paper}</p>
-                        <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{paper.year} · {paper.session}</span>
-                          <span>{paper.duration}</span>
-                          <span>{paper.marks} marks</span>
-                        </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((template, index) => {
+              const mascot = getMascot(template.subject);
+              return (
+                <motion.div key={template.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.025, 0.3) }}>
+                  <Card className="h-full border-border/50 transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md">
+                    <CardContent className="flex h-full flex-col p-5">
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <img src={mascot.image} alt={mascot.name} className="h-11 w-11 rounded-xl bg-muted object-cover" />
+                        <span className="rounded-full bg-primary/8 px-2.5 py-1 text-[10px] font-bold text-primary">{template.board}</span>
                       </div>
-                      <FileText className="h-8 w-8 text-muted-foreground/30 transition-colors group-hover:text-primary/50" />
-                    </div>
-                    <Button
-                      size="sm"
-                      className="mt-3 w-full gap-1.5 text-xs"
-                      onClick={() => navigate(`/practice/past-paper?board=${paper.board}&subject=${paper.subject.toLowerCase()}`)}
-                    >
-                      Start Practice <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                      <h2 className="text-base font-bold leading-snug">{template.name}</h2>
+                      <p className="mt-1 text-xs text-muted-foreground">{template.paper}</p>
+                      <p className="mt-3 line-clamp-3 flex-1 text-xs leading-5 text-muted-foreground">{template.description}</p>
+                      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[10px] text-muted-foreground">
+                        <span className="rounded-lg bg-muted/50 p-2"><Target className="mx-auto mb-1 h-3.5 w-3.5" />{t("examLibrary.questions", { count: template.questionCount })}</span>
+                        <span className="rounded-lg bg-muted/50 p-2"><Clock className="mx-auto mb-1 h-3.5 w-3.5" />{t("examLibrary.minutes", { count: template.durationMinutes })}</span>
+                        <span className="rounded-lg bg-muted/50 p-2"><FileCheck2 className="mx-auto mb-1 h-3.5 w-3.5" />{t("examLibrary.marks", { count: template.totalMarks })}</span>
+                      </div>
+                      <Button className="mt-4 w-full gap-2" onClick={() => navigate(`/mock-exam?template=${encodeURIComponent(template.id)}`)}>
+                        {t("examLibrary.openBlueprint")} <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </main>

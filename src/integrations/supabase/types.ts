@@ -324,6 +324,27 @@ export type Database = {
         }
         Relationships: []
       }
+      class_join_attempts: {
+        Row: {
+          attempted_at: string
+          id: number
+          succeeded: boolean
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: number
+          succeeded?: boolean
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: number
+          succeeded?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       class_members: {
         Row: {
           class_id: string
@@ -1836,17 +1857,6 @@ export type Database = {
         }[]
       }
       get_content_release_readiness: { Args: never; Returns: Json }
-      get_curriculum_subject_question_counts: {
-        Args: {
-          _boards?: string[]
-          _curricula?: string[]
-          _difficulty?: number
-        }
-        Returns: {
-          question_count: number
-          subject: string
-        }[]
-      }
       get_daily_challenge_leaderboard: {
         Args: { _challenge_id: string }
         Returns: {
@@ -1961,19 +1971,6 @@ export type Database = {
         }[]
       }
       grant_dev_quota: { Args: { _user_id: string }; Returns: undefined }
-      grant_verified_purchase: {
-        Args: {
-          _amount_paid: number
-          _currency: string
-          _mock_exams_granted: number
-          _pack_type: string
-          _questions_granted: number
-          _region: string
-          _stripe_session_id: string
-          _user_id: string
-        }
-        Returns: boolean
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1993,10 +1990,13 @@ export type Database = {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
+      is_class_participant: { Args: { _class_id: string }; Returns: boolean }
+      is_class_teacher: { Args: { _class_id: string }; Returns: boolean }
       is_tenant_teacher: {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
+      join_class_by_code: { Args: { _join_code: string }; Returns: string }
       issue_certificate: {
         Args: {
           _achievement_type: string
@@ -2063,6 +2063,10 @@ export type Database = {
       reviewer_can_claim_question: {
         Args: { _question_id: string }
         Returns: boolean
+      }
+      send_classroom_message: {
+        Args: { _message: string; _room_id: string }
+        Returns: Database["public"]["Tables"]["classroom_messages"]["Row"]
       }
       update_learner_topic_mastery: {
         Args: {

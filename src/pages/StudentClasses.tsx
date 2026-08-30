@@ -68,30 +68,11 @@ export default function StudentClasses() {
 
   const joinClass = useMutation({
     mutationFn: async () => {
-      // Look up class by join code
-      const { data: cls, error: findError } = await supabase
-        .from("classes")
-        .select("id")
-        .eq("join_code", joinCode.trim())
-        .maybeSingle();
-
-      if (findError || !cls) throw new Error("Invalid join code. Please check and try again.");
-
-      // Check not already a member
-      const { data: existing } = await supabase
-        .from("class_members")
-        .select("id")
-        .eq("class_id", cls.id)
-        .eq("user_id", user!.id)
-        .maybeSingle();
-
-      if (existing) throw new Error("You're already in this class.");
-
-      const { error } = await supabase.from("class_members").insert({
-        class_id: cls.id,
-        user_id: user!.id,
+      const { data: classId, error } = await supabase.rpc("join_class_by_code", {
+        _join_code: joinCode.trim(),
       });
       if (error) throw error;
+      if (!classId) throw new Error("Invalid join code. Please check and try again.");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["student-classes"] });
