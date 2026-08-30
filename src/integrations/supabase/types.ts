@@ -458,6 +458,27 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_request_windows: {
+        Row: {
+          request_count: number
+          updated_at: string
+          user_id: string
+          window_started_at: string
+        }
+        Insert: {
+          request_count?: number
+          updated_at?: string
+          user_id: string
+          window_started_at?: string
+        }
+        Update: {
+          request_count?: number
+          updated_at?: string
+          user_id?: string
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       coaching_cache: {
         Row: {
           action: string
@@ -1554,6 +1575,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_tutorial_progress: {
+        Row: {
+          completed_at: string | null
+          last_opened_at: string
+          tutorial_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          last_opened_at?: string
+          tutorial_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          last_opened_at?: string
+          tutorial_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       challenge_leaderboard: {
@@ -1808,6 +1853,14 @@ export type Database = {
       confirm_subject_selection: {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
+      }
+      consume_coach_rate_limit: {
+        Args: {
+          _max_requests?: number
+          _user_id: string
+          _window_seconds?: number
+        }
+        Returns: boolean
       }
       create_flashcards_from_mistakes: {
         Args: { _limit?: number }
@@ -2088,6 +2141,22 @@ export type Database = {
         Args: { _question_id: string }
         Returns: boolean
       }
+      save_tutorial_progress: {
+        Args: { _completed?: boolean; _tutorial_id: string }
+        Returns: {
+          completed_at: string | null
+          last_opened_at: string
+          tutorial_id: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_tutorial_progress"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       send_classroom_message: {
         Args: { _message: string; _room_id: string }
         Returns: {
@@ -2104,6 +2173,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      sync_tutorial_completions: {
+        Args: { _tutorial_ids: string[] }
+        Returns: number
       }
       update_learner_topic_mastery: {
         Args: {
