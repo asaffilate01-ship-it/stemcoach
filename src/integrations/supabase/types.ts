@@ -1584,6 +1584,7 @@ export type Database = {
         Args: { _badge_id: string; _user_id: string }
         Returns: boolean
       }
+      can_review_questions: { Args: { _user_id?: string }; Returns: boolean }
       claim_generation_queue: {
         Args: { _limit?: number }
         Returns: {
