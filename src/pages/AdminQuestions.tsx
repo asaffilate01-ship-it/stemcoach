@@ -36,7 +36,7 @@ export default function AdminQuestions() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-questions", filterSubject, filterCurriculum, filterTopic, filterStatus, filterClaimedByMe, search, page, user?.id],
     queryFn: async () => {
-      let q = supabase
+      let q = (supabase as any)
         .from("questions")
         .select("*", { count: "exact" })
         .order("created_at", { ascending: false })
@@ -69,14 +69,14 @@ export default function AdminQuestions() {
     queryKey: ["question-review-history", reviewQuestion?.id],
     enabled: Boolean(reviewQuestion?.id),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("question_review_events")
         .select("id, action, notes, created_at, reviewer_id, flags_snapshot")
         .eq("question_id", reviewQuestion.id)
         .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
