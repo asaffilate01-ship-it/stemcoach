@@ -108,6 +108,13 @@ serve(async (req) => {
       _user_id: user.id, _correct: correct, _xp_gain: xpGain,
     });
     if (statsError) throw statsError;
+    const { data: masteryResult, error: masteryError } = await admin.rpc("update_learner_topic_mastery", {
+      _user_id: user.id,
+      _question_id: questionId,
+      _correct: correct,
+      _time_taken_seconds: timeTaken,
+    });
+    if (masteryError) console.error("mastery update error:", masteryError.message);
     if (quota?.total_questions > 0) {
       const { error } = await admin.rpc("increment_used_questions", { _user_id: user.id });
       if (error) throw error;
@@ -121,7 +128,7 @@ serve(async (req) => {
     }
 
     return json({
-      correct, xp_gained: xpGain, stats: statsResult, new_badges: newBadges,
+      correct, xp_gained: xpGain, stats: statsResult, mastery: masteryResult || null, new_badges: newBadges,
       correct_answer: question.correct_answer, correct_answers: question.correct_answers,
       explanation: question.explanation, worked_solution: question.worked_solution,
       exam_tip: question.exam_tip, tuition_tips: question.tuition_tips,

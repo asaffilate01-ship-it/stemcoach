@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { subjects, type Question as LocalQuestion } from "@/data/questions";
@@ -47,7 +47,11 @@ interface DBQuestion {
   mark_scheme?: string | null;
   model_answer?: string | null;
   max_marks: number | null;
+  mastery_score?: number;
+  next_review_at?: string | null;
 }
+
+type PracticeMode = "diagnostic" | "focus" | "mixed";
 
 function parseOptions(value: unknown): string[] {
   if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
@@ -64,6 +68,7 @@ export default function Practice() {
   const { t } = useTranslation();
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { curriculumId, curriculum, loading: curriculumLoading } = useLearnerCurriculum();
   const { toast } = useToast();
@@ -96,6 +101,9 @@ export default function Practice() {
   const [submitting, setSubmitting] = useState(false);
   // Server-returned answer data (only available after submission)
   const [revealedAnswer, setRevealedAnswer] = useState<any>(null);
+  const [masteryFeedback, setMasteryFeedback] = useState<any>(null);
+  const requestedMode = searchParams.get("mode");
+  const practiceMode: PracticeMode = requestedMode === "diagnostic" || requestedMode === "focus" ? requestedMode : "mixed";
 
   useEffect(() => {
     if (!subjectId || curriculumLoading) return;
@@ -104,17 +112,38 @@ export default function Practice() {
 
       // Try network first, fall back to IndexedDB cache for offline support
       try {
-        let questionQuery = supabase
-          .from("questions_safe" as any)
-          .select("*")
-          .eq("subject", subjectId);
-        if (curriculumId) questionQuery = questionQuery.eq("curriculum", curriculumId);
-        const { data } = await questionQuery.limit(50);
+        let data: unknown[] | null = null;
+        if (user) {
+          const adaptive = await (supabase.rpc as any)("get_adaptive_practice_questions", {
+            _subject: subjectId,
+            _curriculum: curriculumId || null,
+            _mode: practiceMode,
+            _count: 30,
+          });
+          if (!adaptive.error) data = adaptive.data || [];
+        }
+        if (!data?.length) {
+          let questionQuery = supabase
+            .from("questions_safe" as any)
+            .select("*")
+            .eq("subject", subjectId);
+          if (curriculumId) questionQuery = questionQuery.eq("curriculum", curriculumId);
+          const fallback = await questionQuery.limit(50);
+          data = (fallback.data as unknown[] | null) || [];
+        }
         if (data && (data as any[]).length > 0) {
-          const shuffled = (data as unknown as DBQuestion[]).sort(() => Math.random() - 0.5);
-          setQuestions(shuffled);
+          const selected = data as unknown as DBQuestion[];
+          setQuestions(selected);
+          setCurrentIndex(0);
+          setSelectedAnswer(null);
+          setSelectedAnswers(new Set());
+          setEssayAnswer("");
+          setOrderedOptions([]);
+          setShowFeedback(false);
+          setRevealedAnswer(null);
+          setMasteryFeedback(null);
           // Cache for offline use
-          cacheQuestions(subjectId, shuffled, curriculumId);
+          cacheQuestions(subjectId, selected, curriculumId);
         } else {
           // No data from network — try cache
           const cached = await getCachedQuestions(subjectId, curriculumId);
@@ -135,7 +164,7 @@ export default function Practice() {
       setDbLoading(false);
     };
     loadQuestions();
-  }, [curriculumId, curriculumLoading, subjectId, t, toast]);
+  }, [curriculumId, curriculumLoading, practiceMode, subjectId, t, toast, user]);
 
   // Keyboard shortcuts: 1-4 for options, Enter to submit/next, → for next
   useEffect(() => {
@@ -278,6 +307,7 @@ export default function Practice() {
         });
         if (error) throw error;
         setAiGrading(data.grading);
+        setMasteryFeedback(data.mastery || null);
         setShowFeedback(true);
         const passed = data.grading?.score >= data.grading?.max_marks * 0.6;
         setLastCorrect(passed);
@@ -316,6 +346,7 @@ export default function Practice() {
 
       const correct = result.correct;
       setRevealedAnswer(result);
+      setMasteryFeedback(result.mastery || null);
       setLastCorrect(correct);
       setShowFeedback(true);
       setShowCorrectAnim(true);
@@ -357,6 +388,7 @@ export default function Practice() {
     setShowMascotReaction(false);
     setMascotCorrect(null);
     setRevealedAnswer(null);
+    setMasteryFeedback(null);
     setCurrentIndex((prev) => (prev + 1) % questions.length);
   };
 
@@ -513,6 +545,33 @@ export default function Practice() {
         )}
 
         {user && <div className="mb-6"><StreakBar stats={stats} /></div>}
+
+        {user && (
+          <div className="mb-6 rounded-2xl border border-border/60 bg-card p-3">
+            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+              <div>
+                <div className="text-sm font-semibold">{t("practice.adaptiveSession")}</div>
+                <div className="text-xs text-muted-foreground">{t("practice.adaptiveSessionDesc")}</div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/mastery")} className="text-xs">
+                {t("practice.viewMastery")}
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {(["diagnostic", "focus", "mixed"] as PracticeMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setSearchParams({ mode })}
+                  className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${practiceMode === mode ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground hover:text-foreground"}`}
+                  aria-pressed={practiceMode === mode}
+                >
+                  {t(`practice.mode.${mode}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Question counter */}
         <div className="mb-4 flex items-center justify-between">
@@ -748,6 +807,29 @@ export default function Practice() {
                 )}
               </div>
             </div>
+
+            {showFeedback && masteryFeedback && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                    <Target className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold">{t("practice.topicMastery", { topic: masteryFeedback.topic })}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {t("practice.masteryChange", { before: Number(masteryFeedback.score_before).toFixed(0), after: Number(masteryFeedback.score_after).toFixed(0) })}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-primary">{Number(masteryFeedback.score_after).toFixed(0)}%</div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t(`mastery.level.${masteryFeedback.level}`)}</div>
+                  </div>
+                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary/10">
+                  <motion.div initial={{ width: `${masteryFeedback.score_before}%` }} animate={{ width: `${masteryFeedback.score_after}%` }} className="h-full rounded-full bg-primary" />
+                </div>
+              </motion.div>
+            )}
 
             {/* MCQ Feedback */}
             {showFeedback && !isEssay && (
