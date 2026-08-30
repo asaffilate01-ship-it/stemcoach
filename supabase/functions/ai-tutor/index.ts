@@ -253,11 +253,18 @@ async function recordEssayResult(sb: any, userId: string, questionId: string, an
   if (attemptError) throw attemptError;
   const { data: stats, error: statsError } = await sb.rpc("record_answer_stats", { _user_id: userId, _correct: passed, _xp_gain: xpGain });
   if (statsError) throw statsError;
+  const { data: mastery, error: masteryError } = await sb.rpc("update_learner_topic_mastery", {
+    _user_id: userId,
+    _question_id: questionId,
+    _correct: passed,
+    _time_taken_seconds: null,
+  });
+  if (masteryError) console.error("mastery update error:", masteryError.message);
   if (paid) {
     const { error } = await sb.rpc("increment_used_questions", { _user_id: userId });
     if (error) throw error;
   }
-  return { correct: passed, xp_gained: xpGain, stats };
+  return { correct: passed, xp_gained: xpGain, stats, mastery: mastery || null };
 }
 
 // ── GENERATE QUESTIONS ──

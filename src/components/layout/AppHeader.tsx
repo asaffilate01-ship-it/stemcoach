@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe, Target } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Icon3D } from "@/components/ui/icon-3d";
 import { Button } from "@/components/ui/button";
@@ -111,6 +111,7 @@ const navItems: NavItem[] = [
   { to: "/mock-exam", labelKey: "nav.exam", label: "Exam", icon: Trophy, variant: "warning" },
   { to: "/ai-tutor", labelKey: "nav.aiTutor", label: "STEMCoach", icon: Bot, image: "/assets/coach-stem.png" },
   { to: "/dashboard", labelKey: "nav.dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["student", "admin"], group: "study", variant: "primary" },
+  { to: "/mastery", labelKey: "nav.mastery", label: "Mastery", icon: Target, roles: ["student", "admin"], group: "study", variant: "success" },
   { to: "/flashcards", labelKey: "nav.flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study", variant: "accent" },
   { to: "/weak-drills", labelKey: "nav.drills", label: "Drills", icon: Brain, group: "study", variant: "warning" },
   { to: "/daily-challenge", labelKey: "nav.dailyChallenge", label: "Daily Challenge", icon: Flame, group: "study", variant: "destructive" },
