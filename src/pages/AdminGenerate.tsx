@@ -9,7 +9,7 @@ import { subjects, curricula } from "@/data/questions";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { motion } from "framer-motion";
-import { Loader2, Sparkles, Database, ShieldAlert, Rocket, BarChart3, RefreshCw } from "lucide-react";
+import { Loader2, Sparkles, Database, ShieldAlert, Rocket, RefreshCw, Pause, Play, RotateCcw, Ban } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -38,6 +38,7 @@ export default function AdminGenerate() {
   const { toast } = useToast();
   const [generating, setGenerating] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [campaignAction, setCampaignAction] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState("physics");
   const [selectedTopic, setSelectedTopic] = useState("");
   const [selectedSubtopic, setSelectedSubtopic] = useState("");
@@ -200,60 +201,37 @@ export default function AdminGenerate() {
     }
   };
 
-  const handleAutoGenerate = async () => {
-    setGenerating(true);
-    addLog("🚀🚀 Starting auto-generation loop (will process until rate-limited)...");
+  const handleCampaignAction = async (action: "pause" | "resume" | "retry-failed" | "cancel") => {
+    if (!batchStatus?.campaign_id) return;
+    if (action === "cancel" && !window.confirm("Cancel this generation campaign? Pending work will be stopped and cannot be resumed.")) return;
 
-    let totalInserted = 0;
-    let iterations = 0;
-    const MAX_ITERATIONS = 50; // Safety cap
-
-    while (iterations < MAX_ITERATIONS) {
-      iterations++;
-      try {
-        const { data, error } = await supabase.functions.invoke("batch-generate", {
-          body: { action: "process" },
-        });
-        if (error) throw error;
-
-        if (data.message === "No pending items in queue") {
-          addLog("🏆 All queue items processed!");
-          break;
-        }
-
-        totalInserted += data.inserted || 0;
-        const hasRateLimit = data.results?.some((r: any) => r.status === "rate_limited");
-
-        addLog(`  Iteration ${iterations}: +${data.inserted} questions (total: ${totalInserted})`);
-
-        if (hasRateLimit) {
-          addLog("  ⏳ Rate limited — waiting 30s...");
-          await new Promise(r => setTimeout(r, 30000));
-        } else {
-          await new Promise(r => setTimeout(r, 2000));
-        }
-      } catch (e: any) {
-        addLog(`  ❌ Error: ${e.message}`);
-        if (e.message?.includes("429") || e.message?.includes("rate")) {
-          addLog("  ⏳ Waiting 30s...");
-          await new Promise(r => setTimeout(r, 30000));
-        } else {
-          break;
-        }
-      }
+    const actionLabel = action === "retry-failed" ? "retry failed jobs" : action;
+    setCampaignAction(action);
+    addLog(`🛠️ Requesting campaign action: ${actionLabel}...`);
+    try {
+      const { data, error } = await supabase.functions.invoke("batch-generate", {
+        body: { action, campaign_id: batchStatus.campaign_id },
+      });
+      if (error) throw error;
+      addLog(`✅ Campaign ${data.campaign_status}. ${data.affected_queue_jobs || 0} queue jobs updated.`);
+      toast({ title: `Campaign ${data.campaign_status}`, description: `${data.affected_queue_jobs || 0} queue jobs updated.` });
+      await refetchBatch();
+    } catch (e: any) {
+      addLog(`❌ Campaign action failed: ${e.message}`);
+      toast({ title: "Campaign action failed", description: e.message, variant: "destructive" });
+    } finally {
+      setCampaignAction(null);
     }
-
-    addLog(`🏁 Auto-generation stopped. Total: ${totalInserted} questions in ${iterations} iterations.`);
-    toast({ title: "Auto-generation complete", description: `${totalInserted} questions added.` });
-    refetchCount();
-    refetchBatch();
-    setGenerating(false);
   };
 
   const progressPct = batchStatus?.progress_pct || 0;
   const planningPct = batchStatus?.target > 0
     ? Math.min(100, Math.round(((batchStatus?.planned_questions || 0) / batchStatus.target) * 1000) / 10)
     : 0;
+  const campaignStatus = batchStatus?.campaign_status as string | undefined;
+  const campaignIsActive = ["planning", "queued", "running"].includes(campaignStatus || "");
+  const campaignBlocksNew = ["planning", "queued", "running", "paused", "failed"].includes(campaignStatus || "");
+  const campaignCanRun = !["paused", "cancelled", "completed"].includes(campaignStatus || "");
 
   return (
     <div className="min-h-screen bg-background">
@@ -273,7 +251,10 @@ export default function AdminGenerate() {
             <h3 className="font-semibold flex items-center gap-2">
               <Rocket className="h-4 w-4 text-primary" /> Draft generation progress
             </h3>
-            <span className="text-sm font-bold text-primary">{progressPct.toFixed(1)}%</span>
+            <div className="flex items-center gap-2">
+              {campaignStatus && <span className="rounded-full border bg-background px-2 py-1 text-xs font-semibold capitalize">{campaignStatus}</span>}
+              <span className="text-sm font-bold text-primary">{progressPct.toFixed(1)}%</span>
+            </div>
           </div>
           <Progress value={progressPct} className="h-3 mb-3" />
           {batchStatus?.campaign_id && (
@@ -282,7 +263,7 @@ export default function AdminGenerate() {
               {batchStatus.planning_complete ? " — complete" : " — safely resumable"}
             </p>
           )}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 text-center text-sm">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 text-center text-sm">
             <div>
               <div className="text-xl font-bold">{(batchStatus?.generated || 0).toLocaleString()}</div>
               <div className="stem-label">Drafts Generated</div>
@@ -299,34 +280,66 @@ export default function AdminGenerate() {
               <div className="text-xl font-bold">{(batchStatus?.awaiting_review || 0).toLocaleString()}</div>
               <div className="stem-label">Awaiting Review</div>
             </div>
+            <div>
+              <div className="text-xl font-bold">{(batchStatus?.reviewed_questions || 0).toLocaleString()}</div>
+              <div className="stem-label">Reviewed</div>
+            </div>
+            <div>
+              <div className={`text-xl font-bold ${(batchStatus?.queue_failed || 0) > 0 ? "text-destructive" : ""}`}>{(batchStatus?.queue_failed || 0).toLocaleString()}</div>
+              <div className="stem-label">Failed Jobs</div>
+            </div>
           </div>
+          {batchStatus?.campaign_id && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Review backlog: {(batchStatus.review_backlog || 0).toLocaleString()} drafts · Approval yield: {Number(batchStatus.review_yield_pct || 0).toFixed(1)}% · Queue complete: {Number(batchStatus.queue_completion_pct || 0).toFixed(1)}%
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             <div className="flex items-center gap-2 rounded-lg border bg-background px-3">
               <Label htmlFor="bank-target" className="whitespace-nowrap text-xs">Bank target</Label>
               <Input id="bank-target" type="number" min={1000} max={MAX_BANK_TARGET} step={10000} value={bankTarget} onChange={(event) => setBankTarget(Math.min(MAX_BANK_TARGET, Math.max(1000, Number(event.target.value) || 1000)))} className="h-9 w-32 border-0 px-1" />
             </div>
-            <Button onClick={handleSeedQueue} disabled={seeding || generating} variant="outline" className="gap-2 rounded">
+            <Button onClick={handleSeedQueue} disabled={seeding || generating || campaignBlocksNew} variant="outline" className="gap-2 rounded">
               {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
               1. Plan governed bank
             </Button>
-            {batchStatus?.campaign_id && !batchStatus?.planning_complete && (
+            {batchStatus?.campaign_id && !batchStatus?.planning_complete && campaignIsActive && (
               <Button onClick={handleContinuePlanning} disabled={seeding || generating} variant="outline" className="gap-2 rounded">
                 {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
                 Continue queue planning
               </Button>
             )}
-            <Button onClick={handleProcessBatch} disabled={generating} variant="outline" className="gap-2 rounded">
+            <Button onClick={handleProcessBatch} disabled={generating || !campaignCanRun} variant="outline" className="gap-2 rounded">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               2. Process Next Batch
             </Button>
-            <Button onClick={handleAutoGenerate} disabled={generating} className="gap-2 rounded bg-primary">
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-              🚀 Auto-Generate (Loop)
-            </Button>
+            {campaignIsActive && (
+              <Button onClick={() => handleCampaignAction("pause")} disabled={!!campaignAction || generating} variant="secondary" className="gap-2 rounded">
+                {campaignAction === "pause" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pause className="h-4 w-4" />} Pause
+              </Button>
+            )}
+            {campaignStatus === "paused" && (
+              <Button onClick={() => handleCampaignAction("resume")} disabled={!!campaignAction} className="gap-2 rounded">
+                {campaignAction === "resume" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Resume
+              </Button>
+            )}
+            {(batchStatus?.queue_failed || 0) > 0 && campaignStatus !== "cancelled" && (
+              <Button onClick={() => handleCampaignAction("retry-failed")} disabled={!!campaignAction || generating} variant="outline" className="gap-2 rounded">
+                {campaignAction === "retry-failed" ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} Retry failed
+              </Button>
+            )}
+            {batchStatus?.campaign_id && !["completed", "cancelled"].includes(campaignStatus || "") && (
+              <Button onClick={() => handleCampaignAction("cancel")} disabled={!!campaignAction || generating} variant="destructive" className="gap-2 rounded">
+                {campaignAction === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />} Cancel
+              </Button>
+            )}
             <Button onClick={() => refetchBatch()} variant="ghost" size="sm" className="gap-1 rounded">
               <RefreshCw className="h-3 w-3" /> Refresh
             </Button>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            The secured server worker runs every two minutes after deployment. You can close this page; planning and generation checkpoints are stored in the database.
+          </p>
         </motion.div>
 
         {/* Stats per subject */}

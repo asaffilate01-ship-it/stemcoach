@@ -41,3 +41,12 @@ verify_jwt = false
 
 [functions.grade-daily-challenge]
 verify_jwt = false
+
+# These endpoints perform their own admin/cron authorization in
+# _shared/gate.ts. Disabling the platform JWT pre-check allows pg_cron to send
+# its x-cron-secret header while the function still rejects anonymous callers.
+[functions.batch-generate]
+verify_jwt = false
+
+[functions.daily-mascot-notify]
+verify_jwt = false

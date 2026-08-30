@@ -482,6 +482,25 @@ serve(async (req) => {
     if (action === "seed") {
       const targetQuestions = Math.min(MAX_BANK_TARGET, Math.max(1_000, Number(body.target_questions) || DEFAULT_BANK_TARGET));
       const questionsPerJob = Math.min(20, Math.max(5, Number(body.questions_per_job) || DEFAULT_QUESTIONS_PER_JOB));
+      const { data: activeCampaign, error: activeCampaignError } = await supabase
+        .from("generation_campaigns")
+        .select("id,status,name")
+        .in("status", ["planning", "queued", "running", "paused", "failed"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (activeCampaignError) throw new Error(`Unable to check active campaigns: ${activeCampaignError.message}`);
+      if (activeCampaign) {
+        return new Response(JSON.stringify({
+          error: "An unfinished generation campaign already exists",
+          campaign_id: activeCampaign.id,
+          campaign_status: activeCampaign.status,
+          campaign_name: activeCampaign.name,
+        }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const { data: campaign, error: campaignError } = await supabase.from("generation_campaigns").insert({
         name: typeof body.name === "string" ? body.name.slice(0, 120) : "2M curriculum bank",
         target_questions: targetQuestions,
@@ -507,7 +526,11 @@ serve(async (req) => {
     }
 
     if (action === "seed-next") {
-      let campaignQuery = supabase.from("generation_campaigns").select("*").eq("planning_complete", false);
+      let campaignQuery = supabase
+        .from("generation_campaigns")
+        .select("*")
+        .eq("planning_complete", false)
+        .in("status", ["planning", "queued", "running"]);
       if (typeof body.campaign_id === "string") campaignQuery = campaignQuery.eq("id", body.campaign_id);
       const { data: campaign, error: campaignError } = await campaignQuery.order("created_at", { ascending: true }).limit(1).maybeSingle();
       if (campaignError) throw new Error(`Unable to load planning campaign: ${campaignError.message}`);
@@ -525,6 +548,29 @@ serve(async (req) => {
         target_questions: campaign.target_questions,
         planning_complete: planning.planning_complete,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const campaignActions: Record<string, string> = {
+      pause: "pause",
+      resume: "resume",
+      cancel: "cancel",
+      "retry-failed": "retry_failed",
+    };
+    if (campaignActions[action]) {
+      if (typeof body.campaign_id !== "string") {
+        return new Response(JSON.stringify({ error: "campaign_id is required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: operation, error: operationError } = await supabase.rpc("manage_generation_campaign", {
+        _campaign_id: body.campaign_id,
+        _action: campaignActions[action],
+      });
+      if (operationError) throw new Error(`Unable to ${action} campaign: ${operationError.message}`);
+      return new Response(JSON.stringify(operation), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     if (action === "status") {
@@ -548,6 +594,7 @@ serve(async (req) => {
       .from("generation_campaigns")
       .select("*")
       .eq("planning_complete", false)
+      .in("status", ["planning", "queued", "running"])
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle();
@@ -689,11 +736,11 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
           const errText = await aiResponse.text();
           console.error(`[BATCH] AI error for ${item.subject}/${item.topic}/${item.subtopic}: ${aiResponse.status} ${errText}`);
           if (aiResponse.status === 429) {
-            await supabase.from("generation_queue").update({ status: "pending" }).eq("id", item.id);
+            await supabase.from("generation_queue").update({ status: "pending" }).eq("id", item.id).eq("status", "processing");
             results.push({ id: item.id, status: "rate_limited" });
             break;
           }
-          await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id);
+          await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id).eq("status", "processing");
           results.push({ id: item.id, status: "ai_error", error: aiResponse.status });
           continue;
         }
@@ -704,7 +751,7 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
 
         if (!generated.questions || generated.questions.length === 0) {
           const retry = item.attempts < 3;
-          await supabase.from("generation_queue").update({ status: retry ? "pending" : "failed", last_error: "AI returned no questions" }).eq("id", item.id);
+          await supabase.from("generation_queue").update({ status: retry ? "pending" : "failed", last_error: "AI returned no questions" }).eq("id", item.id).eq("status", "processing");
           results.push({ id: item.id, status: retry ? "retrying_no_questions" : "no_questions" });
           continue;
         }
@@ -769,7 +816,7 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
 
         if (rows.length === 0) {
           const retry = item.attempts < 3;
-          await supabase.from("generation_queue").update({ status: retry ? "pending" : "failed", last_error: "All generated questions failed structural validation" }).eq("id", item.id);
+          await supabase.from("generation_queue").update({ status: retry ? "pending" : "failed", last_error: "All generated questions failed structural validation" }).eq("id", item.id).eq("status", "processing");
           results.push({ id: item.id, status: retry ? "retrying_validation" : "validation_failed" });
           continue;
         }
@@ -778,7 +825,7 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
           .upsert(rows, { onConflict: "subject,curriculum,content_hash", ignoreDuplicates: true }).select("id");
         if (insertError) {
           console.error(`[BATCH] DB insert error: ${insertError.message}`);
-          await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id);
+          await supabase.from("generation_queue").update({ status: "failed" }).eq("id", item.id).eq("status", "processing");
           results.push({ id: item.id, status: "db_error", error: insertError.message });
           continue;
         }
@@ -793,7 +840,7 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
           generated_count: cumulativeCount,
           completed_at: complete ? new Date().toISOString() : null,
           last_error: complete ? null : `Generated ${cumulativeCount} of ${item.count} required unique drafts`,
-        }).eq("id", item.id);
+        }).eq("id", item.id).eq("status", "processing");
         results.push({
           id: item.id,
           status: complete ? "done" : retry ? "retrying_shortfall" : "shortfall_failed",
@@ -809,7 +856,7 @@ Each question must be unique, exam-quality, and have verified correct answers.`,
         await new Promise(r => setTimeout(r, 800));
       } catch (e) {
         console.error(`[BATCH] Error processing ${item.id}:`, e);
-        await supabase.from("generation_queue").update({ status: item.attempts < 3 ? "pending" : "failed", last_error: (e as Error).message }).eq("id", item.id);
+        await supabase.from("generation_queue").update({ status: item.attempts < 3 ? "pending" : "failed", last_error: (e as Error).message }).eq("id", item.id).eq("status", "processing");
         results.push({ id: item.id, status: "error", error: (e as Error).message });
       }
     }
