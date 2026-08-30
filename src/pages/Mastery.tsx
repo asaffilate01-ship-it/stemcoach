@@ -104,12 +104,12 @@ export default function Mastery() {
         ) : (
           <>
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {[
-                [t("mastery.overall"), `${summary.average}%`, TrendingUp],
-                [t("mastery.dueNow"), summary.due, CalendarClock],
-                [t("mastery.masteredTopics"), summary.mastered, CheckCircle2],
-                [t("mastery.evidence"), rows.reduce((sum, row) => sum + row.attempts, 0), Brain],
-              ].map(([label, value, Icon]) => (
+              {([
+                { label: t("mastery.overall"), value: `${summary.average}%`, Icon: TrendingUp },
+                { label: t("mastery.dueNow"), value: summary.due, Icon: CalendarClock },
+                { label: t("mastery.masteredTopics"), value: summary.mastered, Icon: CheckCircle2 },
+                { label: t("mastery.evidence"), value: rows.reduce((sum, row) => sum + row.attempts, 0), Icon: Brain },
+              ] as const).map(({ label, value, Icon }) => (
                 <div key={String(label)} className="stem-card rounded-xl p-4">
                   <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10"><Icon className="h-4 w-4 text-primary" /></div>
                   <div className="text-2xl font-bold">{typeof value === "number" ? value.toLocaleString() : value}</div>
