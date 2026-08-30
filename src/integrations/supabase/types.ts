@@ -410,6 +410,33 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       coaching_cache: {
         Row: {
           action: string
@@ -574,15 +601,59 @@ export type Database = {
           },
         ]
       }
+      generation_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          generated_questions: number
+          id: string
+          name: string
+          published_questions: number
+          reviewed_questions: number
+          status: string
+          target_questions: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          generated_questions?: number
+          id?: string
+          name: string
+          published_questions?: number
+          reviewed_questions?: number
+          status?: string
+          target_questions: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          generated_questions?: number
+          id?: string
+          name?: string
+          published_questions?: number
+          reviewed_questions?: number
+          status?: string
+          target_questions?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generation_queue: {
         Row: {
+          attempts: number
           boards: string[]
+          campaign_id: string | null
+          claimed_at: string | null
           completed_at: string | null
           count: number
           created_at: string
           curriculum: string
           difficulty: number
+          generated_count: number
           id: string
+          last_error: string | null
           question_type: string
           status: string
           subject: string
@@ -590,13 +661,18 @@ export type Database = {
           topic: string
         }
         Insert: {
+          attempts?: number
           boards?: string[]
+          campaign_id?: string | null
+          claimed_at?: string | null
           completed_at?: string | null
           count?: number
           created_at?: string
           curriculum: string
           difficulty: number
+          generated_count?: number
           id?: string
+          last_error?: string | null
           question_type: string
           status?: string
           subject: string
@@ -604,20 +680,33 @@ export type Database = {
           topic: string
         }
         Update: {
+          attempts?: number
           boards?: string[]
+          campaign_id?: string | null
+          claimed_at?: string | null
           completed_at?: string | null
           count?: number
           created_at?: string
           curriculum?: string
           difficulty?: number
+          generated_count?: number
           id?: string
+          last_error?: string | null
           question_type?: string
           status?: string
           subject?: string
           subtopic?: string
           topic?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "generation_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "generation_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -742,11 +831,60 @@ export type Database = {
         }
         Relationships: []
       }
+      question_review_events: {
+        Row: {
+          action: string
+          created_at: string
+          flags_snapshot: Json
+          id: string
+          notes: string | null
+          question_id: string
+          question_snapshot: Json
+          reviewer_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          flags_snapshot?: Json
+          id?: string
+          notes?: string | null
+          question_id: string
+          question_snapshot?: Json
+          reviewer_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          flags_snapshot?: Json
+          id?: string
+          notes?: string | null
+          question_id?: string
+          question_snapshot?: Json
+          reviewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_review_events_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_review_events_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           allow_multiple_answers: boolean
           boards: string[]
           command_word: string | null
+          content_hash: string
           content_origin: string
           correct_answer: string
           correct_answers: string[] | null
@@ -756,6 +894,7 @@ export type Database = {
           exam_tip: string
           explanation: string
           formula: string | null
+          generation_campaign_id: string | null
           id: string
           mark_scheme: string | null
           max_marks: number | null
@@ -765,6 +904,9 @@ export type Database = {
           quality_flags: Json
           question_text: string
           question_type: string
+          review_claimed_at: string | null
+          review_claimed_by: string | null
+          review_notes: string | null
           review_status: string
           reviewed_at: string | null
           reviewed_by: string | null
@@ -780,6 +922,7 @@ export type Database = {
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
+          content_hash: string
           content_origin?: string
           correct_answer?: string
           correct_answers?: string[] | null
@@ -789,6 +932,7 @@ export type Database = {
           exam_tip?: string
           explanation?: string
           formula?: string | null
+          generation_campaign_id?: string | null
           id?: string
           mark_scheme?: string | null
           max_marks?: number | null
@@ -798,6 +942,9 @@ export type Database = {
           quality_flags?: Json
           question_text: string
           question_type?: string
+          review_claimed_at?: string | null
+          review_claimed_by?: string | null
+          review_notes?: string | null
           review_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -813,6 +960,7 @@ export type Database = {
           allow_multiple_answers?: boolean
           boards?: string[]
           command_word?: string | null
+          content_hash?: string
           content_origin?: string
           correct_answer?: string
           correct_answers?: string[] | null
@@ -822,6 +970,7 @@ export type Database = {
           exam_tip?: string
           explanation?: string
           formula?: string | null
+          generation_campaign_id?: string | null
           id?: string
           mark_scheme?: string | null
           max_marks?: number | null
@@ -831,6 +980,9 @@ export type Database = {
           quality_flags?: Json
           question_text?: string
           question_type?: string
+          review_claimed_at?: string | null
+          review_claimed_by?: string | null
+          review_notes?: string | null
           review_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -842,7 +994,15 @@ export type Database = {
           tuition_tips?: string[]
           worked_solution?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "questions_generation_campaign_id_fkey"
+            columns: ["generation_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "generation_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       study_goals: {
         Row: {
@@ -1110,6 +1270,7 @@ export type Database = {
           id: string
           notification_prefs: Json
           onboarding_complete: boolean
+          preferred_mascot: string
           subjects: string[]
           updated_at: string
           user_id: string
@@ -1120,6 +1281,7 @@ export type Database = {
           id?: string
           notification_prefs?: Json
           onboarding_complete?: boolean
+          preferred_mascot?: string
           subjects?: string[]
           updated_at?: string
           user_id: string
@@ -1130,6 +1292,7 @@ export type Database = {
           id?: string
           notification_prefs?: Json
           onboarding_complete?: boolean
+          preferred_mascot?: string
           subjects?: string[]
           updated_at?: string
           user_id?: string
@@ -1382,10 +1545,93 @@ export type Database = {
       }
     }
     Functions: {
+      archive_question: {
+        Args: { _notes?: string; _question_id: string }
+        Returns: boolean
+      }
       assert_self: { Args: { _user_id: string }; Returns: undefined }
       award_badge: {
         Args: { _badge_id: string; _user_id: string }
         Returns: boolean
+      }
+      claim_generation_queue: {
+        Args: { _limit?: number }
+        Returns: {
+          attempts: number
+          boards: string[]
+          campaign_id: string | null
+          claimed_at: string | null
+          completed_at: string | null
+          count: number
+          created_at: string
+          curriculum: string
+          difficulty: number
+          generated_count: number
+          id: string
+          last_error: string | null
+          question_type: string
+          status: string
+          subject: string
+          subtopic: string
+          topic: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "generation_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_question_review: {
+        Args: { _question_id: string }
+        Returns: boolean
+      }
+      claim_question_review_batch: {
+        Args: { _curriculum?: string; _limit?: number; _subject?: string }
+        Returns: {
+          allow_multiple_answers: boolean
+          boards: string[]
+          command_word: string | null
+          content_hash: string
+          content_origin: string
+          correct_answer: string
+          correct_answers: string[] | null
+          created_at: string
+          curriculum: string
+          difficulty: number
+          exam_tip: string
+          explanation: string
+          formula: string | null
+          generation_campaign_id: string | null
+          id: string
+          mark_scheme: string | null
+          max_marks: number | null
+          model_answer: string | null
+          options: Json | null
+          points: number
+          quality_flags: Json
+          question_text: string
+          question_type: string
+          review_claimed_at: string | null
+          review_claimed_by: string | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_url: string | null
+          specification_version: string | null
+          subject: string
+          subtopic: string
+          topic: string
+          tuition_tips: string[]
+          worked_solution: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "questions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       confirm_subject_selection: {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
@@ -1457,6 +1703,7 @@ export type Database = {
           xp_reward: number
         }[]
       }
+      get_review_queue_metrics: { Args: never; Returns: Json }
       get_subject_question_counts: {
         Args: never
         Returns: {
@@ -1527,6 +1774,19 @@ export type Database = {
           _device_info?: string
           _session_token: string
           _user_id: string
+        }
+        Returns: Json
+      }
+      release_question_review: {
+        Args: { _notes?: string; _question_id: string }
+        Returns: boolean
+      }
+      review_question_decision: {
+        Args: {
+          _attested?: boolean
+          _decision: string
+          _notes?: string
+          _question_id: string
         }
         Returns: Json
       }
