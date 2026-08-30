@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BookOpen, CheckCircle2, Clock, Cloud, Loader2, MessageCircle, PlayCircle, Search } from "lucide-react";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -41,22 +41,25 @@ export default function Tutorials() {
   const { t, i18n } = useTranslation();
   useDocumentTitle(t("tutorials.documentTitle"));
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [subject, setSubject] = useState("all");
+  const requestedTutorial = tutorials.find((tutorial) => tutorial.id === searchParams.get("tutorial"));
+  const [subject, setSubject] = useState(requestedTutorial?.subject || "all");
   const [search, setSearch] = useState("");
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(requestedTutorial?.id || null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completed, setCompleted] = useState<string[]>(readLocalCompleted);
-  const [lastOpenedId, setLastOpenedId] = useState<string | null>(readLocalLastOpened);
+  const [lastOpenedId, setLastOpenedId] = useState<string | null>(requestedTutorial?.id || readLocalLastOpened());
   const [syncing, setSyncing] = useState(Boolean(user));
   const [accountProgressReady, setAccountProgressReady] = useState(false);
+  const openedFromLinkRef = useRef<string | null>(null);
 
   useEffect(() => {
     let active = true;
     if (!user) {
       setCompleted(readLocalCompleted());
-      setLastOpenedId(readLocalLastOpened());
+      setLastOpenedId(requestedTutorial?.id || readLocalLastOpened());
       setSyncing(false);
       setAccountProgressReady(false);
       return () => { active = false; };
@@ -85,7 +88,7 @@ export default function Tutorials() {
         const remoteCompleted = validRows.filter((row) => row.completed_at).map((row) => row.tutorial_id);
         setCompleted([...new Set([...remoteCompleted, ...(localSyncError ? localCompleted : [])])]);
         const recentIncomplete = validRows.find((row) => !row.completed_at);
-        setLastOpenedId(recentIncomplete?.tutorial_id || readLocalLastOpened());
+        setLastOpenedId(requestedTutorial?.id || recentIncomplete?.tutorial_id || readLocalLastOpened());
       }
       setAccountProgressReady(!error && !localSyncError);
       setSyncing(false);
@@ -93,7 +96,7 @@ export default function Tutorials() {
 
     void loadAccountProgress();
     return () => { active = false; };
-  }, [t, toast, user]);
+  }, [requestedTutorial?.id, t, toast, user]);
 
   const tutorialSubjects = useMemo(() => [...new Set(tutorials.map((tutorial) => tutorial.subject))], []);
   const filtered = useMemo(() => tutorials.filter((tutorial) =>
@@ -102,7 +105,7 @@ export default function Tutorials() {
   ), [search, subject]);
   const continueTutorial = tutorials.find((tutorial) => tutorial.id === lastOpenedId && !completed.includes(tutorial.id));
 
-  const saveProgress = async (tutorialId: string, isComplete: boolean) => {
+  const saveProgress = useCallback(async (tutorialId: string, isComplete: boolean) => {
     if (user) {
       const { error } = await supabase.rpc("save_tutorial_progress", {
         _tutorial_id: tutorialId,
@@ -127,7 +130,20 @@ export default function Tutorials() {
       toast({ title: t("tutorials.saveFailed"), variant: "destructive" });
       return false;
     }
-  };
+  }, [t, toast, user]);
+
+  useEffect(() => {
+    if (!requestedTutorial || authLoading) return;
+    const progressKey = `${user?.id || "device"}:${requestedTutorial.id}`;
+    if (openedFromLinkRef.current === progressKey) return;
+    openedFromLinkRef.current = progressKey;
+    setSubject(requestedTutorial.subject);
+    setSearch("");
+    setOpenId(requestedTutorial.id);
+    setLastOpenedId(requestedTutorial.id);
+    void saveProgress(requestedTutorial.id, false);
+    window.setTimeout(() => document.getElementById(`tutorial-${requestedTutorial.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+  }, [authLoading, requestedTutorial, saveProgress, user?.id]);
 
   const toggleTutorial = (tutorialId: string) => {
     if (openId === tutorialId) {
