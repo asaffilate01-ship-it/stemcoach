@@ -30,6 +30,20 @@ test("tutorial catalogue covers all fourteen subjects", async ({ page }) => {
   await expect(page.getByText("Nominative and Accusative Cases")).toBeVisible();
 });
 
+test("tutorial progress persists and carries lesson context into coaching", async ({ page }) => {
+  await page.goto("/tutorials");
+  await dismissCookies(page);
+  const quadraticCard = page.getByRole("button").filter({ hasText: "Solving Quadratic Equations" });
+  await quadraticCard.click();
+  await page.getByRole("button", { name: "2 and −3", exact: true }).click();
+  await expect(page.getByText(/1 of \d+ tutorials mastered/i)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText(/1 of \d+ tutorials mastered/i)).toBeVisible();
+  await page.getByRole("button").filter({ hasText: "Solving Quadratic Equations" }).click();
+  await page.getByRole("button", { name: /Ask MathMax about this lesson/i }).click();
+  await expect(page).toHaveURL(/\/ai-tutor\?subject=mathematics&tutorial=quadratic-equations/);
+});
+
 test("exam library uses original blueprints and opens exact exam setup", async ({ page }) => {
   await page.goto("/past-papers");
   await dismissCookies(page);

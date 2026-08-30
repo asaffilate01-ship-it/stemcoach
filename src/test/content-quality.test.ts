@@ -4,6 +4,7 @@ import { mockExamTemplates, examBoardGroups } from "@/data/mockExamTemplates";
 import { curriculumAuthorities } from "@/data/curriculumAuthorities";
 import { DEFAULT_COACH_ID, getCoachChoices, getSquadMembers, isCoachId } from "@/lib/mascots";
 import { tutorials } from "@/data/tutorials";
+import { TUTORIAL_CONTEXTS } from "../../supabase/functions/_shared/tutorialCatalog";
 
 const unique = (values: string[]) => new Set(values).size === values.length;
 
@@ -79,5 +80,12 @@ describe("content integrity", () => {
         expect(checkpoint.explanation.length).toBeGreaterThan(15);
       }
     }
+  });
+
+  it("keeps server-validated coach lesson contexts aligned with tutorials", () => {
+    expect(unique(TUTORIAL_CONTEXTS.map((tutorial) => tutorial.id))).toBe(true);
+    expect(TUTORIAL_CONTEXTS.map(({ id, subject, title }) => ({ id, subject, title }))).toEqual(
+      tutorials.map(({ id, subject, title }) => ({ id, subject, title })),
+    );
   });
 });

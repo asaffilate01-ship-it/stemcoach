@@ -2,15 +2,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { getCoachStem, getSquadMembers } from "@/lib/mascots";
 
-const subjectLabels: Record<string, string> = {
-  mathematics: "Mathematics", physics: "Physics", chemistry: "Chemistry", biology: "Biology",
-  "computer-science": "Computer Science", ielts: "IELTS & CELTA", economics: "Economics",
-  "english-literature": "English Literature", psychology: "Psychology", geography: "Geography",
-  "business-studies": "Business Studies", french: "Français", german: "Deutsch",
-};
-const squad = getSquadMembers()
-  .filter((member) => member.subjectId !== "celta")
-  .map((member) => ({ ...member, subject: subjectLabels[member.subjectId] || member.subjectId }));
+const squad = getSquadMembers().filter((member) => member.subjectId !== "celta");
 const coach = getCoachStem();
 
 export function StemSquadSection() {
@@ -65,13 +57,22 @@ export function StemSquadSection() {
               <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-md ring-1 ring-border/30 transition-all duration-300 group-hover:shadow-lg group-hover:ring-primary/30 group-hover:scale-105 sm:h-24 sm:w-24">
                 <img
                   src={member.image}
-                  alt={`${member.name} — ${member.subject} mascot`}
+                  alt={t("squad.mascotAlt", {
+                    name: member.name,
+                    subject: member.subjectId === "ielts"
+                      ? `${t("subjects.names.ielts")} & ${t("subjects.names.celta")}`
+                      : t(`subjects.names.${member.subjectId}`),
+                  })}
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
               </div>
               <span className="text-sm font-bold tracking-tight">{member.name}</span>
-              <span className="text-[11px] text-muted-foreground">{member.subject}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {member.subjectId === "ielts"
+                  ? `${t("subjects.names.ielts")} & ${t("subjects.names.celta")}`
+                  : t(`subjects.names.${member.subjectId}`)}
+              </span>
             </motion.div>
           ))}
         </div>
@@ -87,7 +88,7 @@ export function StemSquadSection() {
             href="/meet-the-squad"
             className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.06] px-6 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-primary/10 hover:shadow-md active:scale-[0.97]"
           >
-            Meet the full Squad & read their bios →
+            {t("squad.fullLink")}
           </a>
         </motion.div>
       </div>
