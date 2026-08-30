@@ -115,7 +115,7 @@ const navItems: NavItem[] = [
   { to: "/flashcards", labelKey: "nav.flashcards", label: "Flashcards", icon: Layers, roles: ["student", "admin"], group: "study", variant: "accent" },
   { to: "/weak-drills", labelKey: "nav.drills", label: "Drills", icon: Brain, group: "study", variant: "warning" },
   { to: "/daily-challenge", labelKey: "nav.dailyChallenge", label: "Daily Challenge", icon: Flame, group: "study", variant: "destructive" },
-  { to: "/past-papers", labelKey: "nav.pastPapers", label: "Past Papers", icon: FileText, group: "study", variant: "purple" },
+  { to: "/past-papers", labelKey: "nav.pastPapers", label: "Exam Library", icon: FileText, group: "study", variant: "purple" },
   { to: "/study-planner", labelKey: "nav.planner", label: "Planner", icon: CalendarDays, roles: ["student", "admin"], group: "study", variant: "success" },
   { to: "/analytics", labelKey: "nav.analytics", label: "Analytics", icon: BarChart3, roles: ["student", "admin"], group: "study", variant: "primary" },
   { to: "/progress-report", labelKey: "nav.report", label: "Report", icon: FileText, roles: ["student", "parent", "admin"], group: "study", variant: "accent" },

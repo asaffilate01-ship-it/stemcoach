@@ -324,6 +324,27 @@ export type Database = {
         }
         Relationships: []
       }
+      class_join_attempts: {
+        Row: {
+          attempted_at: string
+          id: number
+          succeeded: boolean
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: number
+          succeeded?: boolean
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: number
+          succeeded?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       class_members: {
         Row: {
           class_id: string
@@ -1989,6 +2010,8 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      is_class_participant: { Args: { _class_id: string }; Returns: boolean }
+      is_class_teacher: { Args: { _class_id: string }; Returns: boolean }
       is_tenant_admin: {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
@@ -2007,6 +2030,7 @@ export type Database = {
         }
         Returns: string
       }
+      join_class_by_code: { Args: { _join_code: string }; Returns: string }
       lookup_tenant_by_slug: {
         Args: { _slug: string }
         Returns: {
@@ -2063,6 +2087,23 @@ export type Database = {
       reviewer_can_claim_question: {
         Args: { _question_id: string }
         Returns: boolean
+      }
+      send_classroom_message: {
+        Args: { _message: string; _room_id: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          id: string
+          message: string
+          room_id: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "classroom_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_learner_topic_mastery: {
         Args: {

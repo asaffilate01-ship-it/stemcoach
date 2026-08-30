@@ -26,6 +26,7 @@ export default function Tutorials() {
       return [];
     }
   });
+  const tutorialSubjects = useMemo(() => [...new Set(tutorials.map((tutorial) => tutorial.subject))], []);
   const filtered = useMemo(() => tutorials.filter((tutorial) =>
     (subject === "all" || tutorial.subject === subject) &&
     `${tutorial.title} ${tutorial.summary}`.toLowerCase().includes(search.toLowerCase()),
@@ -46,7 +47,7 @@ export default function Tutorials() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("tutorials.search")} className="pl-9"/></div>
         <select value={subject} onChange={(event) => setSubject(event.target.value)} className="rounded-md border bg-background px-3 py-2 text-sm">
-          <option value="all">{t("tutorials.allSubjects")}</option>{["mathematics", "physics", "chemistry", "biology", "computer-science"].map((id) => <option key={id} value={id}>{t(`subjects.names.${id}`)}</option>)}
+          <option value="all">{t("tutorials.allSubjects")}</option>{tutorialSubjects.map((id) => <option key={id} value={id}>{t(`subjects.names.${id}`)}</option>)}
         </select>
       </div>
       <div className="space-y-4">
@@ -58,7 +59,7 @@ export default function Tutorials() {
           return <article key={tutorial.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
             <button onClick={() => setOpenId(open ? null : tutorial.id)} className="flex w-full items-center gap-4 p-5 text-left">
               <img src={mascot.image} alt="" className="h-14 w-14 rounded-xl bg-muted object-contain"/>
-              <div className="flex-1"><p className="text-xs font-semibold uppercase tracking-wide text-primary">{t(`subjects.names.${tutorial.subject}`)} · {tutorial.level}</p><h2 className="mt-1 flex items-center gap-2 text-lg font-bold">{tutorial.title}{isComplete && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}</h2><p className="mt-1 text-sm text-muted-foreground">{tutorial.summary}</p></div>
+              <div className="flex-1"><p className="text-xs font-semibold uppercase tracking-wide text-primary">{t(`subjects.names.${tutorial.subject}`)} · {t(`tutorials.levels.${tutorial.level.toLowerCase()}`)}</p><h2 className="mt-1 flex items-center gap-2 text-lg font-bold">{tutorial.title}{isComplete && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}</h2><p className="mt-1 text-sm text-muted-foreground">{tutorial.summary}</p></div>
               <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex"><Clock className="h-4 w-4"/>{t("tutorials.minutes", { count: tutorial.minutes })}</span>
             </button>
             {open && <div className="space-y-6 border-t px-5 py-6">

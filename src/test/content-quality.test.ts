@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { curricula, sampleQuestions } from "@/data/questions";
+import { curricula, sampleQuestions, subjects } from "@/data/questions";
 import { mockExamTemplates, examBoardGroups } from "@/data/mockExamTemplates";
 import { curriculumAuthorities } from "@/data/curriculumAuthorities";
 import { DEFAULT_COACH_ID, getCoachChoices, getSquadMembers, isCoachId } from "@/lib/mascots";
@@ -68,7 +68,8 @@ describe("content integrity", () => {
   });
 
   it("ships tutorials with checked answers", () => {
-    expect(tutorials.length).toBeGreaterThanOrEqual(20);
+    expect(tutorials.length).toBeGreaterThanOrEqual(29);
+    expect(new Set(tutorials.map((tutorial) => tutorial.subject))).toEqual(new Set(subjects.map((subject) => subject.id)));
     for (const tutorial of tutorials) {
       expect(tutorial.objectives.length).toBeGreaterThanOrEqual(3);
       expect(tutorial.lesson.length).toBeGreaterThanOrEqual(3);

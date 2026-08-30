@@ -43,4 +43,28 @@ describe("release hardening", () => {
     expect(source("src/lib/mascots.ts")).toContain("MASCOT_IDENTITIES");
     expect(source("supabase/functions/daily-mascot-notify/index.ts")).toContain("MASCOT_IDENTITIES");
   });
+
+  it("uses real exam blueprints instead of hard-coded past-paper claims", () => {
+    const library = source("src/pages/PastPapers.tsx");
+    const mockExam = source("src/pages/MockExam.tsx");
+    expect(library).toContain("mockExamTemplates");
+    expect(library).not.toContain("mockPapers");
+    expect(library).toContain("/mock-exam?template=");
+    expect(mockExam).toContain('searchParams.get("template")');
+  });
+
+  it("posts classroom messages through a membership-aware rate-limited RPC", () => {
+    const migration = source("supabase/migrations/20260831000000_secure_classroom_hub.sql");
+    const chat = source("src/components/classroom/ClassroomChat.tsx");
+    const studentClasses = source("src/pages/StudentClasses.tsx");
+    expect(migration).toContain("Class membership required");
+    expect(migration).toContain("Message rate limit reached");
+    expect(migration).toContain("REVOKE INSERT, UPDATE, DELETE");
+    expect(migration).toContain('DROP POLICY IF EXISTS "Students can join classes"');
+    expect(migration).toContain("Join-code rate limit reached");
+    expect(chat).toContain('"send_classroom_message"');
+    expect(chat).not.toContain('.from("classroom_messages").insert');
+    expect(studentClasses).toContain('"join_class_by_code"');
+    expect(studentClasses).not.toContain('.from("class_members").insert');
+  });
 });

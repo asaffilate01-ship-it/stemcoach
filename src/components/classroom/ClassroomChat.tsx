@@ -5,6 +5,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface Message {
   id: string;
@@ -20,13 +22,16 @@ interface ClassroomChatProps {
 }
 
 export function ClassroomChat({ roomId }: ClassroomChatProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMessages([]);
     // Load existing messages
     supabase
       .from("classroom_messages")
@@ -65,26 +70,27 @@ export function ClassroomChat({ roomId }: ClassroomChatProps) {
   const sendMessage = async () => {
     if (!input.trim() || !user || sending) return;
     setSending(true);
-    const displayName = user.email?.split("@")[0] || "Anonymous";
-    await supabase.from("classroom_messages").insert({
-      room_id: roomId,
-      user_id: user.id,
-      display_name: displayName,
-      message: input.trim(),
-    } as any);
-    setInput("");
+    const { error } = await supabase.rpc("send_classroom_message", {
+      _room_id: roomId,
+      _message: input.trim(),
+    });
+    if (error) {
+      toast({ title: t("classroom.sendFailed"), description: error.message, variant: "destructive" });
+    } else {
+      setInput("");
+    }
     setSending(false);
   };
 
   return (
     <div className="flex h-full flex-col border-l bg-background">
       <div className="border-b px-3 py-2">
-        <h3 className="text-sm font-semibold">Chat</h3>
+        <h3 className="text-sm font-semibold">{t("classroom.chat")}</h3>
       </div>
       <ScrollArea className="flex-1 px-3 py-2">
         <div className="space-y-2">
           {messages.length === 0 && (
-            <p className="py-8 text-center text-xs text-muted-foreground">No messages yet</p>
+            <p className="py-8 text-center text-xs text-muted-foreground">{t("classroom.noMessages")}</p>
           )}
           {messages.map((msg) => {
             const isMe = msg.user_id === user?.id;
@@ -115,7 +121,8 @@ export function ClassroomChat({ roomId }: ClassroomChatProps) {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message..."
+            placeholder={t("classroom.messagePlaceholder")}
+            maxLength={1000}
             className="h-8 text-sm"
           />
           <Button type="submit" size="sm" disabled={sending || !input.trim()} className="h-8 w-8 p-0">
