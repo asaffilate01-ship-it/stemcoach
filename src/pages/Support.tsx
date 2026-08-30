@@ -16,33 +16,33 @@ import { toast } from "sonner";
 import { Mail, MessageSquare, HelpCircle, Bug, Lightbulb, Send, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 
-const ticketSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  category: z.string().min(1, "Please select a category"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
-  message: z.string().min(20, "Message must be at least 20 characters"),
-});
-
-type TicketForm = z.infer<typeof ticketSchema>;
+type TicketForm = { name: string; email: string; category: string; subject: string; message: string };
 
 const categories = [
-  { value: "general", label: "General Enquiry", icon: HelpCircle },
-  { value: "bug", label: "Bug Report", icon: Bug },
-  { value: "feature", label: "Feature Request", icon: Lightbulb },
-  { value: "account", label: "Account Issue", icon: Mail },
-  { value: "billing", label: "Billing & Payments", icon: MessageSquare },
+  { value: "general", labelKey: "support.categories.general", icon: HelpCircle },
+  { value: "bug", labelKey: "support.categories.bug", icon: Bug },
+  { value: "feature", labelKey: "support.categories.feature", icon: Lightbulb },
+  { value: "account", labelKey: "support.categories.account", icon: Mail },
+  { value: "billing", labelKey: "support.categories.billing", icon: MessageSquare },
 ];
 
 export default function Support() {
-  useDocumentTitle("Support — STEMCoach");
+  const { t } = useTranslation();
+  useDocumentTitle(`${t("support.title")} — STEMCoach`);
   const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const form = useForm<TicketForm>({
-    resolver: zodResolver(ticketSchema),
+    resolver: zodResolver(z.object({
+      name: z.string().min(2, t("support.validation.name")),
+      email: z.string().email(t("support.validation.email")),
+      category: z.string().min(1, t("support.validation.category")),
+      subject: z.string().min(5, t("support.validation.subject")),
+      message: z.string().min(20, t("support.validation.message")),
+    })),
     defaultValues: {
       name: "",
       email: user?.email || "",
@@ -66,9 +66,9 @@ export default function Support() {
 
       if (error) throw error;
       setSubmitted(true);
-      toast.success("Support ticket submitted successfully!");
+      toast.success(t("support.successToast"));
     } catch (err) {
-      toast.error("Failed to submit ticket. Please try again or email us directly.");
+      toast.error(t("support.failureToast"));
     } finally {
       setLoading(false);
     }
@@ -81,12 +81,12 @@ export default function Support() {
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <div className="mb-10 text-center">
-            <div className="stem-label mb-3">Help & Support</div>
+            <div className="stem-label mb-3">{t("support.helpLabel")}</div>
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              How can we <span className="text-primary">help?</span>
+              {t("support.headingPrefix")} <span className="text-primary">{t("support.headingAccent")}</span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-              Got a question, found a bug, or have a suggestion? We're here to help. Submit a ticket below or email us directly.
+              {t("support.description")}
             </p>
           </div>
 
@@ -98,7 +98,7 @@ export default function Support() {
                   <Mail className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Email Us</div>
+                  <div className="text-sm font-semibold text-foreground">{t("support.emailUs")}</div>
                   <a href="mailto:support@stemcoach.app" className="text-sm text-primary hover:underline">
                     support@stemcoach.app
                   </a>
@@ -111,8 +111,8 @@ export default function Support() {
                   <MessageSquare className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Response Time</div>
-                  <p className="text-sm text-muted-foreground">We aim to respond within 24 hours</p>
+                  <div className="text-sm font-semibold text-foreground">{t("support.responseTime")}</div>
+                  <p className="text-sm text-muted-foreground">{t("support.responseTimeDesc")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -130,9 +130,9 @@ export default function Support() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                     <CheckCircle2 className="h-8 w-8 text-primary" />
                   </div>
-                  <h2 className="text-2xl font-bold text-foreground">Ticket Submitted!</h2>
+                  <h2 className="text-2xl font-bold text-foreground">{t("support.submittedTitle")}</h2>
                   <p className="max-w-md text-muted-foreground">
-                    Thank you for reaching out. We've received your support ticket and will get back to you at your email address within 24 hours.
+                    {t("support.submittedDesc")}
                   </p>
                   <Button
                     variant="outline"
@@ -142,7 +142,7 @@ export default function Support() {
                     }}
                     className="mt-4"
                   >
-                    Submit Another Ticket
+                    {t("support.submitAnother")}
                   </Button>
                 </CardContent>
               </Card>
@@ -150,9 +150,9 @@ export default function Support() {
           ) : (
             <Card className="border-border/40">
               <CardHeader>
-                <CardTitle className="text-xl">Submit a Support Ticket</CardTitle>
+                <CardTitle className="text-xl">{t("support.formTitle")}</CardTitle>
                 <CardDescription>
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  {t("support.formDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -164,9 +164,9 @@ export default function Support() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Your Name</FormLabel>
+                            <FormLabel>{t("support.name")}</FormLabel>
                             <FormControl>
-                              <Input placeholder="John Doe" {...field} />
+                              <Input placeholder={t("support.namePlaceholder")} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -177,7 +177,7 @@ export default function Support() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email Address</FormLabel>
+                            <FormLabel>{t("support.email")}</FormLabel>
                             <FormControl>
                               <Input placeholder="you@example.com" type="email" {...field} />
                             </FormControl>
@@ -193,17 +193,17 @@ export default function Support() {
                         name="category"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Category</FormLabel>
+                            <FormLabel>{t("support.category")}</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select a category" />
+                                  <SelectValue placeholder={t("support.selectCategory")} />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
                                 {categories.map((cat) => (
                                   <SelectItem key={cat.value} value={cat.value}>
-                                    {cat.label}
+                                    {t(cat.labelKey)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -217,9 +217,9 @@ export default function Support() {
                         name="subject"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Subject</FormLabel>
+                            <FormLabel>{t("support.subject")}</FormLabel>
                             <FormControl>
-                              <Input placeholder="Brief description of your issue" {...field} />
+                              <Input placeholder={t("support.subjectPlaceholder")} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -232,10 +232,10 @@ export default function Support() {
                       name="message"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Message</FormLabel>
+                          <FormLabel>{t("support.message")}</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Please describe your issue or question in detail..."
+                              placeholder={t("support.messagePlaceholder")}
                               className="min-h-[140px] resize-y"
                               {...field}
                             />
@@ -249,12 +249,12 @@ export default function Support() {
                       {loading ? (
                         <span className="flex items-center gap-2">
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                          Submitting…
+                          {t("support.submitting")}
                         </span>
                       ) : (
                         <span className="flex items-center gap-2">
                           <Send className="h-4 w-4" />
-                          Submit Ticket
+                          {t("support.submitTicket")}
                         </span>
                       )}
                     </Button>

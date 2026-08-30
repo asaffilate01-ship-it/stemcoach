@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, CheckCircle2, Flag, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface ExamQuestion {
   id: string;
@@ -42,6 +43,7 @@ export function ExamActive({
   onSubmit,
   formatTime,
 }: ExamActiveProps) {
+  const { t } = useTranslation();
   const q = questions[currentQ];
   const parsedOptions: string[] =
     typeof q.options === "string" ? JSON.parse(q.options) : q.options || [];
@@ -69,7 +71,7 @@ export function ExamActive({
             <div className="hidden sm:flex items-center gap-2 rounded-xl bg-muted/30 px-3 py-1.5 ring-1 ring-border/20">
               <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs font-semibold text-muted-foreground">
-                {answered}/{questions.length} answered
+                {t("mockExam.answeredCount", { answered, total: questions.length })}
               </span>
             </div>
             <span className="text-xs font-medium text-muted-foreground sm:hidden">
@@ -87,7 +89,7 @@ export function ExamActive({
               ) : (
                 <CheckCircle2 className="h-3.5 w-3.5" />
               )}
-              Submit
+              {t("mockExam.submit")}
             </Button>
           </div>
         </div>
@@ -160,7 +162,8 @@ export function ExamActive({
                       ? "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   }`}
-                  title="Flag for review"
+                  title={t("mockExam.flagForReview")}
+                  aria-label={t("mockExam.flagForReview")}
                 >
                   <Flag className="h-4 w-4" />
                 </button>
@@ -216,10 +219,10 @@ export function ExamActive({
                   className="gap-1.5 rounded-xl border-border/40"
                 >
                   <ChevronLeft className="h-4 w-4" />{" "}
-                  <span className="hidden sm:inline">Previous</span>
+                  <span className="hidden sm:inline">{t("common.previous")}</span>
                 </Button>
                 <span className="text-xs font-bold text-muted-foreground">
-                  {currentQ + 1} of {questions.length}
+                  {t("mockExam.questionOf", { current: currentQ + 1, total: questions.length })}
                 </span>
                 <Button
                   onClick={() =>
@@ -228,7 +231,7 @@ export function ExamActive({
                   disabled={currentQ === questions.length - 1}
                   className="gap-1.5 rounded-xl"
                 >
-                  <span className="hidden sm:inline">Next</span>{" "}
+                  <span className="hidden sm:inline">{t("common.next")}</span>{" "}
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertTriangle, Award, Zap, BarChart3, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type MockExamTemplate } from "@/data/mockExamTemplates";
+import { useTranslation } from "react-i18next";
 
 interface ExamQuestion {
   id: string;
@@ -27,6 +28,7 @@ interface ExamReviewProps {
 }
 
 export function ExamReview({ questions, answers, flagged, selectedTemplate, onBrowse }: ExamReviewProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showReviewDetail, setShowReviewDetail] = useState(false);
 
@@ -37,7 +39,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
   const gradeColor =
     percent >= 80 ? "text-emerald-500" : percent >= 60 ? "text-primary" : "text-destructive";
   const gradeLabel =
-    percent >= 80 ? "Outstanding!" : percent >= 60 ? "Good effort!" : "Keep practising";
+    percent >= 80 ? t("mockExam.outstanding") : percent >= 60 ? t("mockExam.goodEffort") : t("mockExam.keepPractising");
   const gradeBg =
     percent >= 80
       ? "from-emerald-500/10 to-emerald-500/5"
@@ -76,7 +78,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
               transition={{ delay: 0.3 }}
               className="mb-2 text-3xl font-extrabold tracking-tight md:text-4xl"
             >
-              Exam Complete
+              {t("mockExam.examComplete")}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -111,14 +113,14 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
                 <span className="text-2xl text-muted-foreground/50">/{questions.length}</span>
               </div>
               <div className="mt-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Correct
+                {t("mockExam.correct")}
               </div>
             </div>
             <div className="h-16 w-px bg-gradient-to-b from-transparent via-border to-transparent" />
             <div className="text-center">
               <div className={`text-5xl font-extrabold tracking-tight ${gradeColor}`}>{percent}%</div>
               <div className="mt-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Accuracy
+                {t("mockExam.accuracy")}
               </div>
             </div>
           </motion.div>
@@ -133,19 +135,19 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
             <div className="text-center">
               <div className="text-lg font-extrabold text-foreground">{answered}</div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Answered
+                {t("mockExam.answered")}
               </div>
             </div>
             <div className="text-center">
               <div className="text-lg font-extrabold text-amber-500">{flagged.size}</div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Flagged
+                {t("mockExam.flagged")}
               </div>
             </div>
             <div className="text-center">
               <div className="text-lg font-extrabold text-muted-foreground">{questions.length - answered}</div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Skipped
+                {t("mockExam.skipped")}
               </div>
             </div>
           </motion.div>
@@ -160,7 +162,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
             >
               <div className="flex items-center justify-center gap-2.5 text-sm font-bold text-primary">
                 <Award className="h-5 w-5" />
-                Certificate earned — view it in your profile
+                {t("mockExam.certificateProfile")}
               </div>
             </motion.div>
           )}
@@ -173,7 +175,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
               onClick={() => setShowReviewDetail(!showReviewDetail)}
             >
               <BarChart3 className="h-4 w-4" />
-              {showReviewDetail ? "Hide" : "Review"} Answers
+              {showReviewDetail ? t("mockExam.hideAnswers") : t("mockExam.review")}
             </Button>
           </div>
 
@@ -211,9 +213,9 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
                       </div>
                       {!correct && (
                         <div className="ml-6.5 mb-2 text-xs text-muted-foreground" style={{ marginLeft: 26 }}>
-                          Your answer:{" "}
+                          {t("mockExam.yourAnswer")}:{" "}
                           <span className="font-bold text-destructive">{answers[i] || "—"}</span> ·
-                          Correct:{" "}
+                          {t("mockExam.correctAnswer")}:{" "}
                           <span className="font-bold text-emerald-500">{q.correct_answer}</span>
                         </div>
                       )}
@@ -234,13 +236,13 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
               variant="outline"
               className="gap-2 rounded-xl border-border/40 font-bold"
             >
-              <Award className="h-4 w-4" /> Certificates
+              <Award className="h-4 w-4" /> {t("nav.certificates")}
             </Button>
             <Button
               onClick={onBrowse}
               className="gap-2 rounded-xl shadow-lg shadow-primary/20 font-bold"
             >
-              <Zap className="h-4 w-4" /> Browse Exams
+              <Zap className="h-4 w-4" /> {t("mockExam.browse")}
             </Button>
           </div>
         </div>

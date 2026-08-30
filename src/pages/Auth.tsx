@@ -8,17 +8,19 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Mail, Lock, User, ArrowRight, Sparkles, GraduationCap, Users, Eye } from "lucide-react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useTranslation } from "react-i18next";
 
 type Role = "student" | "teacher" | "parent";
 
-const roleOptions: { key: Role; label: string; icon: typeof GraduationCap; desc: string }[] = [
-  { key: "student", label: "Student", icon: GraduationCap, desc: "Practice & learn" },
-  { key: "teacher", label: "Teacher", icon: Users, desc: "Manage classes" },
-  { key: "parent", label: "Parent", icon: Eye, desc: "Monitor progress" },
+const roleOptions: { key: Role; labelKey: string; icon: typeof GraduationCap; descKey: string }[] = [
+  { key: "student", labelKey: "auth.student", icon: GraduationCap, descKey: "auth.practiceLearn" },
+  { key: "teacher", labelKey: "auth.teacher", icon: Users, descKey: "auth.manageClasses" },
+  { key: "parent", labelKey: "auth.parent", icon: Eye, descKey: "auth.monitorProgress" },
 ];
 
 export default function Auth() {
-  useDocumentTitle("Sign In");
+  const { t } = useTranslation();
+  useDocumentTitle(t("auth.signIn"));
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,6 +29,14 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const authErrorMessage = (error: { code?: string }) => {
+    if (error.code === "invalid_credentials") return t("auth.errors.invalidCredentials");
+    if (error.code === "email_not_confirmed") return t("auth.errors.emailNotConfirmed");
+    if (error.code === "user_already_exists" || error.code === "email_exists") return t("auth.errors.userExists");
+    if (error.code === "weak_password") return t("auth.errors.weakPassword");
+    return t("auth.errors.generic");
+  };
 
   const seedUserData = async (userId: string, name: string) => {
     // Only create profile and student role — admin must manually assign teacher/parent/admin roles
@@ -58,15 +68,15 @@ export default function Auth() {
         }
 
         toast({
-          title: "Check your email",
-          description: "We've sent you a verification link to confirm your account.",
+          title: t("auth.checkEmail"),
+          description: t("auth.checkEmailDesc"),
         });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error("Login failed");
+        if (!user) throw new Error(t("auth.loginFailed"));
 
         const { data: existingProfile } = await supabase
           .from("profiles")
@@ -101,7 +111,7 @@ export default function Auth() {
         else navigate("/subjects");
       }
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: authErrorMessage(error), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -124,19 +134,19 @@ export default function Auth() {
             </div>
             
             <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight">
-              Your private tutor,
+              {t("auth.privateTutor")}
               <br />
-              always available.
+              {t("auth.alwaysAvailable")}
             </h2>
             <p className="mb-10 text-base leading-relaxed opacity-80">
-              Reviewed practice questions, guided tutorials, STEMCoach support, and exam-style simulations across global curricula.
+              {t("auth.heroDesc")}
             </p>
             
             <div className="space-y-4">
               {[
-                 { stat: "Reviewed", label: "Practice Questions" },
-                 { stat: "Global", label: "Curriculum Frameworks" },
-                { stat: "14", label: "Subject Coaches" },
+                 { stat: t("auth.reviewed"), label: t("auth.practiceQuestions") },
+                 { stat: t("auth.global"), label: t("auth.curriculumFrameworks") },
+                { stat: "14", label: t("auth.subjectCoaches") },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
@@ -170,10 +180,10 @@ export default function Auth() {
 
           <div className="mb-6 text-center lg:text-left">
             <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
-              {isSignUp ? "Create your account" : "Welcome back"}
+              {isSignUp ? t("auth.createAccount") : t("auth.welcomeBack")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              {isSignUp ? "Start your exam preparation journey" : "Sign in to continue learning"}
+              {isSignUp ? t("auth.startJourney") : t("auth.signInContinue")}
             </p>
           </div>
 
@@ -189,14 +199,14 @@ export default function Auth() {
                     className="space-y-4 overflow-hidden"
                   >
                     <div>
-                      <Label htmlFor="name" className="text-sm font-medium">Display Name</Label>
+                      <Label htmlFor="name" className="text-sm font-medium">{t("auth.displayName")}</Label>
                       <div className="relative mt-1.5">
                         <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input id="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="rounded-xl pl-10" required />
+                        <Input id="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={t("settings.yourName")} className="rounded-xl pl-10" required />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">I am a…</Label>
+                      <Label className="text-sm font-medium">{t("auth.role")}</Label>
                       <div className="mt-2 grid grid-cols-3 gap-2">
                         {roleOptions.map((r) => (
                           <button
@@ -210,8 +220,8 @@ export default function Auth() {
                             }`}
                           >
                             <r.icon className={`h-5 w-5 transition-colors ${role === r.key ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
-                            <span className="text-xs font-semibold">{r.label}</span>
-                            <span className="text-[10px] text-muted-foreground">{r.desc}</span>
+                            <span className="text-xs font-semibold">{t(r.labelKey)}</span>
+                            <span className="text-[10px] text-muted-foreground">{t(r.descKey)}</span>
                           </button>
                         ))}
                       </div>
@@ -221,7 +231,7 @@ export default function Auth() {
               </AnimatePresence>
 
               <div>
-                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium">{t("auth.email")}</Label>
                 <div className="relative mt-1.5">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="rounded-xl pl-10" required />
@@ -230,21 +240,21 @@ export default function Auth() {
 
               <div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                  <Label htmlFor="password" className="text-sm font-medium">{t("auth.password")}</Label>
                   {!isSignUp && (
                     <button
                       type="button"
                       onClick={async () => {
-                        if (!email) { toast({ title: "Enter your email first", variant: "destructive" }); return; }
+                        if (!email) { toast({ title: t("auth.enterEmailFirst"), variant: "destructive" }); return; }
                         const { error } = await supabase.auth.resetPasswordForEmail(email, {
                           redirectTo: `${window.location.origin}/reset-password`,
                         });
-                        if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
-                        else { toast({ title: "Check your email", description: "Password reset link sent." }); }
+                        if (error) { toast({ title: t("common.error"), description: authErrorMessage(error), variant: "destructive" }); }
+                        else { toast({ title: t("auth.checkEmail"), description: t("auth.resetLinkSent") }); }
                       }}
                       className="text-xs font-medium text-primary hover:underline"
                     >
-                      Forgot password?
+                      {t("auth.forgotPassword")}
                     </button>
                   )}
                 </div>
@@ -255,26 +265,26 @@ export default function Auth() {
               </div>
 
               <Button type="submit" size="lg" className="w-full gap-2 rounded-xl text-base shadow-lg shadow-primary/20" disabled={loading}>
-                {loading ? "Please wait…" : isSignUp ? (
-                  <>Create Account <ArrowRight className="h-4 w-4" /></>
+                {loading ? t("auth.pleaseWait") : isSignUp ? (
+                  <>{t("auth.createAccountBtn")} <ArrowRight className="h-4 w-4" /></>
                 ) : (
-                  <>Sign In <ArrowRight className="h-4 w-4" /></>
+                  <>{t("auth.signIn")} <ArrowRight className="h-4 w-4" /></>
                 )}
               </Button>
             </form>
 
             <div className="mt-5 text-center text-sm text-muted-foreground">
-              {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+              {isSignUp ? t("auth.hasAccount") : t("auth.noAccount")}{" "}
               <button onClick={() => setIsSignUp(!isSignUp)} className="font-semibold text-primary hover:underline">
-                {isSignUp ? "Sign in" : "Sign up"}
+                {isSignUp ? t("auth.signIn") : t("auth.signUp")}
               </button>
             </div>
           </div>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <a href="/terms" className="underline hover:text-foreground">Terms of Service</a> and{" "}
-            <a href="/privacy" className="underline hover:text-foreground">Privacy Policy</a>
+            {t("auth.agreeTerms")}{" "}
+            <a href="/terms" className="underline hover:text-foreground">{t("auth.termsOfService")}</a> {t("auth.and")}{" "}
+            <a href="/privacy" className="underline hover:text-foreground">{t("auth.privacyPolicy")}</a>
           </p>
         </motion.div>
       </div>

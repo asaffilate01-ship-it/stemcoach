@@ -31,8 +31,19 @@ function rateLimit(key: string, max: number, windowMs: number): boolean {
   return true;
 }
 
+class HttpError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -40,16 +51,16 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error("Missing required environment variables");
+      throw new HttpError(500, "Question generation is not configured");
     }
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Not authenticated");
+    if (!authHeader?.startsWith("Bearer ")) throw new HttpError(401, "Unauthorized");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData.user) throw new Error("Invalid authentication");
+    if (userError || !userData.user) throw new HttpError(401, "Unauthorized");
 
     // Rate limit: 10 requests per minute per user (admin-only, heavy operation)
     if (!rateLimit(userData.user.id, 10, 60_000)) {
@@ -225,8 +236,10 @@ ${langInstruction}`,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("generate-questions error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const status = e instanceof HttpError ? e.status : 500;
+    const message = e instanceof HttpError ? e.message : "Unable to generate questions";
+    return new Response(JSON.stringify({ error: message }), {
+      status, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

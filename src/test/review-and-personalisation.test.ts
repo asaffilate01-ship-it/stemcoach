@@ -40,6 +40,7 @@ describe("curriculum-aware personalised coaching", () => {
     expect(practice).toContain('questionQuery.eq("curriculum", curriculumId)');
     expect(practice).toContain("getCachedQuestions(subjectId, curriculumId)");
     expect(tutor).toContain("curriculum: curriculumId");
-    expect(tutor).toContain("recent weak topics");
+    expect(tutor).toContain("coach.personalised");
+    expect(tutor).toContain("language: normalizeLanguage");
   });
 });

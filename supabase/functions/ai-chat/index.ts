@@ -23,6 +23,12 @@ const SUBJECT_LABELS: Record<string, string> = {
   german: "German",
 };
 
+const RESPONSE_LANGUAGES: Record<string, string> = {
+  en: "English",
+  fr: "French",
+  de: "German",
+};
+
 // In-memory rate limiter (per edge function instance)
 const rateLimits = new Map<string, { count: number; resetAt: number }>();
 function rateLimit(key: string, max: number, windowMs: number): boolean {
@@ -69,7 +75,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, subject: requestedSubject, curriculum: requestedCurriculum } = await req.json();
+    const { messages, subject: requestedSubject, curriculum: requestedCurriculum, language: requestedLanguage } = await req.json();
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages array is required" }), {
@@ -91,6 +97,9 @@ serve(async (req) => {
       ? requestedSubject
       : "mathematics";
     const subjectLabel = SUBJECT_LABELS[subjectId];
+    const responseLanguage = typeof requestedLanguage === "string" && requestedLanguage in RESPONSE_LANGUAGES
+      ? RESPONSE_LANGUAGES[requestedLanguage]
+      : RESPONSE_LANGUAGES.en;
 
     const [preferencesResult, missedAttemptsResult, quotaResult] = await Promise.all([
       supabase.from("user_preferences").select("curriculum").eq("user_id", userData.user.id).maybeSingle(),
@@ -150,6 +159,7 @@ Learner context:
 ${learnerContext}
 
 Your role:
+- Respond in ${responseLanguage}, unless the learner explicitly asks to practise or translate another language
 - Explain concepts step by step with clarity
 - Use analogies and real-world examples
 - Include relevant formulas and exam tips
