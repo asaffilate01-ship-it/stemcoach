@@ -1787,6 +1787,10 @@ export type Database = {
           name: string
         }[]
       }
+      manage_generation_campaign: {
+        Args: { _action: string; _campaign_id: string }
+        Returns: Json
+      }
       publish_question: { Args: { _question_id: string }; Returns: Json }
       question_quality_flags: { Args: { _question_id: string }; Returns: Json }
       record_answer_stats: {
