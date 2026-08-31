@@ -40,7 +40,7 @@ export function StudentLearningPaths({ classes, userId }: StudentLearningPathsPr
     enabled: paths.length > 0,
   });
 
-  const tutorialIds = [...new Set(items.map((item) => item.tutorial_id))];
+  const tutorialIds = [...new Set(items.map((item) => String(item.tutorial_id)))] as string[];
   const { data: progress = [] } = useQuery({
     queryKey: ["student-learning-path-tutorial-progress", userId, tutorialIds],
     queryFn: async () => {
