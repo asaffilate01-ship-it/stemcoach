@@ -27,6 +27,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
 const ParentDashboard = lazy(() => import("./pages/ParentDashboard"));
 const StudentClasses = lazy(() => import("./pages/StudentClasses"));
+const AssignmentQuiz = lazy(() => import("./pages/AssignmentQuiz"));
 const TenantAdmin = lazy(() => import("./pages/TenantAdmin"));
 const AdminGenerate = lazy(() => import("./pages/AdminGenerate"));
 const AdminQuestions = lazy(() => import("./pages/AdminQuestions"));
@@ -140,6 +141,7 @@ const App = () => (
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
                     <Route path="/my-classes" element={<ProtectedRoute><StudentClasses /></ProtectedRoute>} />
+                    <Route path="/assignment/:assignmentId" element={<ProtectedRoute><AssignmentQuiz /></ProtectedRoute>} />
                     <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                     <Route path="/study-planner" element={<ProtectedRoute><StudyPlanner /></ProtectedRoute>} />
                     <Route path="/progress-report" element={<ProtectedRoute><ProgressReports /></ProtectedRoute>} />

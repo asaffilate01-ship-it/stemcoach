@@ -85,25 +85,6 @@ export default function StudentClasses() {
     onError: (e: any) => toast({ title: t("common.error"), description: e.message, variant: "destructive" }),
   });
 
-  const startAssignment = useMutation({
-    mutationFn: async (assignmentId: string) => {
-      const { error } = await supabase.from("assignment_submissions").insert({
-        assignment_id: assignmentId,
-        student_id: user!.id,
-      });
-      if (error && !error.message.includes("duplicate")) throw error;
-    },
-    onSuccess: (_, assignmentId) => {
-      queryClient.invalidateQueries({ queryKey: ["student-assignments"] });
-      // Navigate to practice with assignment context
-      const assignment = assignments.find((a: any) => a.id === assignmentId);
-      if (assignment) {
-        navigate(`/practice/${assignment.subject}`);
-      }
-    },
-    onError: (e: any) => toast({ title: t("common.error"), description: e.message, variant: "destructive" }),
-  });
-
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
@@ -200,7 +181,7 @@ export default function StudentClasses() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => startAssignment.mutate(a.id)}
+                      onClick={() => navigate(`/assignment/${a.id}`)}
                       className="gap-1.5 rounded"
                     >
                       {t(started ? "studentClasses.continue" : "studentClasses.start")} <ArrowRight className="h-3.5 w-3.5" />
