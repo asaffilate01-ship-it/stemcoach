@@ -33,6 +33,8 @@ export default function TeacherDashboard() {
   const [assignDesc, setAssignDesc] = useState("");
   const [assignTopics, setAssignTopics] = useState("");
   const [assignCount, setAssignCount] = useState(10);
+  const [assignDifficultyMin, setAssignDifficultyMin] = useState(1);
+  const [assignDifficultyMax, setAssignDifficultyMax] = useState(5);
   const [assignDueDate, setAssignDueDate] = useState("");
   const [pathTitle, setPathTitle] = useState("");
   const [pathDescription, setPathDescription] = useState("");
@@ -53,6 +55,16 @@ export default function TeacherDashboard() {
     queryKey: ["teacher-assignments", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from("assignments").select("*").eq("teacher_id", user!.id).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: Boolean(user),
+  });
+
+  const { data: assignmentResults = [] } = useQuery({
+    queryKey: ["teacher-assignment-results", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_teacher_assignment_results");
       if (error) throw error;
       return data;
     },
@@ -105,32 +117,36 @@ export default function TeacherDashboard() {
 
   const createAssignment = useMutation({
     mutationFn: async (classId: string) => {
-      const classroom = classes.find((item) => item.id === classId);
-      if (!classroom) throw new Error(t("teacherDashboard.classNotFound"));
-      const { error } = await supabase.from("assignments").insert({
-        class_id: classId,
-        teacher_id: user!.id,
-        title: assignTitle.trim(),
-        description: assignDesc.trim() || null,
-        subject: classroom.subject,
-        topics: assignTopics.split(",").map((topic) => topic.trim()).filter(Boolean),
-        curriculum: classroom.curriculum,
-        question_count: Math.min(50, Math.max(1, assignCount)),
-        due_date: assignDueDate ? new Date(assignDueDate).toISOString() : null,
+      const { error } = await supabase.rpc("create_quiz_assignment", {
+        _class_id: classId,
+        _title: assignTitle.trim(),
+        _description: assignDesc.trim() || undefined,
+        _topics: assignTopics.split(",").map((topic) => topic.trim()).filter(Boolean),
+        _question_count: Math.min(50, Math.max(1, assignCount)),
+        _difficulty_min: assignDifficultyMin,
+        _difficulty_max: assignDifficultyMax,
+        _due_date: assignDueDate ? new Date(assignDueDate).toISOString() : undefined,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["teacher-assignments"] });
+      void queryClient.invalidateQueries({ queryKey: ["teacher-assignment-results"] });
       setShowAssign(null);
       setAssignTitle("");
       setAssignDesc("");
       setAssignTopics("");
       setAssignCount(10);
+      setAssignDifficultyMin(1);
+      setAssignDifficultyMax(5);
       setAssignDueDate("");
       toast({ title: t("teacherDashboard.assignmentCreated"), description: t("teacherDashboard.assignmentCreatedDescription") });
     },
-    onError: (error: Error) => toast({ title: t("common.error"), description: error.message, variant: "destructive" }),
+    onError: (error: Error) => toast({
+      title: t("common.error"),
+      description: error.message.includes("Not enough reviewed questions") ? t("teacherDashboard.notEnoughQuestions") : error.message,
+      variant: "destructive",
+    }),
   });
 
   const createLearningPath = useMutation({
@@ -230,6 +246,10 @@ export default function TeacherDashboard() {
                           <div><Label className="text-xs">{t("teacherDashboard.assignmentTitle")}</Label><Input value={assignTitle} onChange={(event) => setAssignTitle(event.target.value)} placeholder={t("teacherDashboard.assignmentTitlePlaceholder")} maxLength={120} className="mt-1 rounded-xl" /></div>
                           <div><Label className="text-xs">{t("teacherDashboard.descriptionOptional")}</Label><Textarea value={assignDesc} onChange={(event) => setAssignDesc(event.target.value)} placeholder={t("teacherDashboard.descriptionPlaceholder")} rows={2} maxLength={1000} className="mt-1 resize-none rounded-xl" /></div>
                           <div className="grid grid-cols-2 gap-2"><div><Label className="text-xs">{t("teacherDashboard.topics")}</Label><Input value={assignTopics} onChange={(event) => setAssignTopics(event.target.value)} placeholder={t("teacherDashboard.topicsPlaceholder")} className="mt-1 rounded-xl" /></div><div><Label className="text-xs">{t("teacherDashboard.questions")}</Label><Input type="number" value={assignCount} onChange={(event) => setAssignCount(Number.parseInt(event.target.value, 10) || 10)} min={1} max={50} className="mt-1 rounded-xl" /></div></div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div><Label className="text-xs">{t("teacherDashboard.difficultyMin")}</Label><select value={assignDifficultyMin} onChange={(event) => { const value = Number(event.target.value); setAssignDifficultyMin(value); if (value > assignDifficultyMax) setAssignDifficultyMax(value); }} className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm">{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>{level}</option>)}</select></div>
+                            <div><Label className="text-xs">{t("teacherDashboard.difficultyMax")}</Label><select value={assignDifficultyMax} onChange={(event) => { const value = Number(event.target.value); setAssignDifficultyMax(value); if (value < assignDifficultyMin) setAssignDifficultyMin(value); }} className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm">{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>{level}</option>)}</select></div>
+                          </div>
                           <div><Label className="text-xs">{t("teacherDashboard.dueDateOptional")}</Label><Input type="datetime-local" value={assignDueDate} onChange={(event) => setAssignDueDate(event.target.value)} className="mt-1 rounded-xl" /></div>
                           <Button onClick={() => createAssignment.mutate(classroom.id)} disabled={!assignTitle.trim() || createAssignment.isPending} size="sm" className="gap-1.5 rounded-xl"><Send className="h-3.5 w-3.5" /> {t("teacherDashboard.assign")}</Button>
                         </div>
@@ -270,7 +290,27 @@ export default function TeacherDashboard() {
             </section>
           )}
 
-          {assignments.length > 0 && <section className="mt-10"><h2 className="mb-4 stem-heading text-xl">{t("teacherDashboard.recentAssignments")}</h2><div className="space-y-2">{assignments.slice(0, 10).map((assignment) => <div key={assignment.id} className="stem-card flex flex-col gap-2 rounded-xl px-5 py-3 sm:flex-row sm:items-center sm:justify-between"><div><div className="text-sm font-semibold">{assignment.title}</div><div className="text-xs text-muted-foreground">{t(`subjects.names.${assignment.subject}`)} · {t("teacherDashboard.questionCount", { count: assignment.question_count })}{assignment.topics.length > 0 && ` · ${assignment.topics.join(", ")}`}</div></div><div className="text-xs text-muted-foreground">{assignment.due_date ? <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{t("teacherDashboard.due", { date: new Date(assignment.due_date).toLocaleDateString() })}</span> : <span className="flex items-center gap-1 text-success"><CheckCircle2 className="h-3 w-3" /> {t("teacherDashboard.noDeadline")}</span>}</div></div>)}</div></section>}
+          {assignments.length > 0 && (
+            <section className="mt-10">
+              <h2 className="mb-4 stem-heading text-xl">{t("teacherDashboard.recentAssignments")}</h2>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {assignments.slice(0, 10).map((assignment) => {
+                  const results = assignmentResults.filter((result) => result.assignment_id === assignment.id);
+                  const completedCount = results.filter((result) => result.completed_at).length;
+                  const averageScore = completedCount
+                    ? Math.round(results.filter((result) => result.completed_at).reduce((sum, result) => sum + ((result.score / Math.max(1, result.total)) * 100), 0) / completedCount)
+                    : 0;
+                  return (
+                    <article key={assignment.id} className="stem-card rounded-xl p-5">
+                      <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-semibold">{assignment.title}</h3><p className="mt-1 text-xs text-muted-foreground">{t(`subjects.names.${assignment.subject}`)} · {t("teacherDashboard.questionCount", { count: assignment.question_count })}{assignment.topics.length > 0 && ` · ${assignment.topics.join(", ")}`}</p></div>{assignment.due_date ? <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{new Date(assignment.due_date).toLocaleDateString()}</span> : <span className="flex shrink-0 items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" />{t("teacherDashboard.noDeadline")}</span>}</div>
+                      <div className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-lg bg-muted/40 p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("teacherDashboard.learnersCompleted")}</p><p className="mt-1 text-lg font-bold">{completedCount}/{results.length}</p></div><div className="rounded-lg bg-muted/40 p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("teacherDashboard.averageScore")}</p><p className="mt-1 text-lg font-bold">{averageScore}%</p></div></div>
+                      <div className="mt-3 space-y-2">{results.length === 0 ? <p className="text-xs text-muted-foreground">{t("teacherDashboard.noLearners")}</p> : results.map((result) => <div key={result.student_id} className="flex items-center justify-between rounded-lg border border-border/40 px-3 py-2 text-xs"><span className="font-medium">{result.student_name}</span><span className={result.completed_at ? "font-semibold text-success" : "text-muted-foreground"}>{result.completed_at ? `${result.score}/${result.total}` : t("teacherDashboard.answered", { answered: result.answered_count, total: result.total })}</span></div>)}</div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </main>
       </PageTransition>
     </div>

@@ -65,3 +65,9 @@ test("mastery remains account-protected", async ({ page }) => {
   await expect(page).toHaveURL(/\/auth$/);
   await expect(page.getByRole("heading", { name: /Welcome back/i })).toBeVisible();
 });
+
+test("assigned quizzes remain account-protected", async ({ page }) => {
+  await page.goto("/assignment/00000000-0000-0000-0000-000000000000");
+  await expect(page).toHaveURL(/\/auth$/);
+  await expect(page.getByRole("heading", { name: /Welcome back/i })).toBeVisible();
+});
