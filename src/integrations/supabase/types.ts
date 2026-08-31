@@ -44,6 +44,27 @@ export type Database = {
         }
         Relationships: []
       }
+      answer_request_windows: {
+        Row: {
+          request_count: number
+          updated_at: string
+          user_id: string
+          window_started_at: string
+        }
+        Insert: {
+          request_count?: number
+          updated_at?: string
+          user_id: string
+          window_started_at?: string
+        }
+        Update: {
+          request_count?: number
+          updated_at?: string
+          user_id?: string
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           created_at: string
@@ -61,6 +82,114 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      assignment_answers: {
+        Row: {
+          answered_at: string
+          attempt_id: string
+          correct: boolean
+          id: string
+          points_earned: number
+          question_id: string
+          submission_id: string
+          submitted_answer: string
+          time_taken_seconds: number | null
+        }
+        Insert: {
+          answered_at?: string
+          attempt_id: string
+          correct: boolean
+          id?: string
+          points_earned?: number
+          question_id: string
+          submission_id: string
+          submitted_answer: string
+          time_taken_seconds?: number | null
+        }
+        Update: {
+          answered_at?: string
+          attempt_id?: string
+          correct?: boolean
+          id?: string
+          points_earned?: number
+          question_id?: string
+          submission_id?: string
+          submitted_answer?: string
+          time_taken_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_answers_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "assignment_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_questions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          position: number
+          question_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          position: number
+          question_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          position?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_questions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_safe"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       assignment_submissions: {
         Row: {
@@ -1958,6 +2087,14 @@ export type Database = {
         Args: { _levels: string[]; _subjects: string[]; _user_id: string }
         Returns: Json
       }
+      consume_answer_rate_limit: {
+        Args: {
+          _max_requests?: number
+          _user_id: string
+          _window_seconds?: number
+        }
+        Returns: boolean
+      }
       consume_coach_rate_limit: {
         Args: {
           _max_requests?: number
@@ -1979,6 +2116,19 @@ export type Database = {
       create_flashcards_from_mistakes: {
         Args: { _limit?: number }
         Returns: number
+      }
+      create_quiz_assignment: {
+        Args: {
+          _class_id: string
+          _description?: string
+          _difficulty_max?: number
+          _difficulty_min?: number
+          _due_date?: string
+          _question_count?: number
+          _title: string
+          _topics?: string[]
+        }
+        Returns: string
       }
       get_adaptive_practice_questions: {
         Args: {
@@ -2006,6 +2156,10 @@ export type Database = {
           subtopic: string
           topic: string
         }[]
+      }
+      get_assignment_session: {
+        Args: { _assignment_id: string }
+        Returns: Json
       }
       get_content_quality_matrix: {
         Args: never
@@ -2148,6 +2302,20 @@ export type Database = {
           subject: string
         }[]
       }
+      get_teacher_assignment_results: {
+        Args: never
+        Returns: {
+          answered_count: number
+          assignment_id: string
+          class_id: string
+          completed_at: string
+          score: number
+          started_at: string
+          student_id: string
+          student_name: string
+          total: number
+        }[]
+      }
       get_teacher_learning_path_progress: {
         Args: never
         Returns: {
@@ -2227,6 +2395,17 @@ export type Database = {
       question_quality_flags: { Args: { _question_id: string }; Returns: Json }
       record_answer_stats: {
         Args: { _correct: boolean; _user_id: string; _xp_gain: number }
+        Returns: Json
+      }
+      record_assignment_answer: {
+        Args: {
+          _assignment_id: string
+          _correct: boolean
+          _question_id: string
+          _submitted_answer: string
+          _time_taken_seconds?: number
+          _user_id: string
+        }
         Returns: Json
       }
       record_daily_challenge_attempt: {
