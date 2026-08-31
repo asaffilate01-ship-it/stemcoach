@@ -985,6 +985,7 @@ const en = {
   footer: {
     copyright: "© {{year}} STEMCoach — Virtual Tuition Centre. Made with",
     copyrightSuffix: "for students everywhere.",
+    poweredBy: "POWERED BY iTECHLOUNGE",
     product: "Product",
     resources: "Resources",
     company: "Company",
