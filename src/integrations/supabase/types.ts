@@ -345,6 +345,86 @@ export type Database = {
         }
         Relationships: []
       }
+      class_learning_path_items: {
+        Row: {
+          created_at: string
+          id: string
+          path_id: string
+          position: number
+          tutorial_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          path_id: string
+          position: number
+          tutorial_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          path_id?: string
+          position?: number
+          tutorial_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_learning_path_items_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "class_learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_learning_path_items_tutorial_id_fkey"
+            columns: ["tutorial_id"]
+            isOneToOne: false
+            referencedRelation: "tutorial_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_learning_paths: {
+        Row: {
+          class_id: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          teacher_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_learning_paths_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_members: {
         Row: {
           class_id: string
@@ -1408,6 +1488,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tutorial_catalog: {
+        Row: {
+          id: string
+          level: string
+          minutes: number
+          subject: string
+          title: string
+        }
+        Insert: {
+          id: string
+          level: string
+          minutes: number
+          subject: string
+          title: string
+        }
+        Update: {
+          id?: string
+          level?: string
+          minutes?: number
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -1862,6 +1966,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_class_learning_path: {
+        Args: {
+          _class_id: string
+          _description?: string
+          _due_date?: string
+          _title: string
+          _tutorial_ids?: string[]
+        }
+        Returns: string
+      }
       create_flashcards_from_mistakes: {
         Args: { _limit?: number }
         Returns: number
@@ -2032,6 +2146,19 @@ export type Database = {
         Returns: {
           question_count: number
           subject: string
+        }[]
+      }
+      get_teacher_learning_path_progress: {
+        Args: never
+        Returns: {
+          class_id: string
+          completed_count: number
+          last_activity_at: string
+          path_completed: boolean
+          path_id: string
+          student_id: string
+          student_name: string
+          tutorial_count: number
         }[]
       }
       grant_dev_quota: { Args: { _user_id: string }; Returns: undefined }
