@@ -977,6 +977,7 @@ const fr = {
   footer: {
     copyright: "© {{year}} STEMCoach — Centre de tutorat virtuel. Fait avec",
     copyrightSuffix: "pour les élèves du monde entier.",
+    poweredBy: "PROPULSÉ PAR iTECHLOUNGE",
     product: "Produit",
     resources: "Ressources",
     company: "Entreprise",

@@ -977,6 +977,7 @@ const de = {
   footer: {
     copyright: "© {{year}} STEMCoach — Virtuelles Nachhilfezentrum. Gemacht mit",
     copyrightSuffix: "für Schüler überall.",
+    poweredBy: "BETRIEBEN VON iTECHLOUNGE",
     product: "Produkt",
     resources: "Ressourcen",
     company: "Unternehmen",
