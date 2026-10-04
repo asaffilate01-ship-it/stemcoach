@@ -1,6 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import en from "@/i18n/locales/en";
 import fr from "@/i18n/locales/fr";
@@ -36,10 +35,15 @@ describe("translation quality", () => {
 
   it("defines every static translation key used by the application", () => {
     const root = resolve(process.cwd(), "src");
-    const files = execFileSync("rg", ["--files", root, "-g", "*.ts", "-g", "*.tsx", "-g", "!i18n/locales/**", "-g", "!test/**"], { encoding: "utf8" })
-      .trim()
-      .split("\n")
-      .filter(Boolean);
+    const collect = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const path = resolve(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (path.includes(resolve(root, "i18n/locales")) || path.includes(resolve(root, "test"))) return [];
+        return collect(path);
+      }
+      return /\.(ts|tsx)$/.test(entry.name) ? [path] : [];
+    });
+    const files = collect(root);
     const used = new Set<string>();
     const keyPattern = /\b(?:t|tr)\(\s*["'`]([^"'`$]+)["'`]/g;
     for (const file of files) {
