@@ -9,7 +9,7 @@ import { BookOpen, Send, User, Loader2, Trash2, Sparkles, CreditCard, Graduation
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { getMascot, getCoachStem } from "@/lib/mascots";
 import { usePreferredCoach } from "@/hooks/usePreferredCoach";
 import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
@@ -28,6 +28,7 @@ export default function AITutor() {
   const { user } = useAuth();
   const { canUseCoaching, loading: quotaLoading } = useQuotaGate();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { preferredCoachId, setPreferredCoachId } = usePreferredCoach();
   const { curriculumId, curriculum } = useLearnerCurriculum();
@@ -44,6 +45,15 @@ export default function AITutor() {
       : "mathematics");
   const [subjectId, setSubjectId] = useState(initialSubject);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const draft = (location.state as { qaDraft?: unknown } | null)?.qaDraft;
+    if (typeof draft !== "string" || !draft.trim()) return;
+    setInput(draft.slice(0, 2000));
+    if (requestedSubject && SUBJECT_IDS.includes(requestedSubject)) setSubjectId(requestedSubject);
+    // Discard route state so drafts are not replayed after another navigation.
+    navigate(location.pathname + location.search, { replace: true, state: null });
+  }, [location.key, location.pathname, location.search, location.state, navigate, requestedSubject]);
 
   const mascot = getMascot(subjectId);
   const coach = getCoachStem();
@@ -369,6 +379,9 @@ export default function AITutor() {
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate("/qa-clinic")}>
+              <BookOpen className="h-4 w-4" /> {t("qa.explore")}
+            </Button>
             <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate(`/practice/${subjectId}`)}>
               <GraduationCap className="h-4 w-4" /> {t("coach.practiseSubject", { subject: subjectLabel })}
             </Button>

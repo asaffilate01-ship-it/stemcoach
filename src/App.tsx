@@ -38,6 +38,7 @@ const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Certificates = lazy(() => import("./pages/Certificates"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const AITutor = lazy(() => import("./pages/AITutor"));
+const QAClinic = lazy(() => import("./pages/QAClinic"));
 const StudyPlanner = lazy(() => import("./pages/StudyPlanner"));
 const WeakTopicDrill = lazy(() => import("./pages/WeakTopicDrill"));
 const LiveClassroom = lazy(() => import("./pages/LiveClassroom"));
@@ -126,6 +127,7 @@ const App = () => (
                     <Route path="/practice/:subjectId" element={<Pub><Practice /></Pub>} />
                     <Route path="/mock-exam" element={<Pub><MockExam /></Pub>} />
                     <Route path="/ai-tutor" element={<Pub><AITutor /></Pub>} />
+                    <Route path="/qa-clinic" element={<Pub><QAClinic /></Pub>} />
                     <Route path="/badges" element={<Pub><Badges /></Pub>} />
                     <Route path="/leaderboard" element={<Pub><Leaderboard /></Pub>} />
                     <Route path="/weak-drills" element={<Pub><WeakTopicDrill /></Pub>} />
