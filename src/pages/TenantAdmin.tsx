@@ -3,7 +3,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings, Copy, UserPlus } from "lucide-react";
+import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings, Copy, UserPlus, UserMinus } from "lucide-react";
 import { TeacherInvitations } from "@/components/institution/TeacherInvitations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +72,22 @@ export default function TenantAdmin() {
       toast({ title: "Member updated" });
     },
     onError: (error: Error) => toast({ title: "Approval failed", description: error.message, variant: "destructive" }),
+  });
+
+  const offboardTeacher = useMutation({
+    mutationFn: async (teacherId: string) => {
+      const { data, error } = await (supabase as any).rpc("offboard_institution_teacher", {
+        _tenant_id: tenant.id,
+        _teacher_user_id: teacherId,
+      });
+      if (error) throw error;
+      if (data !== true) throw new Error("Teacher is no longer an approved member. Refresh and try again.");
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["tenant-members", tenant?.id] });
+      toast({ title: "Teacher access removed", description: "This institution membership has been revoked." });
+    },
+    onError: (error: Error) => toast({ title: "Unable to remove teacher", description: error.message, variant: "destructive" }),
   });
 
   // Branding state
@@ -219,7 +235,13 @@ export default function TenantAdmin() {
                       <div className="text-sm font-semibold">{m.display_name}</div>
                       <div className="text-xs text-muted-foreground capitalize">{m.role} · Joined {new Date(m.joined_at).toLocaleDateString()}</div>
                     </div>
-                    <span className="rounded bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Active</span>
+                    {m.role === "teacher" ? (
+                      <Button size="sm" variant="outline" disabled={offboardTeacher.isPending} className="gap-1 text-destructive" onClick={() => {
+                        if (window.confirm(`Remove ${m.display_name} from this institution? Their other institution memberships will not be removed.`)) offboardTeacher.mutate(m.user_id);
+                      }}><UserMinus className="h-3.5 w-3.5" /> Remove teacher</Button>
+                    ) : (
+                      <span className="rounded bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Active</span>
+                    )}
                   </div>
                 ))}
                 {approvedMembers.length === 0 && (
