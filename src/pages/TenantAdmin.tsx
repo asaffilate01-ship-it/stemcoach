@@ -3,7 +3,8 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings, Copy } from "lucide-react";
+import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings, Copy, UserPlus } from "lucide-react";
+import { TeacherInvitations } from "@/components/institution/TeacherInvitations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +16,7 @@ export default function TenantAdmin() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<"branding" | "members" | "settings">("members");
+  const [tab, setTab] = useState<"branding" | "members" | "teachers" | "settings">("members");
 
   // Fetch tenant where user is admin
   const { data: membership, isLoading: membershipLoading, error: membershipError } = useQuery({
@@ -110,6 +111,7 @@ export default function TenantAdmin() {
   const pendingMembers = members.filter((m: any) => m.status === "pending");
   const approvedMembers = members.filter((m: any) => m.status === "approved");
   const approvedStudents = approvedMembers.filter((m: any) => m.role === "student").length;
+  const approvedTeachers = approvedMembers.filter((m: any) => m.role === "teacher").length;
   const maxStudents = Number(tenant?.max_students ?? 50);
   const availableSeats = Math.max(0, maxStudents - approvedStudents);
   const inviteLink = tenant
@@ -150,16 +152,18 @@ export default function TenantAdmin() {
           </Button>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="stem-card rounded-xl p-4"><p className="text-xs text-muted-foreground">Approved students</p><p className="mt-1 text-2xl font-bold">{approvedStudents} / {maxStudents}</p></div>
           <div className="stem-card rounded-xl p-4"><p className="text-xs text-muted-foreground">Pending student requests</p><p className="mt-1 text-2xl font-bold">{pendingMembers.length}</p></div>
           <div className="stem-card rounded-xl p-4"><p className="text-xs text-muted-foreground">Available student seats</p><p className="mt-1 text-2xl font-bold">{availableSeats}</p></div>
+          <div className="stem-card rounded-xl p-4"><p className="text-xs text-muted-foreground">Approved teachers</p><p className="mt-1 text-2xl font-bold">{approvedTeachers}</p></div>
         </div>
 
         {/* Tabs */}
-        <div className="mb-6 flex gap-2">
+        <div className="mb-6 flex flex-wrap gap-2">
           {[
             { key: "members" as const, label: "Members", icon: Users },
+            { key: "teachers" as const, label: "Teachers", icon: UserPlus },
             { key: "branding" as const, label: "Branding", icon: Palette },
             { key: "settings" as const, label: "Settings", icon: Settings },
           ].map((t) => (
@@ -225,6 +229,9 @@ export default function TenantAdmin() {
             </div>
           </div>
         )}
+
+        {/* Teacher invitation Tab */}
+        {tab === "teachers" && <TeacherInvitations tenantId={tenant.id} />}
 
         {/* Branding Tab */}
         {tab === "branding" && (

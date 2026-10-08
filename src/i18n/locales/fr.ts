@@ -92,6 +92,7 @@ const fr = {
   },
   // ── Auth ──
   auth: {
+    teacherInviteNotice: "L'accès enseignant est activé uniquement après acceptation de l'invitation de votre établissement.",
     signIn: "Se connecter",
     signUp: "S'inscrire",
     email: "E-mail",

@@ -57,6 +57,7 @@ const StudyGroups = lazy(() => import("./pages/StudyGroups"));
 const Blog = lazy(() => import("./pages/Blog"));
 const MeetTheSquad = lazy(() => import("./pages/MeetTheSquad"));
 const RegisterInstitution = lazy(() => import("./pages/RegisterInstitution"));
+const TeacherInvitation = lazy(() => import("./pages/TeacherInvitation"));
 const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 const Support = lazy(() => import("./pages/Support"));
 const Tutorials = lazy(() => import("./pages/Tutorials"));
@@ -116,6 +117,7 @@ const App = () => (
                     <Route path="/blog/:slug" element={<Pub><Blog /></Pub>} />
                     <Route path="/meet-the-squad" element={<Pub><MeetTheSquad /></Pub>} />
                     <Route path="/register-institution" element={<Pub><RegisterInstitution /></Pub>} />
+                    <Route path="/teacher-invitation" element={<Pub><TeacherInvitation /></Pub>} />
                     <Route path="/join-institution" element={<Pub><JoinInstitution /></Pub>} />
                     <Route path="/formulas" element={<Pub><FormulaSheets /></Pub>} />
                     <Route path="/support" element={<Pub><Support /></Pub>} />

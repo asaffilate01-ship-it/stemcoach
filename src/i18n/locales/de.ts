@@ -92,6 +92,7 @@ const de = {
   },
   // ── Auth ──
   auth: {
+    teacherInviteNotice: "Der Lehrkraft-Zugang wird erst nach Annahme einer Einladung durch die Einrichtung freigeschaltet.",
     signIn: "Anmelden",
     signUp: "Registrieren",
     email: "E-Mail",

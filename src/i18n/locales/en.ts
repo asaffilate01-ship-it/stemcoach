@@ -92,6 +92,7 @@ const en = {
   },
   // ── Auth ──
   auth: {
+    teacherInviteNotice: "Teacher access is activated only after accepting an invitation from an institution administrator.",
     signIn: "Sign In",
     signUp: "Sign Up",
     email: "Email",
