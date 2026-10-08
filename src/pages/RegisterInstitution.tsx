@@ -10,12 +10,11 @@ import { Building2, ArrowRight, CheckCircle2, Palette, Users, GraduationCap } fr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const benefits = [
   { icon: Palette, text: "Custom branding with your logo and colours" },
-  { icon: Users, text: "Manage teachers, students, and parents" },
+  { icon: Users, text: "Review student enrolment requests and manage your institution" },
   { icon: GraduationCap, text: "Set assignments and track progress" },
 ];
 
@@ -46,31 +45,20 @@ export default function RegisterInstitution() {
 
     setLoading(true);
     try {
-      // Create tenant
-      const { data: tenant, error: tenantErr } = await supabase
-        .from("tenants")
-        .insert({ name: name.trim(), slug: slug.trim() })
-        .select()
-        .single();
+      // The RPC creates the institution and owner membership in one transaction.
+      // A browser cannot specify its own approval status, plan or privileged role.
+      const { data: tenantId, error: tenantErr } = await (supabase as any).rpc("register_institution", {
+        _name: name.trim(),
+        _slug: slug.trim(),
+      });
       if (tenantErr) throw tenantErr;
-
-      // Add user as admin member (approved)
-      const { error: memberErr } = await supabase
-        .from("tenant_members")
-        .insert({
-          tenant_id: tenant.id,
-          user_id: user.id,
-          role: "admin",
-          status: "approved",
-          approved_by: user.id,
-          approved_at: new Date().toISOString(),
-        });
-      if (memberErr) throw memberErr;
+      if (!tenantId) throw new Error("Registration did not return an institution ID.");
 
       toast({
         title: "Institution registered! 🎉",
         description: "Welcome to your admin portal. Customise your branding to get started.",
       });
+      window.dispatchEvent(new Event("stemcoach:tenant-branding-updated"));
       navigate("/institution");
     } catch (err: any) {
       const msg = err?.message?.includes("unique") ? "That slug is already taken. Try a different one." : err?.message;

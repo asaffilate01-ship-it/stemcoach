@@ -3,8 +3,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
-import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings } from "lucide-react";
+import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,14 +18,14 @@ export default function TenantAdmin() {
   const [tab, setTab] = useState<"branding" | "members" | "settings">("members");
 
   // Fetch tenant where user is admin
-  const { data: membership } = useQuery({
+  const { data: membership, isLoading: membershipLoading, error: membershipError } = useQuery({
     queryKey: ["my-tenant-membership", user?.id],
     queryFn: async () => {
       const { data } = await supabase
         .from("tenant_members")
         .select("*, tenants(*)")
         .eq("user_id", user!.id)
-        .in("role", ["admin", "teacher"])
+        .eq("role", "admin")
         .eq("status", "approved")
         .limit(1)
         .maybeSingle();
@@ -60,24 +59,18 @@ export default function TenantAdmin() {
 
   const approveMember = useMutation({
     mutationFn: async ({ memberId, approve }: { memberId: string; approve: boolean }) => {
-      if (approve) {
-        const { error } = await supabase
-          .from("tenant_members")
-          .update({ status: "approved", approved_by: user!.id, approved_at: new Date().toISOString() })
-          .eq("id", memberId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("tenant_members")
-          .update({ status: "rejected" })
-          .eq("id", memberId);
-        if (error) throw error;
-      }
+      const { error } = await (supabase as any).rpc("review_institution_member", {
+        _tenant_id: tenant.id,
+        _member_id: memberId,
+        _approve: approve,
+      });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-members"] });
       toast({ title: "Member updated" });
     },
+    onError: (error: Error) => toast({ title: "Approval failed", description: error.message, variant: "destructive" }),
   });
 
   // Branding state
@@ -97,24 +90,35 @@ export default function TenantAdmin() {
 
   const saveBranding = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("tenants")
-        .update({
-          name: brandName,
-          primary_color: brandColor,
-          secondary_color: brandSecondary,
-          logo_url: logoUrl || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", tenant.id);
+      const { error } = await (supabase as any).rpc("update_institution_branding", {
+        _tenant_id: tenant.id,
+        _name: brandName,
+        _primary_color: brandColor,
+        _secondary_color: brandSecondary,
+        _logo_url: logoUrl || null,
+      });
       if (error) throw error;
     },
-    onSuccess: () => toast({ title: "Branding saved", description: "Your changes will be reflected across the platform." }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-tenant-membership", user?.id] });
+      window.dispatchEvent(new Event("stemcoach:tenant-branding-updated"));
+      toast({ title: "Branding saved", description: "Your colours and logo have been updated." });
+    },
     onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const pendingMembers = members.filter((m: any) => m.status === "pending");
   const approvedMembers = members.filter((m: any) => m.status === "approved");
+  const approvedStudents = approvedMembers.filter((m: any) => m.role === "student").length;
+  const maxStudents = Number(tenant?.max_students ?? 50);
+  const availableSeats = Math.max(0, maxStudents - approvedStudents);
+  const inviteLink = tenant
+    ? `${window.location.origin}/join-institution?code=${encodeURIComponent(tenant.slug)}`
+    : "";
+
+  if (membershipLoading) {
+    return <div className="min-h-screen bg-background"><AppHeader /><main className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading institution…</main></div>;
+  }
 
   if (!tenant) {
     return (
@@ -123,7 +127,7 @@ export default function TenantAdmin() {
         <main className="container mx-auto px-4 py-16 text-center">
           <Building2 className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
           <h2 className="stem-heading mb-2 text-2xl">No Institution Found</h2>
-          <p className="text-muted-foreground">You need to be an admin or teacher of an institution to access this panel.</p>
+          <p className="text-muted-foreground">{membershipError ? "Unable to load institution membership. Please retry." : "Only an approved institution administrator can access this panel."}</p>
         </main>
       </div>
     );
@@ -137,6 +141,19 @@ export default function TenantAdmin() {
           <div className="stem-label mb-2">Institution Admin</div>
           <h1 className="stem-heading text-3xl">{tenant.name}</h1>
           <p className="text-sm text-muted-foreground">Slug: {tenant.slug} · Plan: {tenant.plan}</p>
+          <Button variant="outline" size="sm" className="mt-4 gap-2" onClick={() => {
+            void navigator.clipboard.writeText(inviteLink)
+              .then(() => toast({ title: "Invitation link copied", description: "Share this link with students to request access." }))
+              .catch(() => toast({ title: "Unable to copy", description: inviteLink, variant: "destructive" }));
+          }}>
+            <Copy className="h-4 w-4" /> Copy student invitation link
+          </Button>
+        </div>
+
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="stem-card rounded-xl p-4"><p className="text-xs text-muted-foreground">Approved students</p><p className="mt-1 text-2xl font-bold">{approvedStudents} / {maxStudents}</p></div>
+          <div className="stem-card rounded-xl p-4"><p className="text-xs text-muted-foreground">Pending student requests</p><p className="mt-1 text-2xl font-bold">{pendingMembers.length}</p></div>
+          <div className="stem-card rounded-xl p-4"><p className="text-xs text-muted-foreground">Available student seats</p><p className="mt-1 text-2xl font-bold">{availableSeats}</p></div>
         </div>
 
         {/* Tabs */}
@@ -175,10 +192,10 @@ export default function TenantAdmin() {
                         <div className="text-xs text-muted-foreground">Requested: {new Date(m.joined_at).toLocaleDateString()} · Role: {m.role}</div>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={() => approveMember.mutate({ memberId: m.id, approve: true })} className="gap-1 rounded text-xs">
+                        <Button size="sm" disabled={approveMember.isPending || (availableSeats === 0 && m.role === "student")} onClick={() => approveMember.mutate({ memberId: m.id, approve: true })} className="gap-1 rounded text-xs">
                           <CheckCircle2 className="h-3 w-3" /> Approve
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => approveMember.mutate({ memberId: m.id, approve: false })} className="gap-1 rounded text-xs">
+                        <Button size="sm" variant="outline" disabled={approveMember.isPending} onClick={() => approveMember.mutate({ memberId: m.id, approve: false })} className="gap-1 rounded text-xs">
                           <XCircle className="h-3 w-3" /> Reject
                         </Button>
                       </div>
@@ -254,7 +271,7 @@ export default function TenantAdmin() {
                 </div>
               </div>
 
-              <Button onClick={() => saveBranding.mutate()} className="rounded">Save Branding</Button>
+              <Button onClick={() => saveBranding.mutate()} disabled={saveBranding.isPending} className="rounded">Save Branding</Button>
             </div>
           </div>
         )}
