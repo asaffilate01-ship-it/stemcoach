@@ -3,8 +3,9 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings, Copy, UserPlus } from "lucide-react";
+import { Building2, Users, CheckCircle2, XCircle, Palette, Shield, Settings, Copy, UserPlus, BarChart3 } from "lucide-react";
 import { TeacherInvitations } from "@/components/institution/TeacherInvitations";
+import { InstitutionClassReports } from "@/components/institution/InstitutionClassReports";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,7 @@ export default function TenantAdmin() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<"branding" | "members" | "teachers" | "settings">("members");
+  const [tab, setTab] = useState<"branding" | "members" | "teachers" | "reports" | "settings">("members");
 
   // Fetch tenant where user is admin
   const { data: membership, isLoading: membershipLoading, error: membershipError } = useQuery({
@@ -164,6 +165,7 @@ export default function TenantAdmin() {
           {[
             { key: "members" as const, label: "Members", icon: Users },
             { key: "teachers" as const, label: "Teachers", icon: UserPlus },
+            { key: "reports" as const, label: "Reports", icon: BarChart3 },
             { key: "branding" as const, label: "Branding", icon: Palette },
             { key: "settings" as const, label: "Settings", icon: Settings },
           ].map((t) => (
@@ -232,6 +234,7 @@ export default function TenantAdmin() {
 
         {/* Teacher invitation Tab */}
         {tab === "teachers" && <TeacherInvitations tenantId={tenant.id} />}
+        {tab === "reports" && <InstitutionClassReports tenantId={tenant.id} />}
 
         {/* Branding Tab */}
         {tab === "branding" && (

@@ -24,6 +24,7 @@ export default function TeacherDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState("");
   const [showAssign, setShowAssign] = useState<string | null>(null);
   const [showLearningPath, setShowLearningPath] = useState<string | null>(null);
   const [newClassName, setNewClassName] = useState("");
@@ -49,6 +50,44 @@ export default function TeacherDashboard() {
       return data;
     },
     enabled: Boolean(user),
+  });
+
+  // Class/institution associations are explicit; personal classes remain private.
+  const { data: teacherInstitutions = [] } = useQuery({
+    queryKey: ["teacher-institutions", user?.id],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("tenant_members")
+        .select("tenant_id, tenants(name)")
+        .eq("user_id", user!.id).eq("role", "teacher").eq("status", "approved");
+      if (error) throw error;
+      return (data || []) as Array<{ tenant_id: string; tenants: { name: string } | null }>;
+    },
+  });
+  const { data: institutionClassLinks = [] } = useQuery({
+    queryKey: ["teacher-institution-class-links", user?.id],
+    enabled: Boolean(user),
+    queryFn: async (): Promise<Array<{ class_id: string; tenant_id: string }>> => {
+      const { data, error } = await (supabase as any).rpc("get_my_institution_class_links");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+  const activeInstitutionId = selectedInstitutionId || teacherInstitutions[0]?.tenant_id || "";
+  const linkInstitutionClass = useMutation({
+    mutationFn: async (classId: string) => {
+      if (!activeInstitutionId) throw new Error("Select an institution before linking a class.");
+      const { error } = await (supabase as any).rpc("link_institution_class", {
+        _tenant_id: activeInstitutionId,
+        _class_id: classId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["teacher-institution-class-links", user?.id] });
+      toast({ title: "Class linked", description: "Your institution administrator can now view aggregate classroom progress." });
+    },
+    onError: (error: Error) => toast({ title: "Class could not be linked", description: error.message, variant: "destructive" }),
   });
 
   const { data: assignments = [] } = useQuery({
@@ -211,6 +250,17 @@ export default function TeacherDashboard() {
             <Button onClick={() => setShowCreate((current) => !current)} className="gap-2 rounded-xl"><Plus className="h-4 w-4" /> {t("teacherDashboard.createClass")}</Button>
           </div>
 
+          {teacherInstitutions.length > 0 && (
+            <section className="stem-card mb-6 rounded-xl p-5">
+              <h2 className="mb-2 flex items-center gap-2 text-base font-semibold"><BarChart3 className="h-4 w-4 text-primary" /> Share classes with your institution</h2>
+              <p className="mb-3 text-xs text-muted-foreground">Only classes you explicitly link contribute to institution-level reporting. This never shares your private practice history.</p>
+              <label htmlFor="teacher-institution-select" className="mb-1 block text-xs font-semibold">Choose institution</label>
+              <select id="teacher-institution-select" value={activeInstitutionId} onChange={(event) => setSelectedInstitutionId(event.target.value)} className="w-full max-w-sm rounded-xl border bg-background px-3 py-2 text-sm">
+                {teacherInstitutions.map((institution) => <option key={institution.tenant_id} value={institution.tenant_id}>{institution.tenants?.name || institution.tenant_id}</option>)}
+              </select>
+            </section>
+          )}
+
           {showCreate && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="stem-card mb-6 rounded-xl p-6">
               <h2 className="mb-4 font-semibold">{t("teacherDashboard.newClass")}</h2>
@@ -238,6 +288,18 @@ export default function TeacherDashboard() {
                       <Button variant="outline" size="sm" onClick={() => { setShowLearningPath(null); setShowAssign(classroom.id); }} className="gap-1.5 rounded-xl text-xs"><ClipboardList className="h-3 w-3" /> {t("teacherDashboard.quizAssignment")}</Button>
                       <Button size="sm" onClick={() => openLearningPathForm(classroom.id)} disabled={availableTutorials.length === 0} className="gap-1.5 rounded-xl text-xs"><Route className="h-3 w-3" /> {t("learningPaths.create")}</Button>
                     </div>
+
+                    {teacherInstitutions.length > 0 && (
+                      <div className="mt-4 rounded-xl border border-dashed p-3">
+                        {institutionClassLinks.some((linked) => linked.class_id === classroom.id) ? (
+                          <p className="flex items-center gap-1.5 text-xs font-semibold text-success"><CheckCircle2 className="h-4 w-4" /> Linked to institution report</p>
+                        ) : (
+                          <Button variant="outline" size="sm" className="w-full gap-2 text-xs" disabled={!activeInstitutionId || linkInstitutionClass.isPending} onClick={() => linkInstitutionClass.mutate(classroom.id)}>
+                            <BarChart3 className="h-4 w-4" /> Link to institution report
+                          </Button>
+                        )}
+                      </div>
+                    )}
 
                     {showAssign === classroom.id && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-4 border-t pt-4">
