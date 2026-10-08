@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,11 @@ export default function Auth() {
   const [role, setRole] = useState<Role>("student");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const requestedReturn = (location.state as { returnTo?: unknown } | null)?.returnTo;
+  const safeInvitationReturn = typeof requestedReturn === "string" && /^\/teacher-invitation\?token=[a-f0-9]{64}$/.test(requestedReturn)
+    ? requestedReturn : null;
 
   const authErrorMessage = (error: { code?: string }) => {
     if (error.code === "invalid_credentials") return t("auth.errors.invalidCredentials");
@@ -63,6 +67,7 @@ export default function Auth() {
 
         if (signUpData?.user && signUpData.session) {
           await seedUserData(signUpData.user.id, displayName);
+          if (safeInvitationReturn) { navigate(safeInvitationReturn); return; }
           navigate("/onboarding");
           return;
         }
@@ -88,6 +93,8 @@ export default function Auth() {
           const meta = user.user_metadata || {};
           await seedUserData(user.id, meta.display_name || user.email || "");
         }
+
+        if (safeInvitationReturn) { navigate(safeInvitationReturn); return; }
 
         const { data: prefs } = await supabase
           .from("user_preferences")
@@ -225,6 +232,9 @@ export default function Auth() {
                           </button>
                         ))}
                       </div>
+                      {role === "teacher" && (
+                        <p className="mt-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">{t("auth.teacherInviteNotice")}</p>
+                      )}
                     </div>
                   </motion.div>
                 )}
