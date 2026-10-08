@@ -50,7 +50,7 @@ export default function InstallApp() {
   };
 
   const benefits = [
-    "Works offline — access loaded questions without internet",
+    "Review previously loaded questions offline; grading and AI coaching require internet",
     "Instant launch from your home screen",
     "Full-screen experience without browser bars",
     "Push notifications for streaks and study reminders",
@@ -74,7 +74,7 @@ export default function InstallApp() {
                     Install <span className="stem-gradient-text">STEMCoach</span>
                   </h1>
                   <p className="mx-auto mb-8 max-w-md text-lg text-muted-foreground">
-                    Add STEMCoach to your home screen for instant access, offline practice, and a native app experience.
+                    Add STEMCoach to your home screen for instant access, access to loaded revision material, and an app-like experience.
                   </p>
 
                   {isInstalled ? (
