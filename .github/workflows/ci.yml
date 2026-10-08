@@ -26,12 +26,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install --package-lock-only --ignore-scripts
-      - name: Record refreshed lockfile patch
-        run: |
-          echo 'LOCKFILE_PATCH_BEGIN'
-          git --no-pager diff --no-color -- package-lock.json
-          echo 'LOCKFILE_PATCH_END'
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - name: Audit production dependencies
