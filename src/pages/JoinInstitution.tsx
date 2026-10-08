@@ -17,7 +17,10 @@ export default function JoinInstitution() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [slug, setSlug] = useState("");
+  const [slug, setSlug] = useState(() =>
+    (new URLSearchParams(window.location.search).get("code") || "")
+      .toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40)
+  );
   const [found, setFound] = useState<{ id: string; name: string; logo_url: string | null } | null>(null);
   const [searchDone, setSearchDone] = useState(false);
 

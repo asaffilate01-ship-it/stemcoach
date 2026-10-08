@@ -33,6 +33,7 @@ export function TenantBrandingProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    let cancelled = false;
     const fetchBranding = async () => {
       // Check if user belongs to any approved tenant
       const { data: membership } = await supabase
@@ -43,6 +44,7 @@ export function TenantBrandingProvider({ children }: { children: ReactNode }) {
         .limit(1)
         .maybeSingle();
 
+      if (cancelled) return;
       if (!membership?.tenants) {
         setBranding(defaultBranding);
         removeCssVars();
@@ -62,7 +64,12 @@ export function TenantBrandingProvider({ children }: { children: ReactNode }) {
       applyCssVars(newBranding);
     };
 
-    fetchBranding();
+    void fetchBranding();
+    window.addEventListener("stemcoach:tenant-branding-updated", fetchBranding);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("stemcoach:tenant-branding-updated", fetchBranding);
+    };
   }, [user]);
 
   return (
