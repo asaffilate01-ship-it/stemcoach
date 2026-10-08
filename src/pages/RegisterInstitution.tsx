@@ -58,6 +58,7 @@ export default function RegisterInstitution() {
         title: "Institution registered! 🎉",
         description: "Welcome to your admin portal. Customise your branding to get started.",
       });
+      window.dispatchEvent(new Event("stemcoach:tenant-branding-updated"));
       navigate("/institution");
     } catch (err: any) {
       const msg = err?.message?.includes("unique") ? "That slug is already taken. Try a different one." : err?.message;
