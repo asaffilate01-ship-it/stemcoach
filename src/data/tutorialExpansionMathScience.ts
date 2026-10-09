@@ -26,7 +26,7 @@ export const mathsScienceExpansion: Tutorial[] = [
     workedExample: "A right triangle has opposite side 3 cm and adjacent side 4 cm. tan θ = 3/4, so θ ≈ 36.9°.",
     examTip: "Write the chosen ratio as words before entering values.",
     commonMistake: "Switching opposite and adjacent when changing the reference angle.",
-    checkpoint: mcq("Which ratio equals opposite ÷ adjacent in a right triangle?", ["tangent", "sine", "cosine", "secant"], "tangent", "The TOA part of SOH-CAH-TOA defines tangent as opposite over adjacent.", "Think TOA."),
+    checkpoint: mcq("Which ratio equals opposite ÷ adjacent in a right triangle?", ["tangent", "sine", "cosine", "secant"], "tangent", "The TOA part of SOH-CAH-TOA defines tangent as opposite over adjacent.", "Recall TOA: tangent means opposite side divided by adjacent side."),
     practice: [
       numeric("A right triangle has opposite 6 cm and hypotenuse 10 cm. What is sin θ? Enter a decimal.", 0.6, "sin θ = opposite/hypotenuse = 6/10 = 0.6.", "Find the ratio, not the angle."),
       multi("Which statements are correct for right-angled triangles?", ["The hypotenuse faces the right angle", "sin θ is opposite ÷ hypotenuse", "tan θ is adjacent ÷ opposite", "cos θ is adjacent ÷ hypotenuse"], ["The hypotenuse faces the right angle", "sin θ is opposite ÷ hypotenuse", "cos θ is adjacent ÷ hypotenuse"], "Hypotenuse location and SOH/CAH are correct; tangent is opposite divided by adjacent.", "Recall the three mnemonics."),
@@ -41,7 +41,7 @@ export const mathsScienceExpansion: Tutorial[] = [
     workedExample: "A 2 kg trolley moving at 3 m/s has kinetic energy ½ × 2 × 3² = 9 J. Raising the trolley 1 m using g ≈ 9.8 N/kg increases its gravitational store by 19.6 J.",
     examTip: "Square the speed before multiplying by half the mass.",
     commonMistake: "Using the speed instead of its square in kinetic-energy calculations.",
-    checkpoint: mcq("Which expression correctly calculates kinetic energy?", ["½ × mass × speed²", "mass × speed", "mass × height", "½ × mass × speed"], "½ × mass × speed²", "Ek = ½mv², with mass in kg and speed in m/s.", "Speed is squared."),
+    checkpoint: mcq("Which expression correctly calculates kinetic energy?", ["½ × mass × speed²", "mass × speed", "mass × height", "½ × mass × speed"], "½ × mass × speed²", "Ek = ½mv², with mass in kg and speed in m/s.", "Kinetic energy depends on the square of the speed, not the speed alone."),
     practice: [
       numeric("What is the kinetic energy in joules of a 4 kg object moving at 2 m/s?", 8, "Ek = ½ × 4 × 2² = 2 × 4 = 8 J.", "Calculate v² first."),
       trueFalse("Doubling the speed of an object at fixed mass doubles its kinetic energy.", false, "Because Ek ∝ v², doubling the speed increases kinetic energy fourfold.", "Energy depends on the square of speed."),
@@ -56,7 +56,7 @@ export const mathsScienceExpansion: Tutorial[] = [
     workedExample: "A wave of frequency 20 Hz and wavelength 0.5 m travels at v = 20 × 0.5 = 10 m/s. Its period is 1/20 = 0.05 s.",
     examTip: "Convert wavelength to metres before applying the formula.",
     commonMistake: "Confusing the period in seconds with the frequency in hertz.",
-    checkpoint: mcq("A wave has frequency 5 Hz and wavelength 3 m. What is its speed?", ["15 m/s", "8 m/s", "1.67 m/s", "0.6 m/s"], "15 m/s", "Multiply frequency by wavelength: v = 5 × 3 = 15 m/s.", "Use v = fλ."),
+    checkpoint: mcq("A wave has frequency 5 Hz and wavelength 3 m. What is its speed?", ["15 m/s", "8 m/s", "1.67 m/s", "0.6 m/s"], "15 m/s", "Multiply frequency by wavelength: v = 5 × 3 = 15 m/s.", "Recall that wave speed equals frequency multiplied by wavelength."),
     practice: [
       numeric("What is the period in seconds of a 4 Hz wave?", 0.25, "T = 1/f = 1/4 = 0.25 s.", "Period is the reciprocal of frequency."),
       multi("Choose all true wave statements.", ["Frequency is measured in hertz", "Wavelength is measured in metres", "Period is measured in newtons", "v = frequency × wavelength"], ["Frequency is measured in hertz", "Wavelength is measured in metres", "v = frequency × wavelength"], "Period is measured in seconds, not newtons; the other three statements are correct.", "Check each physical unit."),
