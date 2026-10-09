@@ -74,7 +74,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
   return (
     <div className="space-y-3">
       <span className="inline-flex rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">
-        {t('qa.formats.' + format)}
+        {t(`qa.formats.${format}`)}
       </span>
       {(format === "single" || format === "true-false" || format === "multiple") && (
         <div className="grid gap-2" role="group" aria-label={t("qa.answerOptions")}>
