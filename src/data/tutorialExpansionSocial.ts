@@ -1,0 +1,96 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, trueFalse, multi, numeric, short, order, match } from "./tutorialQuestions";
+
+/** Authored social science and literature lessons; independent academic review pending. */
+export const socialExpansion: Tutorial[] = [
+  {
+    id: "demand-supply-equilibrium", subject: "economics", title: "Demand, Supply and Market Equilibrium", level: "Foundation", minutes: 15,
+    summary: "Read shifts in demand and supply curves and identify equilibrium price and quantity.",
+    objectives: ["Distinguish movement along a curve from a shift", "Identify the equilibrium price", "Predict effects of a simple demand shock"],
+    lesson: ["Demand typically shows how much buyers want at various prices, holding other influences constant.", "Supply usually shows how much producers offer at various prices, all else equal.", "An equilibrium occurs where quantity demanded equals quantity supplied. A change in consumer taste can shift demand; a price change itself normally causes movement along the existing curve."],
+    workedExample: "If consumers want more coffee at every price and supply is unchanged, the demand curve shifts right. In a standard upward-sloping supply and downward-sloping demand model, equilibrium price and quantity both rise.",
+    examTip: "Always specify which curve shifts and what is held constant.",
+    commonMistake: "Saying a rise in a product's own price shifts its demand curve rather than moving along it.",
+    checkpoint: mcq("What happens at the equilibrium price in a simple competitive market?", ["Quantity demanded equals quantity supplied", "Supply is always zero", "All firms make the same profit", "Consumers demand an infinite quantity"], "Quantity demanded equals quantity supplied", "Market equilibrium is defined by equal quantities demanded and supplied at a given price.", "Look for the intersection of curves."),
+    practice: [
+      multi("Which changes can shift the demand curve for a normal good to the right?", ["An increase in buyers' incomes", "Successful advertising that raises preferences", "A fall in the good's own price", "An increase in the population of buyers"], ["An increase in buyers' incomes", "Successful advertising that raises preferences", "An increase in the population of buyers"], "Income, preferences and the number of buyers are demand shifters; a change in the good's own price is a movement along demand.", "Distinguish a shifter from a price movement."),
+      trueFalse("A change in a product's own price normally shifts the demand curve, holding other factors constant.", false, "Changing the price causes movement along demand rather than a shift of the demand relationship.", "Think about which variable is on the vertical axis."),
+      order("Place these steps for analysing a positive demand shock in order.", ["Identify the factor that changes consumer demand", "Shift the demand curve right", "Read the new equilibrium where supply and demand intersect"], "Identify the external change first, shift demand, then infer equilibrium from the new intersection.", "Shifts precede equilibrium comparisons."),
+    ],
+  },
+  {
+    id: "opportunity-cost-ppf", subject: "economics", title: "Opportunity Cost and Production Possibilities", level: "Intermediate", minutes: 16,
+    summary: "Compare scarce choices and interpret production possibility frontiers.",
+    objectives: ["Define opportunity cost", "Explain productive efficiency", "Use a PPF to illustrate trade-offs"],
+    lesson: ["Opportunity cost is the next-best alternative forgone when choosing an action.", "A production possibility frontier shows maximum feasible combinations of two goods with given resources and technology.", "Points on the frontier are productively efficient for the assumed technology, points inside indicate possible underutilisation, and points outside are currently unattainable."],
+    workedExample: "A bakery can make either 100 loaves or 50 cakes with the same resources. If giving up 20 loaves allows 10 cakes, the opportunity cost per additional cake in that interval is two loaves.",
+    examTip: "State what is forgone and the exact units when describing opportunity cost.",
+    commonMistake: "Equating opportunity cost with money cost rather than the value of the next-best choice.",
+    checkpoint: mcq("What does opportunity cost mean?", ["The value of the next-best alternative forgone", "The sum of all available alternatives", "The monetary price of every product", "The benefit of making no choice"], "The value of the next-best alternative forgone", "Scarcity forces choice; opportunity cost is specifically the next-best alternative that must be given up.", "A choice rules out a particular next-best option."),
+    practice: [
+      numeric("If 15 extra cakes require giving up 30 loaves, how many loaves are forgone per extra cake?", 2, "Divide the 30 loaves forgone by 15 extra cakes = 2 loaves per cake.", "Express opportunity cost per additional cake."),
+      trueFalse("A point inside the PPF can indicate unemployed or underused productive resources.", true, "With the assumed resources and technology, output inside the frontier may be increased without reducing the other good.", "The frontier itself shows maximum feasible output."),
+      match("Match each location on the PPF diagram with its meaning.", [["Inside the frontier", "Attainable but potentially inefficient"], ["On the frontier", "Attainable and productively efficient"], ["Outside the frontier", "Currently unattainable"]], "Inside points may waste resources, frontier points use existing productive capacity and outside points require more capacity or new technology.", "The frontier is the boundary of feasible output."),
+    ],
+  },
+  {
+    id: "literary-imagery", subject: "english-literature", title: "Imagery, Metaphor and Reader Effect", level: "Foundation", minutes: 14,
+    summary: "Build interpretations from short original examples instead of technique spotting alone.",
+    objectives: ["Identify metaphor and personification", "Infer connotations", "Support a reading with precise language analysis"],
+    lesson: ["A metaphor describes one thing as another to suggest shared qualities, without using 'like' or 'as'.", "Personification attributes human-like actions or feelings to non-human things.", "A strong analytical paragraph identifies a short word or phrase, explains possible connotations and connects them to a justified interpretation of the scene."],
+    workedExample: "Original example: 'The street swallowed their footsteps.' The verb 'swallowed' personifies the street, potentially suggesting the travellers are overwhelmed or swallowed up by their surroundings.",
+    examTip: "Use tentative interpretive language such as 'could suggest' where several readings are defensible.",
+    commonMistake: "Naming a technique without explaining how it supports an interpretation.",
+    checkpoint: mcq("In the original sentence 'The wind whispered a warning', which technique is clearest?", ["Personification", "Hyperbole", "Onomatopoeia only", "A factual report"], "Personification", "The wind is described as 'whispering', a human action, to create an ominous atmosphere.", "Can the wind literally whisper as a person does?"),
+    practice: [
+      multi("Which features strengthen a literary interpretation?", ["A short accurate quotation", "Analysis of word connotations", "A justified link to the scene", "A technique name without explanation"], ["A short accurate quotation", "Analysis of word connotations", "A justified link to the scene"], "Strong analysis offers textual evidence, meaning and reasoning; a bare label is insufficient.", "Think evidence, meaning and effect."),
+      trueFalse("A metaphor always includes the word 'like' or 'as'.", false, "Comparisons that explicitly use 'like' or 'as' are usually similes, not metaphors.", "Consider the difference between 'a lion' and 'like a lion'."),
+      order("Put these stages of a close-reading paragraph in a logical order.", ["Make an interpretation", "Quote a short supporting phrase", "Analyse a significant word and its connotations", "Connect the analysis back to the interpretation"], "Start with a claim, support it precisely, analyse and link back.", "Interpretation leads the paragraph."),
+    ],
+  },
+  {
+    id: "narrative-structure", subject: "english-literature", title: "Narrative Perspective, Structure and Suspense", level: "Intermediate", minutes: 16,
+    summary: "Explain how viewpoint and sequencing shape what a reader knows and feels.",
+    objectives: ["Recognise first- and third-person narration", "Explain limited information and suspense", "Discuss structural shifts rather than only language devices"],
+    lesson: ["First-person narration uses 'I' and usually limits readers to what the narrator thinks or observes.", "A third-person limited narrator follows one character's perspective without necessarily knowing everyone's thoughts.", "Writers build suspense by delaying revelations, shifting time, changing pace or withholding key information. These are structural choices."],
+    workedExample: "Original example: 'I opened the note. Behind the door, someone waited.' The first-person perspective does not confirm who waits, leaving a knowledge gap that can increase tension.",
+    examTip: "Write precisely how a structural choice changes reader expectations, rather than stating 'it hooks the reader' without evidence.",
+    commonMistake: "Assuming third-person narration automatically reveals every character's thoughts.",
+    checkpoint: mcq("Which phrase is most clearly first-person narration?", ["I waited by the door", "She waited by the door", "They waited outside", "The door was locked"], "I waited by the door", "The pronoun 'I' places the speaker within the narrated events.", "Look for the narrator's personal pronoun."),
+    practice: [
+      short("What is the term for tension created by uncertainty about what may happen?", "suspense", "Suspense is the anticipatory tension a narrative builds by withholding or delaying important information.", "It is the expectation that something important may happen."),
+      multi("Which are structural techniques rather than single-word images?", ["A flashback", "A chapter cliffhanger", "Delaying a revelation", "Describing an object as a 'silver eye'"], ["A flashback", "A chapter cliffhanger", "Delaying a revelation"], "Flashbacks, cliffhangers and delayed revelations shape order and disclosure; the 'silver eye' is language imagery.", "Structure involves timing and organisation."),
+      match("Match the narrative choice to a plausible effect.", [["Flashback", "Explains earlier events later in the story"], ["Cliffhanger", "Leaves an important question unresolved"], ["First-person limited view", "Keeps the reader close to one speaker's knowledge"]], "These techniques manage chronology, uncertainty and reader access to information.", "Think about what information each choice controls."),
+    ],
+  },
+  {
+    id: "sampling-bias", subject: "psychology", title: "Sampling, Bias and Research Ethics", level: "Foundation", minutes: 15,
+    summary: "Evaluate who takes part in a study and whether conclusions generalise.",
+    objectives: ["Distinguish opportunity and random samples", "Recognise selection bias", "Identify consent and withdrawal principles"],
+    lesson: ["An opportunity sample uses people conveniently available and may not represent the intended population.", "A simple random sample gives each eligible person a defined equal chance of selection, although non-response may still bias outcomes.", "Ethical research generally requires informed consent, the right to withdraw and appropriate handling of sensitive data, with any deception carefully justified and reviewed."],
+    workedExample: "If a researcher surveys only university psychology students about national sleep habits, the sample may overrepresent young educated adults and underrepresent other age groups.",
+    examTip: "Say exactly which group is underrepresented and how that might affect the conclusion.",
+    commonMistake: "Confusing a large sample with a representative sample: size alone does not remove selection bias.",
+    checkpoint: mcq("A researcher asks only the first ten visitors to a library for responses. What is the sampling method?", ["Opportunity sampling", "Simple random sampling", "Stratified random sampling", "Systematic census"], "Opportunity sampling", "The participants were chosen because they were easily accessible to the researcher.", "Were all eligible people given an equal chance?"),
+    practice: [
+      multi("Which are important protections in routine psychological research?", ["Informed consent", "Right to withdraw", "Appropriate confidentiality", "Publication of every participant's full name"], ["Informed consent", "Right to withdraw", "Appropriate confidentiality"], "Consent, withdrawal and privacy protect participants; public identification is not a default ethical requirement.", "Respect participants' autonomy and privacy."),
+      trueFalse("Increasing sample size always removes selection bias.", false, "If the recruitment method systematically excludes groups, a larger sample can remain biased.", "Think who was eligible to be selected."),
+      order("Arrange a basic ethical recruitment process.", ["Explain the study and relevant risks", "Obtain informed consent", "Collect data securely", "Debrief and honour withdrawal rights"], "Participants need an understandable explanation before agreeing; collection and appropriate follow-up come afterwards.", "Consent must come before ordinary data collection."),
+    ],
+  },
+  {
+    id: "experimental-design", subject: "psychology", title: "Experimental Variables and Study Design", level: "Intermediate", minutes: 16,
+    summary: "Separate independent, dependent and extraneous variables in an experiment.",
+    objectives: ["Identify independent and dependent variables", "Recognise confounding variables", "Distinguish independent groups from repeated measures"],
+    lesson: ["The independent variable (IV) is what the researcher manipulates or compares; the dependent variable (DV) is the measured outcome.", "An extraneous variable is any other factor that might affect results; if it varies systematically with the IV it can confound interpretation.", "In repeated-measures designs, the same participants complete each condition; in independent-groups designs, different participants complete each condition."],
+    workedExample: "To test whether background music affects memory, vary the music condition (IV) and measure the number of words correctly recalled (DV), keeping study time and word difficulty comparable.",
+    examTip: "Operationalise the DV as a measurable quantity rather than writing only 'memory'.",
+    commonMistake: "Calling a participant's overall age the dependent variable when the actual outcome is recall performance.",
+    checkpoint: mcq("In a study testing whether study time changes quiz scores, what is the dependent variable?", ["Quiz score", "Study time", "Room temperature", "Participant name"], "Quiz score", "The dependent variable is what the experiment measures as the outcome.", "What changes in response to the manipulated condition?"),
+    practice: [
+      match("Match each research term to its role.", [["Independent variable", "Factor manipulated or compared"], ["Dependent variable", "Measured outcome"], ["Confounding variable", "Uncontrolled alternative explanation"]], "The IV is manipulated, DV is measured, and confounds undermine interpretation.", "Distinguish what researchers change from what they record."),
+      trueFalse("A repeated-measures design tests the same people in each condition.", true, "In repeated measures each participant experiences all relevant experimental conditions.", "The word repeated refers to the participants' measurements."),
+      short("What abbreviation is commonly used for dependent variable?", "DV", "DV stands for dependent variable, the measured outcome of an investigation.", "It is the measured outcome.", ["dependent variable"]),
+    ],
+  },
+];

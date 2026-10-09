@@ -1,8 +1,21 @@
+import { stemExpansion } from "./stemExpansion";
+
+export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching";
+
 export interface TutorialCheckpoint {
   question: string;
+  /** Option list also supplies the movable items for ordering or matching right-hand choices. */
   options: string[];
+  /** Canonical display answer. Multiple/ordering/matching also have structured keys below. */
   answer: string;
   explanation: string;
+  format?: TutorialQuestionFormat;
+  answers?: string[];
+  acceptedAnswers?: string[];
+  /** Absolute numerical tolerance; zero means exact comparison. */
+  tolerance?: number;
+  pairs?: Array<{ left: string; right: string }>;
+  hint?: string;
 }
 
 export interface Tutorial {
@@ -20,6 +33,8 @@ export interface Tutorial {
   workedExample: string;
   checkpoint: TutorialCheckpoint;
   practice?: TutorialCheckpoint[];
+  examTip?: string;
+  commonMistake?: string;
 }
 
 export const tutorials: Tutorial[] = [
@@ -274,4 +289,5 @@ export const tutorials: Tutorial[] = [
     checkpoint: { question: "Complete: Ich sehe ___ Mann.", options: ["den", "der", "dem", "des"], answer: "den", explanation: "Mann is masculine and functions as the direct object, so the accusative definite article is den." },
     practice: [{ question: "In ‘Die Frau kauft einen Apfel’, what is the direct object?", options: ["einen Apfel", "die Frau", "kauft", "no direct object"], answer: "einen Apfel", explanation: "The apple receives the action of buying and is marked by the masculine accusative article einen." }],
   },
+  ...stemExpansion,
 ];

@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { normalizeLanguage } from "@/i18n/language";
 import { supabase } from "@/integrations/supabase/client";
+import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
 
 const COMPLETED_KEY = "stemcoach:tutorials-completed";
 const LAST_OPENED_KEY = "stemcoach:tutorials-last-opened";
@@ -48,7 +49,8 @@ export default function Tutorials() {
   const [subject, setSubject] = useState(requestedTutorial?.subject || "all");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | null>(requestedTutorial?.id || null);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const correctChecks = useRef(new Set<string>());
+  const currentlySaving = useRef(new Set<string>());
   const [completed, setCompleted] = useState<string[]>(readLocalCompleted);
   const [lastOpenedId, setLastOpenedId] = useState<string | null>(requestedTutorial?.id || readLocalLastOpened());
   const [syncing, setSyncing] = useState(Boolean(user));
@@ -168,19 +170,24 @@ export default function Tutorials() {
   const answerCheckpoint = async (
     tutorialId: string,
     checkpointIndex: number,
-    option: string,
-    checkpoints: Array<{ answer: string }>,
+    correct: boolean,
+    count: number,
   ) => {
-    const answerKey = `${tutorialId}:${checkpointIndex}`;
-    const nextAnswers = { ...answers, [answerKey]: option };
-    setAnswers(nextAnswers);
-    const allCorrect = checkpoints.every((item, index) => nextAnswers[`${tutorialId}:${index}`] === item.answer);
-    if (!allCorrect || completed.includes(tutorialId)) return;
+    if (!correct) return;
+    correctChecks.current.add(`${tutorialId}:${checkpointIndex}`);
+    const allCorrect = Array.from({ length: count }, (_, index) => `${tutorialId}:${index}`)
+      .every((key) => correctChecks.current.has(key));
+    if (!allCorrect || completed.includes(tutorialId) || currentlySaving.current.has(tutorialId)) return;
 
-    if (await saveProgress(tutorialId, true)) {
-      setCompleted((current) => [...new Set([...current, tutorialId])]);
-      if (lastOpenedId === tutorialId) setLastOpenedId(null);
-      toast({ title: t("tutorials.completed") });
+    currentlySaving.current.add(tutorialId);
+    try {
+      if (await saveProgress(tutorialId, true)) {
+        setCompleted((current) => [...new Set([...current, tutorialId])]);
+        if (lastOpenedId === tutorialId) setLastOpenedId(null);
+        toast({ title: t("tutorials.completed") });
+      }
+    } finally {
+      currentlySaving.current.delete(tutorialId);
     }
   };
 
@@ -268,16 +275,13 @@ export default function Tutorials() {
                       <div className="space-y-5">
                         {checkpoints.map((checkpoint, checkpointIndex) => {
                           const answerKey = `${tutorial.id}:${checkpointIndex}`;
-                          const checkpointChoice = answers[answerKey];
                           return (
                             <div key={answerKey} className="rounded-xl border border-border/50 p-4">
                               <p className="mb-3 text-sm font-medium">{checkpointIndex + 1}. {checkpoint.question}</p>
-                              <div className="grid gap-2 sm:grid-cols-2">
-                                {checkpoint.options.map((option) => (
-                                  <Button key={option} variant={checkpointChoice === option ? "default" : "outline"} className="h-auto justify-start whitespace-normal py-3 text-left" onClick={() => void answerCheckpoint(tutorial.id, checkpointIndex, option, checkpoints)}>{option}</Button>
-                                ))}
-                              </div>
-                              {checkpointChoice && <p className={`mt-3 rounded-lg p-3 text-sm ${checkpointChoice === checkpoint.answer ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "bg-amber-500/10 text-amber-800 dark:text-amber-300"}`}>{checkpointChoice === checkpoint.answer ? t("tutorials.correct") : t("tutorials.notQuite", { answer: checkpoint.answer })}{checkpoint.explanation}</p>}
+                              <QuestionInteraction questionId={answerKey} question={checkpoint}
+                                workedExample={tutorial.workedExample}
+                                examTip={tutorial.examTip} commonMistake={tutorial.commonMistake}
+                                onAttempt={(correct) => void answerCheckpoint(tutorial.id, checkpointIndex, correct, checkpoints.length)} />
                             </div>
                           );
                         })}

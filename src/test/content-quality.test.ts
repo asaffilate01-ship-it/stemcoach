@@ -4,6 +4,7 @@ import { mockExamTemplates, examBoardGroups } from "@/data/mockExamTemplates";
 import { curriculumAuthorities } from "@/data/curriculumAuthorities";
 import { DEFAULT_COACH_ID, getCoachChoices, getSquadMembers, isCoachId } from "@/lib/mascots";
 import { tutorials } from "@/data/tutorials";
+import { inspectQuestion } from "@/lib/qaEngine";
 import { TUTORIAL_CONTEXTS } from "../../supabase/functions/_shared/tutorialCatalog";
 
 const unique = (values: string[]) => new Set(values).size === values.length;
@@ -74,9 +75,8 @@ describe("content integrity", () => {
     for (const tutorial of tutorials) {
       expect(tutorial.objectives.length).toBeGreaterThanOrEqual(3);
       expect(tutorial.lesson.length).toBeGreaterThanOrEqual(3);
-      expect(tutorial.checkpoint.options).toContain(tutorial.checkpoint.answer);
-      for (const checkpoint of tutorial.practice || []) {
-        expect(checkpoint.options).toContain(checkpoint.answer);
+      for (const checkpoint of [tutorial.checkpoint, ...(tutorial.practice || [])]) {
+        expect(inspectQuestion(checkpoint), `${tutorial.id}: ${checkpoint.question}`).toEqual([]);
         expect(checkpoint.explanation.length).toBeGreaterThan(15);
       }
     }

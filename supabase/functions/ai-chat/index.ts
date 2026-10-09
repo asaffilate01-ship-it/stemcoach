@@ -178,7 +178,7 @@ serve(async (req) => {
       ? `Recent weak-topic evidence: ${weakTopics.join("; ")}. Use this only when relevant and never imply a diagnosis or certainty from limited attempt data.`
       : "No recent weak-topic evidence is available. Do not invent learner performance history.";
     const lessonContext = tutorialContext
-      ? `The learner opened the reviewed STEMCoach tutorial “${tutorialContext.title}”. Use that lesson as context when relevant, but answer the learner's actual question and do not invent tutorial content that was not supplied.`
+      ? `The learner opened an authored STEMCoach tutorial; its exact exam-board specification has not been independently verified “${tutorialContext.title}”. Use that lesson as context when relevant, but answer the learner's actual question and do not invent tutorial content that was not supplied.`
       : "No tutorial context is active.";
 
     const systemPrompt = `You are STEMCoach — an expert, friendly tutor for a student studying ${subjectLabel} under curriculum identifier ${curriculum}.

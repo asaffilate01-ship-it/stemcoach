@@ -1,0 +1,96 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, trueFalse, multi, numeric, short, order, match } from "./tutorialQuestions";
+
+/** Authored computing, geography and business lessons. Academic verification pending. */
+export const computingWorldExpansion: Tutorial[] = [
+  {
+    id: "arrays-lists-searching", subject: "computer-science", title: "Arrays, Lists and Searching Algorithms", level: "Foundation", minutes: 15,
+    summary: "Trace indexing and compare linear with binary search.",
+    objectives: ["Trace array positions", "Explain linear search", "State the sorted-input requirement of binary search"],
+    lesson: ["An array stores an ordered collection of elements; many programming languages index its first element at zero.", "Linear search inspects elements sequentially until it finds the target or reaches the end; it works on unsorted data.", "Binary search repeatedly halves the search region, but it requires input sorted according to the search order."],
+    workedExample: "In the zero-indexed array [4, 7, 10, 15], index 2 contains 10. Searching the sorted list for 15 by binary search checks the middle region then narrows to the right.",
+    examTip: "Check whether the question uses zero-based indexing before reporting a position.",
+    commonMistake: "Applying binary search to an unsorted list without first ensuring a suitable order.",
+    checkpoint: mcq("Which algorithm requires a sorted list to work correctly in its standard form?", ["Binary search", "Linear search", "Counting occurrences", "Reading the first item"], "Binary search", "Binary search uses ordered comparisons to discard half of the candidate region.", "It halves the search region."),
+    practice: [
+      numeric("In a zero-indexed array [9, 6, 3, 8], what is the index of the value 3?", 2, "The positions are 0:9, 1:6, 2:3 and 3:8.", "Start counting at zero."),
+      trueFalse("A linear search can find a target in an unsorted list.", true, "Linear search compares elements one by one without assuming they are in order.", "Does it depend on being able to discard half the list?"),
+      order("Arrange the major steps of binary search.", ["Check the middle item", "Compare the target with the middle value", "Keep the appropriate half of the sorted list", "Repeat until found or no candidates remain"], "Binary search finds the middle, compares and narrows the search space repeatedly.", "Start by checking a central value."),
+    ],
+  },
+  {
+    id: "program-testing-debugging", subject: "computer-science", title: "Program Testing, Trace Tables and Debugging", level: "Intermediate", minutes: 17,
+    summary: "Use test categories and trace tables to detect incorrect program behaviour.",
+    objectives: ["Distinguish normal, boundary and invalid tests", "Trace variable values through code", "Explain a logical error"],
+    lesson: ["A normal test uses typical valid input; a boundary test checks values near a limit.", "An invalid test supplies inputs outside the allowed rules to check that the program rejects them safely.", "A trace table records changing variable states line by line. A logical error can produce an incorrect output even when the program runs without crashing."],
+    workedExample: "If a function accepts ages 18–65 inclusive, try 30 (normal), 18 and 65 (boundaries), and 17 and 66 (invalid). Test whether 65 is accepted rather than only checking middle values.",
+    examTip: "Include expected results with each test case so a pass or failure can be decided.",
+    commonMistake: "Calling every program failure a syntax error; many faults are logical or runtime errors.",
+    checkpoint: mcq("An app accepts scores from 0 to 100 inclusive. Which input is a valid boundary case?", ["0", "50", "-7", "120"], "0", "Zero is the minimum permitted score and a valid boundary input.", "Consider an extreme valid value."),
+    practice: [
+      multi("Which inputs test the boundaries for an inclusive 1–10 integer range?", ["1", "10", "5", "15"], ["1", "10"], "The valid endpoints are 1 and 10; 5 is normal and 15 is invalid.", "Use the smallest and largest permitted values."),
+      trueFalse("A logical error can produce the wrong result even when the program executes.", true, "Logical mistakes affect what the code computes rather than whether its syntax is accepted.", "A wrong formula can still run."),
+      match("Match each test type with an example for inputs between 1 and 10 inclusive.", [["Normal", "Value 5"], ["Boundary", "Value 10"], ["Invalid", "Value 11"]], "Five lies inside the normal range, ten is an endpoint, and eleven exceeds the permitted range.", "Compare each value with the specification."),
+    ],
+  },
+  {
+    id: "plate-tectonics", subject: "geography", title: "Plate Boundaries, Earthquakes and Volcanoes", level: "Foundation", minutes: 16,
+    summary: "Explain why different plate boundaries create distinctive hazards.",
+    objectives: ["Identify constructive and destructive margins", "Explain shallow earthquake generation", "Relate subduction to volcanic activity"],
+    lesson: ["At a divergent (constructive) boundary, plates separate and magma can rise to produce new crust.", "At a convergent boundary involving oceanic and continental plates, denser oceanic lithosphere may subduct, helping generate earthquakes and some volcanic arcs.", "At transform (conservative) boundaries, plates slide past one another, often generating earthquakes without the widespread volcanism associated with subduction."],
+    workedExample: "At a transform boundary, friction can temporarily lock sliding plate edges. Stress accumulates until a sudden slip releases seismic energy as an earthquake.",
+    examTip: "Name plate motion, the mechanism and resulting hazard in that order.",
+    commonMistake: "Claiming all plate boundaries produce volcanoes; transform boundaries commonly produce earthquakes without them.",
+    checkpoint: mcq("At a conservative transform plate boundary, plates mainly do what?", ["Slide sideways past one another", "Move apart and form new crust", "Always melt entirely", "Stop moving permanently"], "Slide sideways past one another", "Transform boundaries involve lateral relative motion, which may cause earthquakes.", "Think sideways motion."),
+    practice: [
+      match("Match the boundary to the typical plate motion.", [["Divergent", "Move apart"], ["Convergent", "Move together"], ["Transform", "Slide past"]], "Divergent plates separate, convergent plates approach, and transform plates slide horizontally relative to each other.", "The names describe relative movement."),
+      multi("Which effects can occur at oceanic–continental subduction zones?", ["Earthquakes", "Volcanic arcs", "Oceanic plate sinking beneath continental lithosphere", "No tectonic activity"], ["Earthquakes", "Volcanic arcs", "Oceanic plate sinking beneath continental lithosphere"], "Subduction can generate seismic activity and volcanism as one lithospheric plate descends under another.", "A subduction zone is an active margin."),
+      trueFalse("Earthquakes can occur at transform plate boundaries.", true, "Frictional locking and sudden slip at transform faults commonly produce earthquakes.", "Movement can be sudden along the boundary."),
+    ],
+  },
+  {
+    id: "climate-data-interpretation", subject: "geography", title: "Interpreting Climate Graphs and Data", level: "Intermediate", minutes: 15,
+    summary: "Read monthly temperature and precipitation and distinguish weather from climate.",
+    objectives: ["Read climate graph units", "Calculate annual temperature range", "Interpret limitations of short time series"],
+    lesson: ["A climograph often shows monthly mean temperature on a line and monthly rainfall or precipitation as bars.", "Annual temperature range is the highest monthly mean temperature minus the lowest monthly mean temperature.", "Climate usually describes long-term patterns over decades; one unusually wet month is weather variability, not evidence by itself of a lasting climate trend."],
+    workedExample: "A station's highest monthly mean temperature is 24 °C and its lowest is 6 °C, giving an annual temperature range of 18 °C.",
+    examTip: "Always state whether the values are in °C, mm or another unit, and refer to the time scale.",
+    commonMistake: "Treating one year's data as conclusive proof of a long-term climate trend.",
+    checkpoint: mcq("A city's monthly mean temperatures range from 5 °C to 23 °C. What is the annual temperature range?", ["18 °C", "28 °C", "23 °C", "5 °C"], "18 °C", "The range is maximum minus minimum, 23 − 5 = 18 °C.", "Subtract the coolest from the warmest value."),
+    practice: [
+      numeric("Rainfall totals are 40 mm, 60 mm and 50 mm for three months. What is their combined rainfall in mm?", 150, "Add 40 + 60 + 50 = 150 mm across those three months.", "The units remain millimetres."),
+      trueFalse("One exceptionally hot day is enough to establish a long-term climate trend.", false, "Climate trends require evidence across a much longer period than a single weather event.", "Compare weather's short timescale with climate's decades."),
+      order("Order a careful approach to interpreting a climate graph.", ["Check axes and units", "Identify maxima and minima", "Calculate differences or totals", "Describe a supported climatic pattern"], "Good analysis checks units, extracts values, calculates reliably and then interprets patterns.", "Confirm what the axes measure first."),
+    ],
+  },
+  {
+    id: "business-cash-flow", subject: "business-studies", title: "Cash Flow, Profit and Working Capital", level: "Foundation", minutes: 15,
+    summary: "Differentiate profitability from cash availability and calculate net cash flow.",
+    objectives: ["Find cash inflows and outflows", "Calculate closing cash balance", "Explain why profit is not the same as cash"],
+    lesson: ["Cash inflows are payments received; outflows are payments made. Net cash flow is inflows minus outflows.", "Closing cash balance equals opening cash balance plus net cash flow for the period.", "A profitable firm may still run short of cash because invoices remain unpaid or stock and equipment absorb cash."],
+    workedExample: "A business starts a month with £1,200, receives £3,000 and pays £3,600. Net cash flow is −£600 and closing cash is £600.",
+    examTip: "Separate the opening balance from the inflow/outflow calculation.",
+    commonMistake: "Adding total revenue to cash when some customers have not actually paid.",
+    checkpoint: mcq("What is net cash flow if inflows are £8,000 and outflows are £6,500?", ["£1,500", "£14,500", "−£1,500", "£6,500"], "£1,500", "Net cash flow = 8,000 − 6,500 = £1,500.", "Subtract outflows from inflows."),
+    practice: [
+      numeric("Opening cash is £500; inflows are £2,000 and outflows £1,800. What is closing cash in pounds?", 700, "Closing cash = 500 + 2,000 − 1,800 = £700.", "Add net cash flow to opening cash."),
+      trueFalse("A business showing accounting profit must have a positive bank balance.", false, "Credit sales and non-cash adjustments mean profit differs from cash received and available in the bank.", "An unpaid customer invoice increases revenue but not cash."),
+      multi("Which actions can improve short-term cash availability, all else equal?", ["Collect overdue receivables", "Reduce unnecessary inventory purchases", "Receive a suitable cash injection", "Delay all customer payments to the firm"], ["Collect overdue receivables", "Reduce unnecessary inventory purchases", "Receive a suitable cash injection"], "Collecting cash, managing stock and new finance can increase available cash; delayed customer payments do the opposite.", "Focus on cash actually entering or leaving."),
+    ],
+  },
+  {
+    id: "market-segmentation", subject: "business-studies", title: "Market Segmentation and the Marketing Mix", level: "Intermediate", minutes: 16,
+    summary: "Target meaningful customer groups and align product, price, place and promotion.",
+    objectives: ["Recognise segmentation methods", "Apply the four Ps", "Evaluate a targeted campaign"],
+    lesson: ["Segmentation groups potential customers by relevant characteristics such as age, location, behaviour or purchasing needs.", "The traditional marketing mix includes product, price, place and promotion; each decision should support the target segment.", "A useful target segment must be reachable and sufficiently valuable relative to the cost of serving it; stereotypes are not a substitute for evidence."],
+    workedExample: "A commuter breakfast stall may segment customers by travel habits, offer a grab-and-go product, price for routine purchases, locate near transport and promote convenience during morning hours.",
+    examTip: "Justify each marketing mix decision using the identified customer's needs.",
+    commonMistake: "Listing the four Ps without explaining why they fit the chosen segment.",
+    checkpoint: mcq("Which of the following is a behavioural segmentation variable?", ["How frequently customers buy", "Customer hair colour", "The firm's building age", "The company's tax rate"], "How frequently customers buy", "Buying frequency describes consumer behaviour and can define meaningful segments.", "Look for how someone shops or uses a product."),
+    practice: [
+      match("Match each element of the four Ps with an example.", [["Product", "Design and features"], ["Price", "Amount charged"], ["Place", "Distribution channel"], ["Promotion", "Advertising campaign"]], "The four Ps connect the offer, charge, availability and customer communication.", "Focus on what the business controls."),
+      multi("Which pieces of evidence can help select a target segment?", ["Customer needs", "Market size", "Cost of reaching the segment", "A manager's unsupported guess about every customer"], ["Customer needs", "Market size", "Cost of reaching the segment"], "Research into needs, size and reachability helps determine whether a segment can be served profitably.", "Seek evidence rather than assumptions."),
+      order("Order a basic targeting workflow.", ["Research potential customers", "Identify meaningful segments", "Select the target segment", "Adapt the marketing mix"], "Research supports segmentation; targeting and a tailored marketing mix follow.", "You must understand customers before choosing who to target."),
+    ],
+  },
+];
