@@ -16,6 +16,11 @@ export const qaEntries = tutorials.flatMap((tutorial) =>
     answer: checkpoint.answer,
     explanation: checkpoint.explanation,
     workedExample: tutorial.workedExample,
+    format: checkpoint.format || "single",
+    hint: checkpoint.hint || "",
+    examTip: tutorial.examTip || "",
+    commonMistake: tutorial.commonMistake || "",
+    checkpoint,
   })),
 );
 
