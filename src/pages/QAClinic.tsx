@@ -139,7 +139,7 @@ export default function QAClinic() {
               <label htmlFor="qa-ask-subject" className="mb-1 block text-xs font-semibold">{t("qa.subject")}</label>
               <select id="qa-ask-subject" value={askSubject} onChange={(event) => setAskSubject(event.target.value)}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
-                {subjects.map((item) => <option key={item.id} value={item.id}>{t(\`subjects.names.\${item.id}\`)}</option>)}
+                {subjects.map((item) => <option key={item.id} value={item.id}>{t(`subjects.names.${item.id}`)}</option>)}
               </select>
             </div>
             <div>
@@ -174,7 +174,7 @@ export default function QAClinic() {
               <select id="qa-subject-filter" value={subject} onChange={(event) => changeFilter(() => setSubject(event.target.value))}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allSubjects")}</option>
-                {subjects.map((item) => <option key={item.id} value={item.id}>{t(\`subjects.names.\${item.id}\`)}</option>)}
+                {subjects.map((item) => <option key={item.id} value={item.id}>{t(`subjects.names.${item.id}`)}</option>)}
               </select>
             </div>
             <div>
@@ -182,7 +182,7 @@ export default function QAClinic() {
               <select id="qa-format-filter" value={format} onChange={(event) => changeFilter(() => setFormat(event.target.value))}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allFormats")}</option>
-                {questionFormats.map((item) => <option key={item} value={item}>{t(\`qa.formats.\${item}\`)}</option>)}
+                {questionFormats.map((item) => <option key={item} value={item}>{t(`qa.formats.${item}`)}</option>)}
               </select>
             </div>
             <div>
@@ -191,7 +191,7 @@ export default function QAClinic() {
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allLevels")}</option>
                 {["Foundation", "Intermediate", "Advanced"].map((item) =>
-                  <option key={item} value={item}>{t(\`tutorials.levels.\${item.toLowerCase()}\`)}</option>)}
+                  <option key={item} value={item}>{t(`tutorials.levels.${item.toLowerCase()}`)}</option>)}
               </select>
             </div>
             <div>
@@ -232,7 +232,7 @@ export default function QAClinic() {
                 <span>{t("qa.challengeScore", { score: firstTryCorrect, total: challengeIds.length })}</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary transition-all" style={{ width: \`\${Math.round(100 * challengeIndex / challengeIds.length)}%\` }} />
+                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round(100 * challengeIndex / challengeIds.length)}%` }} />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{t("qa.challengeStreak", { count: challengeStreak })}</p>
             </div>
@@ -261,8 +261,8 @@ export default function QAClinic() {
                   <div className="mb-4 flex items-center gap-3">
                     <img src={mascot.image} alt="" className="h-10 w-10 rounded-xl bg-muted object-cover" />
                     <div className="min-w-0">
-                      <div className="text-xs font-semibold text-primary">{t(\`subjects.names.\${entry.subject}\`)}</div>
-                      <div className="text-sm font-medium">{entry.topic} · {t(\`tutorials.levels.\${entry.level.toLowerCase()}\`)}</div>
+                      <div className="text-xs font-semibold text-primary">{t(`subjects.names.${entry.subject}`)}</div>
+                      <div className="text-sm font-medium">{entry.topic} · {t(`tutorials.levels.${entry.level.toLowerCase()}`)}</div>
                     </div>
                     {mastered[entry.id] && <Trophy className="ml-auto h-5 w-5 text-primary" aria-label={t("qa.mastered")} />}
                   </div>
