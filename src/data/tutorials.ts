@@ -289,6 +289,5 @@ export const tutorials: Tutorial[] = [
     checkpoint: { question: "Complete: Ich sehe ___ Mann.", options: ["den", "der", "dem", "des"], answer: "den", explanation: "Mann is masculine and functions as the direct object, so the accusative definite article is den." },
     practice: [{ question: "In ‘Die Frau kauft einen Apfel’, what is the direct object?", options: ["einen Apfel", "die Frau", "kauft", "no direct object"], answer: "einen Apfel", explanation: "The apple receives the action of buying and is marked by the masculine accusative article einen." }],
   },
-,
   ...stemExpansion,
 ];
