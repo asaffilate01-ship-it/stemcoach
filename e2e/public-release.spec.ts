@@ -35,7 +35,7 @@ test("tutorial progress persists and carries lesson context into coaching", asyn
   await dismissCookies(page);
   const quadraticCard = page.getByRole("button").filter({ hasText: "Solving Quadratic Equations" });
   await quadraticCard.click();
-  await page.getByRole("button", { name: /A\. 2 and −3/ }).click();
+  await page.getByRole("button", { name: /2 and −3/ }).click();
   await page.getByRole("button", { name: "Check & explain" }).click();
   await expect(page.getByText(/1 of \d+ tutorials mastered/i)).toBeVisible();
   await page.reload();

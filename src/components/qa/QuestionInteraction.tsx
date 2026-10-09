@@ -86,7 +86,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
                 className={chosen
                   ? "w-full rounded-xl border border-primary bg-primary/10 px-3 py-2.5 text-left text-sm"
                   : "w-full rounded-xl border px-3 py-2.5 text-left text-sm transition-colors hover:border-primary/40 focus-visible:outline-primary"}>
-                <span className="mr-2 text-xs font-bold text-muted-foreground">{format === "multiple" ? "☐" : String.fromCharCode(65 + index) + "."}</span>
+                <span className="mr-2 text-xs font-bold text-muted-foreground">{format === "multiple" ? "☐" : String.fromCharCode(65 + index) + "."}</span>{" "}
                 {option}
               </button>
             );
