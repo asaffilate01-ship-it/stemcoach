@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS public.coach_approved_answer_library (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT coach_answer_must_be_reviewed CHECK (
-    status <> 'approved' OR (reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL)
+    status <> 'approved' OR (reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL
+      AND NULLIF(btrim(source_reference), '') IS NOT NULL)
   ),
   CONSTRAINT coach_approved_answer_identity UNIQUE (subject, curriculum, language, prompt_hash)
 );
