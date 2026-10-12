@@ -137,7 +137,7 @@ serve(async (req) => {
     }
 
     const sanitizedMessages = sanitiseCoachMessages(messages);
-    if (sanitizedMessages.length === 0) {
+    if (sanitizedMessages.length === 0 || sanitizedMessages[sanitizedMessages.length - 1].role !== "user") {
       return new Response(JSON.stringify({ error: "At least one non-empty message is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -208,7 +208,7 @@ serve(async (req) => {
 
     // Globally reusable material is *only* served from a human-reviewed library.
     // Never automatically publish student-generated prompts or model output.
-    if (sanitizedMessages.length === 1 && sanitizedMessages[0].role === "user" && !tutorialContext) {
+    if (sanitizedMessages.length === 1 && sanitizedMessages[0].role === "user" && !tutorialContext && lastQuestion.length <= 1_200) {
       const promptHash = await sha256Hex(
         "coach-approved-v1|" + subjectId + "|" + curriculum + "|" + languageCode + "|" +
         normalisePublicQuestion(lastQuestion)
