@@ -18,7 +18,7 @@ Only the private cache holds responses that may be learner-specific; its keys st
 
 ### Approved-answer curation
 
-Approved shared content must be original/licensed, academically checked, correct for its specific syllabus version and free of learner data. A reviewer ID and review timestamp are required in SQL before a record may be approved.
+Approved shared content must be original/licensed, academically checked, correct for its specific syllabus version and free of learner data. A reviewer audit reference, academic source and review timestamp are required before approval. The optional reviewer user ID may be cleared on account deletion without blocking the user's right to deletion.
 
 The SHA-256 prompt hash input is the UTF-8 string:
 
