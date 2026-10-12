@@ -13,11 +13,13 @@ CREATE TABLE IF NOT EXISTS public.coach_approved_answer_library (
   specification_version text NOT NULL,
   status text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'approved', 'retired')),
   reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  reviewer_audit_reference text,
   reviewed_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT coach_answer_must_be_reviewed CHECK (
-    status <> 'approved' OR (reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL
+    status <> 'approved' OR (reviewed_at IS NOT NULL
+      AND NULLIF(btrim(reviewer_audit_reference), '') IS NOT NULL
       AND NULLIF(btrim(source_reference), '') IS NOT NULL)
   ),
   CONSTRAINT coach_approved_answer_identity UNIQUE (subject, curriculum, language, prompt_hash)
