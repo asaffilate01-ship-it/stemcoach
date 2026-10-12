@@ -41,7 +41,7 @@ export const AGENT_INSTRUCTIONS: Record<TutorAgent, string> = {
 };
 
 export function normalisePublicQuestion(question: string): string {
-  return question.trim().replace(/\s+/g, " ").toLocaleLowerCase("en").slice(0, 1_200);
+  return question.trim().replace(/\s+/g, " ").toLocaleLowerCase("en");
 }
 
 export async function sha256Hex(value: string): Promise<string> {
