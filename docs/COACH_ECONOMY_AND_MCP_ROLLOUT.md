@@ -24,7 +24,7 @@ The SHA-256 prompt hash input is the UTF-8 string:
 
     coach-approved-v1|<subject-id>|<curriculum-id>|<language-id>|<normalised question>
 
-The normalisation logic in _shared/coachEconomy.ts trims, collapses whitespace, lowercases with English locale, and takes at most 1,200 characters. The status must be approved, and all lookup dimensions must match. Invalid answers and outdated syllabus answers must be retired. Use only official exam board content where licensing permits it; do not imply STEMCoach lessons have awarding-body endorsement.
+The normalisation logic in _shared/coachEconomy.ts trims, collapses whitespace, lowercases with English locale, and only caches questions with at most 1,200 characters. The status must be approved, and all lookup dimensions must match. Invalid answers and outdated syllabus answers must be retired. Use only official exam board content where licensing permits it; do not imply STEMCoach lessons have awarding-body endorsement.
 
 ### MCP/agent gateway: future work, NOT connected yet
 
