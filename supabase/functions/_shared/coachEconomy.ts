@@ -14,6 +14,7 @@ export function sanitiseCoachMessages(messages: unknown): CoachMessage[] {
   return messages.slice(-MAX_COACH_MESSAGES)
     .filter((message): message is Record<string, unknown> =>
       typeof message === "object" && message !== null &&
+      "role" in message && "content" in message &&
       (message.role === "user" || message.role === "assistant") &&
       typeof message.content === "string")
     .map((message) => ({
