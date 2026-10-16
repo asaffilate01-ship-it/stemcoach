@@ -27,3 +27,6 @@ playwright-report
 *.njsproj
 *.sln
 *.sw?
+
+# Operator-only Omniqora source revision state
+var/omniqora-stemcoach-revisions.json

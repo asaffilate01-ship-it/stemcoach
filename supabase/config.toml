@@ -50,3 +50,7 @@ verify_jwt = false
 
 [functions.daily-mascot-notify]
 verify_jwt = false
+
+# Authenticates learners, checks entitlements and rate-limits internally.
+[functions.omniqora-learning-evidence]
+verify_jwt = false
