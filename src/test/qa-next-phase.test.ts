@@ -13,9 +13,9 @@ describe("Q&A next phase: diagrams, cloze and adaptive review", () => {
   it("adds 14 lessons, 56 new questions and nine answer formats without duplicates", () => {
     expect(nextQAExpansion).toHaveLength(14);
     expect(new Set(nextQAExpansion.map((lesson) => lesson.subject)).size).toBe(14);
-    expect(tutorials).toHaveLength(71);
-    expect(qaEntries).toHaveLength(216);
-    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(216);
+    expect(tutorials).toHaveLength(99);
+    expect(qaEntries).toHaveLength(328);
+    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(328);
     const formats = new Set(qaEntries.map((entry) => entry.format));
     expect([...formats].sort()).toEqual([
       "single", "multiple", "true-false", "numeric", "short-text",

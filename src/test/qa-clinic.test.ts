@@ -13,12 +13,12 @@ const src = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8")
 describe("expanded STEMCoach Question & Answer clinic", () => {
   it("adds genuine author-drafted tutorials and practice across all fourteen subjects", () => {
     const expected = tutorials.reduce((total, lesson) => total + 1 + (lesson.practice?.length || 0), 0);
-    expect(tutorials).toHaveLength(71);
+    expect(tutorials).toHaveLength(99);
     expect(stemExpansion).toHaveLength(28);
     expect(nextQAExpansion).toHaveLength(14);
     expect(stemExpansion.every((lesson) => lesson.practice?.length === 3)).toBe(true);
     expect(qaEntries).toHaveLength(expected);
-    expect(qaEntries).toHaveLength(216);
+    expect(qaEntries).toHaveLength(328);
     expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(qaEntries.length);
     expect(new Set(tutorials.map((entry) => entry.id)).size).toBe(tutorials.length);
     expect(new Set(qaEntries.map((entry) => entry.subject))).toEqual(new Set(subjects.map((subject) => subject.id)));
