@@ -66,7 +66,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
     setResponse((previous) => {
       const order = [...previous.order];
       [order[index], order[index + direction]] = [order[index + direction], order[index]];
-      return { ...previous, order };
+      return { ...previous, order, orderTouched: true };
     });
   };
 

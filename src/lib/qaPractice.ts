@@ -1,5 +1,6 @@
 /** Private-to-this-device revision metadata: no typed answers or question text stored. */
 export const QA_HISTORY_KEY = "stemcoach:qa-review-v1";
+export const QA_BOOKMARKS_KEY = "stemcoach:qa-bookmarks-v1";
 
 export interface QuestionHistory {
   attempts: number;
@@ -20,6 +21,7 @@ export interface ReviewCandidate {
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 1500;
+const MAX_BOOKMARKS = 500;
 
 function validCount(value: unknown): number {
   return Number.isSafeInteger(value) && Number(value) >= 0
@@ -62,11 +64,30 @@ export function serialiseReviewHistory(history: ReviewHistory): string {
   return JSON.stringify({ version: 1, entries });
 }
 
+/** Store only known question IDs; never save submitted free text or answer keys. */
+export function parseBookmarks(raw: string | null, validIds: ReadonlySet<string>): string[] {
+  if (!raw || raw.length > 40_000) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return [...new Set(parsed.filter((id): id is string =>
+      typeof id === "string" && validIds.has(id)))].slice(0, MAX_BOOKMARKS);
+  } catch {
+    return [];
+  }
+}
+
+export function serialiseBookmarks(ids: readonly string[]): string {
+  return JSON.stringify([...new Set(ids)].slice(0, MAX_BOOKMARKS));
+}
+
 /** First-try accuracy drives review intervals; fixing a mistake doesn't erase it. */
 export function recordReviewAttempt(
   history: ReviewHistory, id: string, correct: boolean, firstAttempt: boolean, now: number,
 ): ReviewHistory {
   if (!Number.isFinite(now) || now <= 0) return history;
+  // A reveal followed by typing the displayed solution is not independent learning evidence.
+  if (!firstAttempt && !history[id]) return history;
   const existing = history[id] || {
     attempts: 0, correctFirst: 0, incorrectFirst: 0, firstTryStreak: 0, lastAt: 0, dueAt: 0,
   };

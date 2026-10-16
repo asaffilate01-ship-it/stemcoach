@@ -62,6 +62,7 @@ describe("expanded STEMCoach Question & Answer clinic", () => {
         state.freeText = question.answer.toUpperCase() + ".";
       } else if (kind === "ordering") {
         state.order = [...(question.answers || [])];
+        state.orderTouched = true;
       } else if (kind === "matching") {
         state.matches = Object.fromEntries((question.pairs || []).map((pair) => [pair.left, pair.right]));
       }
