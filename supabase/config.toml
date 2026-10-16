@@ -50,3 +50,7 @@ verify_jwt = false
 
 [functions.daily-mascot-notify]
 verify_jwt = false
+
+# The function authenticates JWTs, entitlements and source scope itself.
+[functions.omniqora-learning-evidence]
+verify_jwt = false

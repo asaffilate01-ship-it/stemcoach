@@ -27,3 +27,6 @@ playwright-report
 *.njsproj
 *.sln
 *.sw?
+
+# Omniqora Knowledge Core sync ledger stays local to the operator
+var/omniqora-stemcoach-revisions.json
