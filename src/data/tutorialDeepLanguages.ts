@@ -1,0 +1,96 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, numeric, short, trueFalse, multi, fillBlanks, match, order } from "./tutorialQuestions";
+
+/** Original classroom and language study drafts. External syllabus verification pending. */
+export const deeperLanguagePedagogy: Tutorial[] = [
+  {
+    id: "celta-receptive-skills", subject: "celta", title: "Teaching Receptive Skills: Reading and Listening", level: "Intermediate", minutes: 17,
+    summary: "Stage reading and listening lessons from gist to detail using task-based feedback.",
+    objectives: ["Distinguish gist and detailed comprehension", "Choose a pre-task purpose", "Plan feedback supported by evidence"],
+    lesson: ["Receptive-skills lessons help learners understand texts or audio, rather than only produce language.", "A gist task encourages understanding the overall topic or purpose; a detailed task requires locating specific facts or inferred meanings.", "Instructions should establish the task clearly before learners read or listen. Afterwards, pair checking and evidence-based feedback can help clarify answers."],
+    workedExample: "For a short news report, first ask learners to choose the main topic from three headings. On a second reading, ask for the date and cause reported in the article, then have learners compare supporting lines.",
+    examTip: "Set comprehension tasks with a clear focus before exposing learners to the text whenever appropriate.",
+    commonMistake: "Testing every unfamiliar word before learners can identify the text's main purpose.",
+    checkpoint: mcq("Which is a gist-reading task?", ["Choose the best heading for the whole article", "Find the precise date in paragraph four", "Identify every past-tense ending", "Count punctuation marks"], "Choose the best heading for the whole article", "Choosing a main heading requires understanding overall meaning rather than isolated details.", "Gist concerns the overall message."),
+    practice: [
+      match("Match each receptive-skills task to its purpose.", [["Gist", "Understand overall meaning"], ["Scanning", "Locate a specific detail"], ["Inference", "Work out meaning from contextual clues"]], "Different tasks direct learners to different levels of comprehension.", "Main idea, specific fact and implied meaning differ."),
+      trueFalse("A listening comprehension activity must always test every word in the recording.", false, "Listening tasks can target gist, detail or inference without requiring a word-by-word transcript.", "Real-world listening often has a particular purpose."),
+      order("Put a basic receptive-skills lesson sequence into order.", ["Establish context and a clear purpose", "Set a gist task", "Read or listen for gist", "Set a focused detail task", "Check and discuss supported answers"], "Students benefit from knowing what to listen or read for, with tasks progressing from overall understanding to detail.", "Start by giving learners a listening or reading purpose."),
+    ],
+  },
+  {
+    id: "celta-vocabulary-mfp", subject: "celta", title: "Teaching Vocabulary: Meaning, Form and Pronunciation", level: "Foundation", minutes: 16,
+    summary: "Plan how learners meet, understand, record and practise new vocabulary.",
+    objectives: ["Distinguish meaning, form and pronunciation", "Check meaning without circular definitions", "Identify useful collocations"],
+    lesson: ["Meaning concerns what a lexical item communicates in context; form includes spelling, word class and patterns of use.", "Pronunciation includes sound, stress and connected-speech features. A good example and concise modelling can clarify these.", "A concept check should test understanding with simpler language than the target item. Useful collocations show how words naturally combine."],
+    workedExample: "To teach 'exhausted', show a context of a person after a long walk, check 'Do they have much energy?' (No), identify it as an adjective, and model stress in /ɪɡˈzɔːstɪd/.",
+    examTip: "Plan one clear classroom check for each relevant aspect of meaning, form and pronunciation.",
+    commonMistake: "Teaching only a translation while omitting register, stress and how the item fits a sentence.",
+    checkpoint: mcq("Which question checks the meaning of 'exhausted' in a suitable context?", ["Does this person have much energy?", "How many letters are there?", "What is its initial sound?", "Can you copy the word three times?"], "Does this person have much energy?", "It checks understanding of extreme tiredness without relying on the same target word.", "A meaning check asks about the concept."),
+    practice: [
+      fillBlanks("Complete two components of vocabulary teaching.", [["form", "Spelling, part of speech and word pattern concern ____.", "form"], ["pronunciation", "Sounds and word stress concern ____.", "pronunciation"]], "Form describes the linguistic shape; pronunciation describes how the word is spoken.", "Think written pattern versus spoken sound."),
+      multi("Which are useful ways to teach a new adjective?", ["Show its use in a short context", "Model stress and pronunciation", "Provide an appropriate example collocation", "Assume spelling alone explains its meaning"], ["Show its use in a short context", "Model stress and pronunciation", "Provide an appropriate example collocation"], "Meaningful context, pronunciation and use patterns provide complementary learning cues.", "Learners need more than the spelling."),
+      trueFalse("A concept-checking question should ideally be harder to understand than the target word.", false, "If the check is too difficult, it may test the question's language instead of the target meaning.", "A check needs clear, simpler language."),
+    ],
+  },
+  {
+    id: "french-partitive-articles", subject: "french", title: "French Partitive Articles: du, de la and de l’", level: "Foundation", minutes: 16,
+    summary: "Use partitive forms with food and quantities and recognise ordinary negative changes.",
+    objectives: ["Choose masculine or feminine partitive forms", "Use de l' before vowel sounds", "Recognise de after many ordinary negations"],
+    lesson: ["French often uses du with masculine singular mass nouns, de la with feminine singular ones, and de l' before vowels or mute h.", "Partitives commonly refer to an unspecified amount: je mange du pain, je bois de l'eau.", "After many ordinary negative statements with no quantity, partitive forms change to de/d': je ne bois pas de café. Some exceptions exist, including uses with être."],
+    workedExample: "Je mange du fromage; elle boit de la soupe; nous prenons de l'eau. Negate the first sentence as je ne mange pas de fromage in an ordinary negative construction.",
+    examTip: "Check grammatical gender and the initial sound, then consider whether the sentence is negative.",
+    commonMistake: "Applying du to every food, regardless of gender or a following vowel.",
+    checkpoint: mcq("Choose the correct partitive in 'Je bois ___ eau.'", ["de l'", "du", "de la", "des"], "de l'", "Eau begins with a vowel sound, so the singular partitive becomes de l'.", "Look at the vowel at the start of eau."),
+    practice: [
+      fillBlanks("Complete the two French partitive phrases.", [["bread", "Je mange ____ pain.", "du"], ["soup", "Elle boit ____ soupe.", "de la"]], "Pain is masculine and soupe is feminine, so the ordinary partitives are du and de la.", "Match the article to the noun's gender."),
+      short("In 'Je ne bois pas ___ café', write the ordinary negative partitive only.", "de", "After a standard negation, the partitive du commonly becomes de before café.", "The ordinary negative form is shorter than du."),
+      trueFalse("In standard French, du is the only partitive form for singular food nouns.", false, "There are forms such as de la and de l' according to gender and phonological context.", "Compare du pain with de la soupe."),
+    ],
+  },
+  {
+    id: "french-direct-object-pronouns", subject: "french", title: "French Direct Object Pronouns: le, la and les", level: "Intermediate", minutes: 17,
+    summary: "Replace a direct-object noun with a pronoun before the conjugated verb in simple clauses.",
+    objectives: ["Identify a direct object", "Choose le, la or les", "Place the pronoun correctly"],
+    lesson: ["French direct-object pronouns can replace previously identified nouns: le for masculine singular, la for feminine singular and les for plural.", "In a simple present-tense sentence the direct-object pronoun usually appears before the conjugated verb.", "Before a vowel, le and la typically elide to l': je l'aime. Context determines what the pronoun refers to."],
+    workedExample: "Je vois le livre becomes Je le vois. Je vois la voiture becomes Je la vois. Je vois les amis becomes Je les vois.",
+    examTip: "Find what receives the action before choosing pronoun number and gender.",
+    commonMistake: "Placing the pronoun after the verb in a simple present statement: 'Je vois le' is not the target structure.",
+    checkpoint: mcq("Replace 'la voiture' in 'Je vois la voiture' with a direct-object pronoun.", ["Je la vois", "Je le vois", "Je les vois", "Je vois la"], "Je la vois", "La voiture is feminine singular, so la precedes the conjugated verb vois.", "Use the feminine singular object pronoun."),
+    practice: [
+      short("Complete 'Je ___ vois' referring to 'les livres'. Write the pronoun only.", "les", "The books are plural, so their direct-object pronoun is les.", "Plural direct objects usually use les."),
+      match("Match each object to the usual direct-object pronoun.", [["le livre", "le"], ["la maison", "la"], ["les chiens", "les"]], "The object pronoun matches the noun's gender and number.", "Singular masculine, singular feminine, then plural."),
+      trueFalse("In 'Je le vois', le normally appears before the conjugated verb.", true, "In an ordinary simple present sentence, the direct-object pronoun comes before vois.", "Find where le is placed."),
+    ],
+  },
+  {
+    id: "german-separable-verbs", subject: "german", title: "Separable German Verbs in Main Clauses", level: "Intermediate", minutes: 17,
+    summary: "Recognise a separable prefix and place it at the end of a simple present-tense main clause.",
+    objectives: ["Identify a separable verb", "Conjugate the finite stem", "Place the prefix correctly in statements"],
+    lesson: ["Some German verbs have separable prefixes such as an-, auf- or mit- when used in typical main clauses.", "The finite verb stem occupies the normal second-position slot and the separable prefix goes to the end of the clause.", "For anrufen, 'Ich rufe dich an' means 'I call you'. Not all German prefixes are separable; check the verb."],
+    workedExample: "Aufstehen (to get up) becomes 'Ich stehe um sieben Uhr auf'. The finite part stehe is near the start and auf comes at the end.",
+    examTip: "Learn the full infinitive with its prefix and check which part is conjugated.",
+    commonMistake: "Leaving the prefix attached to the conjugated verb in a simple main clause: 'Ich aufstehe' is incorrect.",
+    checkpoint: mcq("Which is the correct sentence using anrufen?", ["Ich rufe dich an.", "Ich anrufe dich.", "Ich rufst dich an.", "Ich an dich rufe."], "Ich rufe dich an.", "Rufe is the finite stem in second position and an is separated to the end.", "The prefix moves to the clause end."),
+    practice: [
+      fillBlanks("Complete two parts of a separable-verb sentence.", [["verb", "Ich ____ um sieben Uhr auf.", "stehe"], ["prefix", "Ich rufe dich ____.", "an"]], "In each main clause the finite stem is conjugated and the prefix remains separated.", "One item needs a finite stem, the other the prefix."),
+      trueFalse("In a simple main clause, the prefix of a separable verb can appear at the end.", true, "Separable prefixes commonly occur at the end of ordinary main clauses.", "Consider 'Ich stehe auf'."),
+      order("Arrange these constituents of a simple German statement.", ["Ich", "stehe", "früh", "auf"], "The finite verb stehe is second, and the separable prefix auf is placed at the end.", "Remember both verb-second and final prefix."),
+    ],
+  },
+  {
+    id: "german-dative-case", subject: "german", title: "German Dative Articles and Common Prepositions", level: "Intermediate", minutes: 17,
+    summary: "Choose dative articles after simple prepositions and identify an indirect object.",
+    objectives: ["Recognise dative after mit and bei", "Use dem and der", "Distinguish direct and indirect objects"],
+    lesson: ["German uses the dative case for many indirect objects and after prepositions such as mit, bei, aus, nach, seit, von and zu.", "Masculine and neuter singular definite nouns often use dem in the dative; feminine singular usually uses der.", "Some verbs require dative objects and noun plural patterns add complexity; start with clear preposition examples."],
+    workedExample: "Mit dem Mann means 'with the man' because mit takes dative and Mann is masculine. Mit der Frau means 'with the woman' because Frau is feminine.",
+    examTip: "Check whether a preposition dictates case before using an article table.",
+    commonMistake: "Using den after mit for a masculine singular noun, confusing dative with accusative.",
+    checkpoint: mcq("Complete 'Ich spreche mit ___ Mann.'", ["dem", "den", "der", "des"], "dem", "The preposition mit takes dative, and masculine singular definite dative is dem.", "Mit requires dative."),
+    practice: [
+      fillBlanks("Complete the two definite dative articles.", [["masculine", "mit ____ Hund (masculine)", "dem"], ["feminine", "mit ____ Katze (feminine)", "der"]], "Masculine Hund takes dem and feminine Katze takes der after mit.", "Match gender after a dative preposition."),
+      multi("Which prepositions normally take the dative case?", ["mit", "bei", "für", "ohne"], ["mit", "bei"], "Mit and bei take dative; für and ohne normally require accusative.", "Recall the fixed dative preposition list."),
+      trueFalse("The preposition 'mit' usually requires the accusative case.", false, "Mit is a standard dative-taking preposition.", "Remember mit dem Mann."),
+    ],
+  },
+];

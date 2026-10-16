@@ -51,7 +51,11 @@ const en = {
     soon: "Soon",
     toggleTheme: "Toggle theme",
   },
-  qa:   {
+  qa: {
+    "reviewFilterLabel": "Review focus",
+    "reviewFilters": {"all":"All questions","due":"Due for review","missed":"Previously missed","saved":"Saved questions"},
+    "saveQuestion": "Save question",
+    "removeBookmark": "Remove saved question",
         "fillBlankPlaceholder": "Type the missing word",
     "diagramInstructions": "Use the letter markers on the diagram, then choose the matching label for each point.",
     "diagramMarker": "Point {{marker}}",
@@ -60,7 +64,7 @@ const en = {
     "reviewTitle": "Your revision progress",
     "reviewStats": "{{practiced}} of {{total}} questions practised · {{due}} due for review",
     "weakerTopics": "Topics to revisit:",
-    "privateHistoryNotice": "Only answer counts and review dates are saved on this device. Free-text answers are not stored or shared.",
+    "privateHistoryNotice": "Only revision counts, due dates and saved question IDs are stored on this device. Typed answers are never saved or shared.",
     "clearPracticeHistory": "Clear device history",
     "adaptiveReview": "Adaptive review",
     "timedChallenge": "5-minute challenge",

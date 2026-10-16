@@ -51,7 +51,11 @@ const de = {
     soon: "Bald",
     toggleTheme: "Design wechseln",
   },
-  qa:   {
+  qa: {
+    "reviewFilterLabel": "Wiederholungsfilter",
+    "reviewFilters": {"all":"Alle Fragen","due":"Jetzt wiederholen","missed":"Früher falsch beantwortet","saved":"Gespeicherte Fragen"},
+    "saveQuestion": "Frage speichern",
+    "removeBookmark": "Gespeicherte Frage entfernen",
         "fillBlankPlaceholder": "Fehlendes Wort eingeben",
     "diagramInstructions": "Ordne den Buchstabenpunkten im Diagramm jeweils eine passende Beschriftung zu.",
     "diagramMarker": "Punkt {{marker}}",
@@ -60,7 +64,7 @@ const de = {
     "reviewTitle": "Dein Lernfortschritt",
     "reviewStats": "{{practiced}} von {{total}} Fragen geübt · {{due}} zur Wiederholung",
     "weakerTopics": "Themen zum Wiederholen:",
-    "privateHistoryNotice": "Nur Antwortzahlen und Wiederholungstermine werden auf diesem Gerät gespeichert. Eingetippte Antworten werden nicht gespeichert.",
+    "privateHistoryNotice": "Nur Lernstatistiken, Wiederholungstermine und IDs gespeicherter Fragen bleiben auf diesem Gerät. Eingetippte Antworten werden nicht gespeichert.",
     "clearPracticeHistory": "Geräteverlauf löschen",
     "adaptiveReview": "Adaptive Wiederholung",
     "timedChallenge": "5-Minuten-Challenge",

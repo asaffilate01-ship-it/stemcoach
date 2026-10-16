@@ -51,7 +51,11 @@ const fr = {
     soon: "Bientôt",
     toggleTheme: "Changer de thème",
   },
-  qa:   {
+  qa: {
+    "reviewFilterLabel": "Filtre de révision",
+    "reviewFilters": {"all":"Toutes les questions","due":"À réviser maintenant","missed":"Erreurs précédentes","saved":"Questions enregistrées"},
+    "saveQuestion": "Enregistrer la question",
+    "removeBookmark": "Retirer des questions enregistrées",
         "fillBlankPlaceholder": "Saisissez le mot manquant",
     "diagramInstructions": "Repérez les lettres sur le schéma, puis choisissez la légende correspondante pour chaque point.",
     "diagramMarker": "Point {{marker}}",
@@ -60,7 +64,7 @@ const fr = {
     "reviewTitle": "Vos progrès de révision",
     "reviewStats": "{{practiced}} sur {{total}} questions étudiées · {{due}} à revoir",
     "weakerTopics": "Notions à retravailler :",
-    "privateHistoryNotice": "Seuls les comptes de réponses et les dates de révision sont enregistrés sur cet appareil. Les réponses saisies ne sont pas conservées.",
+    "privateHistoryNotice": "Seuls les compteurs, dates de révision et identifiants des questions enregistrées restent sur cet appareil. Vos réponses saisies ne sont pas conservées.",
     "clearPracticeHistory": "Effacer l'historique local",
     "adaptiveReview": "Révision adaptée",
     "timedChallenge": "Défi de 5 minutes",

@@ -1,0 +1,96 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, numeric, short, trueFalse, multi, fillBlanks, match, order } from "./tutorialQuestions";
+
+/** Independently authored revision material; syllabus review remains required. */
+export const deeperGeographyBusinessIELTS: Tutorial[] = [
+  {
+    id: "urbanisation-sustainable-cities", subject: "geography", title: "Urbanisation and Sustainable Cities", level: "Intermediate", minutes: 16,
+    summary: "Identify urban growth drivers and consider environmental, social and economic trade-offs.",
+    objectives: ["Describe urbanisation", "Distinguish push and pull factors", "Evaluate a sustainable transport policy"],
+    lesson: ["Urbanisation is an increasing proportion of people living in urban areas; urban population can also grow naturally.", "Rural push factors may include limited jobs; urban pull factors may include employment, education and services.", "Sustainable planning can improve public transport, housing quality and green space, but requires attention to cost, access and displacement."],
+    workedExample: "A city introduces affordable buses and safe walking routes. Reduced car dependence may improve air quality, but success depends on route reliability and equitable access for outer neighbourhoods.",
+    examTip: "For an evaluation, state who benefits, what the trade-off is and what evidence would test success.",
+    commonMistake: "Treating every urban challenge as the inevitable outcome of population growth rather than policy and capacity constraints.",
+    checkpoint: mcq("What is meant by urbanisation?", ["A rising share of people living in urban areas", "All urban areas becoming identical", "An automatic fall in total population", "A decrease in urban employment only"], "A rising share of people living in urban areas", "Urbanisation refers to a growing urban proportion of the population.", "Think about the proportion that lives in towns and cities."),
+    practice: [
+      multi("Which may be urban pull factors for migrants?", ["Availability of jobs", "Access to specialist education", "Improved public services", "Rural crop failures"], ["Availability of jobs", "Access to specialist education", "Improved public services"], "Pull factors attract people to a city; crop failure is more commonly a rural push factor.", "Pull means an attraction to the destination."),
+      trueFalse("Building public transport always eliminates traffic congestion immediately.", false, "Benefits depend on capacity, coverage, frequency, pricing and traveller responses.", "Policy effects depend on conditions."),
+      order("Organise a balanced response about a new city transport scheme.", ["Identify the policy's objective", "Explain a potential benefit", "Describe a possible cost or limitation", "Reach an evidence-based judgement"], "A strong evaluation links a goal to benefits, constraints and justified conclusions.", "Start by explaining what the policy aims to achieve."),
+    ],
+  },
+  {
+    id: "coastal-erosion-management", subject: "geography", title: "Coastal Erosion and Shoreline Management", level: "Foundation", minutes: 16,
+    summary: "Identify coastal processes and weigh hard versus soft engineering options.",
+    objectives: ["Describe hydraulic action and abrasion", "Explain one groyne effect", "Compare environmental and financial costs"],
+    lesson: ["Wave hydraulic action exerts pressure on cliff rock, while abrasion occurs as carried material scrapes rock surfaces.", "Groynes interrupt longshore sediment transport, often increasing sand accumulation on one side but potentially reducing supply down-drift.", "Sea walls and rock armour are often termed hard engineering; beach nourishment and managed realignment are softer approaches with different limitations."],
+    workedExample: "A seaside town installs groynes to keep more beach sediment in front of its promenade. They may improve protection locally while reducing the natural supply of material to beaches further along the coast.",
+    examTip: "Mention possible effects beyond the protected location when evaluating coastal defences.",
+    commonMistake: "Assuming one defence offers permanent protection without maintenance, cost or down-drift impacts.",
+    checkpoint: mcq("Which process scrapes a cliff with sediment carried by waves?", ["Abrasion", "Evaporation", "Condensation", "Infiltration"], "Abrasion", "Sand and shingle carried by waves strike and wear away rock surfaces.", "Think of carried rocks as an abrasive tool."),
+    practice: [
+      match("Match a coastline management option to its common description.", [["Groyne", "Interrupts longshore sediment movement"], ["Beach nourishment", "Adds sediment to a beach"], ["Managed realignment", "Allows a controlled shoreline retreat"]], "Each approach addresses coastal risk in a different way, with distinct maintenance and ecological consequences.", "Match the mechanism to the physical intervention."),
+      trueFalse("Groynes can reduce sediment availability farther down-drift.", true, "Sediment trapped near groynes may no longer replenish beaches farther along the transport direction.", "A trapped supply cannot continue unaltered."),
+      multi("Which are sensible criteria for evaluating a coastal defence?", ["Up-front and ongoing costs", "Effects on neighbouring beaches", "Protection of people and infrastructure", "Whether it guarantees zero erosion forever"], ["Up-front and ongoing costs", "Effects on neighbouring beaches", "Protection of people and infrastructure"], "Evaluation should consider benefits, affordability and impacts; no realistic structure guarantees zero future erosion.", "Look beyond the construction itself."),
+    ],
+  },
+  {
+    id: "gross-profit-net-margin", subject: "business-studies", title: "Gross Profit and Net Profit Margins", level: "Intermediate", minutes: 16,
+    summary: "Calculate profit measures and explain why margins differ between businesses.",
+    objectives: ["Calculate gross profit", "Calculate profit margin", "Distinguish cost of sales from other expenses"],
+    lesson: ["Gross profit is revenue minus cost of sales, representing what remains after the direct cost of goods sold.", "Gross profit margin (%) = gross profit/revenue × 100; net profit margin uses net profit after relevant expenses divided by revenue.", "Profit margin comparisons require context: accounting policies, industry mix, seasonality and one-off items can affect reported ratios."],
+    workedExample: "A shop has £20,000 revenue and £12,000 cost of sales, leaving £8,000 gross profit and 40% gross margin. If additional expenses are £5,000, net profit is £3,000 and net margin is 15%.",
+    examTip: "Write the numerator and denominator before substituting figures; do not confuse markup with margin.",
+    commonMistake: "Calculating margin as profit divided by cost, which gives markup rather than profit as a share of revenue.",
+    checkpoint: mcq("Revenue is £50,000 and cost of sales £30,000. What is gross profit?", ["£20,000", "£80,000", "£30,000", "£50,000"], "£20,000", "Gross profit = revenue − cost of sales = £20,000.", "Subtract direct cost of sales from revenue."),
+    practice: [
+      numeric("Gross profit is £6,000 and revenue £15,000. What is gross profit margin as a percentage?", 40, "Gross profit margin = (6,000/15,000) × 100 = 40%.", "Divide profit by revenue, then multiply by 100."),
+      trueFalse("A business may have positive gross profit but negative net profit.", true, "Overheads and other expenses can exceed gross profit, leaving an overall loss.", "Consider costs not included in cost of sales."),
+      fillBlanks("Complete two profit calculations.", [["gross", "Revenue less the cost of sales gives ____ profit.", "gross"], ["margin", "Profit divided by revenue times 100 gives profit ____.", "margin"]], "Gross profit excludes cost of sales and a margin expresses profit relative to revenue.", "Think profit amount versus profit percentage."),
+    ],
+  },
+  {
+    id: "business-stakeholder-tradeoffs", subject: "business-studies", title: "Business Stakeholders and Decision Trade-offs", level: "Foundation", minutes: 15,
+    summary: "Identify different stakeholder interests and explain conflicting priorities.",
+    objectives: ["Name internal and external stakeholders", "Explain conflicts of interest", "Make an evidence-based recommendation"],
+    lesson: ["Stakeholders are individuals or groups affected by, or able to influence, a business's decisions.", "Employees may value stable pay and working conditions, customers quality and value, and nearby residents lower noise and traffic.", "Decisions should weigh competing effects, lawful obligations and commercial goals rather than assuming every stakeholder wants the same outcome."],
+    workedExample: "A takeaway wants longer late-night hours. Customers may welcome convenience and owners more sales, but workers face changed shifts and nearby residents could experience more noise.",
+    examTip: "Name two stakeholders and describe a concrete, different effect on each.",
+    commonMistake: "Assuming shareholders and stakeholders mean the same thing; shareholders are only one stakeholder group.",
+    checkpoint: mcq("Who is a stakeholder in a local business?", ["A nearby resident affected by noise", "Only the owners", "Only its accountants", "Nobody outside the building"], "A nearby resident affected by noise", "People affected by business decisions can be stakeholders even without owning shares.", "Think of those affected by operations."),
+    practice: [
+      multi("Which are plausible stakeholder concerns about extended opening hours?", ["Customer convenience", "Worker scheduling and safety", "Neighbourhood noise", "Whether the building has a blue roof"], ["Customer convenience", "Worker scheduling and safety", "Neighbourhood noise"], "Trading hours can affect customers, employees and local residents.", "Choose impacts linked directly to opening hours."),
+      trueFalse("Every stakeholder always benefits equally from a profitable decision.", false, "Benefits and costs can differ by group, and some stakeholders may be harmed by a profitable choice.", "Think about trade-offs and distribution."),
+      match("Match each stakeholder to one likely priority.", [["Employee", "Safe conditions and fair pay"], ["Customer", "Quality and reasonable value"], ["Local resident", "Noise and traffic impacts"]], "Different stakeholder groups can have different expectations and priorities.", "Consider what each person experiences."),
+    ],
+  },
+  {
+    id: "ielts-reading-skimming", subject: "ielts", title: "IELTS Reading: Skimming, Scanning and Evidence", level: "Foundation", minutes: 16,
+    summary: "Find main ideas and specific information without treating guesses as evidence.",
+    objectives: ["Skim for overall purpose", "Scan for target information", "Differentiate not stated from false"],
+    lesson: ["Skimming means reading rapidly for the main ideas and structure, while scanning means searching for a specific fact, name or date.", "For True/False/Not Given tasks, False requires a contradiction in the passage, and Not Given means the passage provides insufficient information.", "A plausible statement based on general knowledge is not necessarily supported by the supplied text."],
+    workedExample: "Passage: 'The museum opened in 1998 and welcomed 12,000 visitors in its first month.' 'It opened in 1998' is true. 'It opened in 2001' is false. 'Entry was free' is not given.",
+    examTip: "Underline the precise line supporting each response and avoid importing outside facts.",
+    commonMistake: "Treating any claim not mentioned by the passage as False rather than Not Given.",
+    checkpoint: mcq("A passage says a bridge opened in 2005. What is 'The bridge opened in 2010'?", ["False", "True", "Not Given", "Cannot be tested"], "False", "The claim directly contradicts the stated opening date.", "False requires a direct contradiction."),
+    practice: [
+      match("Match each IELTS Reading decision to its evidence rule.", [["True", "Claim agrees with text"], ["False", "Claim contradicts text"], ["Not Given", "Text does not establish the claim"]], "The distinction depends on evidence in the passage, not prior knowledge.", "Agreement, contradiction and absence differ."),
+      trueFalse("A statement unsupported by the passage should automatically be marked False.", false, "A statement can be Not Given when evidence is absent but not contradicted.", "Look for a contradicting sentence."),
+      fillBlanks("Complete two reading strategies.", [["skim", "Reading rapidly for the main idea is ____.", "skimming"], ["scan", "Searching for a particular name or number is ____.", "scanning"]], "Skimming identifies general ideas; scanning targets a specific detail.", "One seeks the big picture and one seeks a detail."),
+    ],
+  },
+  {
+    id: "ielts-task-two-argument", subject: "ielts", title: "IELTS Writing Task 2: Claim, Reason and Example", level: "Intermediate", minutes: 17,
+    summary: "Develop a coherent argument rather than simply listing opinions.",
+    objectives: ["Write a clear response to the prompt", "Explain each central claim", "Use examples as support"],
+    lesson: ["Read the exact task and identify whether it asks for an opinion, discussion, problem/solution or another response.", "A body paragraph normally works best with a clear controlling claim, an explanation of why it matters and relevant support.", "A specific example can illustrate reasoning, but it does not replace explaining the logical connection to the claim."],
+    workedExample: "Prompt: Should cities invest in parks? One paragraph might argue that accessible parks support everyday exercise, explain why proximity encourages regular use, and illustrate with residents who can walk to green spaces.",
+    examTip: "Use every paragraph to advance an idea directly related to the question rather than filling it with memorised phrases.",
+    commonMistake: "Adding examples that describe a topic but never explain the paragraph's argument.",
+    checkpoint: mcq("What is the strongest topic sentence for a paragraph supporting urban parks?", ["Accessible parks can encourage regular physical activity", "Cities exist around the world", "Some people enjoy different hobbies", "The weather varies in cities"], "Accessible parks can encourage regular physical activity", "It makes a focused claim relevant to the benefits of accessible green space.", "Pick a point the paragraph can actually develop."),
+    practice: [
+      order("Arrange the parts of a coherent Task 2 argument paragraph.", ["State the central claim", "Explain the claim's reasoning", "Provide a relevant example", "Link the example back to the question"], "Focused paragraphs connect an argument to explanation and evidence before returning to the task.", "Claims come before their supporting examples."),
+      multi("Which habits usually improve Task 2 coherence?", ["Use clear topic sentences", "Explain why examples matter", "Use logical paragraph order", "Add unrelated memorised sentences"], ["Use clear topic sentences", "Explain why examples matter", "Use logical paragraph order"], "Coherence needs relevance and meaningful connections between ideas.", "Ask whether every sentence supports the same central point."),
+      trueFalse("A paragraph with many examples is necessarily stronger than one with well-developed reasoning.", false, "Examples without explanation or relevance may not develop the argument effectively.", "Consider quality of development, not only quantity."),
+    ],
+  },
+];
