@@ -71,7 +71,7 @@ export function OmniqoraEvidencePanel({ tutorialId, checkIndex }: Props) {
               <Button key={item} type="button" size="sm" variant={item === mode ? "default" : "outline"}
                 onClick={() => { setMode(item); void retrieve(item); }} disabled={Boolean(loadingMode)}
                 aria-pressed={item === mode}>
-                {t("qa.evidenceModes." + item)}
+                {t(`qa.evidenceModes.${item}`)}
               </Button>
             ))}
           </div>
@@ -88,7 +88,7 @@ export function OmniqoraEvidencePanel({ tutorialId, checkIndex }: Props) {
           {result && (
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground">
-                {t("qa.evidenceMethod")}: {t("qa.retrievalMethods." + result.method)}
+                {t("qa.evidenceMethod")}: {t(`qa.retrievalMethods.${result.method}`)}
               </p>
               {result.status === "insufficient_evidence" && (
                 <p className="flex gap-2 text-sm text-muted-foreground">

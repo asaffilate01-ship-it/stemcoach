@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Brain, CircleHelp, Clock3, Flame, GraduationCap, 
 import { QA_HISTORY_KEY, parseReviewHistory, serialiseReviewHistory, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
+import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -342,6 +343,8 @@ export default function QAClinic() {
                     question={entry.checkpoint} workedExample={entry.workedExample}
                     examTip={entry.examTip} commonMistake={entry.commonMistake}
                     onAttempt={(correct, firstAttempt) => recordAttempt(entry.id, correct, firstAttempt)} />
+                  <div className="mt-4"><OmniqoraEvidencePanel key={entry.id} tutorialId={entry.tutorialId}
+                    checkIndex={Number(entry.id.slice(entry.tutorialId.length + 1))} /></div>
                   <div className="mt-auto flex flex-wrap gap-2 border-t pt-3">
                     <Button size="sm" variant="outline" className="gap-1.5 rounded-xl" onClick={() => openCoach(entry)}>
                       <Sparkles className="h-4 w-4" /> {t("qa.askFollowUp")}
