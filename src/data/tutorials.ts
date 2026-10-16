@@ -1,6 +1,12 @@
 import { stemExpansion } from "./stemExpansion";
+import { nextQAExpansion } from "./tutorialExpansionNext";
 
-export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching";
+export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching" | "fill-blanks" | "diagram-label";
+
+export type DiagramKind = "right-triangle" | "cell" | "water-cycle" | "circuit";
+export interface DiagramMarker { id: string; x: number; y: number; answer: string; }
+export interface LabelledDiagram { kind: DiagramKind; markers: DiagramMarker[]; }
+export interface FillBlank { id: string; prompt: string; answer: string; acceptedAnswers?: string[]; }
 
 export interface TutorialCheckpoint {
   question: string;
@@ -16,6 +22,10 @@ export interface TutorialCheckpoint {
   tolerance?: number;
   pairs?: Array<{ left: string; right: string }>;
   hint?: string;
+  /** Learner-facing fill-in fields. Answer keys are displayed only after reveal. */
+  blanks?: FillBlank[];
+  /** Accessible SVG reference image with numbered labelling positions. */
+  diagram?: LabelledDiagram;
 }
 
 export interface Tutorial {
@@ -290,4 +300,5 @@ export const tutorials: Tutorial[] = [
     practice: [{ question: "In ‘Die Frau kauft einen Apfel’, what is the direct object?", options: ["einen Apfel", "die Frau", "kauft", "no direct object"], answer: "einen Apfel", explanation: "The apple receives the action of buying and is marked by the masculine accusative article einen." }],
   },
   ...stemExpansion,
+  ...nextQAExpansion,
 ];

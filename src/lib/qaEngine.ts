@@ -25,7 +25,11 @@ export function hasResponse(question: TutorialCheckpoint, response: QuestionResp
     case "ordering":
       return response.order.length === question.options.length;
     case "matching":
-      return Boolean(question.pairs?.length) && question.pairs!.every((pair) => Boolean(response.matches[pair.left]));
+      return Boolean(question.pairs?.length) && question.pairs.every((pair) => Boolean(response.matches[pair.left]));
+    case "fill-blanks":
+      return Boolean(question.blanks?.length) && question.blanks.every((blank) => Boolean(response.matches[blank.id]?.trim()));
+    case "diagram-label":
+      return Boolean(question.diagram?.markers.length) && question.diagram.markers.every((marker) => Boolean(response.matches[marker.id]));
     default:
       return Boolean(response.choice);
   }
@@ -54,6 +58,12 @@ export function isCorrectResponse(question: TutorialCheckpoint, response: Questi
       return response.order.join("\u0001") === (question.answers || []).join("\u0001");
     case "matching":
       return Boolean(question.pairs?.every((pair) => response.matches[pair.left] === pair.right));
+    case "fill-blanks":
+      return Boolean(question.blanks?.every((blank) =>
+        [blank.answer, ...(blank.acceptedAnswers || [])]
+          .some((answer) => normaliseWrittenAnswer(answer) === normaliseWrittenAnswer(response.matches[blank.id] || ""))));
+    case "diagram-label":
+      return Boolean(question.diagram?.markers.every((marker) => response.matches[marker.id] === marker.answer));
     default:
       return response.choice === question.answer;
   }
@@ -67,6 +77,10 @@ export function displayAnswer(question: TutorialCheckpoint): string {
       return (question.answers || []).join(" → ");
     case "matching":
       return (question.pairs || []).map((pair) => pair.left + " → " + pair.right).join("; ");
+    case "fill-blanks":
+      return (question.blanks || []).map((blank) => blank.prompt + ": " + blank.answer).join("; ");
+    case "diagram-label":
+      return (question.diagram?.markers || []).map((marker) => marker.id + ": " + marker.answer).join("; ");
     default:
       return question.answer;
   }
@@ -106,6 +120,27 @@ export function inspectQuestion(question: TutorialCheckpoint): string[] {
       new Set(pairs.map((pair) => pair.left)).size !== pairs.length ||
       new Set(pairs.map((pair) => pair.right)).size !== pairs.length ||
       pairs.some((pair) => !question.options.includes(pair.right))) issues.push("matching key invalid");
+  }
+  if (format === "fill-blanks") {
+    const blanks = question.blanks || [];
+    if (blanks.length < 2 || blanks.length > 5 || question.options.length !== 0 ||
+      new Set(blanks.map((blank) => blank.id)).size !== blanks.length ||
+      blanks.some((blank) => !/^[a-z0-9-]{1,24}$/.test(blank.id) ||
+        blank.prompt.trim().length < 5 || !blank.answer.trim()))
+      issues.push("fill-in answer key invalid");
+  }
+  if (format === "diagram-label") {
+    const markers = question.diagram?.markers || [];
+    if (!question.diagram || !["right-triangle", "cell", "water-cycle", "circuit"].includes(question.diagram.kind) ||
+      markers.length < 2 || markers.length > 5 ||
+      new Set(markers.map((marker) => marker.id)).size !== markers.length ||
+      question.options.length < markers.length ||
+      new Set(question.options).size !== question.options.length ||
+      markers.some((marker) => !/^[A-E]$/.test(marker.id) ||
+        !Number.isFinite(marker.x) || !Number.isFinite(marker.y) ||
+        marker.x < 10 || marker.x > 390 || marker.y < 10 || marker.y > 210 ||
+        !question.options.includes(marker.answer)))
+      issues.push("diagram label key invalid");
   }
   return issues;
 }

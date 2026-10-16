@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { ArrowDown, ArrowUp, CheckCircle2, Lightbulb, RotateCcw, Eye } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowDown, ArrowUp, CheckCircle2, Lightbulb, RotateCcw, Eye, Volume2, VolumeX } from "lucide-react";
+import { DiagramCanvas } from "@/components/qa/DiagramCanvas";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,27 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
   const [showHint, setShowHint] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
   const [feedback, setFeedback] = useState<boolean | null>(null);
+  const [solutionViewed, setSolutionViewed] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const speechAvailable = typeof window !== "undefined" && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+
+  // Cancel narration when switching question or leaving the clinic.
+  useEffect(() => {
+    return () => { if (speaking && speechAvailable) window.speechSynthesis.cancel(); };
+  }, [speaking, speechAvailable]);
+
+  const toggleSpeech = () => {
+    if (!speechAvailable) return;
+    window.speechSynthesis.cancel();
+    if (speaking) { setSpeaking(false); return; }
+    const utterance = new SpeechSynthesisUtterance(question.question);
+    utterance.lang = "en-GB";
+    utterance.rate = 0.92;
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const pickChoice = (option: string) => {
     if (revealed) return;
@@ -56,12 +78,13 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
     if (hasResponse(question, response)) {
       const correct = isCorrectResponse(question, response);
       setFeedback(correct);
-      onAttempt?.(correct, attemptCount === 0);
+      onAttempt?.(correct, attemptCount === 0 && !solutionViewed);
       setAttemptCount((count) => count + 1);
     } else {
       // Revealing without a response is unscored and doesn't count as correct.
       setFeedback(null);
     }
+    setSolutionViewed(true);
     setRevealed(true);
   };
 
@@ -76,6 +99,13 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
       <span className="inline-flex rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">
         {t(`qa.formats.${format}`)}
       </span>
+      {speechAvailable && (
+        <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-xs"
+          onClick={toggleSpeech} aria-pressed={speaking}>
+          {speaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          {t(speaking ? "qa.stopListening" : "qa.listenQuestion")}
+        </Button>
+      )}
       {(format === "single" || format === "true-false" || format === "multiple") && (
         <div className="grid gap-2" role="group" aria-label={t("qa.answerOptions")}>
           {question.options.map((option, index) => {
@@ -135,6 +165,44 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
               </select>
             </div>
           ))}
+        </div>
+      )}
+      {format === "fill-blanks" && (
+        <div className="space-y-3">
+          {(question.blanks || []).map((blank) => (
+            <div key={blank.id}>
+              <label className="mb-1 block text-sm font-medium" htmlFor={questionId + "-blank-" + blank.id}>{blank.prompt}</label>
+              <Input id={questionId + "-blank-" + blank.id} type="text" autoComplete="off"
+                maxLength={120} disabled={revealed} value={response.matches[blank.id] || ""}
+                placeholder={t("qa.fillBlankPlaceholder")}
+                onChange={(event) => setResponse((previous) => ({
+                  ...previous, matches: { ...previous.matches, [blank.id]: event.target.value },
+                }))} />
+            </div>
+          ))}
+        </div>
+      )}
+      {format === "diagram-label" && question.diagram && (
+        <div className="space-y-3">
+          <DiagramCanvas diagram={question.diagram} description={question.question} />
+          <p className="text-xs text-muted-foreground">{t("qa.diagramInstructions")}</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {question.diagram.markers.map((marker) => (
+              <div key={marker.id} className="rounded-lg border p-3">
+                <label htmlFor={questionId + "-marker-" + marker.id} className="mb-1 block text-sm font-semibold">
+                  {t("qa.diagramMarker", { marker: marker.id })}
+                </label>
+                <select id={questionId + "-marker-" + marker.id}
+                  disabled={revealed} value={response.matches[marker.id] || ""}
+                  onChange={(event) => setResponse((previous) => ({
+                    ...previous, matches: { ...previous.matches, [marker.id]: event.target.value },
+                  }))} className="w-full rounded-lg border bg-background p-2 text-sm">
+                  <option value="">{t("qa.chooseMatch")}</option>
+                  {question.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       {question.hint && !revealed && (

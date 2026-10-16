@@ -37,3 +37,28 @@ export const match = (
   pairs: pairs.map(([left, right]) => ({ left, right })),
   explanation, hint, format: "matching",
 });
+
+
+/** Multiple typed blanks; each field is checked independently after submission. */
+export const fillBlanks = (
+  question: string, blanks: Array<[id: string, prompt: string, answer: string]>, explanation: string, hint = "",
+): TutorialCheckpoint => ({
+  question, format: "fill-blanks", options: [],
+  answer: blanks.map(([id, , answer]) => id + ": " + answer).join("; "),
+  blanks: blanks.map(([id, prompt, answer]) => ({ id, prompt, answer })),
+  explanation, hint,
+});
+
+export const diagramLabel = (
+  question: string, kind: NonNullable<TutorialCheckpoint["diagram"]>["kind"],
+  markers: Array<[id: string, x: number, y: number, answer: string]>,
+  options: string[], explanation: string, hint = "",
+): TutorialCheckpoint => ({
+  question, format: "diagram-label", options,
+  answer: markers.map(([id, , , answer]) => id + ": " + answer).join("; "),
+  diagram: {
+    kind,
+    markers: markers.map(([id, x, y, answer]) => ({ id, x, y, answer })),
+  },
+  explanation, hint,
+});
