@@ -97,7 +97,7 @@ describe("expanded STEMCoach Question & Answer clinic", () => {
     const clinic = src("src/pages/QAClinic.tsx");
     const page = src("src/pages/Tutorials.tsx");
     expect(interaction).toContain("hasResponse(question, response)");
-    expect(interaction).toContain("onAttempt?.(correct, attemptCount === 0)");
+    expect(interaction).toContain("onAttempt?.(correct, attemptCount === 0 && !solutionViewed)");
     expect(clinic).toContain("qaDraft: prompt");
     expect(clinic).toContain('const CHALLENGE_LENGTH = 10');
     expect(clinic).toContain("PAGE_SIZE = 16");

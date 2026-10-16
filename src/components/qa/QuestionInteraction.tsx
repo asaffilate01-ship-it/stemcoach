@@ -24,6 +24,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
   const [showHint, setShowHint] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
   const [feedback, setFeedback] = useState<boolean | null>(null);
+  const [solutionViewed, setSolutionViewed] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const speechAvailable = typeof window !== "undefined" && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
 
@@ -77,12 +78,13 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
     if (hasResponse(question, response)) {
       const correct = isCorrectResponse(question, response);
       setFeedback(correct);
-      onAttempt?.(correct, attemptCount === 0);
+      onAttempt?.(correct, attemptCount === 0 && !solutionViewed);
       setAttemptCount((count) => count + 1);
     } else {
       // Revealing without a response is unscored and doesn't count as correct.
       setFeedback(null);
     }
+    setSolutionViewed(true);
     setRevealed(true);
   };
 

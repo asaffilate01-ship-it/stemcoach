@@ -126,6 +126,7 @@ describe("Q&A next phase: diagrams, cloze and adaptive review", () => {
     expect(engine).toContain('case "fill-blanks"');
     expect(engine).toContain('case "diagram-label"');
     expect(component).toContain("DiagramCanvas");
+    expect(component).toContain("attemptCount === 0 && !solutionViewed");
     expect(component).toContain("SpeechSynthesisUtterance");
     expect(page).toContain('startChallenge("adaptive")');
     expect(page).toContain('startChallenge("timed")');
