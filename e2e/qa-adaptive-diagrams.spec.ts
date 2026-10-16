@@ -33,7 +33,7 @@ test("adaptive review prioritises missed topics and persists local progress acro
   await page.goto("/qa-clinic?subject=mathematics");
   await dismissCookies(page);
   const first = page.locator("article").first();
-  await first.locator('button[aria-pressed]').nth(1).click();
+  await first.locator('div[role="group"] button[aria-pressed]').nth(1).click();
   await first.getByRole("button", { name: "Check & explain" }).click();
   await expect(page.getByText(/1 of \d+ questions practised/)).toBeVisible();
   await page.reload();
