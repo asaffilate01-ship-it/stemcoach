@@ -13,6 +13,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
+    "knowledge:preview": "node scripts/sync-omniqora-learning.mjs --dry-run",
+    "knowledge:sync": "node scripts/sync-omniqora-learning.mjs --apply",
     "release:preflight": "npm run typecheck && npm run lint -- --max-warnings 30 && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {

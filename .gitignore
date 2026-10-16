@@ -27,3 +27,6 @@ playwright-report
 *.njsproj
 *.sln
 *.sw?
+
+# Local source revisions for operator-led Omniqora Knowledge Core synchronisation
+var/omniqora-stemcoach-revisions.json
