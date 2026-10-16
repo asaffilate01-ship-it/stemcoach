@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { qaEntries } from "@/data/qaClinic";
 import { subjects } from "@/data/questions";
 import { stemExpansion } from "@/data/stemExpansion";
+import { nextQAExpansion } from "@/data/tutorialExpansionNext";
 import { tutorials } from "@/data/tutorials";
 import { displayAnswer, emptyResponse, getQuestionFormat, inspectQuestion, isCorrectResponse } from "@/lib/qaEngine";
 import { readFileSync } from "node:fs";
@@ -12,11 +13,12 @@ const src = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8")
 describe("expanded STEMCoach Question & Answer clinic", () => {
   it("adds genuine author-drafted tutorials and practice across all fourteen subjects", () => {
     const expected = tutorials.reduce((total, lesson) => total + 1 + (lesson.practice?.length || 0), 0);
-    expect(tutorials).toHaveLength(57);
+    expect(tutorials).toHaveLength(71);
     expect(stemExpansion).toHaveLength(28);
+    expect(nextQAExpansion).toHaveLength(14);
     expect(stemExpansion.every((lesson) => lesson.practice?.length === 3)).toBe(true);
     expect(qaEntries).toHaveLength(expected);
-    expect(qaEntries).toHaveLength(160);
+    expect(qaEntries).toHaveLength(216);
     expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(qaEntries.length);
     expect(new Set(tutorials.map((entry) => entry.id)).size).toBe(tutorials.length);
     expect(new Set(qaEntries.map((entry) => entry.subject))).toEqual(new Set(subjects.map((subject) => subject.id)));
