@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, BookOpen, Brain, CircleHelp, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy } from "lucide-react";
+import { ArrowRight, BookOpen, Brain, CircleHelp, Clock3, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
+import { QA_HISTORY_KEY, parseReviewHistory, serialiseReviewHistory, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
 import { Button } from "@/components/ui/button";
@@ -15,19 +16,13 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { normalizeLanguage } from "@/i18n/language";
 
 const questionFormats: TutorialQuestionFormat[] = [
-  "single", "multiple", "true-false", "numeric", "short-text", "ordering", "matching",
+  "single", "multiple", "true-false", "numeric", "short-text", "ordering", "matching", "fill-blanks", "diagram-label",
 ];
 const PAGE_SIZE = 16;
 const CHALLENGE_LENGTH = 10;
-
-function sampleWithoutReplacement<T>(items: readonly T[], count: number): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result.slice(0, Math.min(count, result.length));
-}
+const TIMED_SECONDS = 300;
+type ChallengeMode = "mixed" | "adaptive" | "timed";
+const existingQuestionIds = new Set(qaEntries.map((entry) => entry.id));
 
 export default function QAClinic() {
   const { t, i18n } = useTranslation();
@@ -49,6 +44,30 @@ export default function QAClinic() {
   const [firstAttempts, setFirstAttempts] = useState<Record<string, boolean>>({});
   const [mastered, setMastered] = useState<Record<string, boolean>>({});
   const [challengeStreak, setChallengeStreak] = useState(0);
+  const [challengeMode, setChallengeMode] = useState<ChallengeMode>("mixed");
+  const [challengeRound, setChallengeRound] = useState(0);
+  const [deadline, setDeadline] = useState<number | null>(null);
+  const [secondsRemaining, setSecondsRemaining] = useState(TIMED_SECONDS);
+  const [history, setHistory] = useState<ReviewHistory>(() => {
+    try { return parseReviewHistory(localStorage.getItem(QA_HISTORY_KEY), existingQuestionIds); }
+    catch { return {}; }
+  });
+
+  useEffect(() => {
+    try {
+      if (Object.keys(history).length) localStorage.setItem(QA_HISTORY_KEY, serialiseReviewHistory(history));
+      else localStorage.removeItem(QA_HISTORY_KEY);
+    } catch { /* Private browsing or full storage: keep the in-memory session working. */ }
+  }, [history]);
+
+  useEffect(() => {
+    if (challengeMode !== "timed" || deadline === null || challengeIds.length === 0 ||
+        challengeIndex >= challengeIds.length || secondsRemaining === 0) return;
+    const tick = () => setSecondsRemaining(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+    tick();
+    const interval = window.setInterval(tick, 1000);
+    return () => window.clearInterval(interval);
+  }, [challengeMode, deadline, challengeIds.length, challengeIndex, secondsRemaining]);
 
   const filtered = useMemo(() => {
     const phrase = search.trim().toLocaleLowerCase();
@@ -62,7 +81,8 @@ export default function QAClinic() {
   }, [subject, format, level, search]);
 
   const activeChallenge = challengeIds.length > 0;
-  const challengeCompleted = activeChallenge && challengeIndex >= challengeIds.length;
+  const challengeCompleted = activeChallenge && (challengeIndex >= challengeIds.length ||
+    (challengeMode === "timed" && secondsRemaining === 0));
   const challengeEntry = activeChallenge && !challengeCompleted
     ? qaEntries.find((entry) => entry.id === challengeIds[challengeIndex])
     : null;
@@ -70,25 +90,33 @@ export default function QAClinic() {
   const attemptedCount = challengeIds.filter((id) => id in firstAttempts).length;
   const firstTryCorrect = challengeIds.filter((id) => firstAttempts[id] === true).length;
   const masteredCount = challengeIds.filter((id) => mastered[id] === true).length;
+  const reviewSummary = useMemo(() => getReviewSummary(filtered, history), [filtered, history]);
 
-  const startChallenge = () => {
-    const selected = sampleWithoutReplacement(filtered, CHALLENGE_LENGTH).map((entry) => entry.id);
+  const startChallenge = (kind: ChallengeMode = "mixed") => {
+    const selected = buildReviewQueue(filtered, history, CHALLENGE_LENGTH,
+      kind === "adaptive" ? "adaptive" : "mixed").map((entry) => entry.id);
     setChallengeIds(selected);
     setChallengeIndex(0);
     setFirstAttempts({});
     setMastered({});
     setChallengeStreak(0);
+    setChallengeMode(kind);
+    setChallengeRound((round) => round + 1);
+    setSecondsRemaining(TIMED_SECONDS);
+    setDeadline(kind === "timed" ? Date.now() + TIMED_SECONDS * 1000 : null);
     window.setTimeout(() => document.getElementById("qa-library")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
   };
 
   const changeFilter = (change: () => void) => {
     setChallengeIds([]);
     setChallengeIndex(0);
+    setDeadline(null);
     setDisplayLimit(PAGE_SIZE);
     change();
   };
 
   const recordAttempt = (id: string, correct: boolean, firstAttempt: boolean) => {
+    setHistory((previous) => recordReviewAttempt(previous, id, correct, firstAttempt, Date.now()));
     if (correct) setMastered((previous) => ({ ...previous, [id]: true }));
     if (firstAttempt) {
       setFirstAttempts((previous) => id in previous ? previous : { ...previous, [id]: correct });
@@ -204,6 +232,32 @@ export default function QAClinic() {
             </div>
           </div>
 
+          <div className="mb-5 rounded-xl border bg-muted/30 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <Brain className="h-4 w-4 text-primary" /> {t("qa.reviewTitle")}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("qa.reviewStats", { practiced: reviewSummary.practiced, total: filtered.length, due: reviewSummary.due })}
+                </p>
+              </div>
+              <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-xs"
+                onClick={() => setHistory({})} disabled={Object.keys(history).length === 0}>
+                <Trash2 className="h-4 w-4" /> {t("qa.clearPracticeHistory")}
+              </Button>
+            </div>
+            {reviewSummary.weakTopics.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold">{t("qa.weakerTopics")}</span>
+                {reviewSummary.weakTopics.map((item) => (
+                  <span key={item.topic} className="rounded-full bg-amber-500/10 px-3 py-1 text-xs">{item.topic}</span>
+                ))}
+              </div>
+            )}
+            <p className="mt-3 text-xs text-muted-foreground">{t("qa.privateHistoryNotice")}</p>
+          </div>
+
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-muted/30 p-4">
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-sm font-semibold">
@@ -211,10 +265,20 @@ export default function QAClinic() {
               </p>
               <p className="mt-1 text-xs text-muted-foreground">{t("qa.challengeDescription")}</p>
             </div>
-            <Button type="button" className="gap-2 rounded-xl" disabled={filtered.length === 0}
-              onClick={startChallenge}>
-              <Target className="h-4 w-4" /> {t("qa.startChallenge")}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" className="gap-2 rounded-xl"
+                disabled={filtered.length === 0} onClick={() => startChallenge("adaptive")}>
+                <Brain className="h-4 w-4" /> {t("qa.adaptiveReview")}
+              </Button>
+              <Button type="button" variant="outline" className="gap-2 rounded-xl"
+                disabled={filtered.length === 0} onClick={() => startChallenge("timed")}>
+                <Clock3 className="h-4 w-4" /> {t("qa.timedChallenge")}
+              </Button>
+              <Button type="button" className="gap-2 rounded-xl" disabled={filtered.length === 0}
+                onClick={() => startChallenge("mixed")}>
+                <Target className="h-4 w-4" /> {t("qa.startChallenge")}
+              </Button>
+            </div>
           </div>
 
           {filtered.length === 0 && !activeChallenge && (
@@ -230,22 +294,29 @@ export default function QAClinic() {
                   ? t("qa.challengeFinished")
                   : t("qa.challengeProgress", { current: challengeIndex + 1, total: challengeIds.length })}</span>
                 <span>{t("qa.challengeScore", { score: firstTryCorrect, total: challengeIds.length })}</span>
+                {challengeMode === "timed" && !challengeCompleted && (
+                  <span aria-label={t("qa.timeRemaining")}>
+                    {t("qa.timerDisplay", { time: String(Math.floor(secondsRemaining / 60)).padStart(2, "0") + ":" +
+                      String(secondsRemaining % 60).padStart(2, "0") })}
+                  </span>
+                )}
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round(100 * challengeIndex / challengeIds.length)}%` }} />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{t("qa.challengeStreak", { count: challengeStreak })}</p>
+              {challengeMode === "adaptive" && <p className="mt-1 text-xs text-muted-foreground">{t("qa.adaptiveExplanation")}</p>}
             </div>
           )}
 
           {challengeCompleted && (
             <div className="mb-5 rounded-2xl border bg-card p-8 text-center">
               <Trophy className="mx-auto mb-3 h-12 w-12 text-primary" />
-              <h3 className="mb-2 text-xl font-bold">{t("qa.challengeFinished")}</h3>
+              <h3 className="mb-2 text-xl font-bold">{t(challengeMode === "timed" && secondsRemaining === 0 ? "qa.timeExpired" : "qa.challengeFinished")}</h3>
               <p className="mb-2 text-sm">{t("qa.challengeSummary", { correct: firstTryCorrect, attempted: attemptedCount, total: challengeIds.length })}</p>
               <p className="mb-5 text-xs text-muted-foreground">{t("qa.challengeMastered", { count: masteredCount })}</p>
               <div className="flex flex-wrap justify-center gap-2">
-                <Button onClick={startChallenge} className="rounded-xl">{t("qa.playAgain")}</Button>
+                <Button onClick={() => startChallenge(challengeMode)} className="rounded-xl">{t("qa.playAgain")}</Button>
                 <Button variant="outline" className="rounded-xl" onClick={() => { setChallengeIds([]); setChallengeIndex(0); }}>
                   {t("qa.browseAll")}
                 </Button>
@@ -267,7 +338,7 @@ export default function QAClinic() {
                     {mastered[entry.id] && <Trophy className="ml-auto h-5 w-5 text-primary" aria-label={t("qa.mastered")} />}
                   </div>
                   <h3 className="mb-3 text-base font-semibold leading-6">{entry.question}</h3>
-                  <QuestionInteraction key={entry.id + (activeChallenge ? "-challenge" : "")} questionId={entry.id}
+                  <QuestionInteraction key={entry.id + (activeChallenge ? "-challenge-" + challengeRound : "")} questionId={entry.id}
                     question={entry.checkpoint} workedExample={entry.workedExample}
                     examTip={entry.examTip} commonMistake={entry.commonMistake}
                     onAttempt={(correct, firstAttempt) => recordAttempt(entry.id, correct, firstAttempt)} />
