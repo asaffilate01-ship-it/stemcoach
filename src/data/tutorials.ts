@@ -1,5 +1,6 @@
 import { stemExpansion } from "./stemExpansion";
 import { nextQAExpansion } from "./tutorialExpansionNext";
+import { deepQAExpansion } from "./tutorialDeepExpansion";
 
 export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching" | "fill-blanks" | "diagram-label";
 
@@ -301,4 +302,5 @@ export const tutorials: Tutorial[] = [
   },
   ...stemExpansion,
   ...nextQAExpansion,
+  ...deepQAExpansion,
 ];

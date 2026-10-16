@@ -5,6 +5,8 @@ export interface QuestionResponse {
   choices: string[];
   freeText: string;
   order: string[];
+  /** Do not count the untouched, initially displayed sequence as a submitted answer. */
+  orderTouched: boolean;
   matches: Record<string, string>;
 }
 
@@ -23,7 +25,9 @@ export function hasResponse(question: TutorialCheckpoint, response: QuestionResp
     case "short-text":
       return Boolean(response.freeText.trim());
     case "ordering":
-      return response.order.length === question.options.length;
+      return response.orderTouched && response.order.length === question.options.length &&
+        response.order.every((value) => question.options.includes(value)) &&
+        new Set(response.order).size === response.order.length;
     case "matching":
       return Boolean(question.pairs?.length) && question.pairs.every((pair) => Boolean(response.matches[pair.left]));
     case "fill-blanks":
@@ -146,5 +150,5 @@ export function inspectQuestion(question: TutorialCheckpoint): string[] {
 }
 
 export function emptyResponse(question: TutorialCheckpoint): QuestionResponse {
-  return { choice: "", choices: [], freeText: "", order: [...question.options], matches: {} };
+  return { choice: "", choices: [], freeText: "", order: [...question.options], orderTouched: false, matches: {} };
 }

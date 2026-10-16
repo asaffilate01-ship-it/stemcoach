@@ -27,7 +27,7 @@ async function loadTutorials() {
   });
   const encoded = Buffer.from(result.outputFiles[0].contents).toString("base64");
   const { tutorials } = await import("data:text/javascript;base64," + encoded);
-  if (!Array.isArray(tutorials) || tutorials.length < 57) throw new Error("Tutorial source catalogue is incomplete");
+  if (!Array.isArray(tutorials) || tutorials.length < 99) throw new Error("Tutorial source catalogue is incomplete");
   return tutorials;
 }
 

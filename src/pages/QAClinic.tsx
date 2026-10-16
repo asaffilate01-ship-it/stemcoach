@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, BookOpen, Brain, CircleHelp, Clock3, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
-import { QA_HISTORY_KEY, parseReviewHistory, serialiseReviewHistory, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
+import { ArrowRight, Bookmark, BookOpen, Brain, CircleHelp, Clock3, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
+import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
-import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +35,7 @@ export default function QAClinic() {
   );
   const [format, setFormat] = useState("all");
   const [level, setLevel] = useState("all");
+  const [reviewFilter, setReviewFilter] = useState<"all" | "due" | "missed" | "saved">("all");
   const [search, setSearch] = useState("");
   const [displayLimit, setDisplayLimit] = useState(PAGE_SIZE);
   const [question, setQuestion] = useState("");
@@ -49,10 +49,21 @@ export default function QAClinic() {
   const [challengeRound, setChallengeRound] = useState(0);
   const [deadline, setDeadline] = useState<number | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(TIMED_SECONDS);
+  const [savedIds, setSavedIds] = useState<string[]>(() => {
+    try { return parseBookmarks(localStorage.getItem(QA_BOOKMARKS_KEY), existingQuestionIds); }
+    catch { return []; }
+  });
   const [history, setHistory] = useState<ReviewHistory>(() => {
     try { return parseReviewHistory(localStorage.getItem(QA_HISTORY_KEY), existingQuestionIds); }
     catch { return {}; }
   });
+
+  useEffect(() => {
+    try {
+      if (savedIds.length) localStorage.setItem(QA_BOOKMARKS_KEY, serialiseBookmarks(savedIds));
+      else localStorage.removeItem(QA_BOOKMARKS_KEY);
+    } catch { /* Storage is optional; the current session remains functional. */ }
+  }, [savedIds]);
 
   useEffect(() => {
     try {
@@ -76,10 +87,14 @@ export default function QAClinic() {
       (subject === "all" || entry.subject === subject) &&
       (format === "all" || entry.format === format) &&
       (level === "all" || entry.level === level) &&
+      (reviewFilter === "all" ||
+        (reviewFilter === "saved" && savedIds.includes(entry.id)) ||
+        (reviewFilter === "due" && Boolean(history[entry.id]?.attempts) && history[entry.id].dueAt <= Date.now()) ||
+        (reviewFilter === "missed" && (history[entry.id]?.incorrectFirst || 0) > 0)) &&
       (!phrase || [entry.question, entry.topic, entry.explanation, entry.subject, entry.hint]
         .some((text) => text.toLocaleLowerCase().includes(phrase))),
     );
-  }, [subject, format, level, search]);
+  }, [subject, format, level, search, history, reviewFilter, savedIds]);
 
   const activeChallenge = challengeIds.length > 0;
   const challengeCompleted = activeChallenge && (challengeIndex >= challengeIds.length ||
@@ -107,6 +122,11 @@ export default function QAClinic() {
     setDeadline(kind === "timed" ? Date.now() + TIMED_SECONDS * 1000 : null);
     window.setTimeout(() => document.getElementById("qa-library")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
   };
+
+  const toggleSaved = (id: string) =>
+    setSavedIds((previous) => previous.includes(id)
+      ? previous.filter((entry) => entry !== id)
+      : [...previous, id].slice(-500));
 
   const changeFilter = (change: () => void) => {
     setChallengeIds([]);
@@ -197,7 +217,7 @@ export default function QAClinic() {
             <span className="text-sm text-muted-foreground">{t("qa.results", { count: filtered.length })}</span>
           </div>
 
-          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <div>
               <label htmlFor="qa-subject-filter" className="mb-1 block text-xs font-semibold">{t("qa.filterSubject")}</label>
               <select id="qa-subject-filter" value={subject} onChange={(event) => changeFilter(() => setSubject(event.target.value))}
@@ -221,6 +241,16 @@ export default function QAClinic() {
                 <option value="all">{t("qa.allLevels")}</option>
                 {["Foundation", "Intermediate", "Advanced"].map((item) =>
                   <option key={item} value={item}>{t(`tutorials.levels.${item.toLowerCase()}`)}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="qa-review-filter" className="mb-1 block text-xs font-semibold">{t("qa.reviewFilterLabel")}</label>
+              <select id="qa-review-filter" value={reviewFilter}
+                onChange={(event) => changeFilter(() => setReviewFilter(event.target.value as "all" | "due" | "missed" | "saved"))}
+                className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
+                {(["all", "due", "missed", "saved"] as const).map((choice) => (
+                  <option key={choice} value={choice}>{t(`qa.reviewFilters.${choice}`)}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -343,9 +373,13 @@ export default function QAClinic() {
                     question={entry.checkpoint} workedExample={entry.workedExample}
                     examTip={entry.examTip} commonMistake={entry.commonMistake}
                     onAttempt={(correct, firstAttempt) => recordAttempt(entry.id, correct, firstAttempt)} />
-                  <div className="mt-4"><OmniqoraEvidencePanel key={entry.id} tutorialId={entry.tutorialId}
-                    checkIndex={Number(entry.id.slice(entry.tutorialId.length + 1))} /></div>
                   <div className="mt-auto flex flex-wrap gap-2 border-t pt-3">
+                    <Button size="sm" variant={savedIds.includes(entry.id) ? "secondary" : "ghost"}
+                      className="gap-1.5 rounded-xl" aria-pressed={savedIds.includes(entry.id)}
+                      onClick={() => toggleSaved(entry.id)}>
+                      <Bookmark className="h-4 w-4" />
+                      {t(savedIds.includes(entry.id) ? "qa.removeBookmark" : "qa.saveQuestion")}
+                    </Button>
                     <Button size="sm" variant="outline" className="gap-1.5 rounded-xl" onClick={() => openCoach(entry)}>
                       <Sparkles className="h-4 w-4" /> {t("qa.askFollowUp")}
                     </Button>
