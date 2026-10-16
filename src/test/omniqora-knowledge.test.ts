@@ -70,7 +70,6 @@ describe("Omniqora Intelligence RAG/GraphRAG source boundary", () => {
     expect(edgeFunction).toContain('tutorials.get(body.tutorialId)');
     expect(edgeFunction).toContain("!modes.has(body.mode as Mode)");
     expect(edgeFunction).toContain('collection !== "stemcoach-lessons"');
-    expect(edgeFunction).toContain('url + "/v1/query"');
     expect(edgeFunction).toContain("provider.url + \"/v1/query\"");
     expect(edgeFunction).toContain("seeds: body.mode === \"rag\" ? [] : [lesson.title]");
     expect(edgeFunction).toContain('source_uri !== "urn:stemcoach:tutorial:" + lessonId');

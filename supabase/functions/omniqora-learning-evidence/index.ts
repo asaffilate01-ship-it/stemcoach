@@ -77,7 +77,7 @@ function safeEvidence(input: unknown) {
   if (typeof row.citation_id !== "string" || !/^C[1-8]$/.test(row.citation_id) ||
       typeof row.document_id !== "string" || !row.document_id.startsWith("lesson-") ||
       typeof row.source_uri !== "string" || typeof row.title !== "string" ||
-      typeof row.quote !== "string" || !Number.isInteger(row.revision) ||
+      typeof row.quote !== "string" || (typeof row.revision !== "number" || !Number.isInteger(row.revision)) ||
       Number(row.revision) < 1 || row.title.length > 180 || row.quote.length > 4000) {
     throw new Error("invalid_evidence");
   }
@@ -188,7 +188,7 @@ serve(async (req) => {
     if (Object.keys(body).some((field) => !["tutorialId", "mode", "checkIndex"].includes(field)) ||
         typeof body.tutorialId !== "string" ||
         typeof body.mode !== "string" || !modes.has(body.mode as Mode) ||
-        !Number.isInteger(body.checkIndex) || Number(body.checkIndex) < 0 || Number(body.checkIndex) > 3) {
+        (typeof body.checkIndex !== "number" || !Number.isInteger(body.checkIndex)) || Number(body.checkIndex) < 0 || Number(body.checkIndex) > 3) {
       return response({ error: "Invalid tutorial or retrieval mode" }, 422);
     }
     const lesson = tutorials.get(body.tutorialId);
