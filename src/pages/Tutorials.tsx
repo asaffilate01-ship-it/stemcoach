@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { normalizeLanguage } from "@/i18n/language";
 import { supabase } from "@/integrations/supabase/client";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
+import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
 
 const COMPLETED_KEY = "stemcoach:tutorials-completed";
 const LAST_OPENED_KEY = "stemcoach:tutorials-last-opened";
@@ -270,6 +271,7 @@ export default function Tutorials() {
                     <Button variant="outline" className="gap-2" onClick={() => navigate(`/ai-tutor?subject=${encodeURIComponent(tutorial.subject)}&tutorial=${encodeURIComponent(tutorial.id)}`)}>
                       <img src={mascot.image} alt="" className="h-6 w-6 rounded-lg object-cover" /><MessageCircle className="h-4 w-4" />{t("tutorials.askCoach", { name: mascot.name })}
                     </Button>
+                    <OmniqoraEvidencePanel key={tutorial.id} tutorialId={tutorial.id} checkIndex={0} />
                     <section>
                       <h3 className="mb-3 font-semibold">{t("tutorials.knowledgeChecks")}</h3>
                       <div className="space-y-5">
