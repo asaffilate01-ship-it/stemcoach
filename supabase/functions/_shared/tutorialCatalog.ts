@@ -66,6 +66,20 @@ export const TUTORIAL_CONTEXTS = [
   { id: "french-adjective-agreement", subject: "french", title: "French Adjective Agreement" },
   { id: "german-present-tense", subject: "german", title: "German Present-Tense Verb Endings" },
   { id: "german-main-clause-order", subject: "german", title: "German Main-Clause Word Order" },
+  { id: "triangle-diagram-labelling", subject: "mathematics", title: "Trigonometry: Label a Right Triangle" },
+  { id: "circuit-diagram-labelling", subject: "physics", title: "Reading Simple Electrical Circuit Diagrams" },
+  { id: "reaction-energetics", subject: "chemistry", title: "Exothermic and Endothermic Reactions" },
+  { id: "animal-cell-diagram", subject: "biology", title: "Animal Cell Organelles and Their Functions" },
+  { id: "trace-algorithm-loops", subject: "computer-science", title: "Tracing Loops and Accumulator Variables" },
+  { id: "inflation-purchasing-power", subject: "economics", title: "Inflation and Real Purchasing Power" },
+  { id: "comparing-poetry-voices", subject: "english-literature", title: "Comparing Speaker, Tone and Imagery in Poetry" },
+  { id: "retrieval-practice-memory", subject: "psychology", title: "Retrieval Practice and Long-Term Memory" },
+  { id: "water-cycle-labelling", subject: "geography", title: "The Water Cycle: Processes and Diagram Labels" },
+  { id: "business-swot-decision", subject: "business-studies", title: "Using SWOT to Evaluate a Business Choice" },
+  { id: "ielts-paraphrasing", subject: "ielts", title: "Paraphrasing without Changing Meaning" },
+  { id: "celta-lesson-stage-plan", subject: "celta", title: "Planning a Simple Language Lesson" },
+  { id: "french-negation-simple", subject: "french", title: "French Negation with ne … pas" },
+  { id: "german-modal-verbs", subject: "german", title: "German Modal Verbs and Final Infinitives" },
 ] as const satisfies readonly TutorialContext[];
 
 export function findTutorialContext(id: unknown): TutorialContext | null {
