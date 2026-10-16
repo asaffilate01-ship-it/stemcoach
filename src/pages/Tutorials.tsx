@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { normalizeLanguage } from "@/i18n/language";
 import { supabase } from "@/integrations/supabase/client";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
+import { KnowledgeConnections } from "@/components/qa/KnowledgeConnections";
 
 const COMPLETED_KEY = "stemcoach:tutorials-completed";
 const LAST_OPENED_KEY = "stemcoach:tutorials-last-opened";
@@ -266,6 +267,7 @@ export default function Tutorials() {
                     <section className="rounded-xl bg-primary/5 p-4">
                       <h3 className="mb-2 flex items-center gap-2 font-semibold"><BookOpen className="h-4 w-4 text-primary" />{t("tutorials.workedExample")}</h3>
                       <p className="text-sm leading-6">{tutorial.workedExample}</p>
+                      <KnowledgeConnections subject={tutorial.subject} question={tutorial.title} tutorialId={tutorial.id} />
                     </section>
                     <Button variant="outline" className="gap-2" onClick={() => navigate(`/ai-tutor?subject=${encodeURIComponent(tutorial.subject)}&tutorial=${encodeURIComponent(tutorial.id)}`)}>
                       <img src={mascot.image} alt="" className="h-6 w-6 rounded-lg object-cover" /><MessageCircle className="h-4 w-4" />{t("tutorials.askCoach", { name: mascot.name })}
