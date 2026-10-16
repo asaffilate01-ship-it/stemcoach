@@ -84,7 +84,8 @@ export function retrieveGroundedKnowledge({
   const graph: GraphConnection[] = [];
 
   if (seed) {
-    const visited = new Set([seed, ...ranked.map((item) => item.id)]);
+    // A directly relevant cited source can also be a meaningful graph neighbor.
+    const visited = new Set([seed]);
     const addConnections = (origin: string, distance: 1 | 2, via?: string): string[] => {
       const newIds: string[] = [];
       for (const edge of QA_CONCEPT_EDGES) {
