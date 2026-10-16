@@ -52,6 +52,13 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa:   {
+    "knowledgeTitle": "Zusammenhänge beim Lernen entdecken",
+    "knowledgeSources": "Belege aus den Lektionen",
+    "knowledgeRelated": "Verknüpfte Themen",
+    "knowledgeDirect": "Verwandte Lektion",
+    "knowledgeTwoHop": "Lernverbindung über zwei Schritte",
+    "draftSourceNotice": "Diese Auszüge stammen aus STEMCoach-Lernmaterialien und sind nicht unabhängig durch eine Prüfungsorganisation geprüft. Prüfe den jeweils gültigen Lehrplan.",
+    "omniqoraEndorsement": "Intelligence by Omniqora",
         "fillBlankPlaceholder": "Fehlendes Wort eingeben",
     "diagramInstructions": "Ordne den Buchstabenpunkten im Diagramm jeweils eine passende Beschriftung zu.",
     "diagramMarker": "Punkt {{marker}}",

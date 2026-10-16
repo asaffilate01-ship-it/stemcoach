@@ -52,6 +52,13 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa:   {
+    "knowledgeTitle": "Explorer les liens entre les notions",
+    "knowledgeSources": "Explications tirées des leçons",
+    "knowledgeRelated": "Notions associées",
+    "knowledgeDirect": "Leçon associée",
+    "knowledgeTwoHop": "Lien d'apprentissage à deux étapes",
+    "draftSourceNotice": "Ces extraits proviennent de leçons rédigées par STEMCoach et n'ont pas fait l'objet d'une vérification indépendante par un organisme d'examen.",
+    "omniqoraEndorsement": "Intelligence by Omniqora",
         "fillBlankPlaceholder": "Saisissez le mot manquant",
     "diagramInstructions": "Repérez les lettres sur le schéma, puis choisissez la légende correspondante pour chaque point.",
     "diagramMarker": "Point {{marker}}",

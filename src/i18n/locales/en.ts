@@ -52,6 +52,13 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa:   {
+    "knowledgeTitle": "Explore learning connections",
+    "knowledgeSources": "Lesson-backed explanations",
+    "knowledgeRelated": "Connected concepts",
+    "knowledgeDirect": "Related lesson",
+    "knowledgeTwoHop": "Two-step learning link",
+    "draftSourceNotice": "These excerpts come from authored STEMCoach teaching notes, not an independently exam-board-verified source. Check the relevant official syllabus for assessment requirements.",
+    "omniqoraEndorsement": "Intelligence by Omniqora",
         "fillBlankPlaceholder": "Type the missing word",
     "diagramInstructions": "Use the letter markers on the diagram, then choose the matching label for each point.",
     "diagramMarker": "Point {{marker}}",
