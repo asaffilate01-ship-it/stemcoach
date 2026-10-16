@@ -14,7 +14,7 @@ export const deeperMathScience: Tutorial[] = [
     checkpoint: mcq("If f(x) = 3x − 2, what is f(5)?", ["13", "15", "17", "3"], "13", "Substitute x = 5: 3 × 5 − 2 = 13.", "Replace x with 5 before simplifying."),
     practice: [
       numeric("For f(x) = x² + 2, calculate f(−3).", 11, "Square −3 to obtain 9, then add 2 for 11.", "The square of a negative number is positive."),
-      multi("Which inputs are excluded from g(x) = 1/(x − 4)?", ["4", "0", "−4", "8"], ["4", "4"], "The denominator is zero when x = 4.", "Set the denominator equal to zero."),
+      multi("Which statements are correct for g(x) = 1/(x − 4)?", ["x = 4 is excluded from the domain", "x = 5 is a valid input", "x = 4 is a valid input", "g(5) is undefined"], ["x = 4 is excluded from the domain", "x = 5 is a valid input"], "The denominator vanishes at x = 4. At x = 5, the function equals 1.", "Check when the denominator is zero."),
       fillBlanks("Complete the two key definitions of a function.", [["domain", "The set of allowed inputs is the ____.", "domain"], ["range", "The set of resulting outputs is the ____.", "range"]], "Domain describes the inputs, while range describes the corresponding outputs.", "Think input first, output second."),
     ],
   },
