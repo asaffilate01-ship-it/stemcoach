@@ -151,6 +151,10 @@ export default function TenantAdmin() {
           }}>
             <Copy className="h-4 w-4" /> Copy student invitation link
           </Button>
+          <p className="mt-2 max-w-3xl text-xs text-muted-foreground">
+            For SchoolDash or UniPathway, give this link only to your authorised school or centre operator for manual connection verification.
+            It creates a pending learner request; it does not provide single sign-on, paid access or automatic learner data transfer.
+          </p>
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
