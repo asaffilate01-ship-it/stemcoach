@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Building2, Download, RotateCcw, Target, Users } from "lucide-react";
+import { BookOpen, Building2, Download, CalendarDays, RotateCcw, Target, Users } from "lucide-react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +10,7 @@ import {
   revisionPriorities, safeLearnerProgressDigest,
   type MasteryEvidence,
 } from "@/lib/educationBridge";
+import {buildRevisionWeek} from "@/lib/revisionWeek";
 
 type InstitutionMembership = {
   tenant_id: string;
@@ -23,6 +24,8 @@ export default function EducationConnections() {
   const { user } = useAuth();
   const [membership, setMembership] = useState<InstitutionMembership[]>([]);
   const [mastery, setMastery] = useState<MasteryEvidence[]>([]);
+  const [partnerCourses, setPartnerCourses] = useState<{source_product:string;institution_name:string;curriculum:string;subject:string;valid_until:string}[]>([]);
+  const [partnerState, setPartnerState] = useState<"loading"|"ready"|"unavailable">("loading");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
@@ -47,6 +50,18 @@ export default function EducationConnections() {
         if (!cancelled) {
           setMembership((members.data || []) as unknown as InstitutionMembership[]);
           setMastery((progress.data || []) as MasteryEvidence[]);
+          // Optional staged bridge migration. Missing RPC fails closed without
+          // breaking personal revision or exposing any third-party learner data.
+          setPartnerState("loading");
+          setPartnerCourses([]);
+          void (supabase.rpc as any)("get_my_partner_course_preview")
+            .then(({data,error}: {data:unknown;error:unknown})=>{
+              if (cancelled) return;
+              if(error || !Array.isArray(data)){setPartnerState("unavailable");return;}
+              setPartnerCourses(data);
+              setPartnerState("ready");
+            })
+            .catch(()=>{if(!cancelled)setPartnerState("unavailable");});
         }
       } catch {
         if (!cancelled) setError("Your institution or learning records could not be loaded. Please retry.");
@@ -60,6 +75,7 @@ export default function EducationConnections() {
 
   const priorities = useMemo(() => revisionPriorities(mastery, new Date()), [mastery]);
   const digest = useMemo(() => safeLearnerProgressDigest(mastery, new Date()), [mastery]);
+  const revisionWeek = useMemo(() => buildRevisionWeek(mastery, new Date()), [mastery]);
   const downloadOwnSummary = () => {
     // This local export is not an institution submission. The user chooses
     // whether to disclose it outside STEMCoach.
@@ -151,6 +167,49 @@ export default function EducationConnections() {
                   <p className="text-sm text-muted-foreground">Complete a diagnostic or practice session to start a personalised revision plan.</p>
                   <Button asChild><Link to="/subjects"><BookOpen className="mr-2 h-4 w-4" /> Browse subjects</Link></Button>
                 </div>
+              )}
+            </section>
+
+            <section className="stem-card mb-6 rounded-2xl p-5">
+              <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold"><CalendarDays className="h-5 w-5 text-primary" /> Your 7-day study plan</h2>
+              <p className="mb-4 text-sm text-muted-foreground">Suggested revision from your own recorded progress. This is not official assigned homework or a completed attendance record.</p>
+              {revisionWeek.totalTopics === 0 ? (
+                <p className="text-sm text-muted-foreground">Practise a topic to generate your first weekly plan.</p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {revisionWeek.dates.map(day => (
+                    <div key={day.date} className="rounded-xl border border-border p-3">
+                      <h3 className="text-sm font-semibold">{new Date(day.date+"T12:00:00Z").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}</h3>
+                      <p className="mb-2 text-xs text-muted-foreground">{day.tasks.length ? day.tasks.length+" suggested tasks · about "+day.minutes+" min" : "Open study day"}</p>
+                      {day.tasks.map(task => (
+                        <div key={task.id} className="mb-2 text-sm">
+                          <Link className="font-medium text-primary hover:underline" to={task.practicePath}>{task.subject}: {task.topic}</Link>
+                          <p className="text-xs text-muted-foreground">{task.reason === "follow-up" ? "Spaced repeat" : task.reason === "due" ? "Due for review" : "Build confidence"}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="mt-3 text-xs text-muted-foreground">The plan recalculates from your saved progress and is not sent to a school or AI provider.</p>
+            </section>
+
+            <section className="stem-card mb-6 rounded-2xl p-5">
+              <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold"><Building2 className="h-5 w-5 text-primary" /> Verified partner course mappings</h2>
+              <p className="mb-3 text-sm text-muted-foreground">Course mapping alone does not grant STEMCoach subscription access. Every school, learner and curriculum mapping must first pass an independent operator check.</p>
+              {partnerState === "loading" ? (
+                <p role="status" className="text-sm text-muted-foreground">Checking mapped courses…</p>
+              ) : partnerState === "unavailable" ? (
+                <p className="text-sm text-muted-foreground">Partner mapping is not yet enabled on this backend. Personal STEMCoach learning remains available.</p>
+              ) : partnerCourses.length ? (
+                <ul className="space-y-2">{partnerCourses.map((course,index) => (
+                  <li key={course.source_product+":"+course.subject+":"+index} className="rounded-xl border border-border p-3 text-sm">
+                    <span className="font-medium">{course.institution_name} · {course.subject}</span>
+                    <p className="text-xs text-muted-foreground">{course.source_product} · {course.curriculum} · Reviewed mapping; subscription activation separate</p>
+                  </li>
+                ))}</ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No verified and current partner-course mapping found for this account.</p>
               )}
             </section>
 
