@@ -63,6 +63,7 @@ const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 const Support = lazy(() => import("./pages/Support"));
 const Tutorials = lazy(() => import("./pages/Tutorials"));
 const Mastery = lazy(() => import("./pages/Mastery"));
+const EducationConnections = lazy(() => import("./pages/EducationConnections"));
 
 // Keep test credentials and development helpers out of production bundles.
 const DevToolsPanel = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEV_TOOLS === "true"
@@ -150,6 +151,7 @@ const App = () => (
                     <Route path="/study-planner" element={<ProtectedRoute><StudyPlanner /></ProtectedRoute>} />
                     <Route path="/progress-report" element={<ProtectedRoute><ProgressReports /></ProtectedRoute>} />
                     <Route path="/mastery" element={<ProtectedRoute><Mastery /></ProtectedRoute>} />
+                    <Route path="/education-connections" element={<ProtectedRoute><EducationConnections /></ProtectedRoute>} />
                     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
                     {/* Role-protected */}
