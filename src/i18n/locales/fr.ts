@@ -1094,6 +1094,7 @@ const fr = {
   footer: {
     copyright: "© {{year}} STEMCoach — Centre de tutorat virtuel. Fait avec",
     copyrightSuffix: "pour les élèves du monde entier.",
+    educationBrand: "STEMCoach est une marque de iTech Education Ltd.",
     poweredBy: "PROPULSÉ PAR iTECHLOUNGE",
     product: "Produit",
     resources: "Ressources",

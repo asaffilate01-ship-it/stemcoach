@@ -29,6 +29,8 @@ export function Footer() {
   };
 
   return (
+    <>
+    <p className="border-t border-border/30 px-4 py-6 pb-24 text-center text-xs text-muted-foreground lg:hidden">{t("footer.educationBrand")}</p>
     <footer className="hidden border-t border-border/30 bg-muted/10 py-14 lg:block">
       <div className="container mx-auto px-4">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
@@ -89,6 +91,7 @@ export function Footer() {
               <Heart className="h-3 w-3 text-destructive fill-destructive" />
               {t("footer.copyrightSuffix")}
             </p>
+            <p className="text-xs text-muted-foreground">{t("footer.educationBrand")}</p>
             <p className="text-[10px] font-semibold tracking-[0.2em] text-muted-foreground/50 uppercase">
               {t("footer.poweredBy")}
             </p>
@@ -108,5 +111,6 @@ export function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

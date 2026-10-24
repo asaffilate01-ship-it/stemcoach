@@ -1094,6 +1094,7 @@ const de = {
   footer: {
     copyright: "© {{year}} STEMCoach — Virtuelles Nachhilfezentrum. Gemacht mit",
     copyrightSuffix: "für Schüler überall.",
+    educationBrand: "STEMCoach ist eine Marke von iTech Education Ltd.",
     poweredBy: "BETRIEBEN VON iTECHLOUNGE",
     product: "Produkt",
     resources: "Ressourcen",

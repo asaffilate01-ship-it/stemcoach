@@ -1102,6 +1102,7 @@ const en = {
   footer: {
     copyright: "© {{year}} STEMCoach — Virtual Tuition Centre. Made with",
     copyrightSuffix: "for students everywhere.",
+    educationBrand: "STEMCoach is a brand of iTech Education Ltd.",
     poweredBy: "POWERED BY iTECHLOUNGE",
     product: "Product",
     resources: "Resources",

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { supportTicketSchema } from "@/lib/supportTicketSchema";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -36,13 +36,7 @@ export default function Support() {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<TicketForm>({
-    resolver: zodResolver(z.object({
-      name: z.string().min(2, t("support.validation.name")),
-      email: z.string().email(t("support.validation.email")),
-      category: z.string().min(1, t("support.validation.category")),
-      subject: z.string().min(5, t("support.validation.subject")),
-      message: z.string().min(20, t("support.validation.message")),
-    })),
+    resolver: zodResolver(supportTicketSchema(key => t(key))),
     defaultValues: {
       name: "",
       email: user?.email || "",
