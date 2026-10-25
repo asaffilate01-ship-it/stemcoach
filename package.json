@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
     "test:e2e": "playwright test",
     "knowledge:preview": "node scripts/sync-omniqora-learning.mjs --dry-run",
     "knowledge:sync": "node scripts/sync-omniqora-learning.mjs --apply",

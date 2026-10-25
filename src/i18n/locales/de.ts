@@ -837,6 +837,7 @@ const de = {
     noLearners: "Dieser Klasse sind noch keine Lernenden beigetreten.",
     assignedTitle: "Zugewiesene Lernpfade",
     loading: "Lernpfade werden geladen…",
+    noLessons: "Für diesen Lernpfad sind noch keine Lektionen verfügbar. Bitte kontaktiere deine Lehrkraft.",
     loadFailed: "Lernpfade konnten nicht geladen werden. Bitte versuche es erneut.",
     due: "Fällig am {{date}}",
     overdue: "Überfällig — {{date}}",
