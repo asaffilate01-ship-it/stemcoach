@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "knowledge:preview": "node scripts/sync-omniqora-learning.mjs --dry-run",
     "knowledge:sync": "node scripts/sync-omniqora-learning.mjs --apply",
-    "release:preflight": "npm run typecheck && npm run lint -- --max-warnings 30 && npm test && npm run build && npm run test:e2e"
+    "release:preflight": "npm run typecheck && npm run lint -- --max-warnings 30 && npm test && npm run build && npm run test:e2e",
+    "test:tuition-db": "node scripts/test-tuition.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
@@ -77,6 +78,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/typography": "^0.5.16",

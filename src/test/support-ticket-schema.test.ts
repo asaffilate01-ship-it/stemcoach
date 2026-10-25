@@ -7,7 +7,7 @@ describe("Support form resolver compatibility", () => {
   it("returns translated field errors without throwing for invalid input", async () => {
     const result = await resolve({name:"",email:"wrong",category:"",subject:"",message:""}, undefined, options);
     expect(Object.keys(result.errors).sort()).toEqual(["category","email","message","name","subject"]);
-    expect("email" in result.errors ? result.errors.email?.message : undefined).toBe("translated:support.validation.email");
+    expect(("email" in result.errors ? result.errors.email?.message : undefined)).toBe("translated:support.validation.email");
     expect(result.values).toEqual({});
   });
   it("preserves valid ticket fields", async () => {
