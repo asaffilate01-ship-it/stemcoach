@@ -18,7 +18,7 @@ function csvCell(value: unknown): string {
   let cell = String(value ?? "");
   // Prevent spreadsheet-formula execution when class names are exported.
   if (/^[=+\-@\t\r]/.test(cell)) cell = "'" + cell;
-  return '"' + cell.replaceAll('"', '""') + '"';
+  return '"' + cell.replace(/"/g, '""') + '"';
 }
 
 export function InstitutionClassReports({ tenantId }: { tenantId: string }) {

@@ -20,43 +20,57 @@ export function StudentLearningPaths({ classes, userId }: StudentLearningPathsPr
   const classNames = useMemo(() => new Map(classes.map((classroom) => [classroom.id, classroom.name])), [classes]);
   const tutorialById = useMemo(() => new Map(tutorials.map((tutorial) => [tutorial.id, tutorial])), []);
 
-  const { data: paths = [], isLoading, error } = useQuery({
+  const pathsQuery = useQuery({
     queryKey: ["student-learning-paths", userId, classIds],
     queryFn: async () => {
-      const { data, error: queryError } = await (supabase as any).from("class_learning_paths").select("*").in("class_id", classIds).order("due_date", { ascending: true, nullsFirst: false });
+      const { data, error: queryError } = await supabase.from("class_learning_paths").select("*").in("class_id", classIds).order("due_date", { ascending: true, nullsFirst: false });
       if (queryError) throw queryError;
       return data;
     },
-    enabled: classIds.length > 0,
+    enabled: Boolean(userId) && classIds.length > 0,
   });
 
-  const { data: items = [] } = useQuery({
-    queryKey: ["student-learning-path-items", paths.map((path) => path.id)],
+  const paths = pathsQuery.data ?? [];
+
+  const itemsQuery = useQuery({
+    queryKey: ["student-learning-path-items", userId, paths.map((path) => path.id)],
     queryFn: async () => {
-      const { data, error: queryError } = await (supabase as any).from("class_learning_path_items").select("*").in("path_id", paths.map((path) => path.id)).order("position");
+      const { data, error: queryError } = await supabase.from("class_learning_path_items").select("*").in("path_id", paths.map((path) => path.id)).order("position");
       if (queryError) throw queryError;
       return data;
     },
-    enabled: paths.length > 0,
+    enabled: Boolean(userId) && paths.length > 0,
   });
+
+  const items = itemsQuery.data ?? [];
 
   const tutorialIds: string[] = Array.from(
     new Set<string>(items.map((item) => String(item.tutorial_id))),
   );
-  const { data: progress = [] } = useQuery({
+  const progressQuery = useQuery({
     queryKey: ["student-learning-path-tutorial-progress", userId, tutorialIds],
     queryFn: async () => {
-      const { data, error: queryError } = await supabase.from("user_tutorial_progress").select("tutorial_id, completed_at, last_opened_at").in("tutorial_id", tutorialIds);
+      const { data, error: queryError } = await supabase.from("user_tutorial_progress").select("tutorial_id, completed_at, last_opened_at").eq("user_id", userId).in("tutorial_id", tutorialIds);
       if (queryError) throw queryError;
       return data;
     },
-    enabled: tutorialIds.length > 0,
+    enabled: Boolean(userId) && tutorialIds.length > 0,
   });
 
+  const progress = progressQuery.data ?? [];
   const completedIds = new Set(progress.filter((row) => row.completed_at).map((row) => row.tutorial_id));
 
-  if (isLoading) return <div className="mb-8 text-sm text-muted-foreground">{t("learningPaths.loading")}</div>;
-  if (error) return <div className="mb-8 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">{t("learningPaths.loadFailed")}</div>;
+  if (!userId || classIds.length === 0) return null;
+  const queries = [pathsQuery, ...(paths.length ? [itemsQuery] : []), ...(tutorialIds.length ? [progressQuery] : [])];
+  if (queries.some((query) => query.isError)) return (
+    <div role="alert" className="mb-8 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+      <p>{t("learningPaths.loadFailed")}</p>
+      <Button variant="outline" size="sm" className="mt-3" disabled={queries.some((query) => query.isFetching)} onClick={() => {
+        void Promise.all(queries.filter((query) => query.isError).map((query) => query.refetch()));
+      }}>{t("common.retry")}</Button>
+    </div>
+  );
+  if (queries.some((query) => query.isPending)) return <div role="status" className="mb-8 text-sm text-muted-foreground">{t("learningPaths.loading")}</div>;
   if (paths.length === 0) return null;
 
   return (
@@ -93,7 +107,7 @@ export function StudentLearningPaths({ classes, userId }: StudentLearningPathsPr
                   );
                 })}
               </ol>
-              {nextItem ? <Button size="sm" onClick={() => navigate(`/tutorials?tutorial=${encodeURIComponent(nextItem.tutorial_id)}&path=${encodeURIComponent(path.id)}`)} className="mt-4 gap-1.5 rounded-xl"><ListChecks className="h-3.5 w-3.5" />{t(completedCount > 0 ? "learningPaths.continue" : "learningPaths.start")}<ArrowRight className="h-3.5 w-3.5" /></Button> : <p className="mt-4 text-xs font-semibold text-success">{t("learningPaths.complete")}</p>}
+              {nextItem ? <Button size="sm" onClick={() => navigate(`/tutorials?tutorial=${encodeURIComponent(nextItem.tutorial_id)}&path=${encodeURIComponent(path.id)}`)} className="mt-4 gap-1.5 rounded-xl"><ListChecks className="h-3.5 w-3.5" />{t(completedCount > 0 ? "learningPaths.continue" : "learningPaths.start")}<ArrowRight className="h-3.5 w-3.5" /></Button> : isComplete ? <p className="mt-4 text-xs font-semibold text-success">{t("learningPaths.complete")}</p> : <p className="mt-4 text-xs text-muted-foreground">{t("learningPaths.noLessons")}</p>}
             </article>
           );
         })}

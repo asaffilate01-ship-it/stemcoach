@@ -837,6 +837,7 @@ const en = {
     noLearners: "No learners have joined this class yet.",
     assignedTitle: "Assigned learning paths",
     loading: "Loading learning paths…",
+    noLessons: "No lessons are available in this path yet. Please contact your teacher.",
     loadFailed: "Learning paths could not be loaded. Please try again.",
     due: "Due {{date}}",
     overdue: "Overdue — {{date}}",

@@ -837,6 +837,7 @@ const fr = {
     noLearners: "Aucun élève n’a encore rejoint cette classe.",
     assignedTitle: "Parcours attribués",
     loading: "Chargement des parcours…",
+    noLessons: "Aucune leçon n’est encore disponible dans ce parcours. Contactez votre enseignant.",
     loadFailed: "Impossible de charger les parcours. Veuillez réessayer.",
     due: "À rendre le {{date}}",
     overdue: "En retard — {{date}}",
