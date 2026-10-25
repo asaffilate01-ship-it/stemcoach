@@ -1,3 +1,4 @@
+import TuitionWorkspace from '@/features/tuition/TuitionWorkspace';
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -101,6 +102,7 @@ const App = () => (
               <div className="pb-16 lg:pb-0">
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
+<Route path="/learning-plan" element={<TuitionWorkspace />} />
                     {/* Public landing */}
                     <Route path="/" element={<Pub><Index /></Pub>} />
                     <Route path="/home" element={<Pub><Index /></Pub>} />

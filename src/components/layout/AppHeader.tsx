@@ -106,6 +106,7 @@ function LanguageSelector() {
 }
 
 const navItems: NavItem[] = [
+  { to: "/learning-plan", label: "Learning plans", icon: BookOpen, roles: ["student", "teacher", "parent", "admin"], group: "study" },
   { to: "/", labelKey: "nav.home", label: "Home", icon: BookOpen, variant: "primary" },
   { to: "/subjects", labelKey: "nav.subjects", label: "Subjects", icon: GraduationCap, variant: "success" },
   { to: "/mock-exam", labelKey: "nav.exam", label: "Exam", icon: Trophy, variant: "warning" },
