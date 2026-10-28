@@ -67,7 +67,7 @@ export function revisionPriorities(
 ): RevisionPriority[] {
   const cutoff = now.getTime();
   if (!Number.isFinite(cutoff)) return [];
-  return canonicalRows(rows)
+  const ranked = canonicalRows(rows)
     .map((row) => ({
       subject: row.subject,
       topic: row.topic,
@@ -80,8 +80,14 @@ export function revisionPriorities(
     }))
     .sort((a, b) => Number(b.due) - Number(a.due) ||
       a.mastery - b.mastery || a.attempts - b.attempts ||
-      a.subject.localeCompare(b.subject) || a.topic.localeCompare(b.topic))
-    .slice(0, Math.max(0, Math.min(10, Math.floor(limit))));
+      a.subject.localeCompare(b.subject) || a.topic.localeCompare(b.topic));
+  const seen = new Set<string>();
+  return ranked.filter((row) => {
+    const key = JSON.stringify([row.subject, row.topic]);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, Math.max(0, Math.min(10, Math.floor(limit))));
 }
 
 /**

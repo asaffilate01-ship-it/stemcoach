@@ -38,6 +38,7 @@ export default function QAClinic() {
   const [level, setLevel] = useState("all");
   const [reviewFilter, setReviewFilter] = useState<"all" | "due" | "missed" | "saved">("all");
   const [search, setSearch] = useState("");
+  const [reviewTime, setReviewTime] = useState(() => Date.now());
   const [displayLimit, setDisplayLimit] = useState(PAGE_SIZE);
   const [question, setQuestion] = useState("");
   const [askSubject, setAskSubject] = useState("mathematics");
@@ -58,6 +59,18 @@ export default function QAClinic() {
     try { return parseReviewHistory(localStorage.getItem(QA_HISTORY_KEY), existingQuestionIds); }
     catch { return {}; }
   });
+
+  useEffect(() => {
+    const refresh = () => setReviewTime(Date.now());
+    const timer = window.setInterval(refresh, 60_000);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -90,12 +103,12 @@ export default function QAClinic() {
       (level === "all" || entry.level === level) &&
       (reviewFilter === "all" ||
         (reviewFilter === "saved" && savedIds.includes(entry.id)) ||
-        (reviewFilter === "due" && Boolean(history[entry.id]?.attempts) && history[entry.id].dueAt <= Date.now()) ||
+        (reviewFilter === "due" && Boolean(history[entry.id]?.attempts) && history[entry.id].dueAt <= reviewTime) ||
         (reviewFilter === "missed" && (history[entry.id]?.incorrectFirst || 0) > 0)) &&
       (!phrase || [entry.question, entry.topic, entry.explanation, entry.subject, entry.hint]
         .some((text) => text.toLocaleLowerCase().includes(phrase))),
     );
-  }, [subject, format, level, search, history, reviewFilter, savedIds]);
+  }, [subject, format, level, search, history, reviewFilter, savedIds, reviewTime]);
 
   const activeChallenge = challengeIds.length > 0;
   const challengeCompleted = activeChallenge && (challengeIndex >= challengeIds.length ||
@@ -107,7 +120,7 @@ export default function QAClinic() {
   const attemptedCount = challengeIds.filter((id) => id in firstAttempts).length;
   const firstTryCorrect = challengeIds.filter((id) => firstAttempts[id] === true).length;
   const masteredCount = challengeIds.filter((id) => mastered[id] === true).length;
-  const reviewSummary = useMemo(() => getReviewSummary(filtered, history), [filtered, history]);
+  const reviewSummary = useMemo(() => getReviewSummary(filtered, history, reviewTime), [filtered, history, reviewTime]);
 
   const startChallenge = (kind: ChallengeMode = "mixed") => {
     const selected = buildReviewQueue(filtered, history, CHALLENGE_LENGTH,
@@ -138,7 +151,9 @@ export default function QAClinic() {
   };
 
   const recordAttempt = (id: string, correct: boolean, firstAttempt: boolean) => {
-    setHistory((previous) => recordReviewAttempt(previous, id, correct, firstAttempt, Date.now()));
+    const now = Date.now();
+    setReviewTime(now);
+    setHistory((previous) => recordReviewAttempt(previous, id, correct, firstAttempt, now));
     if (correct) setMastered((previous) => ({ ...previous, [id]: true }));
     if (firstAttempt) {
       setFirstAttempts((previous) => id in previous ? previous : { ...previous, [id]: correct });
@@ -215,7 +230,13 @@ export default function QAClinic() {
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{t("qa.libraryDescription")}</p>
             </div>
-            <span className="text-sm text-muted-foreground">{t("qa.results", { count: filtered.length })}</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span role="status" className="text-sm text-muted-foreground">{t("qa.results", { count: filtered.length })}</span>
+              <Button type="button" variant="outline" disabled={subject === "all" && format === "all" && level === "all" && reviewFilter === "all" && !search}
+                onClick={() => changeFilter(() => { setSubject("all"); setFormat("all"); setLevel("all"); setReviewFilter("all"); setSearch(""); })}>
+                {t("qa.clearFilters")}
+              </Button>
+            </div>
           </div>
 
           <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
