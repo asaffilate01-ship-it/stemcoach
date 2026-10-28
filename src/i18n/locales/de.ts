@@ -1,6 +1,8 @@
 const de = {
   // ── Nav & Layout ──
   nav: {
+    mobileNavigation: "Mobile Navigation",
+    skipToContent: "Zum Inhalt springen",
     qaClinic: "Fragen & Antworten",
     home: "Startseite",
     subjects: "Fächer",
@@ -65,6 +67,7 @@ const de = {
     "relatedConcepts": "Verwandte Lernbegriffe",
     "sourceExcerpts": "Zitierte Lernauszüge",
     "openCitedLesson": "Zitiertes Tutorial öffnen",
+    "clearFilters": "Filter zurücksetzen",
     "reviewFilterLabel": "Wiederholungsfilter",
     "reviewFilters": {"all":"Alle Fragen","due":"Jetzt wiederholen","missed":"Früher falsch beantwortet","saved":"Gespeicherte Fragen"},
     "saveQuestion": "Frage speichern",

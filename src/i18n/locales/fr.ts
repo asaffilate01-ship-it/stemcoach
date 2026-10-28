@@ -1,6 +1,8 @@
 const fr = {
   // ── Nav & Layout ──
   nav: {
+    mobileNavigation: "Navigation mobile",
+    skipToContent: "Aller au contenu",
     qaClinic: "Questions-réponses",
     home: "Accueil",
     subjects: "Matières",
@@ -65,6 +67,7 @@ const fr = {
     "relatedConcepts": "Notions liées",
     "sourceExcerpts": "Extraits des sources",
     "openCitedLesson": "Ouvrir le cours cité",
+    "clearFilters": "Effacer les filtres",
     "reviewFilterLabel": "Filtre de révision",
     "reviewFilters": {"all":"Toutes les questions","due":"À réviser maintenant","missed":"Erreurs précédentes","saved":"Questions enregistrées"},
     "saveQuestion": "Enregistrer la question",

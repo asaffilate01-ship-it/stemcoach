@@ -17,6 +17,12 @@ export function normaliseWrittenAnswer(value: string): string {
   return value.normalize("NFKC").trim().replace(/\s+/g, " ").replace(/[.!?]+$/, "").toLocaleLowerCase();
 }
 
+function parseDecimal(value: string): number {
+  const text = value.trim().replace(",", ".");
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(text)) return NaN;
+  return Number(text);
+}
+
 export function hasResponse(question: TutorialCheckpoint, response: QuestionResponse): boolean {
   switch (getQuestionFormat(question)) {
     case "multiple":
@@ -49,10 +55,11 @@ export function isCorrectResponse(question: TutorialCheckpoint, response: Questi
         && expected.every((option) => response.choices.includes(option));
     }
     case "numeric": {
-      const answer = Number(response.freeText.trim().replace(",", "."));
-      const expected = Number(question.answer);
-      return Number.isFinite(answer) && Number.isFinite(expected)
-        && Math.abs(answer - expected) <= (question.tolerance || 0) + 1e-9;
+      const answer = parseDecimal(response.freeText);
+      const expected = parseDecimal(question.answer);
+      const tolerance = question.tolerance ?? 0;
+      return Number.isFinite(answer) && Number.isFinite(expected) && Number.isFinite(tolerance) && tolerance >= 0
+        && Math.abs(answer - expected) <= tolerance + 1e-9;
     }
     case "short-text":
       return [question.answer, ...(question.acceptedAnswers || [])]
@@ -109,7 +116,7 @@ export function inspectQuestion(question: TutorialCheckpoint): string[] {
         new Set(answers).size !== answers.length || answers.some((answer) => !question.options.includes(answer)))
       issues.push("multiple-answer key invalid");
   }
-  if (format === "numeric" && (!Number.isFinite(Number(question.answer)) || (question.tolerance || 0) < 0))
+  if (format === "numeric" && (!Number.isFinite(parseDecimal(question.answer)) || !Number.isFinite(question.tolerance ?? 0) || (question.tolerance ?? 0) < 0))
     issues.push("numeric answer invalid");
   if (format === "short-text" && question.answer.trim().length < 2) issues.push("short answer empty");
   if (format === "ordering") {

@@ -1,6 +1,8 @@
 const en = {
   // ── Nav & Layout ──
   nav: {
+    mobileNavigation: "Mobile navigation",
+    skipToContent: "Skip to content",
     qaClinic: "Q&A Clinic",
     home: "Home",
     subjects: "Subjects",
@@ -65,6 +67,7 @@ const en = {
     "relatedConcepts": "Related lesson concepts",
     "sourceExcerpts": "Cited lesson excerpts",
     "openCitedLesson": "Open cited lesson",
+    "clearFilters": "Clear filters",
     "reviewFilterLabel": "Review focus",
     "reviewFilters": {"all":"All questions","due":"Due for review","missed":"Previously missed","saved":"Saved questions"},
     "saveQuestion": "Save question",

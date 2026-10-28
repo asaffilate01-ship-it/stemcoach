@@ -99,7 +99,7 @@ const App = () => (
               <SessionGuard />
               <SkipToContent />
               <ScrollToTop />
-              <div className="pb-16 lg:pb-0">
+              <div id="app-content" className="pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
 <Route path="/learning-plan" element={<TuitionWorkspace />} />
