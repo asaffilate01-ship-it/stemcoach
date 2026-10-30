@@ -12,9 +12,9 @@ describe("deeper tutorial and Q&A bank", () => {
   it("contains 28 new lessons and 112 new questions with all 14 subjects represented twice", () => {
     expect(deepQAExpansion).toHaveLength(28);
     expect(tutorials).toHaveLength(99);
-    expect(qaEntries).toHaveLength(328);
+    expect(qaEntries).toHaveLength(331);
     expect(new Set(tutorials.map((t) => t.id)).size).toBe(99);
-    expect(new Set(qaEntries.map((q) => q.id)).size).toBe(328);
+    expect(new Set(qaEntries.map((q) => q.id)).size).toBe(331);
     expect(new Set(deepQAExpansion.map((t) => t.subject)).size).toBe(14);
     for (const subject of new Set(deepQAExpansion.map((t) => t.subject)))
       expect(deepQAExpansion.filter((t) => t.subject === subject)).toHaveLength(2);

@@ -18,7 +18,7 @@ describe("expanded STEMCoach Question & Answer clinic", () => {
     expect(nextQAExpansion).toHaveLength(14);
     expect(stemExpansion.every((lesson) => lesson.practice?.length === 3)).toBe(true);
     expect(qaEntries).toHaveLength(expected);
-    expect(qaEntries).toHaveLength(328);
+    expect(qaEntries).toHaveLength(331);
     expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(qaEntries.length);
     expect(new Set(tutorials.map((entry) => entry.id)).size).toBe(tutorials.length);
     expect(new Set(qaEntries.map((entry) => entry.subject))).toEqual(new Set(subjects.map((subject) => subject.id)));

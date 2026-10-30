@@ -1,3 +1,4 @@
+import { numericEquivalent } from "../_shared/assessment.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
@@ -21,14 +22,7 @@ function answersMatch(student: unknown, expected: unknown, numerical: boolean): 
   if (!left || !right) return false;
   if (!numerical) return left === right;
 
-  const pattern = /^\s*([-+]?\d*\.?\d+(?:e[-+]?\d+)?)\s*(.*)$/i;
-  const actualMatch = left.match(pattern);
-  const targetMatch = right.match(pattern);
-  if (!actualMatch || !targetMatch) return left === right;
-  const actual = Number(actualMatch[1]);
-  const target = Number(targetMatch[1]);
-  const tolerance = Math.max(1e-9, Math.abs(target) * 1e-6);
-  return Number.isFinite(actual) && Math.abs(actual - target) <= tolerance && normalize(actualMatch[2]) === normalize(targetMatch[2]);
+  return numericEquivalent(String(student), String(expected));
 }
 
 serve(async (req) => {
@@ -99,7 +93,10 @@ serve(async (req) => {
           .select("id, questions!inner(subject)", { count: "exact", head: true })
           .eq("user_id", user.id).eq("questions.subject", question.subject);
         if (countError) throw countError;
-        if ((count || 0) >= FREE_QUESTIONS_PER_SUBJECT) throw new HttpError(403, "Free question allowance exhausted for this subject");
+        const { count: provisionalCount, error: receiptError } = await admin.from("provisional_feedback_receipts")
+          .select("fingerprint", { count: "exact", head: true }).eq("user_id", user.id).eq("subject", question.subject);
+        if (receiptError) throw receiptError;
+        if ((count || 0) + (provisionalCount || 0) >= FREE_QUESTIONS_PER_SUBJECT) throw new HttpError(403, "Free question allowance exhausted for this subject");
       }
     }
 

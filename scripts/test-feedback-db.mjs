@@ -1,0 +1,27 @@
+import { PGlite } from '@electric-sql/pglite';
+import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+const db = new PGlite();
+await db.exec(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS;
+CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY);
+CREATE TABLE public.questions(id uuid PRIMARY KEY,subject text,review_status text);
+CREATE TABLE public.attempts(user_id uuid,question_id uuid);
+CREATE TABLE public.user_quotas(user_id uuid PRIMARY KEY,total_questions integer,used_questions integer,subjects text[]);
+GRANT USAGE ON SCHEMA public,auth TO service_role;
+GRANT SELECT,UPDATE ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT SELECT ON auth.users TO service_role;`);
+await db.exec(readFileSync('supabase/migrations/20261012193000_coach_cost_aware_reuse.sql','utf8'));
+const user='00000000-0000-0000-0000-000000000001', paid='00000000-0000-0000-0000-000000000002', question='00000000-0000-0000-0000-000000000003';
+await db.query('INSERT INTO auth.users VALUES ($1),($2)',[user,paid]);
+await db.query("INSERT INTO public.questions VALUES ($1,'maths','published')",[question]);
+await db.query("INSERT INTO public.user_quotas VALUES ($1,1,0,ARRAY['maths'])",[paid]);
+const call=async(u,key)=>{await db.exec('SET ROLE service_role');try{return (await db.query('SELECT public.consume_provisional_feedback($1,$2,$3) AS ok',[u,question,key.repeat(64)])).rows[0].ok;}finally{await db.exec('RESET ROLE');}};
+for(const key of ['a','b','c','d','e']) assert.equal(await call(user,key),true);
+assert.equal(await call(user,'f'),false); assert.equal(await call(user,'a'),true);
+assert.equal(await call(paid,'a'),true); assert.equal(await call(paid,'a'),true); assert.equal(await call(paid,'b'),false);
+assert.equal((await db.query('SELECT used_questions FROM user_quotas WHERE user_id=$1',[paid])).rows[0].used_questions,1);
+assert.equal((await db.query('SELECT count(*)::int AS n FROM attempts')).rows[0].n,0);
+for(const role of ['anon','authenticated']) {await db.exec('SET ROLE '+role);await assert.rejects(()=>db.query('SELECT public.consume_provisional_feedback($1,$2,$3)',[user,question,'f'.repeat(64)]));await assert.rejects(()=>db.query('SELECT * FROM provisional_feedback_receipts'));await db.exec('RESET ROLE');}
+await db.query("UPDATE questions SET review_status='needs_review' WHERE id=$1",[question]);await assert.rejects(()=>call(user,'a'));
+console.log('Feedback DB: free/paid limits, exact retries, no verified attempts, role isolation and publication revocation passed.');
+await db.close();

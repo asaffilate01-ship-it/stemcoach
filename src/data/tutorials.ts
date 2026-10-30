@@ -2,7 +2,7 @@ import { stemExpansion } from "./stemExpansion";
 import { nextQAExpansion } from "./tutorialExpansionNext";
 import { deepQAExpansion } from "./tutorialDeepExpansion";
 
-export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching" | "fill-blanks" | "diagram-label";
+export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching" | "fill-blanks" | "diagram-label" | "expression" | "graph-point" | "multi-step";
 
 export type DiagramKind = "right-triangle" | "cell" | "water-cycle" | "circuit";
 export interface DiagramMarker { id: string; x: number; y: number; answer: string; }
@@ -21,6 +21,9 @@ export interface TutorialCheckpoint {
   acceptedAnswers?: string[];
   /** Absolute numerical tolerance; zero means exact comparison. */
   tolerance?: number;
+  numericRule?: { absoluteTolerance?: number; relativeTolerance?: number; significantFigures?: number };
+  graph?: { xMin: number; xMax: number; yMin: number; yMax: number; answerX: number; answerY: number };
+
   pairs?: Array<{ left: string; right: string }>;
   hint?: string;
   /** Learner-facing fill-in fields. Answer keys are displayed only after reveal. */
@@ -304,3 +307,19 @@ export const tutorials: Tutorial[] = [
   ...nextQAExpansion,
   ...deepQAExpansion,
 ];
+
+// Original formative examples. Independent board-specific academic review is still required.
+const algebra = tutorials.find(item => item.id === "quadratic-equations");
+if (algebra) algebra.practice = [...(algebra.practice || []), {
+  format: "expression", question: "Expand (x + 1)(x + 2). Enter a polynomial in x, using ^ for powers.",
+  options: [], answer: "x^2+3x+2", explanation: "Multiply each term: x² + 2x + x + 2 = x² + 3x + 2. Equivalent polynomial forms are accepted.",
+  hint: "Multiply every term in the first bracket by every term in the second."
+}, {
+  format: "graph-point", question: "On the line y = 2x + 1, plot the point where x = 2.", options: [], answer: "(2, 5)",
+  explanation: "Substitute x = 2: y = 2 × 2 + 1 = 5, so the point is (2, 5).",
+  graph: { xMin: -5, xMax: 5, yMin: -5, yMax: 7, answerX: 2, answerY: 5 },
+}, {
+  format: "multi-step", question: "Solve 2x + 3 = 11. Complete each step to show your reasoning.", options: [], answer: "4",
+  explanation: "Subtract 3 from each side to get 2x = 8. Divide by 2 to get x = 4. Substitute back: 2 × 4 + 3 = 11.",
+  blanks: [{ id: "subtract", prompt: "After subtracting 3, 2x equals:", answer: "8" }, { id: "divide", prompt: "After dividing by 2, x equals:", answer: "4" }, { id: "check", prompt: "Substituting x gives 2x + 3 equal to:", answer: "11" }]
+}];

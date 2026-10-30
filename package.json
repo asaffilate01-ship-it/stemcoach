@@ -16,11 +16,13 @@
     "knowledge:preview": "node scripts/sync-omniqora-learning.mjs --dry-run",
     "knowledge:sync": "node scripts/sync-omniqora-learning.mjs --apply",
     "release:preflight": "npm run typecheck && npm run lint -- --max-warnings 30 && npm test && npm run build && npm run test:e2e",
-    "test:tuition-db": "node scripts/test-tuition.mjs"
+    "test:tuition-db": "node scripts/test-tuition.mjs",
+    "test:feedback-db": "node scripts/test-feedback-db.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
     "@capacitor/core": "^8.5.1",
+    "@cortex-js/compute-engine": "0.30.2",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -74,10 +76,12 @@
     "recharts": "^3.8.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
+    "ts-fsrs": "6.0.0",
     "vaul": "^0.9.9",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@electric-sql/pglite": "0.3.14",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.57.0",

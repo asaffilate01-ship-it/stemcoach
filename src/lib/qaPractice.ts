@@ -1,3 +1,4 @@
+import { readCard, scheduleReview, type StoredCard } from "./reviewScheduler";
 /** Private-to-this-device revision metadata: no typed answers or question text stored. */
 export const QA_HISTORY_KEY = "stemcoach:qa-review-v1";
 export const QA_BOOKMARKS_KEY = "stemcoach:qa-bookmarks-v1";
@@ -9,6 +10,7 @@ export interface QuestionHistory {
   firstTryStreak: number;
   lastAt: number;
   dueAt: number;
+  memory?: StoredCard;
 }
 export type ReviewHistory = Record<string, QuestionHistory>;
 
@@ -51,6 +53,7 @@ export function parseReviewHistory(raw: string | null, validIds: ReadonlySet<str
         firstTryStreak: validCount(row.firstTryStreak),
         lastAt,
         dueAt,
+        memory: readCard(row.memory),
       };
     }
     return history;
@@ -92,9 +95,10 @@ export function recordReviewAttempt(
     attempts: 0, correctFirst: 0, incorrectFirst: 0, firstTryStreak: 0, lastAt: 0, dueAt: 0,
   };
   const streak = firstAttempt ? (correct ? existing.firstTryStreak + 1 : 0) : existing.firstTryStreak;
+  const memory = firstAttempt ? scheduleReview(existing.memory, correct, now) : existing.memory;
   const dueAt = firstAttempt
     ? correct
-      ? now + Math.min(14, streak === 1 ? 1 : streak === 2 ? 3 : 7) * DAY
+      ? memory!.due
       : now
     : correct
       ? Math.min(existing.dueAt || now + DAY, now + DAY)
@@ -108,6 +112,7 @@ export function recordReviewAttempt(
       firstTryStreak: streak,
       lastAt: now,
       dueAt,
+      memory,
     },
   };
 }

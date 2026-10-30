@@ -54,6 +54,15 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    learningFlow: "Votre parcours",
+    todayReview: "Révision du jour",
+    learnConcept: "Comprendre la notion",
+    verifiedProgress: "Progrès vérifiés",
+
+    graphInstructions: "Touchez le graphique ou saisissez les deux coordonnées. La saisie au clavier est toujours disponible.",
+    graphTitle: "Plan de coordonnées",
+    partialCredit: "Étapes correctes : {{earned}} sur {{total}}",
+
     "exploreEvidence": "Explorer avec Omniqora Intelligence",
     "signInEvidence": "Se connecter pour consulter les sources",
     "evidenceModes": {"rag":"Recherche de sources (RAG)","hybrid":"Sources et graphe de notions","graph":"Graphe de notions (GraphRAG)"},
@@ -313,6 +322,8 @@ const fr = {
   },
   // ── Practice ──
   practice: {
+    provisionalFeedback: "Retour provisoire de l’IA",
+    provisionalNotice: "Ce retour d’entraînement n’est pas une note validée. Il ne donne pas de points XP et ne modifie pas la maîtrise.",
     title: "Entraînement",
     question: "Question",
     of: "sur",

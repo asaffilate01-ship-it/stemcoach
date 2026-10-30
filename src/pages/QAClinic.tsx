@@ -17,7 +17,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { normalizeLanguage } from "@/i18n/language";
 
 const questionFormats: TutorialQuestionFormat[] = [
-  "single", "multiple", "true-false", "numeric", "short-text", "ordering", "matching", "fill-blanks", "diagram-label",
+  "single", "multiple", "true-false", "numeric", "short-text", "ordering", "matching", "fill-blanks", "diagram-label", "expression", "graph-point", "multi-step",
 ];
 const PAGE_SIZE = 16;
 const CHALLENGE_LENGTH = 10;
@@ -183,6 +183,11 @@ export default function QAClinic() {
           </div>
           <h1 className="stem-heading text-3xl font-bold md:text-4xl">{t("qa.title")}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">{t("qa.intro")}</p>
+          <nav aria-label={t("qa.learningFlow")} className="mt-5 grid gap-2 sm:grid-cols-3">
+            <Button variant="outline" onClick={() => { changeFilter(() => setReviewFilter("due")); document.getElementById("qa-library")?.scrollIntoView({ block: "start" }); }}>{t("qa.todayReview")}</Button>
+            <Button variant="outline" onClick={() => navigate("/tutorials")}>{t("qa.learnConcept")}</Button>
+            <Button variant="outline" onClick={() => navigate("/mastery")}>{t("qa.verifiedProgress")}</Button>
+          </nav>
           <div className="mt-5 flex flex-wrap gap-3 text-xs font-medium text-muted-foreground">
             <span className="rounded-xl bg-muted px-3 py-2">{t("qa.questionCount", { count: qaEntries.length })}</span>
             <span className="rounded-xl bg-muted px-3 py-2">{t("qa.subjectCount", { count: subjects.length })}</span>
