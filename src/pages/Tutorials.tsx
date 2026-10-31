@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { BookOpen, CheckCircle2, Clock, Cloud, Loader2, MessageCircle, PlayCircle, Search } from "lucide-react";
+import { BookOpen, CheckCircle2, Clock, Cloud, Flag, Loader2, MessageCircle, PlayCircle, Search } from "lucide-react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { tutorials } from "@/data/tutorials";
+import { contentReportHref } from "@/lib/contentReport";
 import { getMascot } from "@/lib/mascots";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAuth } from "@/hooks/useAuth";
@@ -284,6 +285,10 @@ export default function Tutorials() {
                                 workedExample={tutorial.workedExample}
                                 examTip={tutorial.examTip} commonMistake={tutorial.commonMistake}
                                 onAttempt={(correct) => void answerCheckpoint(tutorial.id, checkpointIndex, correct, checkpoints.length)} />
+                              <Link to={contentReportHref(answerKey, tutorial.id)}
+                                className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground underline-offset-2 hover:text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+                                <Flag className="h-3.5 w-3.5" aria-hidden="true" /> {t("tutorials.reportQuestion")}
+                              </Link>
                             </div>
                           );
                         })}

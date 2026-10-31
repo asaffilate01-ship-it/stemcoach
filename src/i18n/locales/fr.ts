@@ -54,6 +54,7 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    "reportQuestion": "Signaler un problème avec la question",
     "exploreEvidence": "Explorer avec Omniqora Intelligence",
     "signInEvidence": "Se connecter pour consulter les sources",
     "evidenceModes": {"rag":"Recherche de sources (RAG)","hybrid":"Sources et graphe de notions","graph":"Graphe de notions (GraphRAG)"},
@@ -622,6 +623,8 @@ const fr = {
   },
   // ── Support ──
   support: {
+    "contentReportTitle": "Signaler un problème de contenu pédagogique",
+    "contentReportHint": "Expliquez ce qui semble incorrect ou ambigu. Seule la référence de la question est transmise, pas votre réponse.",
     title: "Assistance",
     subtitle: "Nous sommes là pour vous aider",
     name: "Votre nom",
@@ -853,6 +856,7 @@ const fr = {
     complete: "Parcours terminé",
   },
   tutorials: {
+    reportQuestion: "Signaler une erreur dans la question",
     documentTitle: "Tutoriels STEM",
     label: "Apprendre, s'entraîner, vérifier",
     title: "Tutoriels STEM guidés",

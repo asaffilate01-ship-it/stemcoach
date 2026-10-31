@@ -54,6 +54,7 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    "reportQuestion": "Report question issue",
     "exploreEvidence": "Explore with Omniqora Intelligence",
     "signInEvidence": "Sign in for sourced explanations",
     "evidenceModes": {"rag":"Source search (RAG)","hybrid":"Sources + concept graph","graph":"Concept graph (GraphRAG)"},
@@ -622,6 +623,8 @@ const en = {
   },
   // ── Support ──
   support: {
+    "contentReportTitle": "Report a learning content issue",
+    "contentReportHint": "Tell us what seems incorrect or ambiguous. Only the question reference is included—your answer is not shared.",
     title: "Support",
     subtitle: "We're here to help",
     name: "Your Name",
@@ -853,6 +856,7 @@ const en = {
     complete: "Learning path complete",
   },
   tutorials: {
+    reportQuestion: "Report a question issue",
     documentTitle: "STEM Tutorials",
     label: "Learn, practise, check",
     title: "Guided STEM tutorials",
