@@ -54,6 +54,15 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    learningFlow: "Your learning journey",
+    todayReview: "Today’s review",
+    learnConcept: "Learn the concept",
+    verifiedProgress: "Verified progress",
+
+    graphInstructions: "Tap the graph or enter both coordinates below. Keyboard entry is always available.",
+    graphTitle: "Coordinate plane",
+    partialCredit: "Practice steps correct: {{earned}} of {{total}}",
+
     "exploreEvidence": "Explore with Omniqora Intelligence",
     "signInEvidence": "Sign in for sourced explanations",
     "evidenceModes": {"rag":"Source search (RAG)","hybrid":"Sources + concept graph","graph":"Concept graph (GraphRAG)"},
@@ -313,6 +322,8 @@ const en = {
   },
   // ── Practice ──
   practice: {
+    provisionalFeedback: "Provisional AI feedback",
+    provisionalNotice: "This is practice feedback, not a verified grade. It does not award XP or change mastery.",
     title: "Practice",
     question: "Question",
     of: "of",

@@ -14,12 +14,12 @@ describe("Q&A next phase: diagrams, cloze and adaptive review", () => {
     expect(nextQAExpansion).toHaveLength(14);
     expect(new Set(nextQAExpansion.map((lesson) => lesson.subject)).size).toBe(14);
     expect(tutorials).toHaveLength(99);
-    expect(qaEntries).toHaveLength(328);
-    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(328);
+    expect(qaEntries).toHaveLength(331);
+    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(331);
     const formats = new Set(qaEntries.map((entry) => entry.format));
     expect([...formats].sort()).toEqual([
       "single", "multiple", "true-false", "numeric", "short-text",
-      "ordering", "matching", "fill-blanks", "diagram-label",
+      "ordering", "matching", "fill-blanks", "diagram-label", "expression", "graph-point", "multi-step",
     ].sort());
     for (const lesson of nextQAExpansion) {
       expect(lesson.objectives.length).toBeGreaterThanOrEqual(3);
@@ -84,10 +84,12 @@ describe("Q&A next phase: diagrams, cloze and adaptive review", () => {
     expect(correction.q1.attempts).toBe(1);
     const mastered = recordReviewAttempt({}, "q2", true, true, now);
     expect(mastered.q2.correctFirst).toBe(1);
-    expect(mastered.q2.dueAt).toBe(now + 86_400_000);
+    expect(mastered.q2.dueAt).toBe(mastered.q2.memory!.due);
+    expect(mastered.q2.dueAt).toBeGreaterThan(now);
     expect(reviewPriority("q1", correction, now + 4000)).toBeGreaterThan(reviewPriority("q2", mastered, now + 4000));
     const second = recordReviewAttempt(mastered, "q2", true, true, now + 86_400_001);
-    expect(second.q2.dueAt).toBe(now + 86_400_001 + 3 * 86_400_000);
+    expect(second.q2.dueAt).toBe(second.q2.memory!.due);
+    expect(second.q2.memory!.reps).toBe(2);
   });
 
   it("selects unique adaptive questions, varies subjects and preserves optional filters", () => {

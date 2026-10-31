@@ -35,8 +35,25 @@ test("tutorial progress persists and carries lesson context into coaching", asyn
   await dismissCookies(page);
   const quadraticCard = page.getByRole("button").filter({ hasText: "Solving Quadratic Equations" });
   await quadraticCard.click();
-  await page.getByRole("button", { name: /2 and −3/ }).click();
-  await page.getByRole("button", { name: "Check & explain" }).click();
+  // New formative formats require every checkpoint to be correct before mastery.
+  // Scope actions to their checkpoint: the tutorial now has four check buttons.
+  const checks = page.locator("#tutorial-quadratic-equations section div.space-y-5 > div.rounded-xl");
+  await expect(checks).toHaveCount(4);
+
+  await checks.nth(0).getByRole("button", { name: /2 and −3/ }).click();
+  await checks.nth(0).getByRole("button", { name: "Check & explain" }).click();
+
+  await checks.nth(1).getByRole("textbox", { name: "Write a short answer" }).fill("x^2+3x+2");
+  await checks.nth(1).getByRole("button", { name: "Check & explain" }).click();
+
+  await checks.nth(2).getByRole("spinbutton", { name: "X" }).fill("2");
+  await checks.nth(2).getByRole("spinbutton", { name: "Y" }).fill("5");
+  await checks.nth(2).getByRole("button", { name: "Check & explain" }).click();
+
+  await checks.nth(3).getByLabel("After subtracting 3, 2x equals:").fill("8");
+  await checks.nth(3).getByLabel("After dividing by 2, x equals:").fill("4");
+  await checks.nth(3).getByLabel("Substituting x gives 2x + 3 equal to:").fill("11");
+  await checks.nth(3).getByRole("button", { name: "Check & explain" }).click();
   await expect(page.getByText(/1 of \d+ tutorials mastered/i)).toBeVisible();
   await page.reload();
   await expect(page.getByText(/1 of \d+ tutorials mastered/i)).toBeVisible();

@@ -54,6 +54,15 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    learningFlow: "Dein Lernweg",
+    todayReview: "Heutige Wiederholung",
+    learnConcept: "Das Konzept verstehen",
+    verifiedProgress: "Bestätigter Fortschritt",
+
+    graphInstructions: "Tippe auf die Grafik oder gib beide Koordinaten ein. Tastatureingabe ist immer möglich.",
+    graphTitle: "Koordinatensystem",
+    partialCredit: "Richtige Übungsschritte: {{earned}} von {{total}}",
+
     "exploreEvidence": "Mit Omniqora Intelligence Quellen erkunden",
     "signInEvidence": "Anmelden für belegte Erklärungen",
     "evidenceModes": {"rag":"Quellensuche (RAG)","hybrid":"Quellen und Wissensgraph","graph":"Wissensgraph (GraphRAG)"},
@@ -313,6 +322,8 @@ const de = {
   },
   // ── Practice ──
   practice: {
+    provisionalFeedback: "Vorläufiges KI-Feedback",
+    provisionalNotice: "Dies ist Übungsfeedback, keine bestätigte Note. Es vergibt keine XP und verändert den Lernstand nicht.",
     title: "Übung",
     question: "Frage",
     of: "von",

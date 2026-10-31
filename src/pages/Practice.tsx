@@ -322,17 +322,9 @@ export default function Practice() {
         setAiGrading(data.grading);
         setMasteryFeedback(data.mastery || null);
         setShowFeedback(true);
-        const passed = data.grading?.score >= data.grading?.max_marks * 0.6;
-        setLastCorrect(passed);
-        setShowCorrectAnim(true);
-        setMascotCorrect(passed);
-        setShowMascotReaction(true);
-        setTimeout(() => setShowCorrectAnim(false), 2000);
-        setTimeout(() => setShowMascotReaction(false), 3000);
-        setScore((prev) => ({ correct: prev.correct + (passed ? 1 : 0), total: prev.total + 1 }));
-        showXPPopup(data.xp_gained || 0);
-        if (data.stats) fetchStats();
-        incrementCount();
+        // AI feedback is provisional; no success animation, verified score or XP.
+        setLastCorrect(false);
+
       } catch (e: any) {
         toast({ title: t("practice.gradingFailed"), description: e.message, variant: "destructive" });
       } finally {
@@ -927,9 +919,10 @@ export default function Practice() {
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-4 space-y-4">
                 <div className={`rounded-2xl border p-6 ${aiGrading.score >= aiGrading.max_marks * 0.7 ? "bg-emerald-500/5 border-emerald-500/20" : aiGrading.score >= aiGrading.max_marks * 0.4 ? "bg-amber-500/5 border-amber-500/20" : "bg-destructive/5 border-destructive/20"}`}>
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="font-semibold">{t("practice.score")}: {aiGrading.score}/{aiGrading.max_marks}</span>
+                    <span className="font-semibold">{t("practice.provisionalFeedback")}: {aiGrading.score}/{aiGrading.max_marks}</span>
                     <span className="rounded-lg bg-muted/60 px-2.5 py-1 text-xs font-semibold">{Math.round((aiGrading.score / aiGrading.max_marks) * 100)}%</span>
                   </div>
+                  <p className="mb-3 text-sm font-medium">{t("practice.provisionalNotice")}</p>
                   <p className="text-sm leading-relaxed text-muted-foreground">{aiGrading.feedback}</p>
                 </div>
                 {aiGrading.strengths?.length > 0 && (

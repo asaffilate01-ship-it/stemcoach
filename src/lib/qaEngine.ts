@@ -1,3 +1,5 @@
+import { numericEquivalent } from "../../supabase/functions/_shared/assessment";
+import { expressionEquivalent } from "@/lib/mathAssessment";
 import type { TutorialCheckpoint, TutorialQuestionFormat } from "@/data/tutorials";
 
 export interface QuestionResponse {
@@ -27,6 +29,7 @@ export function hasResponse(question: TutorialCheckpoint, response: QuestionResp
   switch (getQuestionFormat(question)) {
     case "multiple":
       return response.choices.length > 0;
+    case "expression":
     case "numeric":
     case "short-text":
       return Boolean(response.freeText.trim());
@@ -36,6 +39,9 @@ export function hasResponse(question: TutorialCheckpoint, response: QuestionResp
         new Set(response.order).size === response.order.length;
     case "matching":
       return Boolean(question.pairs?.length) && question.pairs.every((pair) => Boolean(response.matches[pair.left]));
+    case "graph-point":
+      return Boolean(response.matches.x?.trim() && response.matches.y?.trim());
+    case "multi-step":
     case "fill-blanks":
       return Boolean(question.blanks?.length) && question.blanks.every((blank) => Boolean(response.matches[blank.id]?.trim()));
     case "diagram-label":
@@ -55,12 +61,13 @@ export function isCorrectResponse(question: TutorialCheckpoint, response: Questi
         && expected.every((option) => response.choices.includes(option));
     }
     case "numeric": {
-      const answer = parseDecimal(response.freeText);
-      const expected = parseDecimal(question.answer);
-      const tolerance = question.tolerance ?? 0;
-      return Number.isFinite(answer) && Number.isFinite(expected) && Number.isFinite(tolerance) && tolerance >= 0
-        && Math.abs(answer - expected) <= tolerance + 1e-9;
+      return numericEquivalent(response.freeText, question.answer, question.numericRule ?? { absoluteTolerance: question.tolerance ?? 0, relativeTolerance: 0 });
     }
+    case "expression":
+      return expressionEquivalent(response.freeText, question.answer);
+    case "graph-point":
+      return Boolean(question.graph) && numericEquivalent(response.matches.x, String(question.graph.answerX), { absoluteTolerance: question.tolerance ?? 0, relativeTolerance: 0 }) && numericEquivalent(response.matches.y, String(question.graph.answerY), { absoluteTolerance: question.tolerance ?? 0, relativeTolerance: 0 });
+
     case "short-text":
       return [question.answer, ...(question.acceptedAnswers || [])]
         .map(normaliseWrittenAnswer)
@@ -69,6 +76,7 @@ export function isCorrectResponse(question: TutorialCheckpoint, response: Questi
       return response.order.join("\u0001") === (question.answers || []).join("\u0001");
     case "matching":
       return Boolean(question.pairs?.every((pair) => response.matches[pair.left] === pair.right));
+    case "multi-step":
     case "fill-blanks":
       return Boolean(question.blanks?.every((blank) =>
         [blank.answer, ...(blank.acceptedAnswers || [])]
@@ -88,6 +96,7 @@ export function displayAnswer(question: TutorialCheckpoint): string {
       return (question.answers || []).join(" → ");
     case "matching":
       return (question.pairs || []).map((pair) => pair.left + " → " + pair.right).join("; ");
+    case "multi-step":
     case "fill-blanks":
       return (question.blanks || []).map((blank) => blank.prompt + ": " + blank.answer).join("; ");
     case "diagram-label":
@@ -116,7 +125,7 @@ export function inspectQuestion(question: TutorialCheckpoint): string[] {
         new Set(answers).size !== answers.length || answers.some((answer) => !question.options.includes(answer)))
       issues.push("multiple-answer key invalid");
   }
-  if (format === "numeric" && (!Number.isFinite(parseDecimal(question.answer)) || !Number.isFinite(question.tolerance ?? 0) || (question.tolerance ?? 0) < 0))
+  if (format === "numeric" && (!numericEquivalent(question.answer, question.answer) || !Number.isFinite(question.tolerance ?? 0) || (question.tolerance ?? 0) < 0))
     issues.push("numeric answer invalid");
   if (format === "short-text" && question.answer.trim().length < 2) issues.push("short answer empty");
   if (format === "ordering") {
@@ -132,7 +141,7 @@ export function inspectQuestion(question: TutorialCheckpoint): string[] {
       new Set(pairs.map((pair) => pair.right)).size !== pairs.length ||
       pairs.some((pair) => !question.options.includes(pair.right))) issues.push("matching key invalid");
   }
-  if (format === "fill-blanks") {
+  if (format === "fill-blanks" || format === "multi-step") {
     const blanks = question.blanks || [];
     if (blanks.length < 2 || blanks.length > 5 || question.options.length !== 0 ||
       new Set(blanks.map((blank) => blank.id)).size !== blanks.length ||
@@ -153,9 +162,21 @@ export function inspectQuestion(question: TutorialCheckpoint): string[] {
         !question.options.includes(marker.answer)))
       issues.push("diagram label key invalid");
   }
+  if (format === "expression" && !expressionEquivalent(question.answer, question.answer)) issues.push("invalid expression");
+  if (format === "graph-point") {
+    const g = question.graph;
+    if (!g || !Object.values(g).every(Number.isFinite) || g.xMin >= g.xMax || g.yMin >= g.yMax || g.answerX < g.xMin || g.answerX > g.xMax || g.answerY < g.yMin || g.answerY > g.yMax) issues.push("invalid graph");
+  }
   return issues;
 }
 
 export function emptyResponse(question: TutorialCheckpoint): QuestionResponse {
   return { choice: "", choices: [], freeText: "", order: [...question.options], orderTouched: false, matches: {} };
+}
+
+/** Formative partial credit never contributes to verified server mastery. */
+export function responseCredit(question: TutorialCheckpoint, response: QuestionResponse): { earned: number; total: number } {
+  if (getQuestionFormat(question) !== "multi-step") return { earned: Number(isCorrectResponse(question, response)), total: 1 };
+  const steps = question.blanks || [];
+  return { total: steps.length, earned: steps.filter(step => [step.answer, ...(step.acceptedAnswers || [])].some(answer => normaliseWrittenAnswer(answer) === normaliseWrittenAnswer(response.matches[step.id] || ""))).length };
 }

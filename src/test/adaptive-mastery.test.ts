@@ -27,7 +27,7 @@ describe("adaptive mastery phase", () => {
     expect(migration).toContain("TO service_role");
     expect(migration).toContain("next_review_at");
     expect(checker).toContain('admin.rpc("update_learner_topic_mastery"');
-    expect(essayGrader).toContain('sb.rpc("update_learner_topic_mastery"');
+    expect(essayGrader).not.toContain('sb.rpc("update_learner_topic_mastery"');
   });
 
   it("selects published adaptive questions without returning canonical answers", () => {

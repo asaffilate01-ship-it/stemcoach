@@ -1,3 +1,4 @@
+import { GraphPointInput } from "./GraphPointInput";
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, CheckCircle2, Lightbulb, RotateCcw, Eye, Volume2, VolumeX } from "lucide-react";
 import { DiagramCanvas } from "@/components/qa/DiagramCanvas";
@@ -5,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { TutorialCheckpoint } from "@/data/tutorials";
-import { displayAnswer, emptyResponse, getQuestionFormat, hasResponse, isCorrectResponse } from "@/lib/qaEngine";
+import { displayAnswer, emptyResponse, getQuestionFormat, hasResponse, isCorrectResponse, responseCredit } from "@/lib/qaEngine";
 
 interface Props {
   question: TutorialCheckpoint;
@@ -123,7 +124,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
           })}
         </div>
       )}
-      {(format === "numeric" || format === "short-text") && (
+      {(format === "numeric" || format === "short-text" || format === "expression") && (
         <div>
           <label className="mb-1 block text-xs font-semibold" htmlFor={questionId + "-response"}>
             {t(format === "numeric" ? "qa.answerNumber" : "qa.answerWritten")}
@@ -167,7 +168,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
           ))}
         </div>
       )}
-      {format === "fill-blanks" && (
+      {(format === "fill-blanks" || format === "multi-step") && (
         <div className="space-y-3">
           {(question.blanks || []).map((blank) => (
             <div key={blank.id}>
@@ -182,6 +183,8 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
           ))}
         </div>
       )}
+      {format === "graph-point" && question.graph && <GraphPointInput graph={question.graph} value={response.matches} disabled={revealed} id={questionId}
+        onChange={matches => setResponse(previous => ({ ...previous, matches }))} />}
       {format === "diagram-label" && question.diagram && (
         <div className="space-y-3">
           <DiagramCanvas diagram={question.diagram} description={question.question} />
@@ -222,6 +225,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
             {feedback && <CheckCircle2 className="h-4 w-4" />}
             {t(feedback ? "qa.correct" : "qa.incorrect")}
           </p>}
+          {format === "multi-step" && feedback !== null && <p>{t("qa.partialCredit", responseCredit(question, response))}</p>}
           <p><strong>{t("qa.correctAnswer")}:</strong> {displayAnswer(question)}</p>
           <div><h4 className="mb-1 font-semibold">{t("qa.why")}</h4><p className="whitespace-pre-wrap">{question.explanation}</p></div>
           {workedExample && <div><h4 className="mb-1 font-semibold">{t("qa.workedExample")}</h4><p className="whitespace-pre-wrap">{workedExample}</p></div>}

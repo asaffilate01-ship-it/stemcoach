@@ -34,7 +34,7 @@ const valid = {
 describe("Omniqora Intelligence RAG/GraphRAG source boundary", () => {
   it("keeps the expanded lesson inventory as its only evidence source", () => {
     expect(tutorials.length).toBe(99);
-    expect(qaEntries.length).toBe(328);
+    expect(qaEntries.length).toBe(331);
     expect(new Set(tutorials.map((t) => t.id)).size).toBe(tutorials.length);
     expect(safeLessonHref("triangle-diagram-labelling"))
       .toBe("/tutorials?tutorial=triangle-diagram-labelling");
