@@ -1,14 +1,15 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { getSquadMembers } from "@/lib/mascots";
 
 export function SocialProofBar() {
   const { t } = useTranslation();
+  const prefersReducedMotion = useReducedMotion();
   const tutorCount = new Set(getSquadMembers().map((member) => member.name)).size + 1;
 
   const counters = [
-    { value: "Reviewed", key: "landing.examQuestions" },
-    { value: "Global", key: "landing.curriculaCovered" },
+    { value: t("landing.statValues.guided"), key: "landing.examQuestions" },
+    { value: t("landing.statValues.global"), key: "landing.curriculaCovered" },
     { value: "14", key: "landing.subjects" },
     { value: String(tutorCount), key: "landing.aiMascotTutors" },
   ];
@@ -20,10 +21,10 @@ export function SocialProofBar() {
           {counters.map((counter, i) => (
             <motion.div
               key={counter.key}
-              initial={{ opacity: 0, y: 12 }}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="group text-center"
             >
               <div className="text-2xl font-extrabold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary sm:text-3xl lg:text-4xl">
