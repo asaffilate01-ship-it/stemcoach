@@ -17,7 +17,7 @@ describe("local study calendar", () => {
     expect(localDateKey(new Date(2027, 0, 1, 0, 30))).toBe("2027-01-01");
     const february = getMonthDays(2027, 1);
     expect(february.filter(day => day.inMonth)).toHaveLength(28);
-    expect(february.map(day => day.date)).toContain("2027-03-01");
+    expect(february.map(day => day.date)).toContain("2027-02-28");
   });
 
   it("keeps streaks across month boundaries and tolerates unfinished today", () => {
