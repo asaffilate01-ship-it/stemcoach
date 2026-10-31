@@ -2,6 +2,7 @@
  * Never include submitted answers, student identifiers or AI transcripts.
  */
 const SAFE_ID = /^[a-z0-9][a-z0-9_-]{0,110}$/i;
+const SAFE_QUESTION_ID = /^[a-z0-9][a-z0-9_:-]{0,110}$/i;
 
 export interface ContentReportContext {
   questionId: string;
@@ -9,7 +10,7 @@ export interface ContentReportContext {
 }
 
 function validContentReference(questionId: string, tutorialId: string): boolean {
-  if (!SAFE_ID.test(questionId) || !SAFE_ID.test(tutorialId)) return false;
+  if (!SAFE_QUESTION_ID.test(questionId) || !SAFE_ID.test(tutorialId)) return false;
   const prefix = questionId.startsWith(tutorialId + "-") ? tutorialId + "-" :
     questionId.startsWith(tutorialId + ":") ? tutorialId + ":" : null;
   return Boolean(prefix && /^\d{1,3}$/.test(questionId.slice(prefix.length)));
