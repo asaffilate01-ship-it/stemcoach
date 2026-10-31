@@ -1,15 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { requirePublishedMockExamQuestions, validateMockExamSubmissions } from "../_shared/mockExamSubmission.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-interface Submission {
-  question_id: string;
-  answer: string | null;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -35,11 +31,9 @@ serve(async (req) => {
     );
 
     const body = await req.json();
-    const submissions: Submission[] = Array.isArray(body?.submissions) ? body.submissions.slice(0, 100) : [];
+    const submissions = validateMockExamSubmissions(body?.submissions);
     const examName = typeof body?.exam_name === "string" ? body.exam_name.slice(0, 150) : "Mock Exam";
     const subject = typeof body?.subject === "string" ? body.subject.slice(0, 100) : null;
-
-    if (submissions.length === 0) throw new Error("No submissions provided");
 
     const { data: quota, error: quotaError } = await admin
       .from("user_quotas")
@@ -53,7 +47,7 @@ serve(async (req) => {
       });
     }
 
-    const ids = [...new Set(submissions.map((s) => String(s.question_id)))];
+    const ids = submissions.map((submission) => submission.question_id);
     const { data: questions, error: qErr } = await admin
       .from("questions")
       .select("id, correct_answer, correct_answers, explanation, worked_solution, exam_tip")
@@ -61,21 +55,23 @@ serve(async (req) => {
       .eq("review_status", "published");
     if (qErr) throw qErr;
 
-    const byId = new Map((questions || []).map((q) => [q.id, q]));
+    // A truncated query, unpublished item or invalid answer key must never
+    // produce a partial grade or consume allowance.
+    const byId = requirePublishedMockExamQuestions(submissions, questions);
 
     let score = 0;
     const results = submissions.map((s) => {
-      const q = byId.get(String(s.question_id));
-      const answer = typeof s.answer === "string" ? s.answer : null;
-      const correct = !!q && !!answer && answer.normalize("NFKC").trim().toLowerCase() === q.correct_answer.normalize("NFKC").trim().toLowerCase();
+      const q = byId.get(s.question_id)!;
+      const answer = s.answer;
+      const correct = !!answer && answer.normalize("NFKC").trim().toLowerCase() === q.correct_answer!.normalize("NFKC").trim().toLowerCase();
       if (correct) score++;
       return {
-        question_id: String(s.question_id),
+        question_id: s.question_id,
         answer,
         correct,
-        correct_answer: q?.correct_answer ?? null,
-        explanation: q?.explanation ?? null,
-        worked_solution: q?.worked_solution ?? null,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation,
+        worked_solution: q.worked_solution,
       };
     });
 
@@ -84,7 +80,7 @@ serve(async (req) => {
 
     // Record attempts for answered questions only
     const attempts = results
-      .filter((r) => r.answer !== null && byId.has(r.question_id))
+      .filter((r) => r.answer !== null)
       .map((r) => ({
         user_id: userId,
         question_id: r.question_id,
