@@ -34,7 +34,7 @@ describe("practice keyboard shortcuts", () => {
     const link = document.createElement("a");
     expect(shouldIgnorePracticeShortcut(keyboard(link, "n"))).toBe(true);
     const editor = document.createElement("div");
-    editor.contentEditable = "true";
+    editor.setAttribute("contenteditable", "true");
     const child = document.createElement("span");
     editor.append(child);
     expect(shouldIgnorePracticeShortcut(keyboard(child, "1"))).toBe(true);
