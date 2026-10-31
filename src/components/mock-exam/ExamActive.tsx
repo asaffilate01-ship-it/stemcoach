@@ -57,9 +57,11 @@ export function ExamActive({
       <div className="sticky top-0 z-30 border-b border-border/30 bg-background/70 backdrop-blur-2xl">
         <div className="container mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <div
+            role="timer"
+            aria-label={t("mockExam.timeRemaining")}
             className={`flex items-center gap-2.5 rounded-xl px-4 py-2 text-sm font-mono font-bold transition-all ${
               timeWarning
-                ? "bg-destructive/10 text-destructive ring-1 ring-destructive/20 animate-pulse"
+                ? "bg-destructive/10 text-destructive ring-1 ring-destructive/20 motion-safe:animate-pulse"
                 : "bg-muted/40 ring-1 ring-border/30"
             }`}
           >
@@ -95,7 +97,7 @@ export function ExamActive({
         </div>
 
         {/* Progress bar */}
-        <div className="h-1 w-full bg-border/20">
+        <div role="progressbar" aria-label={t("mockExam.questionsAnswered")} aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={answered} className="h-1 w-full bg-border/20">
           <motion.div
             className="h-full bg-gradient-to-r from-primary to-primary/70"
             animate={{ width: `${progressPct}%` }}
@@ -106,11 +108,14 @@ export function ExamActive({
 
       <main className="container mx-auto max-w-3xl px-4 py-6">
         {/* Question navigator pills */}
-        <div className="mb-6 overflow-x-auto pb-2">
+        <nav aria-label={t("mockExam.questionNavigation", { defaultValue: "Exam question navigation" })} className="mb-6 overflow-x-auto pb-2">
           <div className="flex gap-1.5 min-w-max">
             {questions.map((_, i) => (
               <button
                 key={i}
+                type="button"
+                aria-label={t("mockExam.questionOf", { current: i + 1, total: questions.length })}
+                aria-current={i === currentQ ? "step" : undefined}
                 onClick={() => setCurrentQ(i)}
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
                   i === currentQ
@@ -126,7 +131,7 @@ export function ExamActive({
               </button>
             ))}
           </div>
-        </div>
+        </nav>
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -149,6 +154,8 @@ export function ExamActive({
                   </span>
                 </div>
                 <button
+                  type="button"
+                  aria-pressed={flagged.has(currentQ)}
                   onClick={() =>
                     setFlagged((prev: Set<number>) => {
                       const next = new Set(prev);
@@ -181,6 +188,8 @@ export function ExamActive({
                     return (
                       <motion.button
                         key={option}
+                        type="button"
+                        aria-pressed={isSelected}
                         whileTap={{ scale: 0.98 }}
                         onClick={() =>
                           setAnswers((prev: Record<number, string>) => ({
@@ -214,6 +223,7 @@ export function ExamActive({
               <div className="flex items-center justify-between">
                 <Button
                   variant="outline"
+                  aria-label={t("common.previous")}
                   onClick={() => setCurrentQ((prev: number) => Math.max(0, prev - 1))}
                   disabled={currentQ === 0}
                   className="gap-1.5 rounded-xl border-border/40"
@@ -225,6 +235,7 @@ export function ExamActive({
                   {t("mockExam.questionOf", { current: currentQ + 1, total: questions.length })}
                 </span>
                 <Button
+                  aria-label={t("common.next")}
                   onClick={() =>
                     setCurrentQ((prev: number) => Math.min(questions.length - 1, prev + 1))
                   }
