@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Bookmark, BookOpen, Brain, CircleHelp, Clock3, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
+import { ArrowRight, Bookmark, BookOpen, Brain, CircleHelp, Clock3, Flag, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
+import { contentReportHref } from "@/lib/contentReport";
 import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
@@ -410,6 +411,11 @@ export default function QAClinic() {
                     <Button size="sm" variant="ghost" className="gap-1.5 rounded-xl"
                       onClick={() => navigate("/tutorials?tutorial=" + encodeURIComponent(entry.tutorialId))}>
                       <BookOpen className="h-4 w-4" /> {t("qa.lesson")}
+                    </Button>
+                    <Button asChild size="sm" variant="ghost" className="gap-1.5 rounded-xl">
+                      <Link to={contentReportHref(entry.id, entry.tutorialId)}>
+                        <Flag className="h-4 w-4" /> {t("qa.reportQuestion")}
+                      </Link>
                     </Button>
                   </div>
                 </article>
