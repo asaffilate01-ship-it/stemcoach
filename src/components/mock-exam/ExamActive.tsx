@@ -108,7 +108,7 @@ export function ExamActive({
 
       <main className="container mx-auto max-w-3xl px-4 py-6">
         {/* Question navigator pills */}
-        <nav aria-label={t("mockExam.questionNavigation", { defaultValue: "Exam question navigation" })} className="mb-6 overflow-x-auto pb-2">
+        <nav aria-label={t("mockExam.questions")} className="mb-6 overflow-x-auto pb-2">
           <div className="flex gap-1.5 min-w-max">
             {questions.map((_, i) => (
               <button
