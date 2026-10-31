@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { attachContentReportReference, parseContentReportParams } from "@/lib/contentReport";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supportTicketSchema } from "@/lib/supportTicketSchema";
@@ -32,6 +34,8 @@ export default function Support() {
   const { t } = useTranslation();
   useDocumentTitle(`${t("support.title")} — STEMCoach`);
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const reportContext = parseContentReportParams(searchParams);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -40,8 +44,8 @@ export default function Support() {
     defaultValues: {
       name: "",
       email: user?.email || "",
-      category: "",
-      subject: "",
+      category: reportContext ? "bug" : "",
+      subject: reportContext ? `Content accuracy: ${reportContext.questionId}` : "",
       message: "",
     },
   });
@@ -55,7 +59,7 @@ export default function Support() {
         email: data.email,
         category: data.category,
         subject: data.subject,
-        message: data.message,
+        message: attachContentReportReference(data.message, reportContext),
       } as any);
 
       if (error) throw error;
@@ -82,6 +86,13 @@ export default function Support() {
             <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
               {t("support.description")}
             </p>
+            {reportContext && (
+              <div className="mx-auto mt-5 max-w-xl rounded-xl border border-primary/20 bg-primary/5 p-4 text-left text-sm">
+                <p className="font-semibold text-foreground">{t("support.contentReportTitle")}</p>
+                <p className="mt-1 text-muted-foreground">{t("support.contentReportHint")}</p>
+                <p className="mt-2 break-words font-mono text-xs">{reportContext.questionId}</p>
+              </div>
+            )}
           </div>
 
           {/* Contact info cards */}
