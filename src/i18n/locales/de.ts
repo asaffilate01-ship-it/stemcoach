@@ -54,6 +54,7 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    "reportQuestion": "Fehler in Frage melden",
     "exploreEvidence": "Mit Omniqora Intelligence Quellen erkunden",
     "signInEvidence": "Anmelden für belegte Erklärungen",
     "evidenceModes": {"rag":"Quellensuche (RAG)","hybrid":"Quellen und Wissensgraph","graph":"Wissensgraph (GraphRAG)"},
@@ -622,6 +623,8 @@ const de = {
   },
   // ── Support ──
   support: {
+    "contentReportTitle": "Problem mit Lerninhalt melden",
+    "contentReportHint": "Beschreibe, was falsch oder unklar erscheint. Es wird nur die Fragenreferenz übermittelt, nicht deine Antwort.",
     title: "Hilfe",
     subtitle: "Wir sind für dich da",
     name: "Dein Name",
@@ -853,6 +856,7 @@ const de = {
     complete: "Lernpfad abgeschlossen",
   },
   tutorials: {
+    reportQuestion: "Fehler in der Frage melden",
     documentTitle: "STEM-Tutorials",
     label: "Lernen, üben, prüfen",
     title: "Geführte STEM-Tutorials",
