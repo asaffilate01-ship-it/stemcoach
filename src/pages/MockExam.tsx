@@ -15,6 +15,7 @@ import { ExamSetup } from "@/components/mock-exam/ExamSetup";
 import { ExamActive } from "@/components/mock-exam/ExamActive";
 import { ExamReview } from "@/components/mock-exam/ExamReview";
 import { Button } from "@/components/ui/button";
+import { examDeadline, secondsToExamDeadline } from "@/lib/examClock";
 import { requireCompleteMockExamGrades, type MockExamGradeResult } from "@/lib/mockExamGrading";
 import { useTranslation } from "react-i18next";
 
@@ -50,6 +51,7 @@ export default function MockExam() {
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const submissionInFlight = useRef(false);
+  const examDeadlineRef = useRef<number | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MockExamTemplate | null>(initialTemplate);
 
   // Custom exam options
@@ -146,17 +148,24 @@ export default function MockExam() {
   }, [user, questions, answers, selectedTemplate, examSubject, toast, refreshQuota, t]);
 
   useEffect(() => {
-    if (state !== "active") return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          handleSubmitExam();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+    if (state !== "active" || examDeadlineRef.current === null) return;
+    // A throttled tab must not add extra time to a timed assessment.
+    // Never submit inside a React state updater (which React can replay).
+    const updateClock = () => {
+      if (examDeadlineRef.current === null) return;
+      const remaining = secondsToExamDeadline(examDeadlineRef.current);
+      setTimeLeft(remaining);
+      if (remaining === 0) void handleSubmitExam();
+    };
+    updateClock();
+    const timer = window.setInterval(updateClock, 1000);
+    document.addEventListener("visibilitychange", updateClock);
+    window.addEventListener("focus", updateClock);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", updateClock);
+      window.removeEventListener("focus", updateClock);
+    };
   }, [state, handleSubmitExam]);
 
   const startExam = async () => {
@@ -199,7 +208,8 @@ export default function MockExam() {
 
       const shuffled = (data as ExamQuestion[]);
       setQuestions(shuffled);
-      setTimeLeft(dur * 60);
+      examDeadlineRef.current = examDeadline(dur);
+      setTimeLeft(secondsToExamDeadline(examDeadlineRef.current));
       setAnswers({});
       setFlagged(new Set());
       setCurrentQ(0);
@@ -211,6 +221,7 @@ export default function MockExam() {
   };
 
   const handleBrowse = () => {
+    examDeadlineRef.current = null;
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete("template");
     setSearchParams(nextParams, { replace: true });
