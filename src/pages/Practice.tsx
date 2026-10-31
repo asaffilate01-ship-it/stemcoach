@@ -24,6 +24,7 @@ import { getCachedQuestions, cacheQuestions } from "@/lib/questionCache";
 import { getMascot } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
 import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
+import { practiceOptionShortcutIndex, shouldIgnorePracticeShortcut, togglePracticeSelection } from "@/lib/practiceKeyboard";
 
 interface DBQuestion {
   id: string;
@@ -166,33 +167,45 @@ export default function Practice() {
     loadQuestions();
   }, [curriculumId, curriculumLoading, practiceMode, subjectId, t, toast, user]);
 
-  // Keyboard shortcuts: 1-4 for options, Enter to submit/next, → for next
+  // Keyboard shortcuts are active only outside editable and interactive controls.
+  // Number keys toggle multi-select answers; Enter submits/advances when valid.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (questions.length === 0 || dbLoading) return;
+      if (questions.length === 0 || dbLoading || submitting || loadingAI || shouldIgnorePracticeShortcut(e)) {
+        return;
+      }
       const q = questions[currentIndex];
       if (!q) return;
       const isEssayQ = q.question_type === "essay" || q.question_type === "multi-step";
-      const opts = parseOptions(q.options);
+      const isShortAnswerQ = q.question_type === "short-answer";
       const isOrderingQ = q.question_type === "ordering";
+      const isMultiSelectQ = q.allow_multiple_answers || q.question_type === "multi-select";
+      const opts = parseOptions(q.options);
 
-      // Don't intercept keys when typing in textarea
-      if (isEssayQ && document.activeElement?.tagName === "TEXTAREA") return;
-
-      if (!showFeedback && !isEssayQ && opts.length > 0) {
-        const num = parseInt(e.key);
-        if (num >= 1 && num <= opts.length) {
+      if (!showFeedback && !isEssayQ && !isShortAnswerQ && !isOrderingQ) {
+        const choice = practiceOptionShortcutIndex(e.key, opts.length);
+        if (choice !== null) {
           e.preventDefault();
-          setSelectedAnswer(opts[num - 1]);
+          if (isMultiSelectQ) {
+            setSelectedAnswers((previous) => togglePracticeSelection(previous, opts[choice]));
+          } else {
+            setSelectedAnswer(opts[choice]);
+          }
           return;
         }
       }
 
       if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
         if (showFeedback) {
+          e.preventDefault();
           handleNext();
-        } else if (selectedAnswer || selectedAnswers.size > 0 || isOrderingQ || (isEssayQ && essayAnswer.trim())) {
+        } else if (
+          selectedAnswer ||
+          selectedAnswers.size > 0 ||
+          isOrderingQ ||
+          (isEssayQ && essayAnswer.trim())
+        ) {
+          e.preventDefault();
           handleSubmit();
         }
       }
@@ -204,7 +217,7 @@ export default function Practice() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [questions, currentIndex, showFeedback, selectedAnswer, selectedAnswers, essayAnswer, dbLoading]);
+  }, [questions, currentIndex, showFeedback, selectedAnswer, selectedAnswers, essayAnswer, dbLoading, submitting, loadingAI]);
 
   // Empty / loading states
   if (!subject) {
@@ -429,12 +442,7 @@ export default function Practice() {
 
 
   const toggleMultiSelect = (option: string) => {
-    setSelectedAnswers((prev) => {
-      const next = new Set(prev);
-      if (next.has(option)) next.delete(option);
-      else next.add(option);
-      return next;
-    });
+    setSelectedAnswers((prev) => togglePracticeSelection(prev, option));
   };
 
   const moveOrderedOption = (index: number, direction: -1 | 1) => {
