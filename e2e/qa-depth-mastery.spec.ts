@@ -7,7 +7,9 @@ async function dismissCookies(page: import("@playwright/test").Page) {
 test("expanded authored bank is displayed in the Q&A Clinic", async ({ page }) => {
   await page.goto("/qa-clinic?subject=mathematics");
   await dismissCookies(page);
-  await expect(page.getByText("328 lesson questions")).toBeVisible();
+  const bankSize = page.getByText(/^\d+ lesson questions$/);
+  await expect(bankSize).toBeVisible();
+  expect(Number((await bankSize.textContent())?.match(/^\d+/)?.[0])).toBeGreaterThanOrEqual(331);
   await page.getByLabel("Search Q&A").fill("Functions, Domain and Range");
   await expect(page.getByText("Functions, Domain and Range").first()).toBeVisible();
 });
