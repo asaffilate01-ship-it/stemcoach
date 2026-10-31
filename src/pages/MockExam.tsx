@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -14,9 +14,11 @@ import { ExamBrowse } from "@/components/mock-exam/ExamBrowse";
 import { ExamSetup } from "@/components/mock-exam/ExamSetup";
 import { ExamActive } from "@/components/mock-exam/ExamActive";
 import { ExamReview } from "@/components/mock-exam/ExamReview";
+import { Button } from "@/components/ui/button";
+import { requireCompleteMockExamGrades, type MockExamGradeResult } from "@/lib/mockExamGrading";
 import { useTranslation } from "react-i18next";
 
-type ExamState = "browse" | "setup" | "loading" | "active" | "review";
+type ExamState = "browse" | "setup" | "loading" | "active" | "grading" | "grading-error" | "review";
 
 interface ExamQuestion {
   id: string;
@@ -47,6 +49,7 @@ export default function MockExam() {
   const [flagged, setFlagged] = useState<Set<number>>(new Set());
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const submissionInFlight = useRef(false);
   const [selectedTemplate, setSelectedTemplate] = useState<MockExamTemplate | null>(initialTemplate);
 
   // Custom exam options
@@ -62,11 +65,15 @@ export default function MockExam() {
   }, []);
 
   const handleSubmitExam = useCallback(async () => {
-    if (submitting) return;
+    // A synchronous guard prevents two timer/submit events charging or grading twice.
+    if (submissionInFlight.current) return;
+    submissionInFlight.current = true;
     setSubmitting(true);
-    setState("review");
+    setState("grading");
 
     if (!user || questions.length === 0) {
+      setState("grading-error");
+      submissionInFlight.current = false;
       setSubmitting(false);
       return;
     }
@@ -90,30 +97,32 @@ export default function MockExam() {
 
       if (error) throw error;
 
-      const results: Array<{
-        question_id: string;
-        correct_answer: string | null;
-        explanation: string | null;
-        worked_solution: string | null;
-      }> = data?.results ?? [];
-
-      const byId = new Map(results.map((r) => [r.question_id, r]));
+      // Never render a 0%-style review until the backend has graded every item.
+      const results = data?.results as MockExamGradeResult[] | undefined;
+      const byId = requireCompleteMockExamGrades(
+        questions.map((q) => q.id),
+        results,
+      );
       setQuestions((prev) =>
         prev.map((q) => {
-          const r = byId.get(q.id);
-          return r
-            ? {
-                ...q,
-                correct_answer: r.correct_answer ?? undefined,
-                explanation: r.explanation ?? undefined,
-                worked_solution: r.worked_solution ?? undefined,
-              }
-            : q;
-        })
+          const r = byId.get(q.id)!;
+          return {
+            ...q,
+            correct_answer: r.correct_answer ?? undefined,
+            explanation: r.explanation ?? undefined,
+            worked_solution: r.worked_solution ?? undefined,
+          };
+        }),
       );
+      setState("review");
 
-      // Keep the local quota display in sync (server already consumed the credit)
-      await refreshQuota();
+      // Quota refresh is best-effort; a network error here must not discard a
+      // valid, confirmed grade or encourage the student to submit twice.
+      try {
+        await refreshQuota();
+      } catch {
+        // Server-side quota remains authoritative.
+      }
 
       if (data?.certificate_issued) {
         toast({
@@ -121,16 +130,20 @@ export default function MockExam() {
           description: t("mockExam.certificateDesc", { percent: data.percent }),
         });
       }
-    } catch (e: any) {
+    } catch {
+      // The server might already have received the submission. Do not offer
+      // an automatic retry until grading and quota handling are idempotent.
+      setState("grading-error");
       toast({
         title: t("mockExam.gradingFailed"),
         description: t("common.tryAgain"),
         variant: "destructive",
       });
     } finally {
+      submissionInFlight.current = false;
       setSubmitting(false);
     }
-  }, [submitting, user, questions, answers, selectedTemplate, examSubject, toast, refreshQuota, t]);
+  }, [user, questions, answers, selectedTemplate, examSubject, toast, refreshQuota, t]);
 
   useEffect(() => {
     if (state !== "active") return;
@@ -258,6 +271,42 @@ export default function MockExam() {
             canTakeMockExam={canTakeMockExam}
           />
         </PageTransition>
+      </div>
+    );
+  }
+
+  // ── Grading / unconfirmed result ──
+  if (state === "grading" || state === "grading-error") {
+    const pending = state === "grading";
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader />
+        <main className="container mx-auto flex min-h-[65vh] max-w-xl flex-col items-center justify-center px-5 py-12 text-center">
+          <div role={pending ? "status" : "alert"} aria-live={pending ? "polite" : "assertive"}
+            className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+            {pending && (
+              <div aria-hidden="true" className="mx-auto mb-5 h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent motion-reduce:animate-none" />
+            )}
+            <h1 className="text-xl font-bold sm:text-2xl">
+              {pending
+                ? t("mockExam.gradingInProgress", { defaultValue: "Checking your answers…" })
+                : t("mockExam.gradingFailed")}
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+              {pending
+                ? t("mockExam.waitForResults", { defaultValue: "Your results will appear only after grading is confirmed." })
+                : t("mockExam.gradingUnconfirmed", {
+                    defaultValue: "We couldn't confirm your result. Your submission may have reached the server. Please contact support to check its status before starting again.",
+                  })}
+            </p>
+            {!pending && (
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Button onClick={handleBrowse} variant="outline">{t("mockExam.backToExams")}</Button>
+                <Button asChild><Link to="/support">{t("nav.support", { defaultValue: "Contact support" })}</Link></Button>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     );
   }
