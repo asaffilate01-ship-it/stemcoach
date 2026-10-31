@@ -136,7 +136,7 @@ export default function MockExam() {
       setState("grading-error");
       toast({
         title: t("mockExam.gradingFailed"),
-        description: t("common.tryAgain"),
+        description: t("mockExam.gradingUnconfirmed"),
         variant: "destructive",
       });
     } finally {
