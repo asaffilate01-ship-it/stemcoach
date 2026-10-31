@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { attachContentReportReference, contentReportHref, parseContentReportParams } from "@/lib/contentReport";
+import { qaEntries } from "@/data/qaClinic";
 
 describe("safe academic content issue reporting", () => {
   it("links authored practice and tutorial checkpoints without sharing a learner answer", () => {
@@ -21,6 +22,12 @@ describe("safe academic content issue reporting", () => {
     expect(() => contentReportHref("math-0?answer=private", "math")).toThrow();
     expect(attachContentReportReference("The answer appears incorrect.", null)).toBe("The answer appears incorrect.");
   });
+  it("can link every published authored Q&A checkpoint without crashing the catalogue", () => {
+    for (const entry of qaEntries) {
+      expect(() => contentReportHref(entry.id, entry.tutorialId)).not.toThrow();
+    }
+  });
+
   it("appends only approved identifiers to the submitted support message", () => {
     expect(attachContentReportReference("  The distractor is ambiguous.  ", {
       questionId: "fractions-2", tutorialId: "fractions",
