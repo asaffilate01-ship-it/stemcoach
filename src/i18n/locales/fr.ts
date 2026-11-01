@@ -54,6 +54,8 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    sprintSize: "Durée du parcours de révision",
+    sprintOption: "{{count}} questions",
     filterTopic: "Filtrer par thème",
     allTopics: "Tous les thèmes",
     "reportQuestion": "Signaler un problème avec la question",
@@ -86,7 +88,7 @@ const fr = {
     "privateHistoryNotice": "Seuls les compteurs, dates de révision et identifiants des questions enregistrées restent sur cet appareil. Vos réponses saisies ne sont pas conservées.",
     "clearPracticeHistory": "Effacer l'historique local",
     "adaptiveReview": "Révision adaptée",
-    "timedChallenge": "Défi de 5 minutes",
+    "timedChallenge": "Défi de {{minutes}} minutes",
     "timeRemaining": "Temps restant",
     "timerDisplay": "Temps restant : {{time}}",
     "timeExpired": "Temps écoulé !",
