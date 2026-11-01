@@ -5,7 +5,7 @@ import { mcq, numeric, trueFalse, multi, short, order, match, fillBlanks } from 
 export const novemberHumanities: Tutorial[] = [
   {
     id: "demand-price-elasticity", subject: "economics",
-    title: "Price Elasticity of Demand", level: "Intermediate", minutes: 16,
+    title: "Demand Elasticity: Calculations and Interpretation", level: "Intermediate", minutes: 16,
     summary: "Calculate signed elasticity, interpret magnitudes and explain why demand sensitivity differs.",
     objectives: ["Use percentage changes to calculate PED", "Distinguish elastic from inelastic demand", "Discuss substitutes and adjustment time"],
     lesson: [
