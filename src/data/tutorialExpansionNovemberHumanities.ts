@@ -16,7 +16,7 @@ export const novemberHumanities: Tutorial[] = [
     workedExample: "If price increases by 10% and quantity demanded falls by 20%, signed PED = −20% ÷ 10% = −2. Its magnitude is 2, so demand is price elastic for this change.",
     examTip: "Label whether you report signed elasticity or its absolute magnitude, and show both percentage changes before division.",
     commonMistake: "Using the change in units of sales divided by the change in pounds of price; PED compares percentages, not absolute amounts.",
-    checkpoint: mcq("Price rises 10% and quantity demanded falls 20%. What is signed PED?", ["−0.5", "−2", "+2", "+0.5"], "−2", "PED = −20% ÷ +10% = −2, or magnitude 2.", "Use percentage quantity change over percentage price change."),
+    checkpoint: mcq("Price rises 10% and quantity demanded falls 20%. What is signed PED?", ["−0.5", "−2", "+2", "+0.5"], "−2", "PED = −20% ÷ +10% = −2, with magnitude 2. The negative sign records falling quantity demanded after a price rise.", "Use percentage quantity change over percentage price change."),
     practice: [
       numeric("Quantity demanded falls 15% after a 5% price rise. What is the absolute magnitude of PED?", 3, "The magnitude is 15/5 = 3, indicating elastic demand over the measured interval.", "Use absolute percentage changes for magnitude."),
       mcq("What does an absolute PED magnitude of 0.4 indicate?", ["Elastic demand", "Inelastic demand", "Unit elasticity", "Perfectly elastic demand"], "Inelastic demand", "A percentage change in quantity demanded is smaller than the percentage change in price when the magnitude is below 1.", "Compare 0.4 with the threshold of one."),
