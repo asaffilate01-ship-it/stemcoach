@@ -54,6 +54,8 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    sprintSize: "Länge der Lernrunde",
+    sprintOption: "{{count}} Fragen",
     filterTopic: "Thema filtern",
     allTopics: "Alle Themen",
     "reportQuestion": "Fehler in Frage melden",
@@ -86,7 +88,7 @@ const de = {
     "privateHistoryNotice": "Nur Lernstatistiken, Wiederholungstermine und IDs gespeicherter Fragen bleiben auf diesem Gerät. Eingetippte Antworten werden nicht gespeichert.",
     "clearPracticeHistory": "Geräteverlauf löschen",
     "adaptiveReview": "Adaptive Wiederholung",
-    "timedChallenge": "5-Minuten-Challenge",
+    "timedChallenge": "{{minutes}}-Minuten-Challenge",
     "timeRemaining": "Verbleibende Zeit",
     "timerDisplay": "Zeit übrig: {{time}}",
     "timeExpired": "Die Zeit ist um!",
