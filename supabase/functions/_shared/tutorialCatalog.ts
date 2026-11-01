@@ -123,6 +123,21 @@ export const TUTORIAL_CONTEXTS = [
   { id: "celta-instruction-checking-feedback", subject: "celta", title: "Instruction Checking and Formative Feedback" },
   { id: "french-futur-proche", subject: "french", title: "Le futur proche avec aller" },
   { id: "german-perfekt-auxiliaries", subject: "german", title: "German Perfekt with haben and sein" },
+  // Phase-next authored drafts (not independently academically verified).
+  { id: "arithmetic-sequences-nth-term", subject: "mathematics", title: "Arithmetic Sequences: Calculating Terms" },
+  { id: "waves-frequency-period-speed", subject: "physics", title: "Wave Speed, Frequency and Period" },
+  { id: "solution-concentration-dilution", subject: "chemistry", title: "Solution Concentration and Dilution" },
+  { id: "photosynthesis-rate-analysis", subject: "biology", title: "Photosynthesis Rate: Limiting-Factor Analysis" },
+  { id: "binary-hex-data-representation", subject: "computer-science", title: "Binary and Hexadecimal Data Representation" },
+  { id: "ppf-capacity-and-choice", subject: "economics", title: "Production Frontiers: Capacity and Opportunity Cost" },
+  { id: "unseen-poetry-voice-imagery", subject: "english-literature", title: "Unseen Poetry: Voice, Imagery and Tone" },
+  { id: "psychology-memory-encoding-retrieval", subject: "psychology", title: "Memory: Encoding, Storage and Retrieval" },
+  { id: "tectonic-boundaries-risk", subject: "geography", title: "Plate Boundaries and Hazard Risk" },
+  { id: "cash-flow-forecasting", subject: "business-studies", title: "Cash Flow Forecasts and Liquidity" },
+  { id: "ielts-reading-skimming-scanning", subject: "ielts", title: "IELTS Reading: Skimming, Scanning and Inference" },
+  { id: "celta-pronunciation-stress-minimal-pairs", subject: "celta", title: "Teaching Pronunciation: Word Stress and Minimal Pairs" },
+  { id: "french-imparfait-passe-compose", subject: "french", title: "Imparfait et passé composé: Context and Events" },
+  { id: "german-modal-verbs-word-order", subject: "german", title: "German Modal Verbs and Word Order" },
 ] as const satisfies readonly TutorialContext[];
 
 export function findTutorialContext(id: unknown): TutorialContext | null {
