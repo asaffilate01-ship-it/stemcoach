@@ -114,7 +114,7 @@ export const TUTORIAL_CONTEXTS = [
   { id: "empirical-formula-method", subject: "chemistry", title: "Empirical Formulae and Mole Ratios" },
   { id: "monohybrid-inheritance", subject: "biology", title: "Monohybrid Inheritance and Probability" },
   { id: "sql-queries-and-keys", subject: "computer-science", title: "Relational Database Queries and Keys" },
-  { id: "demand-price-elasticity", subject: "economics", title: "Price Elasticity of Demand" },
+  { id: "demand-price-elasticity", subject: "economics", title: "Demand Elasticity: Calculations and Interpretation" },
   { id: "literature-argument-and-evidence", subject: "english-literature", title: "Building a Literary Interpretation" },
   { id: "psychology-experiment-design", subject: "psychology", title: "Research Methods: Experiments and Validity" },
   { id: "river-storm-hydrographs", subject: "geography", title: "River Hydrographs and Flood Response" },
