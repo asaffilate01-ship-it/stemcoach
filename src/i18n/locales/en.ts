@@ -121,7 +121,7 @@ const en = {
     "commonMistake": "Common mistake",
     "examTip": "Exam tip",
     "tryAgain": "Try again",
-    "challengeTitle": "10-question quick challenge",
+    "challengeTitle": "{{count}}-question quick challenge",
     "challengeDescription": "Try a random mix of the selected lessons, question types and levels. Answers are self-checked, not formal exam marks.",
     "startChallenge": "Start challenge",
     "challengeFinished": "Challenge complete!",
