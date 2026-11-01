@@ -100,7 +100,9 @@ describe("expanded STEMCoach Question & Answer clinic", () => {
     expect(interaction).toContain("hasResponse(question, response)");
     expect(interaction).toContain("onAttempt?.(correct, attemptCount === 0 && !solutionViewed)");
     expect(clinic).toContain("qaDraft: prompt");
-    expect(clinic).toContain('const CHALLENGE_LENGTH = 10');
+    expect(clinic).toContain("buildReviewQueue(filtered, history, sprintSize");
+    expect(clinic).toContain("sprintQuestionCount(filtered.length, sprintSize)");
+    expect(clinic).toContain("setChallengeIds(selected)");
     expect(clinic).toContain("PAGE_SIZE = 16");
     expect(clinic).toContain("recordAttempt(entry.id, correct, firstAttempt)");
     expect(page).toContain("correctChecks.current.add");
