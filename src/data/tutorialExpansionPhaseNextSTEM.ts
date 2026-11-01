@@ -49,7 +49,7 @@ export const phaseNextSTEM: Tutorial[] = [
   },
   {
     id: "solution-concentration-dilution", subject: "chemistry",
-    title: "Solution Concentration and Dilution", level: "Intermediate", minutes: 15,
+    title: "Molar Concentration: Volume and Dilution Calculations", level: "Intermediate", minutes: 15,
     summary: "Find molar concentrations and reason about dilution without changing the solute amount.",
     objectives: ["Use c = n/V with volume in dm³", "Convert between cm³ and dm³", "Explain how dilution affects concentration"],
     lesson: [
