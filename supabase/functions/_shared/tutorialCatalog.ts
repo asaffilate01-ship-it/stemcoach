@@ -108,6 +108,21 @@ export const TUTORIAL_CONTEXTS = [
   { id: "french-direct-object-pronouns", subject: "french", title: "French Direct Object Pronouns: le, la and les" },
   { id: "german-separable-verbs", subject: "german", title: "Separable German Verbs in Main Clauses" },
   { id: "german-dative-case", subject: "german", title: "German Dative Articles and Common Prepositions" },
+  // November 2026 authored revision (academic/board review still pending).
+  { id: "statistics-mean-median-spread", subject: "mathematics", title: "Mean, Median and Data Spread" },
+  { id: "electrical-power-and-energy", subject: "physics", title: "Electrical Power and Energy Transfers" },
+  { id: "empirical-formula-method", subject: "chemistry", title: "Empirical Formulae and Mole Ratios" },
+  { id: "monohybrid-inheritance", subject: "biology", title: "Monohybrid Inheritance and Probability" },
+  { id: "sql-queries-and-keys", subject: "computer-science", title: "Relational Database Queries and Keys" },
+  { id: "demand-price-elasticity", subject: "economics", title: "Price Elasticity of Demand" },
+  { id: "literature-argument-and-evidence", subject: "english-literature", title: "Building a Literary Interpretation" },
+  { id: "psychology-experiment-design", subject: "psychology", title: "Research Methods: Experiments and Validity" },
+  { id: "river-storm-hydrographs", subject: "geography", title: "River Hydrographs and Flood Response" },
+  { id: "break-even-contribution", subject: "business-studies", title: "Contribution, Break-Even and Margin of Safety" },
+  { id: "ielts-writing-argument-cohesion", subject: "ielts", title: "IELTS Writing: Argument and Cohesion" },
+  { id: "celta-instruction-checking-feedback", subject: "celta", title: "Instruction Checking and Formative Feedback" },
+  { id: "french-futur-proche", subject: "french", title: "Le futur proche avec aller" },
+  { id: "german-perfekt-auxiliaries", subject: "german", title: "German Perfekt with haben and sein" },
 ] as const satisfies readonly TutorialContext[];
 
 export function findTutorialContext(id: unknown): TutorialContext | null {
