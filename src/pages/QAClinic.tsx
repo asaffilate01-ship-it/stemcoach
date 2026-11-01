@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Bookmark, BookOpen, Brain, CircleHelp, Clock3, Flag, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
+import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3, Flag, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
 import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, type SprintSize } from "@/lib/qaSprints";
+import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
 import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
@@ -141,12 +142,12 @@ export default function QAClinic() {
   const firstTryCorrect = challengeIds.filter((id) => firstAttempts[id] === true).length;
   const masteredCount = challengeIds.filter((id) => mastered[id] === true).length;
   const reviewSummary = useMemo(() => getReviewSummary(filtered, history, reviewTime), [filtered, history, reviewTime]);
+  const weeklyPlan = useMemo(() => buildQAWeeklyPlan(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const selectedCount = sprintQuestionCount(filtered.length, sprintSize);
   const timedMinutes = sprintDurationSeconds(sprintSize) / 60;
 
-  const startChallenge = (kind: ChallengeMode = "mixed") => {
-    const selected = buildReviewQueue(filtered, history, sprintSize,
-      kind === "adaptive" ? "adaptive" : "mixed").map((entry) => entry.id);
+  const launchChallenge = (selected: string[], kind: ChallengeMode) => {
+    if (selected.length === 0) return;
     setChallengeIds(selected);
     setChallengeIndex(0);
     setFirstAttempts({});
@@ -158,6 +159,17 @@ export default function QAClinic() {
     setSecondsRemaining(sprintSeconds);
     setDeadline(kind === "timed" ? Date.now() + sprintSeconds * 1000 : null);
     window.setTimeout(() => document.getElementById("qa-library")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+  };
+
+  const startChallenge = (kind: ChallengeMode = "mixed") => {
+    const selected = buildReviewQueue(filtered, history, sprintSize,
+      kind === "adaptive" ? "adaptive" : "mixed").map((entry) => entry.id);
+    launchChallenge(selected, kind);
+  };
+
+  const startPlannedSet = (ids: readonly string[]) => {
+    const allowed = new Set(filtered.map((entry) => entry.id));
+    launchChallenge(ids.filter((id) => allowed.has(id)), "adaptive");
   };
 
   const toggleSaved = (id: string) =>
@@ -376,6 +388,49 @@ export default function QAClinic() {
             )}
             <p className="mt-3 text-xs text-muted-foreground">{t("qa.privateHistoryNotice")}</p>
           </div>
+
+          {!activeChallenge && (
+            <section aria-labelledby="qa-week-title" className="mb-5 rounded-2xl border bg-card p-5 shadow-sm md:p-6">
+              <div className="mb-4 flex items-start gap-3">
+                <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                <div>
+                  <h3 id="qa-week-title" className="text-base font-semibold">{t("qa.weekPlanTitle")}</h3>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("qa.weekPlanDescription")}</p>
+                </div>
+              </div>
+              {weeklyPlan.some((day) => day.questionIds.length > 0) ? (
+                <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {weeklyPlan.map((day, index) => (
+                    <li key={day.startAt} className="flex flex-col justify-between gap-3 rounded-xl border bg-muted/20 p-3">
+                      <div>
+                        <p className="text-xs font-semibold text-primary">
+                          {t("qa.weekPlanDay", { day: index + 1 })}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {new Intl.DateTimeFormat(normalizeLanguage(i18n.resolvedLanguage || i18n.language),
+                            { weekday: "short", month: "short", day: "numeric" }).format(new Date(day.startAt))}
+                        </p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {t("qa.weekPlanMix", { fresh: day.newCount, due: day.dueCount })}
+                        </p>
+                      </div>
+                      <Button type="button" variant="outline" size="sm" className="min-h-10 w-full rounded-lg"
+                        disabled={day.questionIds.length === 0}
+                        aria-label={t("qa.weekPlanStartDay", { day: index + 1 })}
+                        onClick={() => startPlannedSet(day.questionIds)}>
+                        {day.questionIds.length > 0
+                          ? t("qa.weekPlanStart", { count: day.questionIds.length })
+                          : t("qa.weekPlanNoTasks")}
+                      </Button>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="rounded-xl bg-muted/30 p-4 text-sm text-muted-foreground">{t("qa.weekPlanEmpty")}</p>
+              )}
+              <p className="mt-3 text-xs text-muted-foreground">{t("qa.weekPlanDisclaimer")}</p>
+            </section>
+          )}
 
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-muted/30 p-4">
             <div className="min-w-0">
