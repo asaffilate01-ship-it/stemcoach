@@ -4,8 +4,8 @@ import { mcq, numeric, trueFalse, multi, order, match, fillBlanks, short } from 
 /** Original formative study drafts, awaiting independent academic review. */
 export const phaseNextHumanities: Tutorial[] = [
   {
-    id: "opportunity-cost-ppf", subject: "economics",
-    title: "Opportunity Cost and Production Possibility Frontiers", level: "Intermediate", minutes: 15,
+    id: "ppf-capacity-and-choice", subject: "economics",
+    title: "Production Frontiers: Capacity and Opportunity Cost", level: "Intermediate", minutes: 15,
     summary: "Reason about trade-offs, productive efficiency and shifts in productive capacity.",
     objectives: ["Define opportunity cost", "Interpret points on or within a PPF", "Describe how the productive frontier can shift"],
     lesson: [
