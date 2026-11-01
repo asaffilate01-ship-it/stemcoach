@@ -2,6 +2,7 @@ import { stemExpansion } from "./stemExpansion";
 import { nextQAExpansion } from "./tutorialExpansionNext";
 import { deepQAExpansion } from "./tutorialDeepExpansion";
 import { novemberQAExpansion } from "./tutorialExpansionNovember";
+import { phaseNextQAExpansion } from "./tutorialExpansionPhaseNext";
 
 export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching" | "fill-blanks" | "diagram-label";
 
@@ -305,4 +306,5 @@ export const tutorials: Tutorial[] = [
   ...nextQAExpansion,
   ...deepQAExpansion,
   ...novemberQAExpansion,
+  ...phaseNextQAExpansion,
 ];
