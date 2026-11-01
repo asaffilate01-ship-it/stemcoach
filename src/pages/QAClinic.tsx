@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { qaEntries, type QAEntry } from "@/data/qaClinic";
+import { tutorials } from "@/data/tutorials";
 import type { TutorialQuestionFormat } from "@/data/tutorials";
 import { subjects } from "@/data/questions";
 import { getMascot } from "@/lib/mascots";
@@ -30,11 +31,13 @@ export default function QAClinic() {
   const { t, i18n } = useTranslation();
   useDocumentTitle(t("qa.title"));
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedTopic = tutorials.find((item) => item.id === searchParams.get("topic"));
   const requestedSubject = searchParams.get("subject");
   const [subject, setSubject] = useState(
-    requestedSubject && subjects.some((item) => item.id === requestedSubject) ? requestedSubject : "all",
+    linkedTopic?.subject || (requestedSubject && subjects.some((item) => item.id === requestedSubject) ? requestedSubject : "all"),
   );
+  const [topic, setTopic] = useState(linkedTopic?.id || "all");
   const [format, setFormat] = useState("all");
   const [level, setLevel] = useState("all");
   const [reviewFilter, setReviewFilter] = useState<"all" | "due" | "missed" | "saved">("all");
@@ -96,10 +99,25 @@ export default function QAClinic() {
     return () => window.clearInterval(interval);
   }, [challengeMode, deadline, challengeIds.length, challengeIndex, secondsRemaining]);
 
+  // Only authored, known lesson IDs may be used as deep-linked topic presets.
+  // A browser history navigation updates the visible filters as well.
+  useEffect(() => {
+    const selected = tutorials.find((item) => item.id === searchParams.get("topic"));
+    const requested = searchParams.get("subject");
+    setSubject(selected?.subject || (requested && subjects.some((item) => item.id === requested) ? requested : "all"));
+    setTopic(selected?.id || "all");
+  }, [searchParams]);
+
+  const availableTopics = useMemo(
+    () => tutorials.filter((item) => subject === "all" || item.subject === subject),
+    [subject],
+  );
+
   const filtered = useMemo(() => {
     const phrase = search.trim().toLocaleLowerCase();
     return qaEntries.filter((entry) =>
       (subject === "all" || entry.subject === subject) &&
+      (topic === "all" || entry.tutorialId === topic) &&
       (format === "all" || entry.format === format) &&
       (level === "all" || entry.level === level) &&
       (reviewFilter === "all" ||
@@ -109,7 +127,7 @@ export default function QAClinic() {
       (!phrase || [entry.question, entry.topic, entry.explanation, entry.subject, entry.hint]
         .some((text) => text.toLocaleLowerCase().includes(phrase))),
     );
-  }, [subject, format, level, search, history, reviewFilter, savedIds, reviewTime]);
+  }, [subject, topic, format, level, search, history, reviewFilter, savedIds, reviewTime]);
 
   const activeChallenge = challengeIds.length > 0;
   const challengeCompleted = activeChallenge && (challengeIndex >= challengeIds.length ||
@@ -149,6 +167,40 @@ export default function QAClinic() {
     setDeadline(null);
     setDisplayLimit(PAGE_SIZE);
     change();
+  };
+
+  const chooseSubject = (nextSubject: string) => {
+    changeFilter(() => { setSubject(nextSubject); setTopic("all"); });
+    const params = new URLSearchParams(searchParams);
+    params.delete("topic");
+    if (nextSubject === "all") params.delete("subject");
+    else params.set("subject", nextSubject);
+    setSearchParams(params, { replace: true });
+  };
+
+  const chooseTopic = (nextTopic: string) => {
+    const selected = tutorials.find((item) => item.id === nextTopic);
+    changeFilter(() => {
+      setTopic(selected?.id || "all");
+      if (selected) setSubject(selected.subject);
+    });
+    const params = new URLSearchParams(searchParams);
+    if (selected) {
+      params.set("topic", selected.id);
+      params.set("subject", selected.subject);
+    } else params.delete("topic");
+    setSearchParams(params, { replace: true });
+  };
+
+  const clearAllFilters = () => {
+    changeFilter(() => {
+      setSubject("all"); setTopic("all"); setFormat("all");
+      setLevel("all"); setReviewFilter("all"); setSearch("");
+    });
+    const params = new URLSearchParams(searchParams);
+    params.delete("topic");
+    params.delete("subject");
+    setSearchParams(params, { replace: true });
   };
 
   const recordAttempt = (id: string, correct: boolean, firstAttempt: boolean) => {
@@ -233,20 +285,29 @@ export default function QAClinic() {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span role="status" className="text-sm text-muted-foreground">{t("qa.results", { count: filtered.length })}</span>
-              <Button type="button" variant="outline" disabled={subject === "all" && format === "all" && level === "all" && reviewFilter === "all" && !search}
-                onClick={() => changeFilter(() => { setSubject("all"); setFormat("all"); setLevel("all"); setReviewFilter("all"); setSearch(""); })}>
+              <Button type="button" variant="outline" disabled={subject === "all" && topic === "all" && format === "all" && level === "all" && reviewFilter === "all" && !search}
+                onClick={clearAllFilters}>
                 {t("qa.clearFilters")}
               </Button>
             </div>
           </div>
 
-          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label htmlFor="qa-subject-filter" className="mb-1 block text-xs font-semibold">{t("qa.filterSubject")}</label>
-              <select id="qa-subject-filter" value={subject} onChange={(event) => changeFilter(() => setSubject(event.target.value))}
+              <select id="qa-subject-filter" value={subject} onChange={(event) => chooseSubject(event.target.value)}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allSubjects")}</option>
                 {subjects.map((item) => <option key={item.id} value={item.id}>{t(`subjects.names.${item.id}`)}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="qa-topic-filter" className="mb-1 block text-xs font-semibold">{t("qa.filterTopic")}</label>
+              <select id="qa-topic-filter" value={topic} onChange={(event) => chooseTopic(event.target.value)}
+                className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
+                <option value="all">{t("qa.allTopics")}</option>
+                {availableTopics.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
               </select>
             </div>
             <div>
@@ -315,7 +376,7 @@ export default function QAClinic() {
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-muted/30 p-4">
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-sm font-semibold">
-                <Flame className="h-4 w-4 text-primary" /> {t("qa.challengeTitle")}
+                <Flame className="h-4 w-4 text-primary" /> {t("qa.challengeTitle", { count: Math.min(CHALLENGE_LENGTH, filtered.length) })}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">{t("qa.challengeDescription")}</p>
             </div>

@@ -54,6 +54,8 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    filterTopic: "Filtrer par thème",
+    allTopics: "Tous les thèmes",
     "reportQuestion": "Signaler un problème avec la question",
     "exploreEvidence": "Explorer avec Omniqora Intelligence",
     "signInEvidence": "Se connecter pour consulter les sources",
@@ -119,7 +121,7 @@ const fr = {
     "commonMistake": "Erreur fréquente",
     "examTip": "Conseil pour l'examen",
     "tryAgain": "Réessayer",
-    "challengeTitle": "Défi rapide de 10 questions",
+    "challengeTitle": "Défi rapide de {{count}} questions",
     "challengeDescription": "Essayez un mélange aléatoire des cours, formats et niveaux sélectionnés. Les réponses ne constituent pas une évaluation officielle.",
     "startChallenge": "Commencer le défi",
     "challengeFinished": "Défi terminé !",
@@ -856,6 +858,7 @@ const fr = {
     complete: "Parcours terminé",
   },
   tutorials: {
+    practiceTopic: "S'entraîner sur ce thème ({{count}} questions)",
     reportQuestion: "Signaler une erreur dans la question",
     documentTitle: "Tutoriels STEM",
     label: "Apprendre, s'entraîner, vérifier",

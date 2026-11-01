@@ -54,6 +54,8 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    filterTopic: "Filter topic",
+    allTopics: "All topics",
     "reportQuestion": "Report question issue",
     "exploreEvidence": "Explore with Omniqora Intelligence",
     "signInEvidence": "Sign in for sourced explanations",
@@ -119,7 +121,7 @@ const en = {
     "commonMistake": "Common mistake",
     "examTip": "Exam tip",
     "tryAgain": "Try again",
-    "challengeTitle": "10-question quick challenge",
+    "challengeTitle": "{{count}}-question quick challenge",
     "challengeDescription": "Try a random mix of the selected lessons, question types and levels. Answers are self-checked, not formal exam marks.",
     "startChallenge": "Start challenge",
     "challengeFinished": "Challenge complete!",
@@ -856,6 +858,7 @@ const en = {
     complete: "Learning path complete",
   },
   tutorials: {
+    practiceTopic: "Practise this topic ({{count}} questions)",
     reportQuestion: "Report a question issue",
     documentTitle: "STEM Tutorials",
     label: "Learn, practise, check",
