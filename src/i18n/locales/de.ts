@@ -121,7 +121,7 @@ const de = {
     "commonMistake": "Häufiger Fehler",
     "examTip": "Prüfungstipp",
     "tryAgain": "Erneut versuchen",
-    "challengeTitle": "Schnell-Challenge mit 10 Fragen",
+    "challengeTitle": "Schnell-Challenge mit {{count}} Fragen",
     "challengeDescription": "Übe eine zufällige Mischung der ausgewählten Lektionen, Fragetypen und Schwierigkeitsgrade. Keine offizielle Prüfung.",
     "startChallenge": "Challenge starten",
     "challengeFinished": "Challenge abgeschlossen!",
