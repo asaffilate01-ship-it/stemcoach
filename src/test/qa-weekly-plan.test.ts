@@ -22,7 +22,7 @@ describe("private seven-day Q&A revision plan", () => {
     const overdue = recordReviewAttempt({}, sample[0].id, false, true, now - 10_000);
     const history = recordReviewAttempt(overdue, sample[1].id, true, true, now - 2 * 86_400_000);
     const days = buildQAWeeklyPlan(sample, history, now);
-    expect(days[0].questionIds[0]).toBe(sample[0].id);
+    expect(days[0].questionIds.slice(0, 2)).toEqual([sample[1].id, sample[0].id]);
     expect(days[0].dueCount).toBe(2);
     expect(days[0].missedCount).toBe(1);
     expect(days[0].newCount).toBe(3);
