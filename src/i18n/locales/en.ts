@@ -54,6 +54,8 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    sprintSize: "Revision sprint length",
+    sprintOption: "{{count}} questions",
     filterTopic: "Filter topic",
     allTopics: "All topics",
     "reportQuestion": "Report question issue",
@@ -86,7 +88,7 @@ const en = {
     "privateHistoryNotice": "Only revision counts, due dates and saved question IDs are stored on this device. Typed answers are never saved or shared.",
     "clearPracticeHistory": "Clear device history",
     "adaptiveReview": "Adaptive review",
-    "timedChallenge": "5-minute challenge",
+    "timedChallenge": "{{minutes}}-minute challenge",
     "timeRemaining": "Time remaining",
     "timerDisplay": "Time left: {{time}}",
     "timeExpired": "Time's up!",
