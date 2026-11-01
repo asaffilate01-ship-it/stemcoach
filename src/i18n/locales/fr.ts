@@ -121,7 +121,7 @@ const fr = {
     "commonMistake": "Erreur fréquente",
     "examTip": "Conseil pour l'examen",
     "tryAgain": "Réessayer",
-    "challengeTitle": "Défi rapide de 10 questions",
+    "challengeTitle": "Défi rapide de {{count}} questions",
     "challengeDescription": "Essayez un mélange aléatoire des cours, formats et niveaux sélectionnés. Les réponses ne constituent pas une évaluation officielle.",
     "startChallenge": "Commencer le défi",
     "challengeFinished": "Défi terminé !",
