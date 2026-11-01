@@ -376,7 +376,7 @@ export default function QAClinic() {
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-muted/30 p-4">
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-sm font-semibold">
-                <Flame className="h-4 w-4 text-primary" /> {t("qa.challengeTitle")}
+                <Flame className="h-4 w-4 text-primary" /> {t("qa.challengeTitle", { count: Math.min(CHALLENGE_LENGTH, filtered.length) })}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">{t("qa.challengeDescription")}</p>
             </div>
