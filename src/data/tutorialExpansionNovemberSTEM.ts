@@ -44,7 +44,7 @@ export const novemberSTEM: Tutorial[] = [
     workedExample: "A 12 V device drawing 2 A has power P = 12×2 = 24 W. In 15 s, E = 24×15 = 360 J; for a full hour it would transfer 24 Wh.",
     examTip: "Write the equation, substitute values with units and check whether the question requests joules or kilowatt-hours.",
     commonMistake: "Multiplying watts by hours gives watt-hours, not joules; using seconds instead gives joules.",
-    checkpoint: mcq("A 6 V component draws 2 A for 5 s. How much energy is transferred?", ["12 J", "30 J", "60 J", "120 J"], "60 J", "P = 6×2 = 12 W, then E = 12×5 = 60 J.", "Use P = VI first, then E = Pt."),
+    checkpoint: mcq("A 6 V component draws 2 A for 5 s. How much energy is transferred?", ["12 J", "30 J", "60 J", "120 J"], "60 J", "First calculate power P = 6×2 = 12 W, then multiply by 5 s: E = 12×5 = 60 J.", "Use P = VI first, then E = Pt."),
     practice: [
       numeric("A device transfers 120 J in 4 s. What is its power in watts?", 30, "Power is energy transferred per second: 120/4 = 30 W.", "Divide energy by time in seconds."),
       trueFalse("The potential difference across each parallel branch is the same.", true, "Branches connected to the same pair of circuit nodes share the same potential difference.", "Think about the two shared connection points."),
