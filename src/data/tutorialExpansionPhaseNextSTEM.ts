@@ -5,7 +5,7 @@ import { mcq, numeric, trueFalse, multi, order, match, fillBlanks } from "./tuto
 export const phaseNextSTEM: Tutorial[] = [
   {
     id: "arithmetic-sequences-nth-term", subject: "mathematics",
-    title: "Arithmetic Sequences and the nth Term", level: "Foundation", minutes: 14,
+    title: "Arithmetic Sequences: Calculating Terms", level: "Foundation", minutes: 14,
     summary: "Use a common difference to find terms and interpret a linear nth-term formula.",
     objectives: ["Find the constant difference in an arithmetic sequence", "Use a + (n−1)d to find a term", "Check a sequence formula against its first terms"],
     lesson: [
@@ -70,8 +70,8 @@ export const phaseNextSTEM: Tutorial[] = [
     ]
   },
   {
-    id: "photosynthesis-limiting-factors", subject: "biology",
-    title: "Photosynthesis and Limiting Factors", level: "Intermediate", minutes: 15,
+    id: "photosynthesis-rate-analysis", subject: "biology",
+    title: "Photosynthesis Rate: Limiting-Factor Analysis", level: "Intermediate", minutes: 15,
     summary: "Describe how light, carbon dioxide and temperature can limit photosynthesis.",
     objectives: ["Identify products and reactants of photosynthesis", "Interpret a limiting factor", "Explain enzyme effects at high temperatures"],
     lesson: [
