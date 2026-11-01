@@ -126,7 +126,7 @@ export const TUTORIAL_CONTEXTS = [
   // Phase-next authored drafts (not independently academically verified).
   { id: "arithmetic-sequences-nth-term", subject: "mathematics", title: "Arithmetic Sequences: Calculating Terms" },
   { id: "waves-frequency-period-speed", subject: "physics", title: "Wave Speed, Frequency and Period" },
-  { id: "solution-concentration-dilution", subject: "chemistry", title: "Solution Concentration and Dilution" },
+  { id: "solution-concentration-dilution", subject: "chemistry", title: "Molar Concentration: Volume and Dilution Calculations" },
   { id: "photosynthesis-rate-analysis", subject: "biology", title: "Photosynthesis Rate: Limiting-Factor Analysis" },
   { id: "binary-hex-data-representation", subject: "computer-science", title: "Binary and Hexadecimal Data Representation" },
   { id: "ppf-capacity-and-choice", subject: "economics", title: "Production Frontiers: Capacity and Opportunity Cost" },
