@@ -43,6 +43,20 @@ describe("staged, disabled-by-default partner and monthly access", () => {
     expect(checker).not.toContain("user.user_metadata");
     expect(sql).toContain("STAGING DESIGN ONLY");
   });
+  it("serialises the sponsored attempt quota with one atomic INSERT", () => {
+    expect(sql).toContain("pg_catalog.pg_advisory_xact_lock");
+    expect(sql).toContain("pg_catalog.hashtextextended");
+    expect(sql).toContain("public.stemcoach_partner_question_eligible(");
+    expect(sql).toContain("INSERT INTO public.attempts");
+    expect(sql).toContain("question.review_status = 'published'");
+    expect(sql).toContain("TO service_role");
+    expect(checker).toContain('admin.rpc("record_stemcoach_partner_answer"');
+    expect(checker).toContain("if (partnerError.code === \"42501\")");
+    expect(checker).toContain("if (recorded !== true)");
+    expect(checker).toContain('Deno.env.get("STEMCOACH_PARTNER_ACCESS_ENABLED") === "true"');
+    expect(checker).not.toContain("user.user_metadata");
+  });
+
   it("requires published question IDs for monthly release and server-verified subscriber lifecycle", () => {
     expect(sql).toContain("review_status = 'published'");
     expect(sql).toContain("release_month ~");
