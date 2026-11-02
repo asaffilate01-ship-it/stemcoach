@@ -387,6 +387,9 @@ export default function QAClinic() {
               </div>
             )}
             <p className="mt-3 text-xs text-muted-foreground">{t("qa.privateHistoryNotice")}</p>
+            <Link to="/study-skills" className="mt-3 inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+              <BookOpen className="h-4 w-4" aria-hidden="true" />{t("qa.studySkillsLink")}<ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </div>
 
           {!activeChallenge && (

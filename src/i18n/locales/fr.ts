@@ -4,6 +4,7 @@ const fr = {
     mobileNavigation: "Navigation mobile",
     skipToContent: "Aller au contenu",
     qaClinic: "Questions-réponses",
+    studySkills: "Méthodes d’étude et d’examen",
     home: "Accueil",
     subjects: "Matières",
     dashboard: "Tableau de bord",
@@ -54,6 +55,7 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    studySkillsLink: "Apprendre à réviser et à préparer les examens",
     weekPlanTitle: "Votre programme de révision sur 7 jours",
     weekPlanDescription: "Jusqu'à cinq questions par jour selon vos filtres : révisions dues d'abord, puis nouveautés. Lancez une séance à votre rythme.",
     weekPlanDay: "Jour {{day}}",

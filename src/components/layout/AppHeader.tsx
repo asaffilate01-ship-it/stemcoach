@@ -129,6 +129,7 @@ const navItems: NavItem[] = [
   { to: "/formulas", labelKey: "nav.formulaSheets", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
   { to: "/tutorials", labelKey: "nav.tutorials", label: "Tutorials", icon: BookOpen, group: "resources", variant: "success" },
   { to: "/qa-clinic", labelKey: "nav.qaClinic", label: "Q&A Clinic", icon: BookCheck, group: "resources", variant: "purple" },
+  { to: "/study-skills", labelKey: "nav.studySkills", label: "Study & exam skills", icon: Brain, group: "resources", variant: "success" },
   { to: "/blog", labelKey: "nav.blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
   { to: "/parent", labelKey: "nav.parentPortal", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
   { to: "/teacher", labelKey: "nav.teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },

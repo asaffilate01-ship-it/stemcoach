@@ -4,6 +4,7 @@ const en = {
     mobileNavigation: "Mobile navigation",
     skipToContent: "Skip to content",
     qaClinic: "Q&A Clinic",
+    studySkills: "Study & exam skills",
     home: "Home",
     subjects: "Subjects",
     dashboard: "Dashboard",
@@ -54,6 +55,7 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    studySkillsLink: "How to revise, study and prepare for exams",
     weekPlanTitle: "Your 7-day revision plan",
     weekPlanDescription: "Five suggested questions each day from the current filters: due reviews first, then new topics. Start any set when you are ready.",
     weekPlanDay: "Day {{day}}",

@@ -4,6 +4,7 @@ const de = {
     mobileNavigation: "Mobile Navigation",
     skipToContent: "Zum Inhalt springen",
     qaClinic: "Fragen & Antworten",
+    studySkills: "Lern- und Prüfungstechniken",
     home: "Startseite",
     subjects: "Fächer",
     dashboard: "Dashboard",
@@ -54,6 +55,7 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    studySkillsLink: "Lernen, Wiederholen und Prüfungen vorbereiten",
     weekPlanTitle: "Dein 7-Tage-Lernplan",
     weekPlanDescription: "Bis zu fünf Fragen pro Tag aus den aktuellen Filtern: fällige Wiederholungen zuerst, dann neue Themen. Starte eine Runde nach Wunsch.",
     weekPlanDay: "Tag {{day}}",
