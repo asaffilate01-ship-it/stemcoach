@@ -45,7 +45,7 @@ const specs: AuthorLesson[] = [
       ["Which Arabic word means 'one' in standalone counting?", ["واحد", "ثلاثة", "خمسة", "سبعة"], 0, "وَاحِد (wāḥid) is the common standalone masculine form meaning one."],
       ["What is the number value of «٨»?", ["6", "7", "8", "9"], 2, "The Eastern Arabic-Indic digit ٨ corresponds to eight."],
       ["Which standalone word corresponds to ten?", ["ستة", "تسعة", "اثنان", "عشرة"], 3, "عَشَرَة (ʿashara) is a common standalone form of ten."],
-      ["ما قيمة الرقم «٥»؟", ["four", "five", "six", "seven"], 1, "The digit ٥ is five."],
+      ["ما قيمة الرقم «٥»؟", ["four", "five", "six", "seven"], 1, "The Eastern Arabic-Indic digit ٥ represents five, matching the standalone Arabic counting word خمسة."],
       ["Which Arabic counting word corresponds to two?", ["اثنان", "أربعة", "ثمانية", "ستة"], 0, "اثنان (ithnān) is a common standalone nominative form of two."],
       ["Which numeral represents seven?", ["٦", "٨", "٧", "٩"], 2, "٧ is the Eastern Arabic-Indic digit for seven."],
       ["Which pair has the same numeric value?", ["٢ and خمسة", "٤ and ستة", "٩ and ثلاثة", "٩ and تسعة"], 3, "Both ٩ and تسعة express the value nine."],
