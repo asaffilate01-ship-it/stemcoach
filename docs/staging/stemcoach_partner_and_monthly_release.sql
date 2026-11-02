@@ -122,6 +122,64 @@ REVOKE ALL ON FUNCTION public.stemcoach_partner_question_eligible(uuid, text, te
 GRANT EXECUTE ON FUNCTION public.stemcoach_partner_question_eligible(uuid, text, text)
   TO service_role;
 
+-- Atomic sponsored answer transaction: a transaction-scoped per-user/day lock
+-- serialises the 100-attempt UTC fair-use check with the attempt insert. A
+-- failure rolls back both. Service role must separately authenticate the user
+-- through getUser before invoking this function with its UUID.
+CREATE OR REPLACE FUNCTION public.record_stemcoach_partner_answer(
+  _user_id uuid, _question_id uuid, _submitted_answer text,
+  _correct boolean, _time_taken_seconds integer
+) RETURNS boolean
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $fn$
+DECLARE
+  selected_subject text;
+  selected_curriculum text;
+BEGIN
+  IF _user_id IS NULL OR _question_id IS NULL
+     OR _submitted_answer IS NULL
+     OR length(btrim(_submitted_answer)) NOT BETWEEN 1 AND 2000
+     OR _correct IS NULL
+     OR (_time_taken_seconds IS NOT NULL
+         AND _time_taken_seconds NOT BETWEEN 0 AND 86400) THEN
+    RAISE EXCEPTION 'Invalid sponsored answer arguments'
+      USING ERRCODE = '22023';
+  END IF;
+
+  -- Same learner and same UTC date must use the same transaction lock.
+  PERFORM pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended(
+      _user_id::text || ':' ||
+      pg_catalog.to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD'), 0)
+  );
+
+  SELECT question.subject, question.curriculum
+    INTO selected_subject, selected_curriculum
+  FROM public.questions question
+  WHERE question.id = _question_id AND question.review_status = 'published';
+
+  IF NOT FOUND OR NOT public.stemcoach_partner_question_eligible(
+     _user_id, selected_subject, selected_curriculum
+  ) THEN
+    RAISE EXCEPTION 'Sponsored question access denied or daily cap reached'
+      USING ERRCODE = '42501';
+  END IF;
+
+  INSERT INTO public.attempts (
+    user_id, question_id, answer, correct, time_taken_seconds
+  ) VALUES (
+    _user_id, _question_id, _submitted_answer, _correct, _time_taken_seconds
+  );
+  RETURN true;
+END;
+$fn$;
+REVOKE ALL ON FUNCTION public.record_stemcoach_partner_answer(
+  uuid, uuid, text, boolean, integer
+) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.record_stemcoach_partner_answer(
+  uuid, uuid, text, boolean, integer
+) TO service_role;
+
 -- A subscriber eligibility result is not a content release or a refund-proof.
 CREATE OR REPLACE FUNCTION public.stemcoach_monthly_subscriber_eligible(
   _user_id uuid
@@ -189,6 +247,6 @@ COMMIT;
 -- wrong subject, expired binding/learner/proposal, revoked learner,
 -- unauthenticated API and spoofed user ID MUST ALL DENY.
 -- A service role must be the only caller of the sensitive functions.
--- Verify parallel 100/day usage does not race into unlimited free access.
+-- Verify concurrent usage serialises via advisory lock and never passes 100/day.\n-- Test transactions rollback on invalid answers / INSERT failures.
 -- Monthly Stripe webhooks, frontend quota mirror and content fetch gates
 -- MUST be integrated and deployed together before any launch.
