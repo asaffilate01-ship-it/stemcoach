@@ -12,6 +12,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { normalizeLanguage } from "@/i18n/language";
+import { studySpeechLanguage } from "@/lib/subjectLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
 import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
@@ -287,8 +288,8 @@ export default function Tutorials() {
                           const answerKey = `${tutorial.id}:${checkpointIndex}`;
                           return (
                             <div key={answerKey} className="rounded-xl border border-border/50 p-4">
-                              <p className="mb-3 text-sm font-medium">{checkpointIndex + 1}. {checkpoint.question}</p>
-                              <QuestionInteraction questionId={answerKey} question={checkpoint}
+                              <p dir="auto" className="mb-3 text-sm font-medium">{checkpointIndex + 1}. {checkpoint.question}</p>
+                              <QuestionInteraction questionId={answerKey} question={checkpoint} speechLanguage={studySpeechLanguage(tutorial.subject)}
                                 workedExample={tutorial.workedExample}
                                 examTip={tutorial.examTip} commonMistake={tutorial.commonMistake}
                                 onAttempt={(correct) => void answerCheckpoint(tutorial.id, checkpointIndex, correct, checkpoints.length)} />

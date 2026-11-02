@@ -14,15 +14,15 @@ describe("phase-next original formative study bank", () => {
   it("adds exactly 14 lessons and 84 questions without repeating IDs, titles or subjects", () => {
     expect(phaseNextQAExpansion).toHaveLength(14);
     expect(new Set(phaseNextQAExpansion.map(lesson => lesson.subject))).toEqual(
-      new Set(subjects.map(subject => subject.id)),
+      new Set(subjects.filter(subject => !["italian", "spanish", "arabic"].includes(subject.id)).map(subject => subject.id)),
     );
     expect(phaseNextQAExpansion.every(lesson => checksOf(lesson).length === 6)).toBe(true);
     expect(phaseNextQAExpansion.reduce((sum, lesson) => sum + checksOf(lesson).length, 0)).toBe(84);
-    expect(tutorials).toHaveLength(141);
-    expect(qaEntries).toHaveLength(664);
-    expect(new Set(tutorials.map(item => item.id)).size).toBe(141);
-    expect(new Set(qaEntries.map(item => item.id)).size).toBe(664);
-    expect(new Set(tutorials.map(item => item.subject + ":" + item.title.toLowerCase())).size).toBe(141);
+    expect(tutorials).toHaveLength(150);
+    expect(qaEntries).toHaveLength(754);
+    expect(new Set(tutorials.map(item => item.id)).size).toBe(150);
+    expect(new Set(qaEntries.map(item => item.id)).size).toBe(754);
+    expect(new Set(tutorials.map(item => item.subject + ":" + item.title.toLowerCase())).size).toBe(150);
     expect(TUTORIAL_CONTEXTS.map(({ id, subject, title }) => ({ id, subject, title })))
       .toEqual(tutorials.map(({ id, subject, title }) => ({ id, subject, title })));
   });

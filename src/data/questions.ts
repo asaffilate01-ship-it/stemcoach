@@ -1,6 +1,6 @@
 export type QuestionType = "mcq" | "numerical" | "multi-step" | "essay" | "multi-select" | "code" | "data-interpretation" | "assertion-reason" | "true-false" | "ordering" | "short-answer";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
-export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies" | "french" | "german";
+export type Subject = "mathematics" | "physics" | "chemistry" | "biology" | "computer-science" | "ielts" | "celta" | "economics" | "english-literature" | "psychology" | "geography" | "business-studies" | "french" | "german" | "italian" | "spanish" | "arabic";
 
 export interface Question {
   id: string;
@@ -159,6 +159,21 @@ export const subjects: SubjectInfo[] = [
     color: "0 0% 20%",
     questionCount: 0,
     topics: ["Grammatik", "Leseverstehen", "Schriftlicher Ausdruck", "Textanalyse", "Deutsche Literatur", "Erörterung", "Hörverständnis", "Mündliche Prüfung"],
+  },
+  {
+    id: "italian", name: "Italian", icon: "🇮🇹", color: "150 60% 42%",
+    mascotImage: "/assets/coach-stem.png", questionCount: 0,
+    topics: ["Everyday conversation", "Essere and avere", "Articles and nouns", "Present tense", "Listening", "Travel language"],
+  },
+  {
+    id: "spanish", name: "Spanish", icon: "🇪🇸", color: "18 80% 52%",
+    mascotImage: "/assets/coach-stem.png", questionCount: 0,
+    topics: ["Ser and estar", "Regular verbs", "Questions", "Travel and shopping", "Listening", "Grammar and vocabulary"],
+  },
+  {
+    id: "arabic", name: "Arabic (MSA)", icon: "ع", color: "175 65% 36%",
+    mascotImage: "/assets/coach-stem.png", questionCount: 0,
+    topics: ["Arabic script", "Greetings", "Pronouns", "Definite article", "Nouns and adjectives", "Nominal sentences"],
   },
 ];
 

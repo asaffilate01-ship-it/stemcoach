@@ -33,8 +33,8 @@ const valid = {
 
 describe("Omniqora Intelligence RAG/GraphRAG source boundary", () => {
   it("keeps the expanded lesson inventory as its only evidence source", () => {
-    expect(tutorials.length).toBe(141);
-    expect(qaEntries.length).toBe(664);
+    expect(tutorials.length).toBe(150);
+    expect(qaEntries.length).toBe(754);
     expect(new Set(tutorials.map((t) => t.id)).size).toBe(tutorials.length);
     expect(safeLessonHref("triangle-diagram-labelling"))
       .toBe("/tutorials?tutorial=triangle-diagram-labelling");
@@ -89,7 +89,7 @@ describe("Omniqora Intelligence RAG/GraphRAG source boundary", () => {
     expect(manifest.mode).toBe("dry-run");
     expect(manifest.documents).toBe(tutorials.length);
     expect(manifest.proposedSourceEdges).toBeGreaterThan(150);
-    expect(manifest.subjects).toHaveLength(14);
+    expect(manifest.subjects).toHaveLength(17);
     expect(manifest.personalDataIncluded).toBe(false);
     expect(manifest.sourceClassification).toBe("authored_unreviewed");
   });

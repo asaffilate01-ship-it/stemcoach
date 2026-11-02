@@ -13,16 +13,17 @@ const src = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8")
 describe("expanded STEMCoach Question & Answer clinic", () => {
   it("adds genuine author-drafted tutorials and practice across all fourteen subjects", () => {
     const expected = tutorials.reduce((total, lesson) => total + 1 + (lesson.practice?.length || 0), 0);
-    expect(tutorials).toHaveLength(141);
+    expect(tutorials).toHaveLength(150);
     expect(stemExpansion).toHaveLength(28);
     expect(nextQAExpansion).toHaveLength(14);
     expect(stemExpansion.every((lesson) => lesson.practice?.length === 3)).toBe(true);
     expect(qaEntries).toHaveLength(expected);
-    expect(qaEntries).toHaveLength(664);
+    expect(qaEntries).toHaveLength(754);
     expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(qaEntries.length);
     expect(new Set(tutorials.map((entry) => entry.id)).size).toBe(tutorials.length);
     expect(new Set(qaEntries.map((entry) => entry.subject))).toEqual(new Set(subjects.map((subject) => subject.id)));
-    for (const subject of subjects) {
+    // Historical expansion predates the three newly introduced language subjects.
+    for (const subject of subjects.filter((item) => !["italian", "spanish", "arabic"].includes(item.id))) {
       expect(stemExpansion.filter((entry) => entry.subject === subject.id)).toHaveLength(2);
     }
   });

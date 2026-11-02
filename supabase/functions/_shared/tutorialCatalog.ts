@@ -152,6 +152,15 @@ export const TUTORIAL_CONTEXTS = [
   { id: "celta-ccq-icq-feedback-practice", subject: "celta", title: "Language Teaching: Concept Checks and Feedback" },
   { id: "french-negation-questions", subject: "french", title: "French Negation and Everyday Question Forms" },
   { id: "german-separable-verbs-main-clause", subject: "german", title: "German Separable Verbs and Main-Clause Order" },
+  { id: "italian-essere-avere-present", subject: "italian", title: "Italian Essentials: Essere and Avere" },
+  { id: "italian-articles-nouns", subject: "italian", title: "Italian Articles, Gender and Plurals" },
+  { id: "italian-everyday-travel", subject: "italian", title: "Italian Everyday Questions and Travel" },
+  { id: "spanish-ser-estar", subject: "spanish", title: "Spanish Ser and Estar in Everyday Speech" },
+  { id: "spanish-present-regular-verbs", subject: "spanish", title: "Spanish Present-Tense Regular Verbs" },
+  { id: "spanish-travel-shopping", subject: "spanish", title: "Spanish Questions, Travel and Shopping" },
+  { id: "arabic-greetings-pronouns", subject: "arabic", title: "Modern Standard Arabic: Greetings and Pronouns" },
+  { id: "arabic-definite-article-nouns", subject: "arabic", title: "Modern Standard Arabic: Nouns and the Definite Article" },
+  { id: "arabic-simple-nominal-sentences", subject: "arabic", title: "Modern Standard Arabic: Simple Nominal Sentences" },
 ] as const satisfies readonly TutorialContext[];
 
 export function findTutorialContext(id: unknown): TutorialContext | null {

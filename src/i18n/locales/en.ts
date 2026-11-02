@@ -327,6 +327,9 @@ const en = {
       celta: "CELTA",
       french: "French",
       german: "German",
+      italian: "Italian",
+      spanish: "Spanish",
+      arabic: "Arabic (Modern Standard)",
     },
   },
   // ── Practice ──

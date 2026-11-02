@@ -12,14 +12,14 @@ describe("November 2026 authored multi-subject expansion", () => {
   it("adds 14 complete guided lessons, one for each available subject", () => {
     expect(novemberQAExpansion).toHaveLength(14);
     expect(new Set(novemberQAExpansion.map(lesson => lesson.subject))).toEqual(
-      new Set(subjects.map(subject => subject.id)),
+      new Set(subjects.filter(subject => !["italian", "spanish", "arabic"].includes(subject.id)).map(subject => subject.id)),
     );
     expect(novemberQAExpansion.every(lesson => checksOf(lesson).length === 8)).toBe(true);
     expect(novemberQAExpansion.reduce((n, lesson) => n + checksOf(lesson).length, 0)).toBe(112);
-    expect(tutorials).toHaveLength(141);
-    expect(qaEntries).toHaveLength(664);
-    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(141);
-    expect(new Set(qaEntries.map(entry => entry.id)).size).toBe(664);
+    expect(tutorials).toHaveLength(150);
+    expect(qaEntries).toHaveLength(754);
+    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(150);
+    expect(new Set(qaEntries.map(entry => entry.id)).size).toBe(754);
     expect(TUTORIAL_CONTEXTS.map(({ id, subject, title }) => ({ id, subject, title })))
       .toEqual(tutorials.map(({ id, subject, title }) => ({ id, subject, title })));
   });
