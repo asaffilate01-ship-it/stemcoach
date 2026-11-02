@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { PUBLISHED_BANK_TARGET, summariseBankMetrics } from "@/lib/questionBankProgramme";
+import { ReviewCapacityPlanner } from "@/components/admin/ReviewCapacityPlanner";
 
 const questionTypes = [
   { id: "mcq", label: "Multiple Choice (single answer)" },
@@ -280,6 +281,8 @@ export default function AdminGenerate() {
             UniPathway, TrainDirekt and Skillfinch access must be verified against current institutional enrolments.
           </p>
         </section>
+
+        <ReviewCapacityPlanner published={bankProgress?.published ?? null} target={PUBLISHED_BANK_TARGET} />
 
         {/* Draft queue progress */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 stem-card rounded-xl p-6">

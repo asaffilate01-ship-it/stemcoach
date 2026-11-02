@@ -16,10 +16,10 @@ describe("November 2026 authored multi-subject expansion", () => {
     );
     expect(novemberQAExpansion.every(lesson => checksOf(lesson).length === 8)).toBe(true);
     expect(novemberQAExpansion.reduce((n, lesson) => n + checksOf(lesson).length, 0)).toBe(112);
-    expect(tutorials).toHaveLength(150);
-    expect(qaEntries).toHaveLength(754);
-    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(150);
-    expect(new Set(qaEntries.map(entry => entry.id)).size).toBe(754);
+    expect(tutorials).toHaveLength(156);
+    expect(qaEntries).toHaveLength(814);
+    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(156);
+    expect(new Set(qaEntries.map(entry => entry.id)).size).toBe(814);
     expect(TUTORIAL_CONTEXTS.map(({ id, subject, title }) => ({ id, subject, title })))
       .toEqual(tutorials.map(({ id, subject, title }) => ({ id, subject, title })));
   });
