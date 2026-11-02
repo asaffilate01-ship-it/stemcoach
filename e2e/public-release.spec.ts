@@ -20,12 +20,12 @@ test("pricing presents the server-backed 5,000 and 1,000 credit packs", async ({
   await expect(page.getByText(/10,000 questions|2,000 extra questions/)).toHaveCount(0);
 });
 
-test("tutorial catalogue covers all fourteen subjects", async ({ page }) => {
+test("tutorial catalogue covers all seventeen subjects", async ({ page }) => {
   await page.goto("/tutorials");
   await dismissCookies(page);
   await expect(page.getByText(/0 of \d+ tutorials mastered/i)).toBeVisible();
   await expect(page.getByText("Solving Quadratic Equations")).toBeVisible();
-  await expect(page.locator("select option")).toHaveCount(15);
+  await expect(page.locator("select option")).toHaveCount(18);
   await page.locator("select").selectOption("german");
   await expect(page.getByText("Nominative and Accusative Cases")).toBeVisible();
 });
