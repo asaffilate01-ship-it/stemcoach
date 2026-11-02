@@ -14,7 +14,13 @@ export const getQuestionFormat = (question: TutorialCheckpoint): TutorialQuestio
   question.format || "single";
 
 export function normaliseWrittenAnswer(value: string): string {
-  return value.normalize("NFKC").replace(/[\u0640\u064B-\u065F\u0670]/g, "").trim().replace(/\s+/g, " ").replace(/[.!?]+$/, "").toLocaleLowerCase();
+  // Arabic optional vowel marks and elongation should not make a correct
+  // unvowelled spelling fail. Keep meaningful Arabic letters and Latin accents.
+  const withoutOptionalMarks = Array.from(value.normalize("NFKC")).filter((character) => {
+    const code = character.codePointAt(0) ?? 0;
+    return code !== 0x0640 && code !== 0x0670 && (code < 0x064b || code > 0x065f);
+  }).join("");
+  return withoutOptionalMarks.trim().replace(/\s+/g, " ").replace(/[.!?]+$/, "").toLocaleLowerCase();
 }
 
 function parseDecimal(value: string): number {
