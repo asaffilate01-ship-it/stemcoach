@@ -13,6 +13,7 @@ import { Loader2, Sparkles, Database, ShieldAlert, Rocket, RefreshCw, Pause, Pla
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { PUBLISHED_BANK_TARGET, summariseBankMetrics } from "@/lib/questionBankProgramme";
 
 const questionTypes = [
   { id: "mcq", label: "Multiple Choice (single answer)" },
@@ -65,6 +66,18 @@ export default function AdminGenerate() {
     refetchInterval: 60000,
   });
   const dbCount = Object.values(subjectCounts || {}).reduce((total, subjectCount) => total + subjectCount, 0);
+  const { data: bankMetrics } = useQuery({
+    queryKey: ["reviewed-bank-metrics"],
+    enabled: !!user && isAdmin,
+    queryFn: async () => {
+      const { data, error } = await (supabase.rpc as any)("get_question_bank_metrics");
+      if (error) throw error;
+      return data as Record<string, unknown> | null;
+    },
+    refetchInterval: 60_000,
+  });
+  const bankProgress = summariseBankMetrics(bankMetrics);
+
 
   const { data: batchStatus, refetch: refetchBatch } = useQuery({
     queryKey: ["batch-status"],
@@ -244,6 +257,29 @@ export default function AdminGenerate() {
             Generate question drafts for structural validation and expert review before publication.
           </p>
         </div>
+
+        {/* Verified question-bank progress is separate from generated drafts. */}
+        <section aria-label="Published question-bank target" className="mb-7 rounded-2xl border bg-card p-5 shadow-sm">
+          <h2 className="text-lg font-bold">Two-million published question target</h2>
+          {bankProgress ? (
+            <>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {bankProgress.published.toLocaleString()} reviewed and published of {PUBLISHED_BANK_TARGET.toLocaleString()} planned.
+                {bankProgress.awaitingReview.toLocaleString()} awaiting review; drafts do not count as published.
+              </p>
+              <Progress value={bankProgress.progressPct} className="mt-3 h-3" />
+              <p className="mt-2 text-xs font-semibold tabular-nums">
+                {bankProgress.progressPct.toFixed(2)}% complete · {bankProgress.remaining.toLocaleString()} reviewed questions remaining
+              </p>
+            </>
+          ) : <p className="mt-2 text-sm text-muted-foreground">
+            Published inventory currently unavailable. Do not treat generated drafts as released questions.
+          </p>}
+          <p className="mt-3 text-xs text-muted-foreground">
+            Monthly paid releases require a separately approved release batch and a server-verified subscription.
+            UniPathway, TrainDirekt and Skillfinch access must be verified against current institutional enrolments.
+          </p>
+        </section>
 
         {/* Draft queue progress */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 stem-card rounded-xl p-6">
