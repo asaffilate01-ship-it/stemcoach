@@ -29,7 +29,7 @@ const specs: AuthorLesson[] = [
     recall: ["What is the sentence usually called that introduces a body paragraph's main claim?", "topic sentence", "A topic sentence establishes the focus for the explanation and evidence in that paragraph.", ["a topic sentence"]]
   },
   {
-    id: "celta-concept-checking", subject: "celta", title: "Language Teaching: Concept Checks and Feedback", level: "Intermediate",
+    id: "celta-ccq-icq-feedback-practice", subject: "celta", title: "Language Teaching: Concept Checks and Feedback", level: "Intermediate",
     summary: "Use short concept-checking questions, clear instructions and feedback to support language learning.",
     objectives: ["Write concept-checking questions", "Distinguish checking meaning from checking instructions", "Offer specific corrective feedback"],
     lesson: [
@@ -79,7 +79,7 @@ const specs: AuthorLesson[] = [
     recall: ["Which French question word means 'where'?", "où", "Où is used to ask about place or location; its accent distinguishes it from ou meaning 'or'.", ["où ?"]]
   },
   {
-    id: "german-separable-verbs", subject: "german", title: "German Separable Verbs and Main-Clause Order", level: "Intermediate",
+    id: "german-separable-verbs-main-clause", subject: "german", title: "German Separable Verbs and Main-Clause Order", level: "Intermediate",
     summary: "Apply verb-second word order and recognise separated prefixes in ordinary statements.",
     objectives: ["Identify common separable verbs", "Place the finite verb correctly in main clauses", "Recognise infinitive forms with modal verbs"],
     lesson: [
