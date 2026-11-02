@@ -89,7 +89,7 @@ describe("Omniqora Intelligence RAG/GraphRAG source boundary", () => {
     expect(manifest.mode).toBe("dry-run");
     expect(manifest.documents).toBe(tutorials.length);
     expect(manifest.proposedSourceEdges).toBeGreaterThan(150);
-    expect(manifest.subjects).toHaveLength(14);
+    expect(manifest.subjects).toHaveLength(17);
     expect(manifest.personalDataIncluded).toBe(false);
     expect(manifest.sourceClassification).toBe("authored_unreviewed");
   });
