@@ -55,6 +55,8 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    firstTryAccuracy: "Beim ersten Versuch richtig: {{accuracy}} % ({{correct}} von {{total}} Versuchen)",
+    firstTryEmpty: "Die Erstversuchsquote erscheint nach deiner ersten Antwort.",
     studySkillsLink: "Lernen, Wiederholen und Prüfungen vorbereiten",
     weekPlanTitle: "Dein 7-Tage-Lernplan",
     weekPlanDescription: "Bis zu fünf Fragen pro Tag aus den aktuellen Filtern: fällige Wiederholungen zuerst, dann neue Themen. Starte eine Runde nach Wunsch.",

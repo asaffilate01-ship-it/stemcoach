@@ -138,6 +138,20 @@ export const TUTORIAL_CONTEXTS = [
   { id: "celta-pronunciation-stress-minimal-pairs", subject: "celta", title: "Teaching Pronunciation: Word Stress and Minimal Pairs" },
   { id: "french-imparfait-passe-compose", subject: "french", title: "Imparfait et passé composé: Context and Events" },
   { id: "german-modal-verbs-word-order", subject: "german", title: "German Modal Verbs and Word Order" },
+  { id: "compound-growth-percentages", subject: "mathematics", title: "Compound Growth and Repeated Percentage Change" },
+  { id: "work-energy-power-calculations", subject: "physics", title: "Work, Energy Transfer and Power" },
+  { id: "acid-base-indicators", subject: "chemistry", title: "Acids, Bases, pH and Neutralisation" },
+  { id: "ecosystem-food-webs", subject: "biology", title: "Ecosystems, Food Webs and Energy Transfer" },
+  { id: "relational-database-keys", subject: "computer-science", title: "Relational Databases, Keys and Simple Queries" },
+  { id: "inflation-real-income-index", subject: "economics", title: "Inflation, Price Indices and Real Income" },
+  { id: "dramatic-irony-stagecraft", subject: "english-literature", title: "Dramatic Irony, Stagecraft and Audience Response" },
+  { id: "experiment-design-controls", subject: "psychology", title: "Psychological Experiments: Variables and Controls" },
+  { id: "urbanisation-push-pull", subject: "geography", title: "Urbanisation, Migration and Push–Pull Factors" },
+  { id: "contribution-profit-margin", subject: "business-studies", title: "Contribution, Costs and Profit Decisions" },
+  { id: "ielts-task-two-reasoning", subject: "ielts", title: "IELTS Writing Task 2: Clear Arguments and Examples" },
+  { id: "celta-ccq-icq-feedback-practice", subject: "celta", title: "Language Teaching: Concept Checks and Feedback" },
+  { id: "french-negation-questions", subject: "french", title: "French Negation and Everyday Question Forms" },
+  { id: "german-separable-verbs-main-clause", subject: "german", title: "German Separable Verbs and Main-Clause Order" },
 ] as const satisfies readonly TutorialContext[];
 
 export function findTutorialContext(id: unknown): TutorialContext | null {

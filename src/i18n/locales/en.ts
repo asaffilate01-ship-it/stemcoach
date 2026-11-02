@@ -55,6 +55,8 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    firstTryAccuracy: "First-attempt accuracy: {{accuracy}}% ({{correct}} of {{total}} attempts)",
+    firstTryEmpty: "First-attempt accuracy appears after you try a question.",
     studySkillsLink: "How to revise, study and prepare for exams",
     weekPlanTitle: "Your 7-day revision plan",
     weekPlanDescription: "Five suggested questions each day from the current filters: due reviews first, then new topics. Start any set when you are ready.",
