@@ -189,6 +189,7 @@ export default function Dashboard() {
     { label: t("dashboard.flashcardsAction"), icon: Layers, to: "/flashcards", variant: "success" as const },
     { label: t("dashboard.analyticsAction"), icon: BarChart3, to: "/analytics", variant: "accent" as const },
     { label: "School & tuition", icon: BookOpen, to: "/education-connections", variant: "primary" as const },
+    { label: t("nav.studySkills"), icon: Brain, to: "/study-skills", variant: "success" as const },
   ];
 
   return (
@@ -236,7 +237,7 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div className="mb-5 md:mb-8">
-            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none sm:grid sm:grid-cols-5 sm:gap-3 sm:overflow-visible">
+            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible lg:grid-cols-6">
               {quickActions.map((action, i) => (
                 <motion.button
                   key={action.label}
