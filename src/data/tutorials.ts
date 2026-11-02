@@ -4,6 +4,7 @@ import { deepQAExpansion } from "./tutorialDeepExpansion";
 import { novemberQAExpansion } from "./tutorialExpansionNovember";
 import { phaseNextQAExpansion } from "./tutorialExpansionPhaseNext";
 import { largeQAExpansion } from "./tutorialExpansionLarge";
+import { newLanguageExpansion } from "./tutorialExpansionNewLanguages";
 
 export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching" | "fill-blanks" | "diagram-label";
 
@@ -37,7 +38,8 @@ export interface Tutorial {
   subject:
     | "mathematics" | "physics" | "chemistry" | "biology" | "computer-science"
     | "economics" | "english-literature" | "psychology" | "geography"
-    | "business-studies" | "ielts" | "celta" | "french" | "german";
+    | "business-studies" | "ielts" | "celta" | "french" | "german"
+    | "italian" | "spanish" | "arabic";
   title: string;
   level: "Foundation" | "Intermediate" | "Advanced";
   minutes: number;
@@ -309,4 +311,5 @@ export const tutorials: Tutorial[] = [
   ...novemberQAExpansion,
   ...phaseNextQAExpansion,
   ...largeQAExpansion,
+  ...newLanguageExpansion,
 ];

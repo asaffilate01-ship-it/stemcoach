@@ -19,6 +19,7 @@ import { subjects } from "@/data/questions";
 import { getMascot } from "@/lib/mascots";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { normalizeLanguage } from "@/i18n/language";
+import { studySpeechLanguage } from "@/lib/subjectLanguage";
 
 const questionFormats: TutorialQuestionFormat[] = [
   "single", "multiple", "true-false", "numeric", "short-text", "ordering", "matching", "fill-blanks", "diagram-label",
@@ -531,9 +532,9 @@ export default function QAClinic() {
                     </div>
                     {mastered[entry.id] && <Trophy className="ml-auto h-5 w-5 text-primary" aria-label={t("qa.mastered")} />}
                   </div>
-                  <h3 className="mb-3 text-base font-semibold leading-6">{entry.question}</h3>
+                  <h3 dir="auto" className="mb-3 text-base font-semibold leading-6">{entry.question}</h3>
                   <QuestionInteraction key={entry.id + (activeChallenge ? "-challenge-" + challengeRound : "")} questionId={entry.id}
-                    question={entry.checkpoint} workedExample={entry.workedExample}
+                    question={entry.checkpoint} speechLanguage={studySpeechLanguage(entry.subject)} workedExample={entry.workedExample}
                     examTip={entry.examTip} commonMistake={entry.commonMistake}
                     onAttempt={(correct, firstAttempt) => recordAttempt(entry.id, correct, firstAttempt)} />
                   <div className="mt-4"><OmniqoraEvidencePanel key={entry.id} tutorialId={entry.tutorialId}

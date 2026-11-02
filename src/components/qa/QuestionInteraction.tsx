@@ -10,13 +10,14 @@ import { displayAnswer, emptyResponse, getQuestionFormat, hasResponse, isCorrect
 interface Props {
   question: TutorialCheckpoint;
   questionId: string;
+  speechLanguage?: string;
   workedExample?: string;
   examTip?: string;
   commonMistake?: string;
   onAttempt?: (correct: boolean, firstAttempt: boolean) => void;
 }
 
-export function QuestionInteraction({ question, questionId, workedExample, examTip, commonMistake, onAttempt }: Props) {
+export function QuestionInteraction({ question, questionId, speechLanguage = "en-GB", workedExample, examTip, commonMistake, onAttempt }: Props) {
   const { t } = useTranslation();
   const format = getQuestionFormat(question);
   const [response, setResponse] = useState(() => emptyResponse(question));
@@ -38,7 +39,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
     window.speechSynthesis.cancel();
     if (speaking) { setSpeaking(false); return; }
     const utterance = new SpeechSynthesisUtterance(question.question);
-    utterance.lang = "en-GB";
+    utterance.lang = speechLanguage;
     utterance.rate = 0.92;
     utterance.onend = () => setSpeaking(false);
     utterance.onerror = () => setSpeaking(false);
@@ -117,7 +118,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
                   ? "w-full rounded-xl border border-primary bg-primary/10 px-3 py-2.5 text-left text-sm"
                   : "w-full rounded-xl border px-3 py-2.5 text-left text-sm transition-colors hover:border-primary/40 focus-visible:outline-primary"}>
                 <span className="mr-2 text-xs font-bold text-muted-foreground">{format === "multiple" ? "☐" : String.fromCharCode(65 + index) + "."}</span>{" "}
-                {option}
+                <span dir="auto">{option}</span>
               </button>
             );
           })}
@@ -128,7 +129,7 @@ export function QuestionInteraction({ question, questionId, workedExample, examT
           <label className="mb-1 block text-xs font-semibold" htmlFor={questionId + "-response"}>
             {t(format === "numeric" ? "qa.answerNumber" : "qa.answerWritten")}
           </label>
-          <Input id={questionId + "-response"} type="text" inputMode={format === "numeric" ? "decimal" : "text"}
+          <Input dir="auto" id={questionId + "-response"} type="text" inputMode={format === "numeric" ? "decimal" : "text"}
             autoComplete="off" maxLength={120} disabled={revealed}
             placeholder={t(format === "numeric" ? "qa.numberPlaceholder" : "qa.writtenPlaceholder")}
             value={response.freeText} onChange={(event) => setResponse((prev) => ({ ...prev, freeText: event.target.value }))} />
