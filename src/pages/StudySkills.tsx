@@ -122,6 +122,7 @@ export default function StudySkills() {
   const [duration, setDuration] = useState<10 | 20 | 25>(20);
   const [remaining, setRemaining] = useState(20 * 60);
   const [running, setRunning] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const deadline = useRef<number | null>(null);
 
   const filtered = useMemo(() => {
@@ -157,6 +158,7 @@ export default function StudySkills() {
   const resetTimer = (minutes: 10 | 20 | 25) => {
     deadline.current = null;
     setRunning(false);
+    setHasStarted(false);
     setDuration(minutes);
     setRemaining(minutes * 60);
   };
@@ -167,6 +169,7 @@ export default function StudySkills() {
       setRunning(false);
     } else if (remaining > 0) {
       deadline.current = Date.now() + remaining * 1000;
+      setHasStarted(true);
       setRunning(true);
     }
   };
@@ -283,7 +286,7 @@ export default function StudySkills() {
             <div className="flex flex-wrap gap-2">
               <Button className="min-h-11 gap-2" disabled={remaining === 0} onClick={toggleTimer}>
                 {running ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />}
-                {running ? ui.pause : remaining === duration * 60 ? ui.start : ui.resume}
+                {running ? ui.pause : hasStarted ? ui.resume : ui.start}
               </Button>
               <Button variant="outline" className="min-h-11 gap-2" onClick={() => resetTimer(duration)}>
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />{ui.reset}
