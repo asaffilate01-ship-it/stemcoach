@@ -86,8 +86,20 @@ serve(async (req) => {
       .eq("id", questionId).eq("review_status", "published").single();
     if (questionError || !question) throw new HttpError(404, "Published question not found");
 
+    // Staging-gated education sponsor: authentic, current institution and course
+    // membership is rechecked by a service-only database function. The browser
+    // and user_metadata cannot request or grant this access. OFF by default.
+    let partnerEligible = false;
+    if (!assignmentId && Deno.env.get("STEMCOACH_PARTNER_ACCESS_ENABLED") === "true") {
+      const { data, error } = await admin.rpc("stemcoach_partner_question_eligible", {
+        _user_id: user.id, _subject: question.subject, _curriculum: question.curriculum,
+      });
+      if (error) throw new HttpError(503, "School entitlement verification unavailable");
+      partnerEligible = data === true;
+    }
+
     let quota: { total_questions: number; used_questions: number; subjects: string[] | null } | null = null;
-    if (!assignmentId) {
+    if (!assignmentId && !partnerEligible) {
       const quotaResult = await admin.from("user_quotas").select("total_questions, used_questions, subjects")
         .eq("user_id", user.id).maybeSingle();
       quota = quotaResult.data;
