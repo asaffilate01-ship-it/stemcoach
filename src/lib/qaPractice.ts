@@ -164,9 +164,14 @@ export function getReviewSummary(source: readonly ReviewCandidate[], history: Re
     const current = topics.get(key);
     topics.set(key, { topic: entry.topic, misses: (current?.misses || 0) + misses });
   }
+  const firstTryAttempts = practiced.reduce((sum, entry) => sum + history[entry.id].attempts, 0);
+  const firstTryCorrect = practiced.reduce((sum, entry) => sum + history[entry.id].correctFirst, 0);
   return {
     practiced: practiced.length,
     due,
+    firstTryAttempts,
+    firstTryCorrect,
+    firstTryAccuracy: firstTryAttempts > 0 ? Math.round(firstTryCorrect / firstTryAttempts * 100) : null,
     weakTopics: [...topics.values()].sort((a, b) => b.misses - a.misses).slice(0, 3),
   };
 }

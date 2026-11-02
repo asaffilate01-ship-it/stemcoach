@@ -18,11 +18,11 @@ describe("phase-next original formative study bank", () => {
     );
     expect(phaseNextQAExpansion.every(lesson => checksOf(lesson).length === 6)).toBe(true);
     expect(phaseNextQAExpansion.reduce((sum, lesson) => sum + checksOf(lesson).length, 0)).toBe(84);
-    expect(tutorials).toHaveLength(127);
-    expect(qaEntries).toHaveLength(524);
-    expect(new Set(tutorials.map(item => item.id)).size).toBe(127);
-    expect(new Set(qaEntries.map(item => item.id)).size).toBe(524);
-    expect(new Set(tutorials.map(item => item.subject + ":" + item.title.toLowerCase())).size).toBe(127);
+    expect(tutorials).toHaveLength(141);
+    expect(qaEntries).toHaveLength(664);
+    expect(new Set(tutorials.map(item => item.id)).size).toBe(141);
+    expect(new Set(qaEntries.map(item => item.id)).size).toBe(664);
+    expect(new Set(tutorials.map(item => item.subject + ":" + item.title.toLowerCase())).size).toBe(141);
     expect(TUTORIAL_CONTEXTS.map(({ id, subject, title }) => ({ id, subject, title })))
       .toEqual(tutorials.map(({ id, subject, title }) => ({ id, subject, title })));
   });

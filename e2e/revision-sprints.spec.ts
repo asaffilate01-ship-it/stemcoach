@@ -21,7 +21,7 @@ test("a focused topic cannot invent missing questions even when 20 are requested
   await dismissCookies(page);
   await page.getByLabel("Revision sprint length").selectOption("20");
   await expect(page.getByText("6-question quick challenge")).toBeVisible();
-  await expect(page.getByRole("button", { name: "10-minute challenge" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "5-minute challenge" })).toBeVisible();
   await page.getByRole("button", { name: "Adaptive review" }).click();
   await expect(page.getByText("Question 1 of 6")).toBeVisible();
   await expect(page.getByText("First-try score: 0 / 6")).toBeVisible();

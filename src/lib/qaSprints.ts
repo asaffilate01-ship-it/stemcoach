@@ -22,3 +22,10 @@ export function parseSprintSize(value: string): SprintSize {
   if (numeric === 5 || numeric === 10 || numeric === 20) return numeric;
   return 10;
 }
+
+/** No extra ten-minute allocation if a filter only contains a short set. */
+export function effectiveSprintDurationSeconds(available: number, requested: SprintSize): number {
+  const count = sprintQuestionCount(available, requested);
+  if (!count) return 0;
+  return sprintDurationSeconds(count <= 5 ? 5 : count <= 10 ? 10 : 20);
+}

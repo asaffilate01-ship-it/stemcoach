@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3, Flag, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
 import { contentReportHref } from "@/lib/contentReport";
-import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, type SprintSize } from "@/lib/qaSprints";
+import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
 import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -144,7 +144,7 @@ export default function QAClinic() {
   const reviewSummary = useMemo(() => getReviewSummary(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const weeklyPlan = useMemo(() => buildQAWeeklyPlan(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const selectedCount = sprintQuestionCount(filtered.length, sprintSize);
-  const timedMinutes = sprintDurationSeconds(sprintSize) / 60;
+  const timedMinutes = effectiveSprintDurationSeconds(filtered.length, sprintSize) / 60;
 
   const launchChallenge = (selected: string[], kind: ChallengeMode) => {
     if (selected.length === 0) return;
@@ -155,7 +155,7 @@ export default function QAClinic() {
     setChallengeStreak(0);
     setChallengeMode(kind);
     setChallengeRound((round) => round + 1);
-    const sprintSeconds = sprintDurationSeconds(sprintSize);
+    const sprintSeconds = effectiveSprintDurationSeconds(selected.length, sprintSize);
     setSecondsRemaining(sprintSeconds);
     setDeadline(kind === "timed" ? Date.now() + sprintSeconds * 1000 : null);
     window.setTimeout(() => document.getElementById("qa-library")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
@@ -371,6 +371,11 @@ export default function QAClinic() {
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {t("qa.reviewStats", { practiced: reviewSummary.practiced, total: filtered.length, due: reviewSummary.due })}
+                  <span className="mt-1 block">
+                    {reviewSummary.firstTryAccuracy === null
+                      ? t("qa.firstTryEmpty")
+                      : t("qa.firstTryAccuracy", { accuracy: reviewSummary.firstTryAccuracy, correct: reviewSummary.firstTryCorrect, total: reviewSummary.firstTryAttempts })}
+                  </span>
                 </p>
               </div>
               <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-xs"

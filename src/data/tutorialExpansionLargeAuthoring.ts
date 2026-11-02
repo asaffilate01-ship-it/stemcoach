@@ -1,4 +1,4 @@
-import type { Tutorial, TutorialQuestionFormat } from "./tutorials";
+import type { Tutorial } from "./tutorials";
 import { mcq, trueFalse, short } from "./tutorialQuestions";
 
 type FourChoices = [string, string, string, string];

@@ -55,6 +55,8 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    firstTryAccuracy: "Réussite au premier essai : {{accuracy}} % ({{correct}} sur {{total}} tentatives)",
+    firstTryEmpty: "La précision au premier essai apparaît après une première réponse.",
     studySkillsLink: "Apprendre à réviser et à préparer les examens",
     weekPlanTitle: "Votre programme de révision sur 7 jours",
     weekPlanDescription: "Jusqu'à cinq questions par jour selon vos filtres : révisions dues d'abord, puis nouveautés. Lancez une séance à votre rythme.",
