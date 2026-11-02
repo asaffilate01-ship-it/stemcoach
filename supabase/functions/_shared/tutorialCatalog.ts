@@ -161,6 +161,12 @@ export const TUTORIAL_CONTEXTS = [
   { id: "arabic-greetings-pronouns", subject: "arabic", title: "Modern Standard Arabic: Greetings and Pronouns" },
   { id: "arabic-definite-article-nouns", subject: "arabic", title: "Modern Standard Arabic: Nouns and the Definite Article" },
   { id: "arabic-simple-nominal-sentences", subject: "arabic", title: "Modern Standard Arabic: Simple Nominal Sentences" },
+  { id: "italian-present-regular-verbs", subject: "italian", title: "Italian Regular Verbs in the Present Tense" },
+  { id: "italian-adjective-agreement", subject: "italian", title: "Italian Adjectives and Noun Agreement" },
+  { id: "spanish-gustar-pronouns", subject: "spanish", title: "Spanish Gustar and Everyday Preferences" },
+  { id: "spanish-past-preterite-regular", subject: "spanish", title: "Spanish Regular Preterite for Completed Events" },
+  { id: "arabic-question-words-locations", subject: "arabic", title: "Modern Standard Arabic: Questions and Places" },
+  { id: "arabic-numbers-one-to-ten", subject: "arabic", title: "Modern Standard Arabic: Counting from One to Ten" },
 ] as const satisfies readonly TutorialContext[];
 
 export function findTutorialContext(id: unknown): TutorialContext | null {

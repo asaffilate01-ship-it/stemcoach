@@ -5,6 +5,7 @@ import { novemberQAExpansion } from "./tutorialExpansionNovember";
 import { phaseNextQAExpansion } from "./tutorialExpansionPhaseNext";
 import { largeQAExpansion } from "./tutorialExpansionLarge";
 import { newLanguageExpansion } from "./tutorialExpansionNewLanguages";
+import { additionalLanguageDepth } from "./tutorialDepthLanguages";
 
 export type TutorialQuestionFormat = "single" | "multiple" | "true-false" | "numeric" | "short-text" | "ordering" | "matching" | "fill-blanks" | "diagram-label";
 
@@ -312,4 +313,5 @@ export const tutorials: Tutorial[] = [
   ...phaseNextQAExpansion,
   ...largeQAExpansion,
   ...newLanguageExpansion,
+  ...additionalLanguageDepth,
 ];

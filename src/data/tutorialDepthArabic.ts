@@ -12,7 +12,7 @@ const specs: AuthorLesson[] = [
       "مَنْ (man) asks who, and مَتَى (matā) asks when. Short vowel marks may be omitted in ordinary written Arabic.",
       "Useful place nouns include مَدْرَسَة (school), مَكْتَبَة (library), مَطَار (airport) and مَحَطَّة (station).",
     ],
-    workedExample: "أَيْنَ الْمَدْرَسَةُ؟ means Where is the school? مَنْ هَذَا؟ means Who is this? مَتَى تَبْدَأُ الدَّرْسُ؟ would be incorrect for the masculine noun درس; use مَتَى يَبْدَأُ الدَّرْسُ؟.",
+    workedExample: "أَيْنَ الْمَدْرَسَةُ؟ means Where is the school? مَنْ هَذَا؟ means Who is this? مَتَى يَبْدَأُ الدَّرْسُ؟ means When does the lesson begin?",
     examTip: "Identify the question word before interpreting the rest of the sentence, and check noun gender when forming a verb phrase.",
     commonMistake: "Confusing مَنْ (who) with مِنْ (from) when vowel marks are omitted; the grammatical context matters.",
     checks: [

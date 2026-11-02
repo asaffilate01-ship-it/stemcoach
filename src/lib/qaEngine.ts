@@ -14,7 +14,7 @@ export const getQuestionFormat = (question: TutorialCheckpoint): TutorialQuestio
   question.format || "single";
 
 export function normaliseWrittenAnswer(value: string): string {
-  return value.normalize("NFKC").trim().replace(/\s+/g, " ").replace(/[.!?]+$/, "").toLocaleLowerCase();
+  return value.normalize("NFKC").replace(/[\u0640\u064B-\u065F\u0670]/g, "").trim().replace(/\s+/g, " ").replace(/[.!?]+$/, "").toLocaleLowerCase();
 }
 
 function parseDecimal(value: string): number {

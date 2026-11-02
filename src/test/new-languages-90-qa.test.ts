@@ -17,10 +17,10 @@ describe("new language formative foundation", () => {
       expect(newLanguageExpansion.filter((lesson) => lesson.subject === subject)).toHaveLength(3);
     expect(newLanguageExpansion.reduce((n, t) => n + 1 + (t.practice?.length || 0), 0)).toBe(90);
     expect(subjects).toHaveLength(17);
-    expect(tutorials).toHaveLength(150);
-    expect(qaEntries).toHaveLength(754);
-    expect(new Set(tutorials.map((t)=>t.id)).size).toBe(150);
-    expect(new Set(qaEntries.map((q)=>q.id)).size).toBe(754);
+    expect(tutorials).toHaveLength(156);
+    expect(qaEntries).toHaveLength(814);
+    expect(new Set(tutorials.map((t)=>t.id)).size).toBe(156);
+    expect(new Set(qaEntries.map((q)=>q.id)).size).toBe(814);
     expect(new Set(tutorials.map((t)=>t.subject))).toEqual(new Set(subjects.map((s)=>s.id)));
   });
   it("checks all 90 authored answer keys and rejects a different option or free text", () => {
