@@ -147,6 +147,20 @@ serve(async (req) => {
         throw assignmentError;
       }
       assignmentProgress = data;
+    } else if (partnerEligible) {
+      // Staging only: this RPC checks the verified enrolment again *under a
+      // transactional user/day lock* and inserts the attempt before releasing
+      // the lock. A preceding read-only eligibility check is not sufficient
+      // to prevent concurrent free attempts.
+      const { data: recorded, error: partnerError } = await admin.rpc("record_stemcoach_partner_answer", {
+        _user_id: user.id, _question_id: questionId, _submitted_answer: submittedAnswer,
+        _correct: correct, _time_taken_seconds: timeTaken,
+      });
+      if (partnerError) {
+        if (partnerError.code === "42501") throw new HttpError(403, "School access expired or daily allowance reached");
+        throw new HttpError(503, "Sponsored answer recording is not available");
+      }
+      if (recorded !== true) throw new HttpError(503, "Sponsored answer recording was not confirmed");
     } else {
       const { error: attemptError } = await admin.from("attempts").insert({
         user_id: user.id, question_id: questionId, answer: submittedAnswer, correct, time_taken_seconds: timeTaken,
