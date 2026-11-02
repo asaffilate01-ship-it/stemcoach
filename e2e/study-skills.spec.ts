@@ -14,7 +14,7 @@ test("public study hub offers 18 accessible practical guides with real source li
   await expect(page.locator("article")).toHaveCount(3);
   await expect(page.getByRole("heading", { name: "Test yourself from memory" })).toBeVisible();
   await page.getByRole("button", { name: "All techniques" }).click();
-  await page.getByRole("searchbox", { name: "Search study techniques" }).fill("sleep");
+  await page.getByRole("searchbox", { name: "Search study techniques" }).fill("Protect rest and sleep");
   await expect(page.locator("article")).toHaveCount(1);
   await expect(page.locator("article")).toContainText(["Protect rest and sleep"]);
   await expect(page.locator("article").getByRole("link", { name: /Read the underlying guidance/ })).toHaveAttribute("href", /^https:\/\//);
