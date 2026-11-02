@@ -35,7 +35,7 @@ export const TUTORIAL_CONTEXTS = [
   { id: "river-processes", subject: "geography", title: "River Erosion and Transport" },
   { id: "break-even", subject: "business-studies", title: "Break-Even Analysis" },
   { id: "ielts-paragraph-cohesion", subject: "ielts", title: "Building a Cohesive Academic Paragraph" },
-  { id: "celta-ccq-icq-feedback-practice", subject: "celta", title: "Concept-Checking Questions" },
+  { id: "celta-concept-checking", subject: "celta", title: "Concept-Checking Questions" },
   { id: "french-perfect-tense", subject: "french", title: "Le passé composé avec avoir" },
   { id: "german-accusative", subject: "german", title: "Nominative and Accusative Cases" },
   { id: "arithmetic-sequences", subject: "mathematics", title: "Arithmetic Sequences and the nth Term" },
@@ -106,7 +106,7 @@ export const TUTORIAL_CONTEXTS = [
   { id: "celta-vocabulary-mfp", subject: "celta", title: "Teaching Vocabulary: Meaning, Form and Pronunciation" },
   { id: "french-partitive-articles", subject: "french", title: "French Partitive Articles: du, de la and de l’" },
   { id: "french-direct-object-pronouns", subject: "french", title: "French Direct Object Pronouns: le, la and les" },
-  { id: "german-separable-verbs-main-clause", subject: "german", title: "Separable German Verbs in Main Clauses" },
+  { id: "german-separable-verbs", subject: "german", title: "Separable German Verbs in Main Clauses" },
   { id: "german-dative-case", subject: "german", title: "German Dative Articles and Common Prepositions" },
   // November 2026 authored revision (academic/board review still pending).
   { id: "statistics-mean-median-spread", subject: "mathematics", title: "Mean, Median and Data Spread" },
