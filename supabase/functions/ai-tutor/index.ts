@@ -48,6 +48,14 @@ function makeCacheKey(params: Record<string, any>): string {
   return btoa(JSON.stringify(sorted)).slice(0, 200);
 }
 
+// Legacy essay keys were reversible, truncated encodings of learner writing.
+// New private keys hash the full answer, user identity and rubric together.
+async function privateEssayCacheKey(fields: Record<string, unknown>): Promise<string> {
+  const input = new TextEncoder().encode(JSON.stringify(fields));
+  const digest = await crypto.subtle.digest("SHA-256", input);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 // Try to get cached response (permanent store — avoids re-calling the model)
 async function getCache(action: string, questionId?: string, cacheKey?: string): Promise<string | null> {
   const sb = getSupabaseAdmin();
@@ -172,8 +180,12 @@ async function gradeEssay(params: any, apiKey: string, userId: string) {
   const mark_scheme = fullQ.mark_scheme || fullQ.worked_solution;
   const model_answer = fullQ.model_answer || fullQ.correct_answer;
 
-  // Cache key: question + normalized student answer
-  const cacheKey = makeCacheKey({ q: question_text.slice(0, 500), a: student_answer.slice(0, 500) });
+  // Private reuse: only the same learner, identical answer and unchanged mark
+  // scheme can reuse a grading response. No raw learner text in a cache key.
+  const cacheKey = await privateEssayCacheKey({
+    version: "2026-10-12", userId, question_id, student_answer,
+    mark_scheme, model_answer, max_marks,
+  });
 
   // Check cache
   const cached = await getCache("grade-essay", question_id, cacheKey);

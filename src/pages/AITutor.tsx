@@ -78,7 +78,28 @@ export default function AITutor() {
   const clearConversation = async () => {
     setMessages([]);
     try { localStorage.removeItem(conversationKey); } catch { /* storage unavailable */ }
-    if (user) await (supabase as any).from("coach_conversations").delete().eq("user_id", user.id).eq("subject", subjectId);
+    if (user) {
+      // Clearing a conversation must also erase its short-lived private AI
+      // response cache; approved public learning material is unaffected.
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          const result = await fetch(CHAT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: "Bearer " + session.access_token,
+            },
+            body: JSON.stringify({ action: "forget-private-cache", subject: subjectId }),
+          });
+          if (!result.ok) console.error("Unable to clear private tutor response cache");
+        }
+      } catch (error) {
+        console.error("Unable to clear private tutor response cache", error);
+      }
+      await (supabase as any).from("coach_conversations").delete().eq("user_id", user.id).eq("subject", subjectId);
+    }
   };
 
   useEffect(() => {
