@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -80,6 +80,11 @@ export default function Practice() {
 
   const [questions, setQuestions] = useState<DBQuestion[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
+  const [questionLoadFailed, setQuestionLoadFailed] = useState(false);
+  const [usingCachedQuestions, setUsingCachedQuestions] = useState(false);
+  const [reloadQuestions, setReloadQuestions] = useState(0);
+  const loadVersion = useRef(0);
+  const answerSubmissionInFlight = useRef(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(new Set());
@@ -108,12 +113,42 @@ export default function Practice() {
 
   useEffect(() => {
     if (!subjectId || curriculumLoading) return;
+    let active = true;
+    const version = ++loadVersion.current;
+    const isCurrent = () => active && loadVersion.current === version;
+
     const loadQuestions = async () => {
       setDbLoading(true);
+      setQuestionLoadFailed(false);
+      setUsingCachedQuestions(false);
+      // A previous subject or mode must never remain visible as new content loads.
+      setQuestions([]);
+      setCurrentIndex(0);
+      setSelectedAnswer(null);
+      setSelectedAnswers(new Set());
+      setEssayAnswer("");
+      setOrderedOptions([]);
+      setScore({ correct: 0, total: 0 });
+      setShowFeedback(false);
+      setShowTips(false);
+      setAiGrading(null);
+      setAiExplanation(null);
+      setRevealedAnswer(null);
+      setMasteryFeedback(null);
+      setTimeTaken(0);
+      setTimerRunning(true);
 
-      // Try network first, fall back to IndexedDB cache for offline support
+      const loadCached = async () => {
+        const cached = await getCachedQuestions(subjectId, curriculumId);
+        if (!isCurrent()) return false;
+        if (!cached?.length) return false;
+        setQuestions(cached as DBQuestion[]);
+        setUsingCachedQuestions(true);
+        return true;
+      };
+
       try {
-        let data: unknown[] | null = null;
+        let records: unknown[] = [];
         if (user) {
           const adaptive = await (supabase.rpc as any)("get_adaptive_practice_questions", {
             _subject: subjectId,
@@ -121,51 +156,38 @@ export default function Practice() {
             _mode: practiceMode,
             _count: 30,
           });
-          if (!adaptive.error) data = adaptive.data || [];
+          if (!isCurrent()) return;
+          if (!adaptive.error && Array.isArray(adaptive.data)) records = adaptive.data;
         }
-        if (!data?.length) {
-          let questionQuery = supabase
-            .from("questions_safe" as any)
-            .select("*")
-            .eq("subject", subjectId);
-          if (curriculumId) questionQuery = questionQuery.eq("curriculum", curriculumId);
-          const fallback = await questionQuery.limit(50);
-          data = (fallback.data as unknown[] | null) || [];
+
+        if (!records.length) {
+          let query = supabase.from("questions_safe" as any).select("*").eq("subject", subjectId);
+          if (curriculumId) query = query.eq("curriculum", curriculumId);
+          const result = await query.limit(50);
+          if (!isCurrent()) return;
+          if (result.error) throw result.error;
+          records = Array.isArray(result.data) ? result.data : [];
         }
-        if (data && (data as any[]).length > 0) {
-          const selected = data as unknown as DBQuestion[];
-          setQuestions(selected);
-          setCurrentIndex(0);
-          setSelectedAnswer(null);
-          setSelectedAnswers(new Set());
-          setEssayAnswer("");
-          setOrderedOptions([]);
-          setShowFeedback(false);
-          setRevealedAnswer(null);
-          setMasteryFeedback(null);
-          // Cache for offline use
-          cacheQuestions(subjectId, selected, curriculumId);
+
+        if (records.length) {
+          if (!isCurrent()) return;
+          setQuestions(records as DBQuestion[]);
+          void cacheQuestions(subjectId, records, curriculumId);
         } else {
-          // No data from network — try cache
-          const cached = await getCachedQuestions(subjectId, curriculumId);
-          if (cached && cached.length > 0) {
-            setQuestions(cached as DBQuestion[]);
-            toast({ title: t("practice.offlineMode"), description: t("practice.showingCached") });
-          }
+          await loadCached();
         }
       } catch {
-        // Network error — use cached questions
-        const cached = await getCachedQuestions(subjectId, curriculumId);
-        if (cached && cached.length > 0) {
-          setQuestions(cached as DBQuestion[]);
-          toast({ title: t("practice.youreOffline"), description: t("practice.practicingCached") });
+        if (isCurrent() && !(await loadCached()) && isCurrent()) {
+          setQuestionLoadFailed(true);
         }
+      } finally {
+        if (isCurrent()) setDbLoading(false);
       }
-
-      setDbLoading(false);
     };
-    loadQuestions();
-  }, [curriculumId, curriculumLoading, practiceMode, subjectId, t, toast, user]);
+
+    void loadQuestions();
+    return () => { active = false; };
+  }, [curriculumId, curriculumLoading, practiceMode, reloadQuestions, subjectId, user, t, toast]);
 
   // Keyboard shortcuts are active only outside editable and interactive controls.
   // Number keys toggle multi-select answers; Enter submits/advances when valid.
@@ -269,8 +291,15 @@ export default function Practice() {
             <div className="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-2xl shadow-md">
               <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">{t("practice.noQuestionsYet")}</h2>
-            <p className="mb-8 text-muted-foreground">{mascot.name} {t("practice.preparingQuestions")} {subject.name}{curriculum ? ` for ${curriculum.label}` : ""}. {t("practice.checkBackSoon")}</p>
+            <h2 className="mb-2 text-2xl font-bold">{questionLoadFailed ? t("practice.loadFailed") : t("practice.noQuestionsYet")}</h2>
+            <p className="mb-8 text-muted-foreground">{questionLoadFailed
+              ? t("practice.loadFailedDesc")
+              : <>{mascot.name} {t("practice.preparingQuestions")} {subject.name}{curriculum ? ` for ${curriculum.label}` : ""}. {t("practice.checkBackSoon")}</>}</p>
+            {questionLoadFailed && (
+              <Button onClick={() => setReloadQuestions(count => count + 1)} variant="outline" className="mb-3 w-full">
+                {t("common.retry")}
+              </Button>
+            )}
             <Button onClick={() => navigate("/subjects")} className="gap-2">
               <ChevronLeft className="h-4 w-4" /> {t("practice.backToSubjects")}
             </Button>
@@ -298,12 +327,15 @@ export default function Practice() {
   };
 
   const handleSubmit = async () => {
+    if (answerSubmissionInFlight.current) return;
+    const submissionLoadVersion = loadVersion.current;
     if (!canPractice && !canPracticeSubjectFree(subjectId || "")) {
       toast({ title: t("practice.questionLimitReached"), description: t("practice.purchaseToContinue"), variant: "destructive" });
       return;
     }
     if (isEssay) {
       if (!essayAnswer.trim()) return;
+      answerSubmissionInFlight.current = true;
       setLoadingAI(true);
       setTimerRunning(false);
       try {
@@ -319,6 +351,7 @@ export default function Practice() {
           },
         });
         if (error) throw error;
+        if (submissionLoadVersion !== loadVersion.current) return;
         setAiGrading(data.grading);
         setMasteryFeedback(data.mastery || null);
         setShowFeedback(true);
@@ -334,15 +367,19 @@ export default function Practice() {
         if (data.stats) fetchStats();
         incrementCount();
       } catch (e: any) {
-        toast({ title: t("practice.gradingFailed"), description: e.message, variant: "destructive" });
+        if (submissionLoadVersion === loadVersion.current) {
+          toast({ title: t("practice.gradingFailed"), description: e.message, variant: "destructive" });
+        }
       } finally {
-        setLoadingAI(false);
+        answerSubmissionInFlight.current = false;
+        if (submissionLoadVersion === loadVersion.current) setLoadingAI(false);
       }
       return;
     }
 
     const submittedSingleAnswer = isOrdering ? currentOrder.join(" → ") : selectedAnswer;
     if (!submittedSingleAnswer && selectedAnswers.size === 0) return;
+    answerSubmissionInFlight.current = true;
     setTimerRunning(false);
     setSubmitting(true);
 
@@ -356,6 +393,7 @@ export default function Practice() {
         },
       });
       if (error) throw error;
+      if (submissionLoadVersion !== loadVersion.current) return;
 
       const correct = result.correct;
       setRevealedAnswer(result);
@@ -381,9 +419,12 @@ export default function Practice() {
         // Trigger badge display through fetchStats
       }
     } catch (e: any) {
-      toast({ title: t("practice.submitFailed"), description: e.message, variant: "destructive" });
+      if (submissionLoadVersion === loadVersion.current) {
+        toast({ title: t("practice.submitFailed"), description: e.message, variant: "destructive" });
+      }
     } finally {
-      setSubmitting(false);
+      answerSubmissionInFlight.current = false;
+      if (submissionLoadVersion === loadVersion.current) setSubmitting(false);
     }
   };
 
@@ -406,16 +447,7 @@ export default function Practice() {
   };
 
   const handleAskAI = async () => {
-    // Device-level cache: an explanation for a given question never changes,
-    // so we only ever fetch it once per device.
-    const cacheKey = `stemcoach:explain:${question.id}`;
-    try {
-      const local = localStorage.getItem(cacheKey);
-      if (local) {
-        setAiExplanation(local);
-        return;
-      }
-    } catch { /* storage unavailable — fall through to fetch */ }
+    // Do not reuse a previous account\u0027s personalised explanation from shared-device storage.
 
     setLoadingAI(true);
     try {
@@ -432,7 +464,6 @@ export default function Practice() {
       });
       if (error) throw error;
       setAiExplanation(data.explanation);
-      try { localStorage.setItem(cacheKey, data.explanation); } catch { /* quota full */ }
     } catch (e: any) {
       toast({ title: t("practice.coachingFailed"), description: e.message, variant: "destructive" });
     } finally {
@@ -498,6 +529,12 @@ export default function Practice() {
       </div>
 
       <main className="container mx-auto max-w-4xl px-4 py-6 md:py-10">
+        {/* Cached questions can be read offline, but assessment is still server-checked. */}
+        {usingCachedQuestions && (
+          <p role="status" className="mb-5 rounded-xl border border-warning/25 bg-warning/5 p-3 text-sm text-foreground">
+            {t("practice.cachedNeedsConnection")}
+          </p>
+        )}
         {/* Quota banner */}
         {isFree && user && (
           <motion.div
