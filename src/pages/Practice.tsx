@@ -133,6 +133,11 @@ export default function Practice() {
       setShowTips(false);
       setAiGrading(null);
       setAiExplanation(null);
+      setLoadingAI(false);
+      setSubmitting(false);
+      setShowXP(false);
+      setShowCorrectAnim(false);
+      setShowMascotReaction(false);
       setRevealedAnswer(null);
       setMasteryFeedback(null);
       setTimeTaken(0);
@@ -188,6 +193,18 @@ export default function Practice() {
     void loadQuestions();
     return () => { active = false; };
   }, [curriculumId, curriculumLoading, practiceMode, reloadQuestions, subjectId, user, t, toast]);
+
+  // Clear legacy per-question AI output that was shared across accounts on one device.
+  useEffect(() => {
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("stemcoach:explain:")) localStorage.removeItem(key);
+      }
+    } catch {
+      // Storage may be unavailable; this does not affect server-side access control.
+    }
+  }, []);
 
   // Keyboard shortcuts are active only outside editable and interactive controls.
   // Number keys toggle multi-select answers; Enter submits/advances when valid.
@@ -447,8 +464,9 @@ export default function Practice() {
   };
 
   const handleAskAI = async () => {
-    // Do not reuse a previous account\u0027s personalised explanation from shared-device storage.
-
+    // Do not reuse another account's personalised explanation on shared devices.
+    const requestedVersion = loadVersion.current;
+    if (loadingAI) return;
     setLoadingAI(true);
     try {
       const { data, error } = await supabase.functions.invoke("ai-tutor", {
@@ -463,11 +481,14 @@ export default function Practice() {
         },
       });
       if (error) throw error;
+      if (requestedVersion !== loadVersion.current) return;
       setAiExplanation(data.explanation);
     } catch (e: any) {
-      toast({ title: t("practice.coachingFailed"), description: e.message, variant: "destructive" });
+      if (requestedVersion === loadVersion.current) {
+        toast({ title: t("practice.coachingFailed"), description: e.message, variant: "destructive" });
+      }
     } finally {
-      setLoadingAI(false);
+      if (requestedVersion === loadVersion.current) setLoadingAI(false);
     }
   };
 
@@ -608,6 +629,7 @@ export default function Practice() {
                   key={mode}
                   type="button"
                   onClick={() => setSearchParams({ mode })}
+                  disabled={submitting || loadingAI}
                   className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${practiceMode === mode ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground hover:text-foreground"}`}
                   aria-pressed={practiceMode === mode}
                 >
