@@ -1,6 +1,7 @@
 const fr = {
   // ── Nav & Layout ──
   nav: {
+    more: "Plus",
     mobileNavigation: "Navigation mobile",
     skipToContent: "Aller au contenu",
     qaClinic: "Questions-réponses",

@@ -1,6 +1,7 @@
 const en = {
   // ── Nav & Layout ──
   nav: {
+    more: "More",
     mobileNavigation: "Mobile navigation",
     skipToContent: "Skip to content",
     qaClinic: "Q&A Clinic",

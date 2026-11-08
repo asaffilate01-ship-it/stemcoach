@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe, Target } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe, Target, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Icon3D } from "@/components/ui/icon-3d";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import type { Icon3DVariant } from "@/components/ui/icon-3d";
 import { normalizeLanguage } from "@/i18n/language";
 import type { SupportedLanguage } from "@/i18n/language";
 import { supabase } from "@/integrations/supabase/client";
+import { canShowNavItem } from "@/lib/navAccess";
 
 interface NavItem {
   to: string;
@@ -156,18 +157,21 @@ export function AppHeader() {
   };
 
   const filterVisible = (items: NavItem[]) =>
-    items.filter(item => {
-      if (!item.roles) return true;
-      if (!user) return false;
-      if (rolesLoading) return false;
-      return item.roles.some(r => roles.includes(r as any));
-    });
+    items.filter(item => canShowNavItem(item, { signedIn: Boolean(user), rolesLoading, roles }));
 
   const topNav = filterVisible(navItems.filter(i => !i.group));
   const studyItems = filterVisible(navItems.filter(i => i.group === "study"));
   const socialItems = filterVisible(navItems.filter(i => i.group === "social"));
   const classItems = filterVisible(navItems.filter(i => i.group === "classes"));
   const resourceItems = filterVisible(navItems.filter(i => i.group === "resources"));
+  const overflowTopNav = topNav.slice(4);
+  const mobileMenuGroups = [
+    { label: t("nav.more"), items: topNav },
+    { label: t("nav.groupStudy"), items: studyItems },
+    { label: t("nav.groupResources"), items: resourceItems },
+    { label: t("nav.groupClasses"), items: classItems },
+    { label: t("nav.groupRewards"), items: socialItems },
+  ].filter(group => group.items.length > 0);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -236,14 +240,42 @@ export function AppHeader() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-0.5 lg:flex">
           {topNav.slice(0, 4).map(item => <NavLink key={item.to} item={item} />)}
+          {overflowTopNav.length > 0 && <GroupDropdown label={t("nav.more")} items={overflowTopNav} />}
           {user && <GroupDropdown label={t("nav.groupStudy")} items={studyItems} />}
           <GroupDropdown label={t("nav.groupRewards")} items={socialItems} />
           {classItems.length > 0 && <GroupDropdown label={t("nav.groupClasses")} items={classItems} />}
           <GroupDropdown label={t("nav.groupResources")} items={resourceItems} />
         </nav>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Right actions: all role-eligible destinations remain discoverable on mobile. */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button type="button" className="lg:hidden flex min-h-10 min-w-10 items-center justify-center gap-1 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                aria-label={t("nav.more")}>
+                <Menu className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">{t("nav.more")}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-[70vh] w-[min(19rem,calc(100vw-1rem))] overflow-y-auto lg:hidden">
+              {mobileMenuGroups.map((group, index) => (
+                <div key={group.label}>
+                  {index > 0 && <DropdownMenuSeparator />}
+                  <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                  {group.items.map(item => (
+                    <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)}
+                      aria-current={isActive(item.to) ? "page" : undefined}
+                      className="flex min-h-10 items-center gap-2.5">
+                      <Icon3D icon={item.icon} variant={item.variant || "primary"} size="xs" />
+                      <span className="min-w-0 flex-1 whitespace-normal">{item.labelKey ? t(item.labelKey) : item.label}</span>
+                      {item.comingSoon && <span className="text-xs text-muted-foreground">{t("nav.soon")}</span>}
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Language selector */}
           <LanguageSelector />
           <button

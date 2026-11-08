@@ -1,6 +1,7 @@
 const de = {
   // ── Nav & Layout ──
   nav: {
+    more: "Mehr",
     mobileNavigation: "Mobile Navigation",
     skipToContent: "Zum Inhalt springen",
     qaClinic: "Fragen & Antworten",
