@@ -238,7 +238,7 @@ export function AppHeader() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-0.5 lg:flex">
+        <nav className="hidden items-center gap-0.5 xl:flex" aria-label={t("nav.groupStudy")}>
           {topNav.slice(0, 4).map(item => <NavLink key={item.to} item={item} />)}
           {overflowTopNav.length > 0 && <GroupDropdown label={t("nav.more")} items={overflowTopNav} />}
           {user && <GroupDropdown label={t("nav.groupStudy")} items={studyItems} />}
@@ -251,15 +251,15 @@ export function AppHeader() {
         <div className="flex items-center gap-1 sm:gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button type="button" className="lg:hidden flex min-h-10 min-w-10 items-center justify-center gap-1 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              <button type="button" className="xl:hidden flex min-h-10 min-w-10 items-center justify-center gap-1 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
                 aria-label={t("nav.more")}>
                 <Menu className="h-5 w-5" aria-hidden="true" />
                 <span className="sr-only">{t("nav.more")}</span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="max-h-[70vh] w-[min(19rem,calc(100vw-1rem))] overflow-y-auto lg:hidden">
+            <DropdownMenuContent align="end" className="max-h-[70vh] w-[min(19rem,calc(100vw-1rem))] overflow-y-auto xl:hidden">
               {mobileMenuGroups.map((group, index) => (
-                <div key={group.label}>
+                <div key={group.label} role="group" aria-label={group.label}>
                   {index > 0 && <DropdownMenuSeparator />}
                   <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
                   {group.items.map(item => (
