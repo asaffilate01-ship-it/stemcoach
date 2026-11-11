@@ -16,11 +16,11 @@ describe("November expanded original formative bank", () => {
     expect(new Set(largeQAExpansion.map(lesson => lesson.subject))).toEqual(new Set(subjects.filter(subject => !["italian", "spanish", "arabic"].includes(subject.id)).map(subject => subject.id)));
     expect(largeQAExpansion.every(lesson => questionsOf(lesson).length === 10)).toBe(true);
     expect(largeQAExpansion.reduce((sum, lesson) => sum + questionsOf(lesson).length, 0)).toBe(140);
-    expect(tutorials).toHaveLength(156);
-    expect(qaEntries).toHaveLength(814);
-    expect(new Set(tutorials.map(x => x.id)).size).toBe(156);
-    expect(new Set(qaEntries.map(x => x.id)).size).toBe(814);
-    expect(new Set(tutorials.map(x => x.subject + ":" + x.title.toLowerCase())).size).toBe(156);
+    expect(tutorials).toHaveLength(176);
+    expect(qaEntries).toHaveLength(974);
+    expect(new Set(tutorials.map(x => x.id)).size).toBe(176);
+    expect(new Set(qaEntries.map(x => x.id)).size).toBe(974);
+    expect(new Set(tutorials.map(x => x.subject + ":" + x.title.toLowerCase())).size).toBe(176);
     expect(TUTORIAL_CONTEXTS.map(({ id, subject, title }) => ({ id, subject, title })))
       .toEqual(tutorials.map(({ id, subject, title }) => ({ id, subject, title })));
   });

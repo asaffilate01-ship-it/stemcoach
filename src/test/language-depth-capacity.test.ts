@@ -20,10 +20,10 @@ describe("second language learning phase: 60 checked formative questions", () =>
       expect(additionalLanguageDepth.filter((lesson) => lesson.subject === subject)).toHaveLength(2);
     }
     expect(additionalLanguageDepth.reduce((total, lesson) => total + checks(lesson).length, 0)).toBe(60);
-    expect(tutorials).toHaveLength(156);
-    expect(qaEntries).toHaveLength(814);
-    expect(new Set(tutorials.map((lesson) => lesson.id)).size).toBe(156);
-    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(814);
+    expect(tutorials).toHaveLength(176);
+    expect(qaEntries).toHaveLength(974);
+    expect(new Set(tutorials.map((lesson) => lesson.id)).size).toBe(176);
+    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(974);
     expect(TUTORIAL_CONTEXTS.map(({id,subject,title})=>({id,subject,title})))
       .toEqual(tutorials.map(({id,subject,title})=>({id,subject,title})));
   });
