@@ -43,14 +43,12 @@ describe("on-demand million-variant authored-skill drafts", () => {
     for (let offset = 0; offset < VARIANTS_PER_SKILL; offset++) {
       const index = start + offset;
       const first = draftVariantAt(index);
-      expect(first, "Missing question for " + index).not.toBeNull();
-      const item = first!;
-      expect(item.skill).toBe(skill);
-      expect(item.reviewStatus).toBe("draft");
-      expect(item.answer.trim().length).toBeGreaterThan(0);
-      expect(item.workedSolution.length).toBeGreaterThan(35);
-      expect(seenIds.has(item.id), "Duplicate ID in family " + skill).toBe(false);
-      expect(seenQuestions.has(item.question), "Duplicate prompt in family " + skill).toBe(false);
+      if (!first) throw new Error("Missing question for " + index);
+      const item = first;
+      if (item.skill !== skill || item.reviewStatus !== "draft") throw new Error("Invalid skill/review state at " + index);
+      if (!item.answer.trim() || item.workedSolution.length < 25) throw new Error("Incomplete answer at " + index);
+      if (seenIds.has(item.id)) throw new Error("Duplicate ID in " + skill + " at " + index);
+      if (seenQuestions.has(item.question)) throw new Error("Duplicate prompt in " + skill + " at " + index);
       seenIds.add(item.id);
       seenQuestions.add(item.question);
     }
