@@ -1,0 +1,98 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, numeric, trueFalse, multi, order, short } from "./tutorialQuestions";
+
+/** Original formative lessons. Syllabus mapping and independent academic review pending. */
+export const milestoneMathsLessons: Tutorial[] = [
+{
+"id": "pythagoras-distance",
+"subject": "mathematics",
+"title": "Pythagoras' Theorem and Coordinate Distances",
+"level": "Foundation",
+"minutes": 16,
+"summary": "Calculate missing sides of right-angled triangles and use horizontal and vertical differences to find coordinate distances.",
+"objectives": ["Identify the hypotenuse in a right-angled triangle","Use a² + b² = c² with compatible length units","Derive coordinate distance from perpendicular horizontal and vertical changes"],
+"lesson": ["Pythagoras' theorem applies only to right-angled triangles. The hypotenuse is always opposite the right angle and is the longest side.","For perpendicular side lengths a and b, the hypotenuse c satisfies c² = a² + b². To find a shorter side, subtract the other side's square from c².","Between points (x₁,y₁) and (x₂,y₂), the horizontal and vertical differences form a right triangle. Distance is √((x₂−x₁)² + (y₂−y₁)²)."],
+"workedExample": "A ladder forms a right triangle with horizontal reach 5 m and vertical height 12 m. Its length is √(5² + 12²) = √169 = 13 m. For coordinates (1,2) and (6,14), the differences are also 5 and 12, so distance is 13 units.",
+"examTip": "Label the right angle and hypotenuse first, square lengths before adding or subtracting, and include a unit in the final length.",
+"commonMistake": "Adding the lengths directly instead of their squares gives an incorrect hypotenuse; using subtraction for the longest side also reverses the formula.",
+checkpoint: mcq("In a right-angled triangle, the perpendicular sides measure 3 cm and 4 cm. What is the hypotenuse?", ["5 cm","7 cm","12 cm","25 cm"], "5 cm", "The longest side is √(3² + 4²) = √(9 + 16) = 5 cm, so the Pythagorean triple is 3, 4, 5.", "Square both perpendicular lengths and add before taking the square root."),
+practice: [
+numeric("Find the hypotenuse in centimetres when the shorter sides are 5 cm and 12 cm.", 13, "The squared length is 5² + 12² = 25 + 144 = 169; √169 = 13 cm.", "The hypotenuse must be longer than twelve centimetres."),
+numeric("A triangle has hypotenuse 10 m and one shorter side 6 m. Find the missing shorter side in metres.", 8, "Subtract 6² from the hypotenuse square: 10² − 6² = 100 − 36 = 64, so the missing side is 8 m.", "Use subtraction when the hypotenuse is already known."),
+mcq("Find the distance between coordinates (0, 0) and (8, 15).", ["7 units","17 units","23 units","289 units"], "17 units", "Horizontal and vertical differences are 8 and 15. The straight-line distance is √(64 + 225) = √289 = 17.", "Take the square root of the sum of squared coordinate differences."),
+trueFalse("Pythagoras' theorem applies to every triangle, regardless of its angles.", false, "The relation a² + b² = c² holds specifically when one angle equals 90 degrees, not for arbitrary triangles.", "Check the angle condition required by the theorem."),
+multi("Which statements are true for a right-angled triangle?", ["The hypotenuse is opposite the right angle","The hypotenuse is the longest side","The two shorter sides meet at the right angle","The sum of all three side lengths is always a square"], ["The hypotenuse is opposite the right angle","The hypotenuse is the longest side","The two shorter sides meet at the right angle"], "The right-angle geometry determines which sides can be used in a²+b²=c², but the perimeter has no general perfect-square requirement.", "Focus on the geometry of the angle and opposite side."),
+order("Put the steps for finding a right-triangle hypotenuse in a useful order.", ["Square both perpendicular side lengths","Add the two squared lengths","Take the square root to find the hypotenuse"], "The Pythagorean relation gives the square of the hypotenuse first, then the final square root returns a length.", "The sum of the two squares is not yet the length."),
+short("What name is given to the longest side opposite the right angle?", "hypotenuse", "The hypotenuse is opposite the 90-degree angle. The other two sides are perpendicular to each other.", "Identify the side facing the square corner of the triangle."),
+]
+},
+{
+"id": "algebra-rearranging-formulas",
+"subject": "mathematics",
+"title": "Rearranging Formulae and Inverse Operations",
+"level": "Intermediate",
+"minutes": 17,
+"summary": "Make a chosen variable the subject of equations by undoing operations while maintaining equality on both sides.",
+"objectives": ["Identify the desired subject of a formula","Apply inverse operations in a valid order","Explain restrictions when dividing by expressions that may be zero"],
+"lesson": ["To make a variable the subject, use operations that preserve equality: add, subtract, multiply or divide both sides by the same non-zero quantity.","Reverse the order of operations around the subject: remove outer additions or subtractions before reversing multiplication or division.","When the subject appears inside a square, use the square root carefully and consider signs where the context allows both positive and negative results."],
+"workedExample": "From P = 2(l + w), divide by 2 to obtain P/2 = l + w; subtract l from both sides to obtain w = P/2 − l. Substituting P = 30 and l = 8 gives w = 15 − 8 = 7.",
+"examTip": "Check a rearrangement by substituting numbers into both the original and final formulas and verifying that they give matching results.",
+"commonMistake": "Moving terms across an equals sign without the correct inverse operation, or dividing by a variable that could equal zero, can change the solutions.",
+checkpoint: mcq("For P = 2(l + w), which rearrangement correctly makes w the subject?", ["w = P/2 − l","w = 2P − l","w = P − 2l","w = 2l − P"], "w = P/2 − l", "Divide the entire equation by 2, then subtract l: P/2 = l + w, so w = P/2 − l.", "Undo the outside multiplication before the inside addition."),
+practice: [
+numeric("If y = 2x + 3 and y = 15, find x.", 6, "Subtract 3 to get 12 = 2x, then divide by 2 to obtain x = 6.", "Undo the addition first, then divide by two."),
+numeric("Given v = u + at, v = 25, u = 5 and t = 4, find acceleration a.", 5, "Subtract u to get 20 = 4a, then divide by 4 to obtain a = 5.", "Make a the subject using a = (v − u)/t."),
+mcq("From A = πr² for a circle with positive radius, what expression makes r the subject?", ["√(A/π)","A/π","π/A","A²/π"], "√(A/π)", "First divide by π to get r² = A/π. The positive square root gives the geometric radius.", "Isolate r squared before taking the root."),
+trueFalse("Dividing both sides of an equation by x is always safe even when x may equal zero.", false, "Division by zero is undefined, so cancelling a variable factor without checking can discard valid cases or introduce invalid reasoning.", "Check whether a quantity could be zero before dividing by it."),
+multi("Which operations preserve an equality when correctly applied to both sides?", ["Add the same number to each side","Subtract the same expression from each side","Multiply both sides by the same number","Divide both sides by zero"], ["Add the same number to each side","Subtract the same expression from each side","Multiply both sides by the same number"], "The first three operations preserve equality. Division by zero is undefined and must never be used.", "One possible operation has an undefined denominator."),
+order("Arrange steps to make x the subject of 3x + 5 = 20.", ["Subtract 5 from both sides","Divide both sides by 3","State the solution x = 5"], "The initial equality becomes 3x = 15 after subtraction, and division by three then gives x = 5.", "Remove the constant term before removing the coefficient."),
+short("What is the inverse operation of multiplying a quantity by a non-zero number?", "division", "Division by the same non-zero number undoes multiplication; this is how coefficients are removed in simple rearrangements.", "Think about which arithmetic operation undoes multiplication."),
+]
+},
+{
+"id": "frequency-density-histograms",
+"subject": "mathematics",
+"title": "Histograms and Frequency Density",
+"level": "Intermediate",
+"minutes": 18,
+"summary": "Interpret histograms with unequal class widths by linking bar area, frequency and frequency density.",
+"objectives": ["Find each class width from its interval","Calculate frequency density as frequency divided by class width","Recover class frequency from bar width multiplied by height"],
+"lesson": ["A histogram displays continuous data divided into classes. When class widths differ, bar height represents frequency density rather than raw frequency.","Frequency density = frequency ÷ class width; inversely, frequency = bar height × class width when the vertical axis shows density.","Read both class interval boundaries before finding width. Two equally frequent classes may have different heights if one covers a wider interval."],
+"workedExample": "One class covers 10 ≤ x < 15 and has frequency 20. Its width is 5 and density is 20/5 = 4. Another class covers 15 ≤ x < 25 with frequency 20; its width is 10, so its density is 2. The first bar is twice as tall but both areas equal 20.",
+"examTip": "Find the width of every class first, and use bar area—not bar height alone—to compare the numbers of observations.",
+"commonMistake": "Assuming the tallest bar always contains the greatest frequency is wrong when the histogram has classes of unequal widths.",
+checkpoint: mcq("A histogram class has frequency 24 and width 6. What is its frequency density?", ["4","6","18","144"], "4", "Frequency density is frequency divided by class width, so 24 ÷ 6 = 4.", "Divide the observed count by the width of its interval."),
+practice: [
+numeric("A class spans 5 ≤ x < 10 and has frequency density 3. Find its frequency.", 15, "The class width is 10 − 5 = 5. Frequency is density × class width = 3 × 5 = 15.", "Calculate the area of the histogram bar."),
+numeric("A histogram class has frequency 36 and class width 9. Find its frequency density.", 4, "The bar height equals frequency divided by width: 36/9 = 4.", "Divide the total in the class by the interval width."),
+mcq("Two classes each have frequency 20, but widths 5 and 10. Which statement is correct?", ["The narrower class has twice the density","The wider class has twice the density","Their densities are equal","Neither class has a density"], "The narrower class has twice the density", "With the same frequency, densities are 20/5 = 4 and 20/10 = 2. The narrower class's bar is twice as tall.", "Density depends inversely on width when counts are the same."),
+trueFalse("In a histogram with unequal class widths, bar height always equals frequency.", false, "The vertical scale must reflect frequency density in an unequal-width histogram; class frequency is proportional to bar area.", "Check whether the class intervals all have matching widths."),
+multi("Which quantities are needed to recover histogram class frequency?", ["Bar height measured as frequency density","Class interval width","Multiplication of height and width","The title font size"], ["Bar height measured as frequency density","Class interval width","Multiplication of height and width"], "Frequency corresponds to the bar's area, calculated by multiplying its density height by its width.", "A visual decoration never determines frequency."),
+order("Order the steps for calculating a bar height when frequency is known.", ["Find the upper and lower class boundaries","Subtract them to find class width","Divide class frequency by class width"], "The interval width must be established before calculating frequency density, which sets the bar height.", "Calculate class width before its density."),
+short("What name is given to frequency divided by class width?", "frequency density", "Frequency density is the measure displayed on the vertical axis for histograms of classes with differing widths.", "Its name combines frequency and the amount per unit interval."),
+]
+},
+{
+"id": "geometric-sequences-ratio",
+"subject": "mathematics",
+"title": "Geometric Sequences and Common Ratios",
+"level": "Intermediate",
+"minutes": 16,
+"summary": "Identify constant multiplication in geometric sequences and calculate missing or later terms using a common ratio.",
+"objectives": ["Distinguish geometric from arithmetic sequences","Find the common ratio between successive nonzero terms","Use the nth-term relation arⁿ⁻¹ for geometric sequences"],
+"lesson": ["In a geometric sequence, multiply by a fixed common ratio r to move from one term to the next. An arithmetic sequence instead adds a fixed difference.","For nonzero consecutive terms, divide the later term by the previous term to find r. The ratio may be a whole number, fraction or negative value.","If the first term is a, the nth term is a × rⁿ⁻¹, because n − 1 ratio steps separate the first and nth terms."],
+"workedExample": "For 3, 6, 12, 24, ... the first term is a = 3 and ratio r = 2. The fifth term is 3 × 2⁴ = 48. By contrast, 3, 6, 9, 12 is arithmetic because its terms rise by a constant difference of 3.",
+"examTip": "Divide two neighbouring nonzero terms to establish the ratio, then check it with another pair before finding a later term.",
+"commonMistake": "Using the nth power instead of the (n−1)th power produces a term one step too large, because the first term has no multiplication step.",
+checkpoint: mcq("What is the next term in the geometric sequence 2, 6, 18, ...?", ["24","36","54","72"], "54", "Each term is multiplied by three, so the next term after 18 is 18 × 3 = 54.", "Use multiplication by the same ratio rather than addition."),
+practice: [
+numeric("The sequence 3, 6, 12, ... has ratio 2. Find its sixth term.", 96, "The sixth term is 3 × 2⁵ = 3 × 32 = 96, since there are five ratio steps after the first term.", "Use a × r to the power n minus one."),
+numeric("The sequence 81, 27, 9, ... continues geometrically. What is its fifth term?", 1, "The common ratio is 1/3; continuing gives fourth term 3 and fifth term 1.", "Each new term is one third of the previous term."),
+mcq("What is the common ratio in 5, 10, 20, 40?", ["2","5","10","15"], "2", "Divide any nonzero term by the preceding term, such as 10 ÷ 5 = 2; the other pairs confirm the ratio.", "The common ratio is a quotient, not a difference."),
+trueFalse("Every geometric sequence has a constant difference between consecutive terms.", false, "Geometric sequences have a constant multiplier; most do not have a constant additive difference between consecutive terms.", "Compare adding a value with multiplying by a value."),
+multi("Which sequences are geometric?", ["2, 4, 8, 16","9, 3, 1, 1/3","1, 4, 7, 10","5, −5, 5, −5"], ["2, 4, 8, 16","9, 3, 1, 1/3","5, −5, 5, −5"], "The first two have fixed positive ratios of 2 and 1/3, and the last has ratio −1. The arithmetic sequence adds 3 each time.", "Check whether division of consecutive terms is consistent."),
+order("Order the steps for finding the nth term of a geometric sequence.", ["Identify the first term a","Calculate the common ratio r","Evaluate a × rⁿ⁻¹ for the requested n"], "The first term and common ratio define the sequence; n−1 multiplications reach the requested term.", "Use the first term and ratio before applying the exponent."),
+short("What is the name for the fixed multiplier connecting terms in a geometric sequence?", "common ratio", "The common ratio describes the multiplicative change from one nonzero term to the next in a geometric sequence.", "It is the quotient of successive nonzero terms."),
+]
+},
+];
