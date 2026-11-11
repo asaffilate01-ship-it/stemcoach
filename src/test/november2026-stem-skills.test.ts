@@ -10,11 +10,11 @@ const questionsOf = (lesson: (typeof tutorials)[number]) => [lesson.checkpoint, 
 describe("20 original STEM lessons and 160 mixed-format self-checks", () => {
   it("adds four complete lesson modules per STEM subject without inflating old content", () => {
     expect(november2026STEMLessons).toHaveLength(20);
-    expect(tutorials).toHaveLength(176);
-    expect(qaEntries).toHaveLength(974);
-    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(176);
-    expect(new Set(qaEntries.map(item => item.id)).size).toBe(974);
-    expect(new Set(tutorials.map(lesson => lesson.subject + ":" + lesson.title.toLowerCase().trim())).size).toBe(176);
+    expect(tutorials).toHaveLength(200);
+    expect(qaEntries).toHaveLength(1166);
+    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(200);
+    expect(new Set(qaEntries.map(item => item.id)).size).toBe(1166);
+    expect(new Set(tutorials.map(lesson => lesson.subject + ":" + lesson.title.toLowerCase().trim())).size).toBe(200);
     const grouped = new Map<string, number>();
     for (const item of november2026STEMLessons) grouped.set(item.subject, (grouped.get(item.subject) || 0) + 1);
     expect(Object.fromEntries(grouped.entries())).toEqual({
