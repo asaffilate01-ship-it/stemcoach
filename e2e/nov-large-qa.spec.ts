@@ -22,7 +22,7 @@ test("new compound growth topic offers all ten original answers and a proportion
 test("local Q&A history shows honest first-try accuracy without storing answers", async ({ page }) => {
   await page.addInitScript(() => {
     const id = "compound-growth-percentages-0";
-    localStorage.setItem("stemcoach:qa-review-v1", JSON.stringify({
+    localStorage.setItem("stemcoach:qa-review-v1:scope-v2:guest", JSON.stringify({
       version: 1,
       entries: { [id]: {
         attempts: 2, correctFirst: 1, incorrectFirst: 1,

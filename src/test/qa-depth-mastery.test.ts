@@ -11,10 +11,10 @@ const src = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8")
 describe("deeper tutorial and Q&A bank", () => {
   it("contains 28 new lessons and 112 new questions with all 14 subjects represented twice", () => {
     expect(deepQAExpansion).toHaveLength(28);
-    expect(tutorials).toHaveLength(200);
-    expect(qaEntries).toHaveLength(1166);
-    expect(new Set(tutorials.map((t) => t.id)).size).toBe(200);
-    expect(new Set(qaEntries.map((q) => q.id)).size).toBe(1166);
+    expect(tutorials).toHaveLength(212);
+    expect(qaEntries).toHaveLength(1262);
+    expect(new Set(tutorials.map((t) => t.id)).size).toBe(212);
+    expect(new Set(qaEntries.map((q) => q.id)).size).toBe(1262);
     expect(new Set(deepQAExpansion.map((t) => t.subject)).size).toBe(14);
     for (const subject of new Set(deepQAExpansion.map((t) => t.subject)))
       expect(deepQAExpansion.filter((t) => t.subject === subject)).toHaveLength(2);
@@ -75,13 +75,13 @@ describe("deeper tutorial and Q&A bank", () => {
     expect(parseBookmarks("{garbled", ids)).toEqual([]);
     const page = src("src/pages/QAClinic.tsx");
     for (const filter of ["saved", "missed", "due"]) expect(page).toContain('reviewFilter === "' + filter + '"');
-    expect(page).toContain("QA_BOOKMARKS_KEY");
+    expect(page).toContain("qaScopedStorageKeys(ownerId)");
   });
 
-  it("aligns the trusted server-side AI tutor lesson allowlist with all 200 lessons", () => {
+  it("aligns the trusted server-side AI tutor lesson allowlist with all 212 lessons", () => {
     const catalog = src("supabase/functions/_shared/tutorialCatalog.ts");
     const found = [...catalog.matchAll(/\{ id: "([a-z0-9-]+)", subject: "([^"]+)", title: "([^"]+)" \}/g)];
-    expect(found).toHaveLength(200);
+    expect(found).toHaveLength(212);
     expect(found.map((x) => x[1])).toEqual(tutorials.map((t) => t.id));
     expect(found.map((x) => x[2])).toEqual(tutorials.map((t) => t.subject));
     expect(found.map((x) => x[3])).toEqual(tutorials.map((t) => t.title));

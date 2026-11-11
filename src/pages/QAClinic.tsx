@@ -5,7 +5,7 @@ import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3
 import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
-import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
+import { qaScopedStorageKeys, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
 import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
@@ -18,6 +18,7 @@ import type { TutorialQuestionFormat } from "@/data/tutorials";
 import { subjects } from "@/data/questions";
 import { getMascot } from "@/lib/mascots";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useAuth } from "@/hooks/useAuth";
 import { normalizeLanguage } from "@/i18n/language";
 import { studySpeechLanguage } from "@/lib/subjectLanguage";
 
@@ -29,7 +30,8 @@ const PAGE_SIZE = 16;
 type ChallengeMode = "mixed" | "adaptive" | "timed";
 const existingQuestionIds = new Set(qaEntries.map((entry) => entry.id));
 
-export default function QAClinic() {
+function QAClinicSession({ ownerId }: { ownerId: string | null }) {
+  const { history: historyKey, bookmarks: bookmarksKey } = qaScopedStorageKeys(ownerId);
   const { t, i18n } = useTranslation();
   useDocumentTitle(t("qa.title"));
   const navigate = useNavigate();
@@ -59,11 +61,11 @@ export default function QAClinic() {
   const [deadline, setDeadline] = useState<number | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(sprintDurationSeconds(10));
   const [savedIds, setSavedIds] = useState<string[]>(() => {
-    try { return parseBookmarks(localStorage.getItem(QA_BOOKMARKS_KEY), existingQuestionIds); }
+    try { return parseBookmarks(localStorage.getItem(bookmarksKey), existingQuestionIds); }
     catch { return []; }
   });
   const [history, setHistory] = useState<ReviewHistory>(() => {
-    try { return parseReviewHistory(localStorage.getItem(QA_HISTORY_KEY), existingQuestionIds); }
+    try { return parseReviewHistory(localStorage.getItem(historyKey), existingQuestionIds); }
     catch { return {}; }
   });
 
@@ -81,17 +83,17 @@ export default function QAClinic() {
 
   useEffect(() => {
     try {
-      if (savedIds.length) localStorage.setItem(QA_BOOKMARKS_KEY, serialiseBookmarks(savedIds));
-      else localStorage.removeItem(QA_BOOKMARKS_KEY);
+      if (savedIds.length) localStorage.setItem(bookmarksKey, serialiseBookmarks(savedIds));
+      else localStorage.removeItem(bookmarksKey);
     } catch { /* Storage is optional; the current session remains functional. */ }
-  }, [savedIds]);
+  }, [savedIds, bookmarksKey]);
 
   useEffect(() => {
     try {
-      if (Object.keys(history).length) localStorage.setItem(QA_HISTORY_KEY, serialiseReviewHistory(history));
-      else localStorage.removeItem(QA_HISTORY_KEY);
+      if (Object.keys(history).length) localStorage.setItem(historyKey, serialiseReviewHistory(history));
+      else localStorage.removeItem(historyKey);
     } catch { /* Private browsing or full storage: keep the in-memory session working. */ }
-  }, [history]);
+  }, [history, historyKey]);
 
   useEffect(() => {
     if (challengeMode !== "timed" || deadline === null || challengeIds.length === 0 ||
@@ -253,6 +255,7 @@ export default function QAClinic() {
           </div>
           <h1 className="stem-heading text-3xl font-bold md:text-4xl">{t("qa.title")}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">{t("qa.intro")}</p>
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("qa.deviceScopedNotice")}</p>
           <div className="mt-5 flex flex-wrap gap-3 text-xs font-medium text-muted-foreground">
             <span className="rounded-xl bg-muted px-3 py-2">{t("qa.questionCount", { count: qaEntries.length })}</span>
             <span className="rounded-xl bg-muted px-3 py-2">{t("qa.subjectCount", { count: subjects.length })}</span>
@@ -591,4 +594,25 @@ export default function QAClinic() {
       </main>
     </div>
   );
+}
+
+/**
+ * Keying the learner session forces *all* in-flight quiz, draft and review
+ * component state to remount on account changes, including guest sign-out.
+ * Wait for auth resolution to avoid briefly displaying another profile's data.
+ */
+export default function QAClinic() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader />
+        <main id="main-content" className="container mx-auto px-4 py-16">
+          <p role="status" className="text-sm text-muted-foreground">Loading practice profile…</p>
+        </main>
+      </div>
+    );
+  }
+  const ownerId = user?.id ?? null;
+  return <QAClinicSession key={ownerId ? "account:" + ownerId : "guest"} ownerId={ownerId} />;
 }

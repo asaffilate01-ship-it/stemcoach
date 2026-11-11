@@ -56,6 +56,7 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    deviceScopedNotice: "Les questions enregistrées et l’historique de révision restent sur ce navigateur, séparés par compte ou invité, sans synchronisation entre appareils. Les anciennes données communes ne sont pas importées.",
     firstTryAccuracy: "Réussite au premier essai : {{accuracy}} % ({{correct}} sur {{total}} tentatives)",
     firstTryEmpty: "La précision au premier essai apparaît après une première réponse.",
     studySkillsLink: "Apprendre à réviser et à préparer les examens",
