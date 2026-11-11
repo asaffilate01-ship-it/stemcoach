@@ -1,0 +1,98 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, numeric, trueFalse, multi, order, short } from "./tutorialQuestions";
+
+/** Original formative studies for learner practice, not validated exam-bank publications. */
+export const nextReasoningBioComputing: Tutorial[] = [
+{
+"id": "immune-response-vaccination-memory",
+"subject": "biology",
+"title": "Immune Response, Vaccination and Memory Cells",
+"level": "Intermediate",
+"minutes": 19,
+"summary": "Distinguish physical defences from adaptive immunity and explain how vaccination prepares memory-cell responses without causing the target disease.",
+"objectives": ["Identify pathogens, antigens and antibodies correctly","Explain adaptive B- and T-cell roles in a simplified immune response","Describe primary and secondary responses following vaccination"],
+"lesson": ["Physical and chemical defences, such as skin and stomach acid, help prevent pathogen entry. Innate responses can act rapidly, but adaptive immunity recognises specific antigens.","Some B cells differentiate into plasma cells that secrete antibodies with specificity for an antigen. Helper T cells coordinate immune responses, while cytotoxic T cells can kill infected cells.","Vaccination presents antigens or instructions to produce an antigen, triggering immunity and memory cells. Later exposure can produce a quicker and stronger specific response, reducing disease risk but not guaranteeing complete protection."],
+"workedExample": "After an initial vaccine dose, a person's adaptive immune system develops antigen-specific B- and T-cell memory. On later exposure to the pathogen, memory cells respond more rapidly than naïve cells; this can reduce the severity or likelihood of disease even though protection varies with pathogen and person.",
+"examTip": "Do not say antibodies kill every pathogen directly. Explain recognition, neutralisation or marking for other immune mechanisms, and distinguish a vaccine from an antibiotic.",
+"commonMistake": "Claiming that every vaccinated person becomes permanently unable to carry an infection oversimplifies duration, variability and the different outcomes vaccines can prevent.",
+checkpoint: mcq("Which immune cell type differentiates into antibody-secreting plasma cells?", ["B lymphocyte","Red blood cell","Platelet","Muscle cell"], "B lymphocyte", "Activated B cells can mature into plasma cells that release large amounts of antibodies recognising particular antigens.", "Think about the B-cell branch of adaptive immunity."),
+practice: [
+mcq("What is the main purpose of a vaccine in a simplified adaptive immune model?", ["Prepare antigen-specific immune memory","Replace all white blood cells","Treat every bacterial infection directly","Make skin impenetrable"], "Prepare antigen-specific immune memory", "Vaccination introduces an antigenic stimulus, allowing development of specific memory before later pathogen exposure.", "Vaccination prepares a faster response to future exposure."),
+short("What is the name for a molecule or molecular feature recognised by an antigen receptor?", "antigen", "An antigen is a molecular structure that can be recognised by an antibody or a T-cell receptor in an appropriate context.", "This term refers to the feature recognised by adaptive immunity."),
+mcq("Which defence is primarily a physical barrier against pathogen entry?", ["Intact skin","An antibody memory cell","A red blood cell","A muscle tendon"], "Intact skin", "The skin's outer layers form a protective physical barrier; immune cells are important but are not the external physical barrier.", "Look for the body's protective outer surface."),
+trueFalse("Vaccination always guarantees that infection is impossible in every individual.", false, "Vaccine effectiveness varies by disease, immune response and time. Vaccination can reduce infection or severe disease without guaranteeing sterilising immunity.", "Vaccines reduce risk but rarely offer absolute guarantees."),
+multi("Which statements about adaptive immune protection are correct?", ["Some B cells produce antibody-secreting plasma cells","Specific memory cells can respond more rapidly on re-exposure","T cells can help coordinate or kill infected cells","Every vaccine is an antibiotic"], ["Some B cells produce antibody-secreting plasma cells","Specific memory cells can respond more rapidly on re-exposure","T cells can help coordinate or kill infected cells"], "Adaptive responses involve antigen-specific lymphocytes, whereas antibiotics target bacteria and have a different clinical purpose.", "Keep immune training distinct from antibiotic treatment."),
+order("Order the simplified stages of vaccine-generated adaptive memory.", ["A vaccine presents a relevant antigenic stimulus","Specific lymphocytes respond and memory cells develop","Later exposure can activate a faster memory-cell response"], "Initial antigen recognition and proliferation create memory that can respond more effectively to later exposure.", "Memory formation happens before a subsequent exposure."),
+short("Which cells allow an immune response to be faster after encountering the same antigen again?", "memory cells", "Memory B cells and T cells persist after an initial response and can be reactivated on subsequent encounter.", "Their name reflects retention of prior antigen experience."),
+]
+},
+{
+"id": "reflex-arcs-synapses",
+"subject": "biology",
+"title": "Reflex Arcs, Synapses and Rapid Responses",
+"level": "Intermediate",
+"minutes": 18,
+"summary": "Trace a protective reflex from receptor to effector and explain how synapses transfer signals between neurones.",
+"objectives": ["Identify sensory, relay and motor neurones in a reflex pathway","Recognise receptor and effector functions","Explain the directional role of chemical neurotransmitter release at a synapse"],
+"lesson": ["A protective reflex is a rapid, automatic response to a stimulus. A receptor detects a change and a sensory neurone carries impulses towards the central nervous system.","In a common spinal withdrawal reflex, the signal travels through relay neurones in the spinal cord to a motor neurone, which carries a response to an effector muscle.","Across a typical chemical synapse, neurotransmitter is released from the presynaptic cell, diffuses across the synaptic cleft and binds receptors on the postsynaptic membrane."],
+"workedExample": "When a person accidentally touches a hot object, temperature or pain receptors trigger sensory impulses. In the spinal cord, relay circuitry activates motor neurones and the flexor muscles contract to withdraw the hand. Sensory information may also reach the brain, but the protective motor response can begin before conscious awareness.",
+"examTip": "Trace the order receptor → sensory neurone → relay neurone → motor neurone → effector and keep electrical signalling distinct from chemical synaptic transmission.",
+"commonMistake": "Placing the motor neurone before the sensory neurone, or saying all reflexes must wait for deliberate brain decisions, confuses the fast spinal route.",
+checkpoint: mcq("Which neurone usually carries a signal from a skin receptor towards the spinal cord?", ["Sensory neurone","Motor neurone","Red blood cell","Muscle fibre"], "Sensory neurone", "Sensory neurones conduct signals from receptors towards the central nervous system, where reflex circuits process them.", "Follow the direction of information into the nervous system."),
+practice: [
+mcq("What is the effector in a typical hand-withdrawal reflex?", ["Contracting muscle","Light-sensitive receptor","Bone mineral","Blood plasma"], "Contracting muscle", "Motor neurones stimulate skeletal muscles that contract to move the hand away from a painful or damaging stimulus.", "An effector carries out the response."),
+short("What structure allows chemical transmission between two neurones?", "synapse", "At a chemical synapse, a neurotransmitter crosses a narrow cleft and binds postsynaptic receptors.", "This communication point has a short six-letter name."),
+mcq("What chemical carries a signal across a typical chemical synaptic cleft?", ["Neurotransmitter","Haemoglobin","Starch","Cellulose"], "Neurotransmitter", "Released neurotransmitter molecules diffuse through the synaptic cleft and act on receptors of the next cell.", "It is released from the presynaptic terminal."),
+trueFalse("A rapid spinal withdrawal reflex must wait until the person makes a conscious decision.", false, "Spinal circuits can coordinate a motor response without waiting for conscious processing in the brain, although the person may perceive pain afterward.", "The purpose of a reflex is rapid, automatic protection."),
+multi("Which components occur in a common spinal withdrawal reflex?", ["A receptor detecting the stimulus","Sensory neurone into the spinal cord","Motor neurone to a muscle","A conscious decision before every motor impulse"], ["A receptor detecting the stimulus","Sensory neurone into the spinal cord","Motor neurone to a muscle"], "Receptors, neural pathways and effectors produce rapid protective responses without requiring conscious decisions first.", "Separate reflex processing from later conscious awareness."),
+order("Order the principal stages of a spinal withdrawal reflex.", ["A skin receptor initiates a sensory signal","Spinal relay circuitry activates motor output","The effector muscle contracts and withdraws the hand"], "Sensory information enters the spinal cord before interneuronal processing activates motor output to the muscle.", "Start with the receptor and finish with the effector."),
+short("What type of neurone carries a command from the CNS to a skeletal muscle?", "motor neurone", "Motor neurones carry outgoing signals from the central nervous system to effectors that execute responses.", "This is the outgoing branch of a reflex pathway."),
+]
+},
+{
+"id": "binary-search-trace-invariants",
+"subject": "computer-science",
+"title": "Binary Search: Trace Tables and Sorted-Array Preconditions",
+"level": "Intermediate",
+"minutes": 19,
+"summary": "Trace midpoint comparisons and narrowing bounds in binary search while explaining the need for a sorted array.",
+"objectives": ["Identify binary search preconditions","Calculate integer midpoint positions for index intervals","Trace low and high index updates until a target is found or ruled out"],
+"lesson": ["Binary search works on a list sorted according to the same comparison ordering used by the search. It compares the target with a middle element and discards half of the remaining interval.","In zero-based indexing, a safe midpoint for low and high indices can be computed as low + floor((high−low)/2). If the target is larger, set low to mid+1; if smaller, set high to mid−1.","The loop terminates when the target is found or low passes high. Each comparison reduces the remaining sorted search interval, leading to O(log n) comparisons."],
+"workedExample": "Find 13 in sorted [2, 5, 7, 11, 13, 17, 23]. Start low=0 and high=6, mid=3 gives 11. Since 13>11, set low=4. Mid=(4+6)//2=5 gives 17, so high=4. Mid=4 gives 13, found after three comparisons.",
+"examTip": "Write low, mid, high and compared value at each step; use indices rather than positions counted from one.",
+"commonMistake": "Applying binary search to an unsorted list, or forgetting to exclude a rejected midpoint, can miss a present target or cause a non-terminating loop.",
+checkpoint: mcq("Which condition is essential for ordinary binary search on an array?", ["The array is sorted under the comparison used","Every value is unique","All values are positive","The array has exactly eight items"], "The array is sorted under the comparison used", "Binary search discards half the candidates based on ordering, so sorting is required; duplicate values can still be searched.", "The search needs ordering to eliminate a half-interval safely."),
+practice: [
+numeric("For zero-based binary search with low=0 and high=8, what midpoint does floor((low+high)/2) give?", 4, "The integer midpoint of indices zero through eight is floor(8/2) = 4.", "Average the two bounds and round down to an integer index."),
+mcq("Searching for 13 in [2,5,7,11,13,17,23], what value is checked first?", ["11","13","7","17"], "11", "With low zero and high six, mid three selects element 11 for the first comparison.", "Use the middle index of the seven-element array."),
+mcq("If target is larger than the middle element of an ascending sorted list, which half can be discarded?", ["The lower half including the rejected midpoint","The upper half including the last element","Neither half","Both halves"], "The lower half including the rejected midpoint", "All values at or below the midpoint are too small in ascending order, so the next low index is mid+1.", "The rejected middle value cannot equal the target."),
+trueFalse("Binary search has logarithmic worst-case comparison growth in a sorted array.", true, "At each unsuccessful comparison the remaining search region is approximately halved, so the number of checks grows as log₂ n.", "Each step discards approximately half the candidates."),
+multi("Which facts about binary search are correct?", ["A sorted sequence is needed","The midpoint can be calculated from low and high indices","It can terminate with not found","It always examines every element"], ["A sorted sequence is needed","The midpoint can be calculated from low and high indices","It can terminate with not found"], "Binary search can reject large portions of ordered data, so examining every element is not generally needed.", "The algorithm repeatedly narrows the search interval."),
+order("Order a search step when a target is greater than the middle value.", ["Read and compare the middle element","Reject the midpoint and elements below it","Set low to mid+1 and repeat if the interval remains valid"], "The order of comparison and boundary update preserves the invariant that any matching element must remain in the interval.", "Adjust the lower bound only after the comparison."),
+short("What time-complexity class describes binary search on a sorted array in the worst case?", "O(log n)", "Because each comparison halves the remaining search range, binary search grows logarithmically with input size.", "It scales with repeated halving rather than examining all elements."),
+]
+},
+{
+"id": "equivalence-partition-testing",
+"subject": "computer-science",
+"title": "Equivalence Partitions and Boundary-Value Test Design",
+"level": "Intermediate",
+"minutes": 17,
+"summary": "Choose representative valid and invalid inputs using equivalence classes, and supplement them with boundary-value tests.",
+"objectives": ["Identify input equivalence classes from a specification","Choose representative tests for invalid and valid partitions","Distinguish validation, testing and evidence of correctness"],
+"lesson": ["Equivalence partitioning groups inputs that a program is intended to handle in the same way. A representative from each class can reveal broad defects without testing every possible value.","A field accepting integer ages 18–65 has at least three numeric range partitions: under 18, 18 through 65, and over 65. Non-integer and missing inputs may need separate classes.","Boundary testing complements partitions by checking just below, exactly on and just above a limit, such as 17,18,19 and 64,65,66. Passing tests increases confidence but does not prove absence of every bug."],
+"workedExample": "A whole-number discount code length must be 6 digits. Tests can include a valid 6-digit string, one with only 5 digits, one with 7 digits and a 6-character alphabetic string. These cover length and character-class partitions, rather than just repeating many normal codes.",
+"examTip": "List the specification rules first and label each test with the partition or boundary it represents; record expected acceptance or rejection.",
+"commonMistake": "Using only several valid middle-range inputs gives little evidence about invalid types, empty values or boundary conditions.",
+checkpoint: mcq("An age input permits whole numbers 18 through 65 inclusive. Which value is an invalid lower-bound test?", ["17","18","19","64"], "17", "Seventeen is immediately below the allowed minimum of 18 and should be rejected by correct range validation.", "Try one less than the first accepted age."),
+practice: [
+numeric("An inclusive age field accepts 18 through 65. What is the highest accepted whole-number age?", 65, "The upper bound is inclusive, so 65 is valid, whereas 66 is outside the permitted integer range.", "The word inclusive means the endpoint itself is allowed."),
+mcq("Which best describes an equivalence partition in software testing?", ["Inputs expected to trigger similar program behaviour","A database table used only for billing","A function that always succeeds","Every possible input listed individually"], "Inputs expected to trigger similar program behaviour", "Partitioning divides the input domain into classes with comparable expected outcomes so representative test cases can be selected.", "Group inputs according to the same specified outcome."),
+mcq("For a code requiring exactly six numeric digits, which candidate checks an invalid character-class partition?", ["12345A","123456","654321","000123"], "12345A", "The code has six characters but includes a letter, so it specifically tests numeric-character validation rather than length.", "Keep the correct length while violating the character rule."),
+trueFalse("Passing all selected boundary tests mathematically proves the program has no defects.", false, "Tests sample specified behaviours and cannot establish the correctness of all possible implementations and untested scenarios.", "A finite test set provides evidence rather than absolute proof."),
+multi("Which are useful tests for an integer field accepting values 18–65 inclusive?", ["17","18","65","66"], ["17","18","65"], "All four values are useful boundary tests: 17 and 66 should be rejected while 18 and 65 accepted. To test only accepted or lower-side values, the fourth is an invalid upper boundary.", "Be careful: useful tests include both valid and invalid boundaries."),
+order("Order the preparation of an equivalence-partition test plan.", ["Write the explicit input rules","Identify valid and invalid equivalence classes","Select representative values and expected results"], "Testing starts from the specification, divides the domain by expected behaviour, then records representative cases.", "The specification determines which inputs belong to each class."),
+short("What is the testing technique of splitting inputs into representative valid and invalid classes?", "equivalence partitioning", "Equivalence partitioning organises input data into classes expected to behave similarly, reducing redundant test cases.", "The name combines the idea of equivalent cases and partitions."),
+]
+},
+];
