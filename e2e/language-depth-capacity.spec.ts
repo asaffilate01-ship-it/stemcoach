@@ -33,9 +33,9 @@ test("Arabic vocalised and unvocalised word forms are accepted in a short-answer
   await expect(last.getByText("Correct — well done!")).toBeVisible();
 });
 
-test("Q&A homepage truthfully displays the new 974-question draft catalogue", async ({ page }) => {
+test("Q&A homepage truthfully displays the new 1166-question draft catalogue", async ({ page }) => {
   await page.goto("/qa-clinic");
   await dismissCookies(page);
-  await expect(page.getByText("974 lesson questions")).toBeVisible();
+  await expect(page.getByText("1166 lesson questions")).toBeVisible();
   await expect(page.getByText("17 subjects")).toBeVisible();
 });
