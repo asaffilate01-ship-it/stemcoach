@@ -20,6 +20,8 @@ describe("shared browser: per-learner Q&A practice isolation", () => {
     expect(alice.history).not.toBe(alice.bookmarks);
     expect(guest.history).not.toBe(QA_HISTORY_KEY);
     expect(guest.bookmarks).not.toBe(QA_BOOKMARKS_KEY);
+    expect(guest.history).toBe("stemcoach:qa-review-v1:scope-v2:guest");
+    expect(guest.bookmarks).toBe("stemcoach:qa-bookmarks-v1:scope-v2:guest");
     expect(qaScopedStorageKeys("learner-alice")).toEqual(alice);
     expect(qaScopedStorageKeys("learner-alice:2").history).not.toBe(alice.history);
   });
