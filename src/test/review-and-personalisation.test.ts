@@ -37,7 +37,7 @@ describe("curriculum-aware personalised coaching", () => {
   });
 
   it("filters learner practice and coach requests by the selected curriculum", () => {
-    expect(practice).toContain('questionQuery.eq("curriculum", curriculumId)');
+    expect(practice).toContain('if (curriculumId) query = query.eq("curriculum", curriculumId)');
     expect(practice).toContain("getCachedQuestions(subjectId, curriculumId)");
     expect(tutor).toContain("curriculum: curriculumId");
     expect(tutor).toContain("coach.personalised");
