@@ -1,4 +1,5 @@
 import { stemExpansion } from "./stemExpansion";
+import { nextReasoningExpansion } from "./nextReasoningExpansion";
 import { milestone200Lessons } from "./milestone200Lessons";
 import { november2026STEMLessons } from "./november2026STEMLessons";
 import { nextQAExpansion } from "./tutorialExpansionNext";
@@ -318,4 +319,5 @@ export const tutorials: Tutorial[] = [
   ...additionalLanguageDepth,
   ...november2026STEMLessons,
   ...milestone200Lessons,
+  ...nextReasoningExpansion,
 ];
