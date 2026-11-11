@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Target, Loader2, AlertTriangle, CheckCircle2, XCircle, ArrowRight, Sparkles } from "lucide-react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { listDrillTopics, parseDrillOptions, selectDrillQuestions, type DrillFocus } from "@/lib/weakDrillSession";
 
 interface WeakTopic {
   subject: string;
@@ -23,7 +25,7 @@ interface DrillQuestion {
   subject: string;
   topic: string;
   difficulty: number;
-  options: string[] | null;
+  options: unknown;
 }
 
 interface AIPlan {
@@ -45,60 +47,133 @@ export default function WeakTopicDrill() {
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [analyzed, setAnalyzed] = useState(false);
   const [drilling, setDrilling] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [activeQuestions, setActiveQuestions] = useState<DrillQuestion[]>([]);
+  const [activeFocus, setActiveFocus] = useState<DrillFocus | null>(null);
+  const [lastSession, setLastSession] = useState<{ correct: number; total: number } | null>(null);
+  const requestVersion = useRef(0);
+  const analysisInFlight = useRef(false);
+  const answerInFlight = useRef(false);
+  const userId = user?.id;
+  const topicOptions = useMemo(() => listDrillTopics(drillQuestions), [drillQuestions]);
+
+  // A late response from a previous signed-in learner must not render here.
+  useEffect(() => {
+    requestVersion.current++;
+    analysisInFlight.current = false;
+    answerInFlight.current = false;
+    setLoading(false);
+    setSubmitting(false);
+    setWeakTopics([]);
+    setDrillQuestions([]);
+    setActiveQuestions([]);
+    setActiveFocus(null);
+    setAiPlan(null);
+    setAnalyzed(false);
+    setDrilling(false);
+    setLastSession(null);
+    setScore({ correct: 0, total: 0 });
+    return () => { requestVersion.current++; };
+  }, [userId]);
 
   const analyze = async () => {
+    if (!userId || analysisInFlight.current) return;
+    analysisInFlight.current = true;
+    const version = ++requestVersion.current;
     setLoading(true);
+    setAnalyzed(false);
+    setLastSession(null);
     try {
       const { data, error } = await supabase.functions.invoke("weak-topic-drill");
       if (error) throw error;
-      setWeakTopics(data.weak_topics || []);
-      setDrillQuestions(data.drill_questions || []);
-      setAiPlan(data.ai_plan || null);
+      if (version !== requestVersion.current) return;
+
+      const safeQuestions = Array.isArray(data?.drill_questions)
+        ? data.drill_questions.filter((question: DrillQuestion) =>
+            question && typeof question.id === "string" &&
+            typeof question.subject === "string" && typeof question.topic === "string" &&
+            typeof question.question_text === "string")
+        : [];
+      setWeakTopics(Array.isArray(data?.weak_topics) ? data.weak_topics : []);
+      setDrillQuestions(safeQuestions);
+      setAiPlan(Array.isArray(data?.ai_plan?.plans) ? data.ai_plan : null);
       setAnalyzed(true);
-      if (data.weak_topics?.length === 0) {
-        toast({ title: "No weak topics found! You're doing great! 🎉" });
+      if (!Array.isArray(data?.weak_topics) || data.weak_topics.length === 0) {
+        toast({ title: "No weak-topic pattern identified", description: "This may mean you need more completed practice to see a pattern." });
       }
-    } catch (e: any) {
-      toast({ title: "Analysis failed", description: e.message, variant: "destructive" });
+    } catch (error) {
+      if (version === requestVersion.current) {
+        toast({ title: "Analysis failed", description: error instanceof Error ? error.message : "Please retry.", variant: "destructive" });
+      }
     } finally {
-      setLoading(false);
+      if (version === requestVersion.current) {
+        analysisInFlight.current = false;
+        setLoading(false);
+      }
     }
   };
 
-  const startDrill = () => {
+  const startDrill = (focus?: DrillFocus) => {
+    const session = selectDrillQuestions(drillQuestions, focus);
+    if (!session.length) return;
+    requestVersion.current++;
+    setActiveQuestions(session);
+    setActiveFocus(focus || null);
+    setLastSession(null);
     setDrilling(true);
     setCurrentQ(0);
     setScore({ correct: 0, total: 0 });
     setSelected(null);
     setShowFeedback(false);
     setAnswerResult(null);
+    setSubmitting(false);
+    answerInFlight.current = false;
   };
 
   const submitAnswer = async () => {
-    if (!selected) return;
-    const q = drillQuestions[currentQ];
+    const q = activeQuestions[currentQ];
+    const answer = selected?.trim();
+    if (!q || !answer || showFeedback || answerInFlight.current) return;
+    const version = requestVersion.current;
+    answerInFlight.current = true;
+    setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("check-answer", {
-        body: { question_id: q.id, answer: selected },
+        body: { question_id: q.id, answer },
       });
       if (error) throw error;
-      setAnswerResult(data);
+      if (version !== requestVersion.current) return;
+      if (!data || typeof data.correct !== "boolean") throw new Error("Answer feedback was incomplete. Please retry.");
+      setAnswerResult({
+        correct: data.correct,
+        correct_answer: typeof data.correct_answer === "string" ? data.correct_answer : "",
+        explanation: typeof data.explanation === "string" ? data.explanation : undefined,
+      });
       setShowFeedback(true);
       setScore(prev => ({ correct: prev.correct + (data.correct ? 1 : 0), total: prev.total + 1 }));
     } catch (error) {
-      toast({ title: "Could not submit answer", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+      if (version === requestVersion.current) {
+        toast({ title: "Could not submit answer", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+      }
+    } finally {
+      if (version === requestVersion.current) {
+        answerInFlight.current = false;
+        setSubmitting(false);
+      }
     }
   };
 
   const nextQuestion = () => {
+    if (!showFeedback || submitting) return;
     setSelected(null);
     setShowFeedback(false);
     setAnswerResult(null);
-    if (currentQ + 1 < drillQuestions.length) {
+    if (currentQ + 1 < activeQuestions.length) {
       setCurrentQ(prev => prev + 1);
     } else {
+      requestVersion.current++;
       setDrilling(false);
-      toast({ title: `Drill complete! ${score.correct}/${score.total} correct` });
+      setLastSession({ correct: score.correct, total: score.total });
     }
   };
 
@@ -111,7 +186,8 @@ export default function WeakTopicDrill() {
     );
   }
 
-  const question = drillQuestions[currentQ];
+  const question = activeQuestions[currentQ];
+  const questionOptions = parseDrillOptions(question?.options);
 
   return (
     <div className="min-h-screen bg-background">
