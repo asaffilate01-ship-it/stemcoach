@@ -33,6 +33,8 @@ export default function Onboarding() {
   const [step, setStep] = useState<Step>("welcome");
   const [selectedCurriculum, setSelectedCurriculum] = useState("");
   const [squadIndex, setSquadIndex] = useState(0);
+  const [savingCurriculum, setSavingCurriculum] = useState(false);
+  const [curriculumError, setCurriculumError] = useState("");
 
   const squadMembers = getSquadMembers().filter(m => m.name !== "Lexi" || m.subjectId === "ielts");
   const coach = getCoachStem();
@@ -54,13 +56,23 @@ export default function Onboarding() {
   }, [user, navigate]);
 
   const saveCurriculumAndContinue = async () => {
-    if (!user || !selectedCurriculum) return;
-    await supabase.from("user_preferences").upsert({
-      user_id: user.id,
-      curriculum: selectedCurriculum,
-      onboarding_complete: false,
-    } as any);
-    setStep("preview");
+    if (!user || !selectedCurriculum || savingCurriculum) return;
+    setCurriculumError("");
+    setSavingCurriculum(true);
+    try {
+      const { error } = await supabase.from("user_preferences").upsert({
+        user_id: user.id,
+        curriculum: selectedCurriculum,
+        onboarding_complete: false,
+      } as any, { onConflict: "user_id" });
+      if (error) throw error;
+      setStep("preview");
+    } catch {
+      setCurriculumError("We could not save your curriculum. Your selection is still here; please try again.");
+      toast({ title: "Curriculum not saved", description: "Please retry; no purchase has been started.", variant: "destructive" });
+    } finally {
+      setSavingCurriculum(false);
+    }
   };
 
   const currentMascot = squadMembers[squadIndex];
@@ -97,6 +109,9 @@ export default function Onboarding() {
                 </p>
                 <Button size="lg" onClick={() => setStep("meet-squad")} className="gap-2 rounded-xl">
                   Meet the Squad <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" className="mt-3" onClick={() => setStep("curriculum")}>
+                  Choose my curriculum now
                 </Button>
               </motion.div>
             )}
@@ -150,6 +165,9 @@ export default function Onboarding() {
                     )}
                   </Button>
                 </div>
+                <Button variant="ghost" className="mt-4" onClick={() => setStep("curriculum")}>
+                  Skip introductions
+                </Button>
               </motion.div>
             )}
 
@@ -161,7 +179,8 @@ export default function Onboarding() {
                   {curricula.map((c) => (
                     <button
                       key={c.id}
-                      onClick={() => setSelectedCurriculum(c.id)}
+                      onClick={() => { setSelectedCurriculum(c.id); setCurriculumError(""); }}
+                      aria-pressed={selectedCurriculum === c.id}
                       className={`flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
                         selectedCurriculum === c.id ? "border-primary bg-primary/5" : "border-transparent hover:border-primary/20"
                       }`}
@@ -176,11 +195,12 @@ export default function Onboarding() {
                 </div>
                 <Button
                   onClick={saveCurriculumAndContinue}
-                  disabled={!selectedCurriculum}
+                  disabled={!selectedCurriculum || savingCurriculum}
                   className="mt-6 w-full gap-2 rounded-xl"
                 >
-                  Continue <ChevronRight className="h-4 w-4" />
+                  {savingCurriculum ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : <>Continue <ChevronRight className="h-4 w-4" /></>}
                 </Button>
+                {curriculumError && <p role="alert" className="mt-3 text-sm text-destructive">{curriculumError}</p>}
               </motion.div>
             )}
 

@@ -183,6 +183,7 @@ export default function Dashboard() {
   })();
   const displayName = user?.email?.split("@")[0] || t("dashboard.student");
 
+  const suggestedFocus = weakTopics[0];
   const quickActions = [
     { label: t("dashboard.practiceAction"), icon: BookOpen, to: "/subjects", variant: "primary" as const },
     { label: t("dashboard.weakDrills"), icon: Brain, to: "/weak-drills", variant: "warning" as const },
@@ -234,6 +235,28 @@ export default function Dashboard() {
               </div>
             </div>
           </motion.div>
+
+          {/* One evidence-based next action before secondary navigation and scores. */}
+          <section aria-labelledby="next-step-title" className="stem-card mb-5 flex flex-col gap-4 rounded-2xl p-5 md:mb-8 md:flex-row md:items-center md:justify-between md:p-6">
+            <div className="max-w-2xl">
+              <p className="stem-label">{t("dashboard.nextStep")}</p>
+              <h2 id="next-step-title" className="mt-2 text-xl font-bold">
+                {suggestedFocus
+                  ? t("dashboard.revisitTopic", { topic: suggestedFocus.topic })
+                  : t("dashboard.shortPractice")}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {suggestedFocus
+                  ? t("dashboard.revisitDescription", { attempts: suggestedFocus.total })
+                  : t("dashboard.shortPracticeDescription")}
+              </p>
+            </div>
+            <button type="button" onClick={() => navigate(suggestedFocus ? "/weak-drills" : "/subjects")}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+              {suggestedFocus ? t("dashboard.openWeakDrills") : t("dashboard.startPractice")}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </section>
 
           {/* Quick Actions */}
           <div className="mb-5 md:mb-8">

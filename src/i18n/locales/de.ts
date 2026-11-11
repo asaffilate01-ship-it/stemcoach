@@ -1,6 +1,7 @@
 const de = {
   // ── Nav & Layout ──
   nav: {
+    more: "Mehr",
     mobileNavigation: "Mobile Navigation",
     skipToContent: "Zum Inhalt springen",
     qaClinic: "Fragen & Antworten",
@@ -334,6 +335,9 @@ const de = {
   },
   // ── Practice ──
   practice: {
+    loadFailed: "Fragen konnten nicht geladen werden",
+    loadFailedDesc: "Prüfe deine Verbindung und versuche es erneut. Ein Ladefehler verbraucht keine Fragen-Guthaben.",
+    cachedNeedsConnection: "Gespeicherte Fragen von diesem Gerät werden angezeigt. Zum Prüfen der Antworten und Speichern des Fortschritts ist eine Verbindung nötig.",
     title: "Übung",
     question: "Frage",
     of: "von",
@@ -531,6 +535,13 @@ const de = {
   },
   // ── Dashboard ──
   dashboard: {
+    nextStep: "Dein nächster Schritt",
+    revisitTopic: "{{topic}} wiederholen",
+    revisitDescription: "Nach {{attempts}} bisherigen Versuchen könnte eine kurze Wiederholung helfen. Das ist keine Prüfungsreife-Bewertung.",
+    shortPractice: "Kurze Übungsrunde starten",
+    shortPracticeDescription: "Beantworte ein paar Fragen, um Themen für die Wiederholung zu finden.",
+    openWeakDrills: "Schwachstellen üben",
+    startPractice: "Jetzt üben",
     title: "Dashboard",
     welcome: "Willkommen zurück",
     xp: "XP",

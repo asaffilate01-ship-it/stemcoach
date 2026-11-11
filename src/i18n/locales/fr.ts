@@ -1,6 +1,7 @@
 const fr = {
   // ── Nav & Layout ──
   nav: {
+    more: "Plus",
     mobileNavigation: "Navigation mobile",
     skipToContent: "Aller au contenu",
     qaClinic: "Questions-réponses",
@@ -334,6 +335,9 @@ const fr = {
   },
   // ── Practice ──
   practice: {
+    loadFailed: "Impossible de charger les questions",
+    loadFailedDesc: "Vérifiez votre connexion puis réessayez. Un échec de chargement ne consomme pas de crédit.",
+    cachedNeedsConnection: "Questions enregistrées sur cet appareil. Une connexion reste nécessaire pour vérifier les réponses et enregistrer les progrès.",
     title: "Entraînement",
     question: "Question",
     of: "sur",
@@ -531,6 +535,13 @@ const fr = {
   },
   // ── Dashboard ──
   dashboard: {
+    nextStep: "Votre prochaine étape",
+    revisitTopic: "Revoir {{topic}}",
+    revisitDescription: "D'après {{attempts}} essais récents, ce sujet mérite une nouvelle révision. Ce n'est pas une note de préparation à l'examen.",
+    shortPractice: "Commencer une courte séance",
+    shortPracticeDescription: "Répondez à quelques questions pour découvrir les notions à revoir.",
+    openWeakDrills: "Revoir les points faibles",
+    startPractice: "Commencer à s'entraîner",
     title: "Tableau de bord",
     welcome: "Bon retour",
     xp: "XP",

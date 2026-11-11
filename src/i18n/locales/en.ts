@@ -1,6 +1,7 @@
 const en = {
   // ── Nav & Layout ──
   nav: {
+    more: "More",
     mobileNavigation: "Mobile navigation",
     skipToContent: "Skip to content",
     qaClinic: "Q&A Clinic",
@@ -334,6 +335,9 @@ const en = {
   },
   // ── Practice ──
   practice: {
+    loadFailed: "Unable to load questions",
+    loadFailedDesc: "Your questions could not be loaded. Check your connection and try again; a failed load does not use question credits.",
+    cachedNeedsConnection: "Showing questions saved on this device. A connection is still required to check answers and record progress.",
     title: "Practice",
     question: "Question",
     of: "of",
@@ -531,6 +535,13 @@ const en = {
   },
   // ── Dashboard ──
   dashboard: {
+    nextStep: "Your next step",
+    revisitTopic: "Revisit {{topic}}",
+    revisitDescription: "Based on {{attempts}} recent attempts, this topic may benefit from a short review. This is not an exam readiness score.",
+    shortPractice: "Start a short practice session",
+    shortPracticeDescription: "Answer a few questions to find topics worth revisiting. Progress is based on recorded work.",
+    openWeakDrills: "Open weak drills",
+    startPractice: "Start practising",
     title: "Dashboard",
     welcome: "Welcome back",
     xp: "XP",
