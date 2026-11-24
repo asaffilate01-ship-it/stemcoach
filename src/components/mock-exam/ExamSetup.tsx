@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Clock, BookOpen, Award, Loader2, ChevronLeft, Target, Sparkles, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { subjects, curricula } from "@/data/questions";
+import { launchSubjects as subjects, launchCurricula as curricula } from "@/lib/launchDiscovery";
 import { type MockExamTemplate } from "@/data/mockExamTemplates";
 import { useTranslation } from "react-i18next";
 

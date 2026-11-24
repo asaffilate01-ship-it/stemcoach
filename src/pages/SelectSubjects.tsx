@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { BookOpen, Layers, ChevronRight, Loader2, Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
-import { subjects } from "@/data/questions";
+import { launchSubjects as subjects } from "@/lib/launchDiscovery";
 import { calculateQuestionAllocation } from "@/lib/subscriptionTiers";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
@@ -19,7 +19,6 @@ const LEVELS = [
   { id: "a-level", label: "A-Level", description: "Advanced Level" },
   { id: "ib-sl", label: "IB SL", description: "Standard Level" },
   { id: "ib-hl", label: "IB HL", description: "Higher Level" },
-  { id: "ap", label: "AP", description: "Advanced Placement" },
   { id: "university", label: "University", description: "Undergraduate" },
 ];
 
@@ -142,11 +141,12 @@ export default function SelectSubjects() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {subjects.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => toggleSubject(s.id)}
+                    aria-pressed={selectedSubjects.includes(s.id)}
                     className={`flex items-center gap-2 rounded-xl border-2 p-3 text-left transition-all ${
                       selectedSubjects.includes(s.id) ? "border-primary bg-primary/5" : "border-transparent hover:border-primary/20"
                     }`}
@@ -173,11 +173,12 @@ export default function SelectSubjects() {
               <h2 className="mb-2 text-2xl font-bold">Select your level</h2>
               <p className="mb-6 text-sm text-muted-foreground">Choose which academic level(s) you're studying at.</p>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {LEVELS.map((l) => (
                   <button
                     key={l.id}
                     onClick={() => toggleLevel(l.id)}
+                    aria-pressed={selectedLevels.includes(l.id)}
                     className={`flex flex-col rounded-xl border-2 p-3 text-left transition-all ${
                       selectedLevels.includes(l.id) ? "border-primary bg-primary/5" : "border-transparent hover:border-primary/20"
                     }`}

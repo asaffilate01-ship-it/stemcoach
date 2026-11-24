@@ -2,8 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Search, Sparkles, ArrowRight, GraduationCap, Clock, Target, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { subjects } from "@/data/questions";
-import { mockExamTemplates, examBoardGroups, type MockExamTemplate } from "@/data/mockExamTemplates";
+import { launchSubjects as subjects, launchExamTemplates as mockExamTemplates } from "@/lib/launchDiscovery";
+import { examBoardGroups, type MockExamTemplate } from "@/data/mockExamTemplates";
 import { getMascot } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
 

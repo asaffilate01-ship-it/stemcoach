@@ -1,3 +1,4 @@
+import { isLaunchSubject } from "@/lib/launchDiscovery";
 import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { motion } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -16,7 +17,7 @@ export default function MeetTheSquad() {
   const { t, i18n } = useTranslation();
   useDocumentTitle(t("squad.documentTitle"));
   const navigate = useNavigate();
-  const members = getSquadMembers();
+  const members = getSquadMembers().filter(member => isLaunchSubject(member.subjectId));
   const coach = getCoachStem();
 
   return (

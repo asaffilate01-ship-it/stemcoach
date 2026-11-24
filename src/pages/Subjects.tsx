@@ -6,11 +6,12 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import { subjects, curricula, difficultyLabels, type Difficulty } from "@/data/questions";
+import { difficultyLabels, type Difficulty } from "@/data/questions";
+import { launchSubjects as subjects, launchCurricula as curricula, launchCountryGroups as countryGroups } from "@/lib/launchDiscovery";
+import { LaunchLanguagePanel } from "@/components/landing/LaunchLanguagePanel";
 import { ChevronRight, ChevronDown, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X, Check, Globe, Lightbulb } from "lucide-react";
 import { Icon3D } from "@/components/ui/icon-3d";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { getMascot } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
 import { useSubjectCounts } from "@/hooks/useSubjectCounts";
@@ -18,24 +19,7 @@ import { useSubjectCounts } from "@/hooks/useSubjectCounts";
 
 /* ───────────────── Country & Board Data ───────────────── */
 
-const countryGroups = [
-  { id: "uk", label: "United Kingdom", flag: "🇬🇧", keys: ["uk-gcse", "uk-alevel", "uk-btec", "uk-scottish-nat5", "uk-scottish-higher", "uk-scottish-adv-higher", "uni-uk"] },
-  { id: "intl", label: "International", flag: "🌐", keys: ["uk-igcse", "uk-ial", "uk-olevel", "uni-intl"] },
-  { id: "ib", label: "IB Programme", flag: "🌐", keys: ["ib-myp", "ib-dp-sl", "ib-dp-hl"] },
-  { id: "us", label: "United States", flag: "🇺🇸", keys: ["us-middle", "us-highschool", "us-ap", "us-sat", "us-act", "uni-us"] },
-  { id: "au", label: "Australia", flag: "🇦🇺", keys: ["au-hsc", "au-vce", "au-qce", "au-wace", "au-sace", "au-atar", "uni-au"] },
-  { id: "nz", label: "New Zealand", flag: "🇳🇿", keys: ["nz-ncea-1", "nz-ncea-2", "nz-ncea-3", "nz-scholarship", "uni-nz"] },
-  { id: "ca", label: "Canada", flag: "🇨🇦", keys: ["ca-ontario-12", "ca-bc-12", "ca-alberta-12", "ca-quebec-cegep", "uni-ca"] },
-  { id: "in", label: "India", flag: "🇮🇳", keys: ["india-cbse-10", "india-cbse-12", "india-icse-10", "india-isc-12", "india-state", "india-jee", "india-neet", "india-olympiad", "uni-in"] },
-  { id: "pk", label: "Pakistan", flag: "🇵🇰", keys: ["pakistan-matric", "pakistan-fsc", "pakistan-olevel", "pakistan-alevel", "pakistan-ecat-mdcat", "uni-pk"] },
-  { id: "bd", label: "Bangladesh", flag: "🇧🇩", keys: ["bd-hsc", "bd-ssc", "uni-bd"] },
-  { id: "lk", label: "Sri Lanka", flag: "🇱🇰", keys: ["lk-al", "lk-ol", "uni-lk"] },
-  { id: "ae", label: "UAE", flag: "🇦🇪", keys: ["uae-moe-9", "uae-moe-10", "uae-moe-11", "uae-moe-12", "uae-emsat-legacy"] },
-  { id: "fr", label: "France", flag: "🇫🇷", keys: ["fr-seconde", "fr-premiere", "fr-bac-general", "fr-bac-techno", "fr-bac-pro", "fr-bts", "fr-cpge", "fr-but", "uni-fr"] },
-  { id: "ph", label: "Philippines", flag: "🇵🇭", keys: ["ph-grade10", "ph-grade11", "ph-grade12", "ph-stem", "ph-abm", "ph-humss"] },
-  { id: "de", label: "Deutschland", flag: "🇩🇪", keys: ["de-mittlerer", "de-oberstufe", "de-abitur", "de-fachabitur", "de-berufliches-gym", "uni-de"] },
-  { id: "lang", label: "Language Certs", flag: "🗣️", keys: ["ielts-academic", "ielts-general", "celta"] },
-];
+
 
 /** Exam board visual identity — short code + brand color */
 const boardBranding: Record<string, { abbr: string; color: string }> = {
@@ -286,14 +270,15 @@ function FilterPanel({
               transition={{ duration: 0.2 }}
               className="overflow-hidden border-t border-border/30"
             >
-              <div className="grid grid-cols-2 gap-1.5 p-3">
+              <div className="grid grid-cols-1 gap-1.5 p-3">
                 {countryGroups.map((group) => {
                   const isSelected = selectedCountries.has(group.id);
                   return (
                     <button
                       key={group.id}
                       onClick={() => toggleCountry(group.id)}
-                      className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ${
+                      aria-pressed={isSelected}
+                      className={`flex items-center gap-2 min-h-11 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ${
                         isSelected
                           ? "bg-primary/10 ring-1 ring-primary/25"
                           : "bg-muted/30 hover:bg-muted/50"
@@ -475,7 +460,7 @@ function FilterPanel({
         </div>
         <div className="flex flex-wrap gap-1.5">
           {selectedCountries.size === 0 && (
-            <span className="text-[11px] text-muted-foreground">{t("subjects.allCountriesShort")}</span>
+            <span className="text-[11px] text-muted-foreground">{"All three markets"}</span>
           )}
           {[...selectedCountries].map(id => {
             const g = countryGroups.find(c => c.id === id);
@@ -515,8 +500,7 @@ export default function Subjects() {
   const { t } = useTranslation();
   useDocumentTitle(t("nav.subjects"));
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set(["uk"]));
+  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set<string>());
   const [selectedLevels, setSelectedLevels] = useState<Set<string>>(new Set());
   const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set());
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
@@ -602,7 +586,7 @@ export default function Subjects() {
 
   // Summary label
   const summaryLabel = useMemo(() => {
-    if (selectedCountries.size === 0) return "All curricula";
+    if (selectedCountries.size === 0) return "UK, Germany and Pakistan";
     const names = [...selectedCountries].map(id => countryGroups.find(g => g.id === id)?.label).filter(Boolean);
     return names.join(", ");
   }, [selectedCountries]);
@@ -640,8 +624,14 @@ export default function Subjects() {
             </div>
           </div>
 
-          {/* Mobile: Sticky filter bar */}
-          <div className="mb-4 flex items-center justify-between gap-3 md:hidden">
+          <div aria-label="Launch markets" className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {countryGroups.map(group => <button key={group.id} type="button" aria-pressed={selectedCountries.has(group.id)} onClick={() => toggleCountry(group.id)} className={`min-h-16 rounded-xl border p-3 text-left focus-visible:ring-2 focus-visible:ring-ring ${selectedCountries.has(group.id) ? "border-primary bg-primary/5" : "bg-card"}`}>
+              <span className="text-lg" aria-hidden="true">{group.flag}</span> <span className="font-semibold">{group.label}</span><span className="mt-1 block text-xs text-muted-foreground">{group.range} · programme scope</span>
+            </button>)}
+          </div>
+          <LaunchLanguagePanel />
+          {/* Mobile and tablet filter sheet */}
+          <div className="mb-4 flex items-center justify-between gap-3 lg:hidden">
             <div>
               <h2 className="text-base font-bold tracking-tight">
                 {countsLoading ? t("common.loading") : `${availableCount} ${t("subjects.subjectsHeading")}`}
@@ -650,7 +640,7 @@ export default function Subjects() {
             </div>
             <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
               <SheetTrigger asChild>
-                <button className="relative flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground shadow-sm transition-colors active:bg-muted">
+                <button className="relative flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground shadow-sm transition-colors active:bg-muted">
                   <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
                   {t("subjects.filters")}
                   {activeFilterCount > 0 && (
@@ -660,7 +650,7 @@ export default function Subjects() {
                   )}
                 </button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl pb-safe-area-bottom">
+              <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-safe-area-bottom">
                 <SheetHeader className="pb-2">
                   <SheetTitle className="text-base">{t("subjects.filters")}</SheetTitle>
                 </SheetHeader>
@@ -671,19 +661,17 @@ export default function Subjects() {
             </Sheet>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)]>
             {/* Desktop sidebar filters */}
-            {!isMobile && (
-              <aside className="hidden md:block">
-                <div className="sticky top-20 rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+            <aside className="hidden lg:block min-w-0">
+                <div className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
                   <FilterPanel {...filterProps} />
                 </div>
               </aside>
-            )}
 
             {/* Subject grid */}
             <div>
-              <div className="mb-5 hidden items-center justify-between md:flex">
+              <div className="mb-5 hidden items-center justify-between lg:flex">
                 <div>
                   <h2 className="text-lg font-bold tracking-tight md:text-xl">{t("subjects.subjectsHeading")}</h2>
                   <p className="text-xs text-muted-foreground">

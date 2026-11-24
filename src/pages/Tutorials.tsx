@@ -6,7 +6,8 @@ import { BookOpen, CheckCircle2, Clock, Cloud, Flag, Loader2, MessageCircle, Pla
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { tutorials } from "@/data/tutorials";
+import { tutorials as allTutorials } from "@/data/tutorials";
+import { isLaunchSubject } from "@/lib/launchDiscovery";
 import { contentReportHref } from "@/lib/contentReport";
 import { getMascot } from "@/lib/mascots";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -18,9 +19,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
 import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
 
+const tutorials = allTutorials.filter(item => isLaunchSubject(item.subject));
 const COMPLETED_KEY = "stemcoach:tutorials-completed";
 const LAST_OPENED_KEY = "stemcoach:tutorials-last-opened";
-const tutorialIds = new Set(tutorials.map((tutorial) => tutorial.id));
+const tutorialIds = new Set(allTutorials.map((tutorial) => tutorial.id));
 
 function readLocalCompleted(): string[] {
   try {
@@ -205,7 +207,7 @@ export default function Tutorials() {
           <p className="mt-2 max-w-2xl text-muted-foreground">{t("tutorials.description")}</p>
           <p className="mt-3 flex items-center gap-2 text-sm font-medium text-primary">
             {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : user && accountProgressReady ? <Cloud className="h-4 w-4" /> : null}
-            {t(user && accountProgressReady ? "tutorials.progressAccount" : "tutorials.progressDevice", { completed: completed.length, total: tutorials.length })}
+            {t(user && accountProgressReady ? "tutorials.progressAccount" : "tutorials.progressDevice", { completed: completed.filter(id => tutorials.some(item => item.id === id)).length, total: tutorials.length })}
           </p>
           {normalizeLanguage(i18n.resolvedLanguage || i18n.language) !== "en" && (
             <p className="mt-2 max-w-2xl text-xs text-muted-foreground">{t("tutorials.contentLanguageNotice")}</p>

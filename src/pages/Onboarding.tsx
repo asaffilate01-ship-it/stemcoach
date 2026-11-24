@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap, BookOpen, ChevronRight, Loader2, Sparkles, Layers, CreditCard } from "lucide-react";
-import { subjects, curricula } from "@/data/questions";
+import { launchSubjects as subjects, launchCurricula as curricula, isLaunchSubject } from "@/lib/launchDiscovery";
 import { getSquadMembers, getCoachStem } from "@/lib/mascots";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
@@ -37,7 +37,7 @@ export default function Onboarding() {
   const [savingCurriculum, setSavingCurriculum] = useState(false);
   const [curriculumError, setCurriculumError] = useState("");
 
-  const squadMembers = getSquadMembers().filter(m => m.name !== "Lexi" || m.subjectId === "ielts");
+  const squadMembers = getSquadMembers().filter(m => isLaunchSubject(m.subjectId) && (m.name !== "Lexi" || m.subjectId === "ielts"));
   const coach = getCoachStem();
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function Onboarding() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <PageTransition>
-        <main className="container mx-auto flex max-w-lg flex-col items-center px-4 py-16">
+        <main className="container mx-auto flex max-w-3xl flex-col items-center px-4 py-8 sm:py-12">
           {/* Progress dots */}
           <div className="mb-8 flex items-center gap-2">
             {["welcome", "meet-squad", "curriculum", "preview"].map((s, i) => (
@@ -175,8 +175,8 @@ export default function Onboarding() {
             {step === "curriculum" && (
               <motion.div key="curriculum" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
                 <h2 className="mb-2 text-2xl font-bold">Choose your curriculum</h2>
-                <p className="mb-6 text-sm text-muted-foreground">Select the exam board you're studying for.</p>
-                <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+                <p className="mb-6 text-sm text-muted-foreground">Select your qualification in the UK, Germany or Pakistan.</p>
+                <div className="grid gap-2 sm:grid-cols-2 max-h-[60dvh] overflow-y-auto pr-1">
                   {curricula.map((c) => (
                     <button
                       key={c.id}
