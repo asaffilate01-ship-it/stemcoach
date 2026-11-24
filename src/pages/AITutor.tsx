@@ -38,7 +38,7 @@ function CoachWorkspace() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { preferredCoachId, setPreferredCoachId } = usePreferredCoach();
-  const { curriculumId, curriculum } = useLearnerCurriculum();
+  const { curriculumId, curriculum, loading: curriculumLoading, error: curriculumError, retry: retryCurriculum } = useLearnerCurriculum();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -75,7 +75,7 @@ function CoachWorkspace() {
   const activeTutorial = requestedTutorial?.subject === subjectId ? requestedTutorial : null;
 
   const accountId = user?.id;
-  const threadReady = !conversationLoading && loadedSubject === subjectId && !threadError && canUseCoaching;
+  const threadReady = !conversationLoading && loadedSubject === subjectId && !threadError && canUseCoaching && !curriculumLoading && !curriculumError;
   const busy = isLoading || clearing || conversationLoading;
 
   const persistConversation = async (thread: Msg[], request: AbortController) => {
@@ -119,8 +119,8 @@ function CoachWorkspace() {
     setSaveError("");
     setIsLoading(false);
     setClearing(false);
-    setConversationLoading(Boolean(accountId && canUseCoaching));
-    if (accountId && canUseCoaching) {
+    setConversationLoading(Boolean(accountId && canUseCoaching && !curriculumLoading && !curriculumError));
+    if (accountId && canUseCoaching && !curriculumLoading && !curriculumError) {
       void (async () => {
         try {
           const { data, error } = await supabase.from("coach_conversations").select("messages").eq("user_id", accountId).eq("subject", subjectId).maybeSingle();
@@ -137,7 +137,7 @@ function CoachWorkspace() {
       })();
     }
     return () => { active = false; scope.cancel(); };
-  }, [accountId, subjectId, retry, canUseCoaching]);
+  }, [accountId, subjectId, retry, canUseCoaching, curriculumId, curriculumLoading, curriculumError]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -263,6 +263,11 @@ function CoachWorkspace() {
       </main></div>;
   }
 
+  if (canUseCoaching && (curriculumLoading || curriculumError)) {
+    return <div className="min-h-screen bg-background"><AppHeader /><main className="mx-auto max-w-md px-6 py-20 text-center">
+      {curriculumError ? <><h1 className="text-xl font-semibold">Your curriculum could not be verified</h1><p role="alert" className="my-4 text-sm text-muted-foreground">Retry before opening your private tutor.</p><Button onClick={retryCurriculum} className="min-h-11">{t("common.retry")}</Button></> : <p role="status">Checking your curriculum…</p>}
+    </main></div>;
+  }
   if (!quotaLoading && !canUseCoaching) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -307,7 +312,9 @@ function CoachWorkspace() {
                       setLoadedSubject(null);
                       setSubjectId(id);
                     }
-                    void setPreferredCoachId(id as Parameters<typeof setPreferredCoachId>[0]);
+                    void setPreferredCoachId(id as Parameters<typeof setPreferredCoachId>[0]).then(({ error }) => {
+                      if (error) setSaveError("Your tutor selection is active for this session, but your preference could not be saved.");
+                    });
                   }}
                   disabled={busy}
                   aria-pressed={isActive}

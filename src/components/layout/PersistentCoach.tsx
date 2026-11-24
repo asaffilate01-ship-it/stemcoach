@@ -10,11 +10,11 @@ const hiddenRoutes = new Set(["/", "/home", "/auth", "/reset-password", "/privac
 export function PersistentCoach() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { preferredCoach, preferredCoachId } = usePreferredCoach();
+  const { preferredCoach, preferredCoachId, loading: preferenceLoading } = usePreferredCoach();
   const location = useLocation();
   const navigate = useNavigate();
 
-  if (!user || hiddenRoutes.has(location.pathname) || location.pathname === "/ai-tutor") return null;
+  if (!user || preferenceLoading || hiddenRoutes.has(location.pathname) || location.pathname === "/ai-tutor") return null;
 
   const target = preferredCoachId === "stemcoach"
     ? "/ai-tutor"

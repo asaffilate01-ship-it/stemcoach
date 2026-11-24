@@ -46,6 +46,6 @@ describe("private coach conversations", () => {
     expect(page).toContain("signal: request.signal");
     expect(page).toContain("requestScope.current.inFlight");
     expect(page).not.toContain("localStorage");
-    expect(page).toContain("if (accountId && canUseCoaching)");
+    expect(page).toContain("if (accountId && canUseCoaching && !curriculumLoading && !curriculumError)");
   });
 });
