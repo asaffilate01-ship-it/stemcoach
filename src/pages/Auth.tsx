@@ -1,3 +1,4 @@
+import { safePracticeReturn } from "@/lib/launchPractice";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +34,8 @@ export default function Auth() {
   const requestedReturn = (location.state as { returnTo?: unknown } | null)?.returnTo;
   const safeInvitationReturn = typeof requestedReturn === "string" && /^\/teacher-invitation\?token=[a-f0-9]{64}$/.test(requestedReturn)
     ? requestedReturn : null;
+
+  const practiceReturn = safePracticeReturn(requestedReturn);
 
   const authErrorMessage = (error: { code?: string }) => {
     if (error.code === "invalid_credentials") return t("auth.errors.invalidCredentials");
@@ -113,6 +116,7 @@ export default function Auth() {
           .eq("user_id", user.id);
 
         const userRole = roles?.[0]?.role;
+        if (practiceReturn && roles?.some(row => row.role === "student")) { navigate(practiceReturn); return; }
         if (userRole === "teacher") navigate("/teacher");
         else if (userRole === "parent") navigate("/parent");
         else navigate("/subjects");

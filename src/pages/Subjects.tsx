@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { difficultyLabels, type Difficulty } from "@/data/questions";
 import { launchSubjects as subjects, launchCurricula as curricula, launchCountryGroups as countryGroups } from "@/lib/launchDiscovery";
+import { buildPracticePath } from "@/lib/launchPractice";
 import { LaunchLanguagePanel } from "@/components/landing/LaunchLanguagePanel";
 import { ChevronRight, ChevronDown, Filter, Layers, GraduationCap, Zap, ArrowRight, BookOpen, Sparkles, SlidersHorizontal, X, Check, Globe, Lightbulb } from "lucide-react";
 import { Icon3D } from "@/components/ui/icon-3d";
@@ -568,7 +569,7 @@ export default function Subjects() {
     [activeLevelOptions, selectedLevels],
   );
   const countBoards = useMemo(() => [...selectedBoards], [selectedBoards]);
-  const { isEmpty, countFor, loading: countsLoading } = useSubjectCounts({
+  const { isEmpty, countFor, loading: countsLoading, error: countsError, retry: retryCounts } = useSubjectCounts({
     curricula: countCurricula,
     boards: countBoards,
     difficulty: selectedDifficulty,
@@ -580,7 +581,7 @@ export default function Subjects() {
     () => [...subjects].sort((a, b) => Number(isEmpty(a.id)) - Number(isEmpty(b.id))),
     [isEmpty]
   );
-  const availableCount = countsLoading ? 0 : orderedSubjects.filter((s) => !isEmpty(s.id)).length;
+  const availableCount = countsLoading || countsError ? 0 : orderedSubjects.filter((s) => !isEmpty(s.id)).length;
 
   const activeFilterCount = selectedCountries.size + selectedLevels.size + selectedBoards.size + (selectedDifficulty ? 1 : 0);
 
@@ -634,7 +635,7 @@ export default function Subjects() {
           <div className="mb-4 flex items-center justify-between gap-3 lg:hidden">
             <div>
               <h2 className="text-base font-bold tracking-tight">
-                {countsLoading ? t("common.loading") : `${availableCount} ${t("subjects.subjectsHeading")}`}
+                {countsLoading ? t("common.loading") : countsError ? "Availability unverified" : `${availableCount} ${t("subjects.subjectsHeading")}`}
               </h2>
               <p className="text-[11px] text-muted-foreground">{summaryLabel}</p>
             </div>
@@ -675,15 +676,16 @@ export default function Subjects() {
                 <div>
                   <h2 className="text-lg font-bold tracking-tight md:text-xl">{t("subjects.subjectsHeading")}</h2>
                   <p className="text-xs text-muted-foreground">
-                    {countsLoading ? t("common.loading") : t("subjects.subjectsAvailable", { count: availableCount })} · {summaryLabel}
+                    {countsLoading ? t("common.loading") : countsError ? "Availability unverified" : t("subjects.subjectsAvailable", { count: availableCount })} · {summaryLabel}
                   </p>
                 </div>
               </div>
 
+              {countsError && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 text-sm"><p>Question availability could not be verified. Retry to check the selected filters.</p><button type="button" className="min-h-11 rounded-xl border px-4 font-semibold text-primary" onClick={retryCounts}>{t("common.retry")}</button></div>}
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 md:gap-4">
                 {orderedSubjects.map((subject, i) => {
                   const empty = !countsLoading && isEmpty(subject.id);
-                  const unavailable = countsLoading || empty;
+                  const unavailable = countsLoading || countsError || empty;
                   const liveCount = countFor(subject.id);
                   return (
                   <motion.div
@@ -693,7 +695,7 @@ export default function Subjects() {
                     transition={{ duration: 0.35, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <button
-                      onClick={() => !unavailable && navigate(`/practice/${subject.id}`)}
+                      onClick={() => !unavailable && navigate(buildPracticePath(subject.id, countCurricula, countBoards, selectedDifficulty))}
                       disabled={unavailable}
                       aria-disabled={unavailable}
                       className={`group relative w-full overflow-hidden rounded-2xl border border-border/50 bg-card text-left shadow-sm transition-all duration-300 ${unavailable ? "cursor-not-allowed opacity-60" : "hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/25 active:scale-[0.98]"}`}
@@ -725,7 +727,7 @@ export default function Subjects() {
                             <BookOpen className="h-3 w-3" />
                             {countsLoading
                               ? t("common.loading")
-                              : empty
+                              : countsError ? "Availability unverified" : empty
                                 ? t("subjects.contentInProgress")
                                 : `${liveCount.toLocaleString()} ${t("subjects.qs")}`}
                             <span className="h-2.5 w-px bg-border" />

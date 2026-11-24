@@ -1,6 +1,7 @@
 import { Fragment, useEffect, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { safePracticeReturn } from "@/lib/launchPractice";
 import { useUserRole } from "@/hooks/useUserRole";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -16,12 +17,14 @@ export function ProtectedRoute({ children, requiredRole, allowedRoles }: Protect
   const { user, loading } = useAuth();
   const { loading: rolesLoading, error: rolesError, retry, hasRole } = useUserRole();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/auth", { replace: true });
+      const returnTo = safePracticeReturn(location.pathname + location.search);
+      navigate("/auth", { replace: true, state: returnTo ? { returnTo } : undefined });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location.pathname, location.search]);
 
   // Check role access after roles load
   useEffect(() => {
