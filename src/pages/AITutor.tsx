@@ -85,19 +85,19 @@ function CoachWorkspace() {
       subject: subjectId,
       messages: normaliseCoachThread(thread),
       updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id,subject" });
+    }, { onConflict: "user_id,subject" }).abortSignal(request.signal);
     if (error && requestScope.current.isCurrent(request)) {
       setSaveError("Your reply is visible but could not be saved to your account.");
     }
   };
 
   const clearConversation = async () => {
-    if (!accountId || busy || !threadReady) return;
+    if (!accountId || busy || !threadReady || requestScope.current.inFlight) return;
     const request = requestScope.current.begin();
     setClearing(true);
     setSaveError("");
     try {
-      const { error } = await supabase.from("coach_conversations").delete().eq("user_id", accountId).eq("subject", subjectId);
+      const { error } = await supabase.from("coach_conversations").delete().eq("user_id", accountId).eq("subject", subjectId).abortSignal(request.signal);
       if (error) throw error;
       if (requestScope.current.isCurrent(request)) setMessages([]);
     } catch {
@@ -151,7 +151,7 @@ function CoachWorkspace() {
 
   const send = async (text?: string) => {
     const msg = text || input.trim();
-    if (!msg || busy || !threadReady || !accountId) return;
+    if (!msg || busy || !threadReady || !accountId || requestScope.current.inFlight) return;
     const request = requestScope.current.begin();
     const current = () => requestScope.current.isCurrent(request);
     setSaveError("");
