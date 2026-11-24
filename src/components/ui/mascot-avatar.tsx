@@ -11,7 +11,7 @@ export function MascotAvatar({ mascot, decorative = false, className = "" }: {
       {failedImage === mascot.image ? (
         <span aria-hidden={decorative || undefined} role={decorative ? undefined : "img"} aria-label={decorative ? undefined : mascot.name} className="text-xl">{mascot.emoji}</span>
       ) : (
-        <img src={mascot.image} alt={decorative ? "" : mascot.name} className="h-full w-full object-contain p-1" onError={() => setFailedImage(mascot.image)} />
+        <img src={mascot.image} alt={decorative ? "" : mascot.name} className="h-full w-full object-contain p-[6%]" onError={() => setFailedImage(mascot.image)} />
       )}
     </span>
   );

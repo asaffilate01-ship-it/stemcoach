@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -715,7 +716,7 @@ export default function Subjects() {
                       <div className="flex items-center gap-4 p-4 md:block md:p-6">
                         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br md:mb-5 md:h-12 md:w-12 md:rounded-2xl ${subjectGradients[subject.id] || "from-primary to-primary/70"} text-base font-bold text-white shadow-md md:text-lg md:shadow-lg overflow-hidden`}>
                           {subject.mascotImage ? (
-                            <img src={subject.mascotImage} alt={`${subject.name} mascot`} className="h-full w-full object-cover" />
+                            <MascotAvatar mascot={getMascot(subject.id)} decorative className="h-full w-full" />
                           ) : (
                             subject.icon
                           )}
@@ -749,7 +750,7 @@ export default function Subjects() {
                             const mascot = getMascot(subject.id);
                             return mascot.tips?.[0] ? (
                               <div className="hidden md:flex items-start gap-2 rounded-lg bg-primary/5 px-2.5 py-2 mb-3">
-                                <img src={mascot.image} alt={mascot.name} className="h-5 w-5 rounded-full object-cover mt-0.5 shrink-0" />
+                                <MascotAvatar mascot={mascot} decorative className="mt-0.5 h-6 w-6" />
                                 <p className="text-[10px] leading-relaxed text-primary font-medium">{mascot.tips[0]}</p>
                               </div>
                             ) : null;

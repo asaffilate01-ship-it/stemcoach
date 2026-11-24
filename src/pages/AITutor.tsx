@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { useState, useRef, useEffect } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -225,7 +226,7 @@ export default function AITutor() {
         <PageTransition>
           <main className="container mx-auto flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-primary/10">
-              <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
+              <MascotAvatar mascot={coach} className="h-full w-full" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">{t("coach.premiumTitle")}</h2>
             <p className="mb-6 max-w-md text-muted-foreground">
@@ -258,13 +259,14 @@ export default function AITutor() {
                     setSubjectId(id);
                     void setPreferredCoachId(id as Parameters<typeof setPreferredCoachId>[0]);
                   }}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium transition-all ${
+                  aria-pressed={isActive}
+                  className={`flex min-h-11 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-muted text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <img src={m.image} alt={m.name} className="h-5 w-5 rounded-full object-cover" />
+                  <MascotAvatar mascot={m} decorative className="h-6 w-6" />
                   {m.name}
                 </button>
               );
@@ -309,7 +311,7 @@ export default function AITutor() {
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
                   <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
-                    <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+                    <MascotAvatar mascot={mascot} decorative className="h-full w-full" />
                   </div>
                   <h3 className="text-lg font-semibold">{mascot.name}</h3>
                   <p className="mt-1 text-xs italic text-muted-foreground">“{t("coach.readyToHelp")}”</p>
@@ -347,7 +349,7 @@ export default function AITutor() {
               >
                 {msg.role === "assistant" && (
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg overflow-hidden">
-                    <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+                    <MascotAvatar mascot={mascot} decorative className="h-full w-full" />
                   </div>
                 )}
                 <div
@@ -369,7 +371,7 @@ export default function AITutor() {
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
-                  <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+                  <MascotAvatar mascot={mascot} decorative className="h-full w-full" />
                 </div>
                 <div className="rounded-xl bg-muted px-4 py-2.5">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
