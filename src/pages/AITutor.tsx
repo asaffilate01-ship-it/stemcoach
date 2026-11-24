@@ -58,6 +58,7 @@ function CoachWorkspace() {
       : "mathematics");
   const [subjectId, setSubjectId] = useState(initialSubject);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const manuallySelectedTutor = useRef(false);
 
   useEffect(() => {
     const draft = (location.state as { qaDraft?: unknown } | null)?.qaDraft;
@@ -144,7 +145,7 @@ function CoachWorkspace() {
   }, [messages]);
 
   useEffect(() => {
-    if (!busy && !requestedSubject && !requestedTutorial && messages.length === 0 && preferredCoachId !== "stemcoach" && SUBJECT_IDS.includes(preferredCoachId)) {
+    if (!manuallySelectedTutor.current && !busy && !requestedSubject && !requestedTutorial && messages.length === 0 && preferredCoachId !== "stemcoach" && SUBJECT_IDS.includes(preferredCoachId)) {
       setSubjectId(preferredCoachId);
     }
   }, [messages.length, preferredCoachId, requestedSubject, requestedTutorial, busy]);
@@ -305,6 +306,7 @@ function CoachWorkspace() {
                 <button
                   key={id}
                   onClick={() => {
+                    manuallySelectedTutor.current = true;
                     if (id !== subjectId) {
                       requestScope.current.cancel();
                       setMessages([]);
