@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { subjects, curricula } from "@/data/questions";
+import { launchSubjects as subjects, launchCurricula as curricula, isLaunchCurriculum, isLaunchSubject } from "@/lib/launchDiscovery";
+import { marketProgramme, questionTarget } from "@/data/threeMarketProgramme";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { motion } from "framer-motion";
@@ -32,6 +33,7 @@ const questionTypes = [
 ];
 
 const DEFAULT_BANK_TARGET = 2_000_000;
+const scopedPlannerAvailable = false;
 const MAX_BANK_TARGET = 2_500_000;
 
 export default function AdminGenerate() {
@@ -113,6 +115,10 @@ export default function AdminGenerate() {
   }
 
   const handleGenerate = async () => {
+    if (!isLaunchSubject(selectedSubject) || !isLaunchCurriculum(selectedCurriculum)) {
+      toast({ title: "Choose a launch subject and curriculum", variant: "destructive" });
+      return;
+    }
     if (!selectedTopic) {
       toast({ title: "Select a topic", variant: "destructive" });
       return;
@@ -262,7 +268,10 @@ export default function AdminGenerate() {
 
         {/* Verified question-bank progress is separate from generated drafts. */}
         <section aria-label="Published question-bank target" className="mb-7 rounded-2xl border bg-card p-5 shadow-sm">
-          <h2 className="text-lg font-bold">Two-million published question target</h2>
+          <h2 className="text-lg font-bold">{questionTarget.toLocaleString()} reviewed-question launch target</h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">{marketProgramme.map(market => <div key={market.country} className="rounded-xl border bg-background p-3"><p className="text-xs text-muted-foreground">{{ PK: "Pakistan", GB: "United Kingdom", DE: "Germany" }[market.country]}</p><p className="text-xl font-semibold tabular-nums">{market.target.toLocaleString()}</p></div>)}</div>
+          <p className="mt-3 text-xs text-muted-foreground">Planning targets only. Scoped published totals require a server-side inventory breakdown.</p>
+          <h3 className="mt-5 text-sm font-semibold">Legacy all-market inventory (separate from launch target)</h3>
           {bankProgress ? (
             <>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -340,9 +349,9 @@ export default function AdminGenerate() {
               <Label htmlFor="bank-target" className="whitespace-nowrap text-xs">Bank target</Label>
               <Input id="bank-target" type="number" min={1000} max={MAX_BANK_TARGET} step={10000} value={bankTarget} onChange={(event) => setBankTarget(Math.min(MAX_BANK_TARGET, Math.max(1000, Number(event.target.value) || 1000)))} className="h-9 w-32 border-0 px-1" />
             </div>
-            <Button onClick={handleSeedQueue} disabled={seeding || generating || campaignBlocksNew} variant="outline" className="gap-2 rounded">
+            <Button onClick={handleSeedQueue} disabled={seeding || generating || campaignBlocksNew || !scopedPlannerAvailable} variant="outline" className="gap-2 rounded">
               {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
-              1. Plan governed bank
+              1. Plan launch bank (server update required)
             </Button>
             {batchStatus?.campaign_id && !batchStatus?.planning_complete && campaignIsActive && (
               <Button onClick={handleContinuePlanning} disabled={seeding || generating} variant="outline" className="gap-2 rounded">
@@ -486,7 +495,7 @@ export default function AdminGenerate() {
               {log.length === 0 ? (
                 <span className="text-muted-foreground">
                   Safe question publishing workflow:{"\n\n"}
-                  1. Plan a target bank distributed across every supported subject and curriculum{"\n"}
+                  1. Legacy campaigns cover all supported curricula. New bulk campaigns are disabled here until the server-side planner supports the launch scope.{"\n"}
                   2. Scheduled workers claim jobs atomically and generate draft questions{"\n"}
                   3. Duplicate and structural checks run before a draft enters review{"\n"}
                   4. Only approved questions become visible to learners{"\n\n"}

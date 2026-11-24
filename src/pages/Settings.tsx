@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from "react-i18next";
 import { getCoachChoices, type CoachId } from "@/lib/mascots";
+import { isLaunchSubject } from "@/lib/launchDiscovery";
 import { usePreferredCoach } from "@/hooks/usePreferredCoach";
 
 interface PendingLink {
@@ -50,7 +51,7 @@ export default function Settings() {
   const [exporting, setExporting] = useState(false);
   const [pendingLinks, setPendingLinks] = useState<PendingLink[]>([]);
   const { preferredCoachId, setPreferredCoachId } = usePreferredCoach();
-  const coachChoices = getCoachChoices().filter((coach, index, all) =>
+  const coachChoices = getCoachChoices().filter(coach => coach.id === "stemcoach" || isLaunchSubject(coach.id)).filter((coach, index, all) =>
     all.findIndex((candidate) => candidate.name === coach.name) === index,
   );
   const [notifPrefs, setNotifPrefs] = useState({

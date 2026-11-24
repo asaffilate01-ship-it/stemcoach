@@ -1,44 +1,15 @@
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { curricula } from "@/data/questions";
+import { launchCurricula as curricula, launchCountryGroups } from "@/lib/launchDiscovery";
+import { LaunchLanguagePanel } from "./LaunchLanguagePanel";
 import { ChevronRight } from "lucide-react";
 
-const countryMeta: Record<string, { label: string; flag: string }> = {
-  "🇬🇧": { label: "United Kingdom", flag: "🇬🇧" },
-  "🏴󠁧󠁢󠁳󠁣󠁴󠁿": { label: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
-  "🌍": { label: "International / IB", flag: "🌍" },
-  "🇺🇸": { label: "United States", flag: "🇺🇸" },
-  "🇦🇺": { label: "Australia", flag: "🇦🇺" },
-  "🇳🇿": { label: "New Zealand", flag: "🇳🇿" },
-  "🇨🇦": { label: "Canada", flag: "🇨🇦" },
-  "🇮🇳": { label: "India", flag: "🇮🇳" },
-  "🇵🇰": { label: "Pakistan", flag: "🇵🇰" },
-  "🇧🇩": { label: "Bangladesh", flag: "🇧🇩" },
-  "🇱🇰": { label: "Sri Lanka", flag: "🇱🇰" },
-  "🇦🇪": { label: "UAE", flag: "🇦🇪" },
-  "🇫🇷": { label: "France", flag: "🇫🇷" },
-  "🇵🇭": { label: "Philippines", flag: "🇵🇭" },
-  "🇩🇪": { label: "Deutschland", flag: "🇩🇪" },
-  "🗣️": { label: "Language Certs", flag: "🗣️" },
-};
-
-function groupByCountry() {
-  const groups: { key: string; label: string; flag: string; items: typeof curricula }[] = [];
-  const seen = new Set<string>();
-  for (const c of curricula) {
-    if (!seen.has(c.country)) {
-      seen.add(c.country);
-      const meta = countryMeta[c.country] || { label: c.country, flag: c.country };
-      groups.push({ key: c.country, label: meta.label, flag: meta.flag, items: [] });
-    }
-    groups.find(g => g.key === c.country)!.items.push(c);
-  }
-  return groups;
-}
+function groupByCountry() { return launchCountryGroups.map(market => ({ ...market, key: market.id, items: curricula.filter(item => market.keys.includes(item.id)) })); }
 
 export function CurriculaSection() {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const groups = useMemo(groupByCountry, []);
   const [activeKey, setActiveKey] = useState(groups[0]?.key || "");
   const activeGroup = groups.find(g => g.key === activeKey);
@@ -58,15 +29,16 @@ export function CurriculaSection() {
         </div>
 
         <div className="mx-auto max-w-4xl">
-          <div className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-            <div className="flex gap-2 min-w-max pb-1">
+          <div className="mb-6">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {groups.map((g) => {
                 const isActive = g.key === activeKey;
                 return (
                   <button
                     key={g.key}
                     onClick={() => setActiveKey(g.key)}
-                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-semibold transition-all duration-200 ${
+                    aria-pressed={isActive}
+                    className={`flex items-center gap-2 min-h-12 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all duration-200 ${
                       isActive
                         ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -89,10 +61,10 @@ export function CurriculaSection() {
             {activeGroup && (
               <motion.div
                 key={activeKey}
-                initial={{ opacity: 0, y: 12 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
+                transition={{ duration: reduceMotion ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="grid gap-3 sm:grid-cols-2"
               >
                 {activeGroup.items.map((c) => (
@@ -105,7 +77,7 @@ export function CurriculaSection() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-semibold text-foreground">{c.label}</div>
-                      <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{c.boards.join(" · ")}</div>
+                      <div className="mt-0.5 break-words text-xs text-muted-foreground">{c.boards.join(" · ")}</div>
                     </div>
                     <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-primary" />
                   </div>
@@ -130,6 +102,7 @@ export function CurriculaSection() {
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("common.examBoards")}</div>
             </div>
           </div>
+          <div className="mt-8"><LaunchLanguagePanel /></div>
         </div>
       </div>
     </section>

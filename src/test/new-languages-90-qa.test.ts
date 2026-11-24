@@ -74,6 +74,7 @@ describe("new language formative foundation", () => {
     expect(tutorial).toContain('dir="auto"');
     expect(question).toContain('speechLanguage');
     expect(question).toContain('utterance.lang = speechLanguage');
-    expect(languages).toContain('"en", "fr", "de"');
+    expect(languages).toContain('"en", "de"');
+    expect(languages).not.toContain('"en", "fr", "de"');
   });
 });

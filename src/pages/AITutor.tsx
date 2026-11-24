@@ -22,7 +22,7 @@ import { CoachRequestScope, normaliseCoachThread, type CoachMessage as Msg } fro
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
-const SUBJECT_IDS = ["mathematics", "physics", "chemistry", "biology", "computer-science", "economics", "english-literature", "psychology", "geography", "business-studies", "ielts", "celta", "french", "german"];
+const SUBJECT_IDS = ["mathematics", "physics", "chemistry", "biology", "computer-science", "economics", "english-literature", "psychology", "geography", "business-studies", "ielts", "celta", "german"];
 export default function AITutor() {
   const { user } = useAuth();
   const { search } = useLocation();

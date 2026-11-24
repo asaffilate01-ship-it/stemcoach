@@ -42,7 +42,7 @@ describe("curriculum bank coverage", () => {
 
   it("advertises only implemented interface languages", () => {
     const html = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
-    expect(html).toContain('"inLanguage": ["en", "fr", "de"]');
-    expect(html).toContain('"availableLanguage": ["English", "French", "German"]');
+    expect(html).toContain('"inLanguage": ["en", "de"]');
+    expect(html).toContain('"availableLanguage": ["English", "German"]');
   });
 });

@@ -1,9 +1,10 @@
+import { isLaunchSubject } from "@/lib/launchDiscovery";
 import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { getCoachStem, getSquadMembers } from "@/lib/mascots";
 
-const squad = getSquadMembers().filter((member) => member.subjectId !== "celta");
+const squad = getSquadMembers().filter((member) => member.subjectId !== "celta" && isLaunchSubject(member.subjectId));
 const coach = getCoachStem();
 
 export function StemSquadSection() {

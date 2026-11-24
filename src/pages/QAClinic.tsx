@@ -12,14 +12,17 @@ import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { qaEntries, type QAEntry } from "@/data/qaClinic";
-import { tutorials } from "@/data/tutorials";
+import { qaEntries as allQAEntries, type QAEntry } from "@/data/qaClinic";
+import { tutorials as allTutorials } from "@/data/tutorials";
 import type { TutorialQuestionFormat } from "@/data/tutorials";
-import { subjects } from "@/data/questions";
+import { launchSubjects as subjects, isLaunchSubject } from "@/lib/launchDiscovery";
 import { getMascot } from "@/lib/mascots";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { normalizeLanguage } from "@/i18n/language";
 import { studySpeechLanguage } from "@/lib/subjectLanguage";
+
+const qaEntries = allQAEntries.filter(entry => isLaunchSubject(entry.subject));
+const tutorials = allTutorials.filter(item => isLaunchSubject(item.subject));
 
 const questionFormats: TutorialQuestionFormat[] = [
   "single", "multiple", "true-false", "numeric", "short-text", "ordering", "matching", "fill-blanks", "diagram-label",
@@ -27,7 +30,7 @@ const questionFormats: TutorialQuestionFormat[] = [
 const PAGE_SIZE = 16;
 
 type ChallengeMode = "mixed" | "adaptive" | "timed";
-const existingQuestionIds = new Set(qaEntries.map((entry) => entry.id));
+const existingQuestionIds = new Set(allQAEntries.map((entry) => entry.id));
 
 export default function QAClinic() {
   const { t, i18n } = useTranslation();
