@@ -1,0 +1,1068 @@
+{
+  "schemaVersion": 1,
+  "batch": "three-market-003",
+  "note": "Original formative drafts; independent academic review and board mapping required.",
+  "items": [
+    {
+      "id": "three-market-003-001",
+      "track": "mathematics",
+      "topic": "Percentages",
+      "text": "A coat costing £80 is reduced by 15%. What is its new price?",
+      "options": [
+        "£65",
+        "£72",
+        "£68",
+        "£92"
+      ],
+      "correctAnswer": "£68",
+      "explanation": "15% of £80 is £12, so £80 − £12 = £68.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-002",
+      "track": "mathematics",
+      "topic": "Geometry",
+      "text": "A circle has radius 6 cm. What is its exact area?",
+      "options": [
+        "12π cm²",
+        "6π cm²",
+        "72π cm²",
+        "36π cm²"
+      ],
+      "correctAnswer": "36π cm²",
+      "explanation": "Area = πr² = 36π cm².",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-003",
+      "track": "mathematics",
+      "topic": "Matrices",
+      "text": "What is the determinant of the matrix [[3, 2], [1, 4]]?",
+      "options": [
+        "10",
+        "14",
+        "5",
+        "12"
+      ],
+      "correctAnswer": "10",
+      "explanation": "For a 2 × 2 matrix the determinant is ad − bc = 12 − 2 = 10.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-004",
+      "track": "mathematics",
+      "topic": "Calculus",
+      "text": "Evaluate the definite integral of 2x from x = 1 to x = 3.",
+      "options": [
+        "4",
+        "8",
+        "6",
+        "9"
+      ],
+      "correctAnswer": "8",
+      "explanation": "An antiderivative is x²; the difference is 9 − 1 = 8.",
+      "type": "mcq",
+      "difficulty": 4,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-005",
+      "track": "biology",
+      "topic": "Enzymes",
+      "text": "Why can an enzyme lose activity at a sufficiently high temperature?",
+      "options": [
+        "Its amino acids always become glucose.",
+        "Its substrate becomes an enzyme.",
+        "Its active site's shape may change.",
+        "Its peptide bonds must all break."
+      ],
+      "correctAnswer": "Its active site's shape may change.",
+      "explanation": "Heat can disrupt interactions maintaining protein structure, altering the active site.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-006",
+      "track": "biology",
+      "topic": "Genetics",
+      "text": "Which molecule carries a copy of genetic coding information from DNA to a ribosome during gene expression?",
+      "options": [
+        "Transfer RNA",
+        "Ribosomal RNA",
+        "DNA polymerase",
+        "Messenger RNA"
+      ],
+      "correctAnswer": "Messenger RNA",
+      "explanation": "mRNA is transcribed from DNA and serves as a template during translation.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-007",
+      "track": "biology",
+      "topic": "Cell transport",
+      "text": "What is the net movement of particles from higher to lower concentration without metabolic energy called?",
+      "options": [
+        "Diffusion",
+        "Active transport",
+        "Endocytosis",
+        "Exocytosis"
+      ],
+      "correctAnswer": "Diffusion",
+      "explanation": "Diffusion occurs down a concentration gradient.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-008",
+      "track": "chemistry",
+      "topic": "Equilibrium",
+      "text": "For an exothermic forward reaction at equilibrium, which change favours the reactants?",
+      "options": [
+        "Decreasing temperature",
+        "Increasing temperature",
+        "Adding a catalyst",
+        "Waiting at constant conditions"
+      ],
+      "correctAnswer": "Increasing temperature",
+      "explanation": "Heating favours the endothermic reverse direction; a catalyst changes rates rather than equilibrium position.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-009",
+      "track": "chemistry",
+      "topic": "Organic chemistry",
+      "text": "Which functional group characterises a simple alcohol?",
+      "options": [
+        "Carboxyl (−COOH)",
+        "Amino (−NH₂)",
+        "Hydroxyl (−OH)",
+        "Carbonyl (>C=O)"
+      ],
+      "correctAnswer": "Hydroxyl (−OH)",
+      "explanation": "Alcohols have a hydroxyl group attached to a saturated carbon atom.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-010",
+      "track": "chemistry",
+      "topic": "Reactions",
+      "text": "Balance H₂ + O₂ → H₂O using the smallest whole-number coefficients.",
+      "options": [
+        "1, 1, 1",
+        "1, 2, 2",
+        "2, 2, 1",
+        "2, 1, 2"
+      ],
+      "correctAnswer": "2, 1, 2",
+      "explanation": "Two H₂ and one O₂ supply four hydrogen and two oxygen atoms, matching two H₂O.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-011",
+      "track": "physics",
+      "topic": "Circuits",
+      "text": "Two resistors of 3 Ω and 5 Ω are connected in series. What is their total resistance?",
+      "options": [
+        "8 Ω",
+        "2 Ω",
+        "15 Ω",
+        "1.875 Ω"
+      ],
+      "correctAnswer": "8 Ω",
+      "explanation": "Series resistances add: 3 + 5 = 8 Ω.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-012",
+      "track": "physics",
+      "topic": "Momentum",
+      "text": "A 0.5 kg ball moves at 12 m/s. What is the magnitude of its momentum?",
+      "options": [
+        "24 kg·m/s",
+        "6 kg·m/s",
+        "12.5 kg·m/s",
+        "3 kg·m/s"
+      ],
+      "correctAnswer": "6 kg·m/s",
+      "explanation": "Momentum magnitude is mass × speed = 0.5 × 12 = 6.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-013",
+      "track": "physics",
+      "topic": "Optics",
+      "text": "A ray enters glass from air at a nonzero angle to the normal. Which quantity remains unchanged at the boundary?",
+      "options": [
+        "Wavelength",
+        "Speed",
+        "Frequency",
+        "Direction"
+      ],
+      "correctAnswer": "Frequency",
+      "explanation": "Frequency is fixed by the source, whereas speed and wavelength change and refraction changes direction.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-014",
+      "track": "english-language",
+      "topic": "Punctuation",
+      "text": "Which sentence uses an apostrophe correctly for a bag belonging to one student?",
+      "options": [
+        "The students bag is blue.",
+        "The students' bag is blue.",
+        "The student,s bag is blue.",
+        "The student's bag is blue."
+      ],
+      "correctAnswer": "The student's bag is blue.",
+      "explanation": "A singular possessive noun normally takes an apostrophe followed by s.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-015",
+      "track": "english-language",
+      "topic": "Reading",
+      "text": "Maya studied the timetable before leaving because the bus service was reduced. What motivated her to check it?",
+      "options": [
+        "The bus service was reduced.",
+        "She had missed a previous bus.",
+        "She was driving instead.",
+        "The timetable was incorrect."
+      ],
+      "correctAnswer": "The bus service was reduced.",
+      "explanation": "The reason follows because in the sentence; the other details are not stated.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-016",
+      "track": "ielts",
+      "topic": "Reading",
+      "text": "Passage: The exhibition is free for children under twelve. Everyone else needs a ticket. Does an eleven-year-old need a ticket under this rule?",
+      "options": [
+        "Yes",
+        "No",
+        "Only on weekdays",
+        "Only when accompanied"
+      ],
+      "correctAnswer": "No",
+      "explanation": "Eleven is under twelve. The passage does not impose additional conditions.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-017",
+      "track": "ielts",
+      "topic": "Writing",
+      "text": "Which sentence gives a clear overview of an upward trend in a chart?",
+      "options": [
+        "The chart has a blue line.",
+        "I think sales are wonderful.",
+        "Overall, sales rose over the period.",
+        "The chart's title is written above it."
+      ],
+      "correctAnswer": "Overall, sales rose over the period.",
+      "explanation": "An overview describes the main trend rather than appearance or personal opinions.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-018",
+      "track": "german",
+      "topic": "Grammatik",
+      "text": "Ergänze: Morgen ___ ich meine Freundin besuchen. (werden, Präsens)",
+      "options": [
+        "wirst",
+        "wird",
+        "werden",
+        "werde"
+      ],
+      "correctAnswer": "werde",
+      "explanation": "Für die erste Person Singular lautet die Form werde.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "de",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-019",
+      "track": "german",
+      "topic": "Leseverstehen",
+      "text": "Im Text steht: „Der Zug fährt um acht Uhr ab.“ Wann fährt der Zug?",
+      "options": [
+        "Um acht Uhr",
+        "Um neun Uhr",
+        "Am Abend um zehn",
+        "Um sieben Uhr"
+      ],
+      "correctAnswer": "Um acht Uhr",
+      "explanation": "Die Uhrzeit steht ausdrücklich im Text.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "de",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-020",
+      "track": "german-visa-preparation",
+      "topic": "Alltagssprache",
+      "text": "Welche Frage passt, wenn Sie den Preis eines Gegenstands wissen möchten?",
+      "options": [
+        "Wie spät ist es?",
+        "Wie viel kostet das?",
+        "Woher kommen Sie?",
+        "Wie heißen Sie?"
+      ],
+      "correctAnswer": "Wie viel kostet das?",
+      "explanation": "Wie viel kostet das? fragt nach dem Preis.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "de",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-021",
+      "track": "artificial-intelligence",
+      "topic": "Classification",
+      "text": "What is precision for a positive class when there are 12 true positives and 3 false positives?",
+      "options": [
+        "20%",
+        "75%",
+        "80%",
+        "100%"
+      ],
+      "correctAnswer": "80%",
+      "explanation": "Precision = TP/(TP+FP) = 12/15 = 80%.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-022",
+      "track": "artificial-intelligence",
+      "topic": "Generalisation",
+      "text": "Why is a held-out test set used after selecting a model?",
+      "options": [
+        "To tune parameters repeatedly",
+        "To increase training-set size",
+        "To replace validation labels",
+        "To estimate performance on unseen data"
+      ],
+      "correctAnswer": "To estimate performance on unseen data",
+      "explanation": "A held-out test set supports an independent estimate after model selection.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-023",
+      "track": "coding",
+      "topic": "Data structures",
+      "text": "Which structure follows last-in, first-out removal?",
+      "options": [
+        "Stack",
+        "Queue",
+        "Set",
+        "Priority queue ordered by numeric priority"
+      ],
+      "correctAnswer": "Stack",
+      "explanation": "A stack removes the most recently added item first.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-024",
+      "track": "coding",
+      "topic": "Python",
+      "text": "What does len([4, 7, 4]) return in Python?",
+      "options": [
+        "2",
+        "3",
+        "15",
+        "4"
+      ],
+      "correctAnswer": "3",
+      "explanation": "len returns the number of elements, including repeated values.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-025",
+      "track": "cyber-security",
+      "topic": "Security principles",
+      "text": "Which principle limits an account to permissions needed for its assigned task?",
+      "options": [
+        "Maximum privilege",
+        "Security through obscurity",
+        "Least privilege",
+        "Open access"
+      ],
+      "correctAnswer": "Least privilege",
+      "explanation": "Least privilege reduces the damage and exposure possible from an account.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-026",
+      "track": "cyber-security",
+      "topic": "Phishing",
+      "text": "You receive an unexpected message asking for a password reset through a link. What is the safest first step?",
+      "options": [
+        "Enter your password on the linked page.",
+        "Forward the message with your password.",
+        "Disable account alerts.",
+        "Use the service's known official website independently."
+      ],
+      "correctAnswer": "Use the service's known official website independently.",
+      "explanation": "Independently accessing the official service avoids relying on a potentially malicious link.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-027",
+      "track": "cloud-computing",
+      "topic": "Service models",
+      "text": "Which service model provides virtual servers that customers manage at the operating-system level?",
+      "options": [
+        "Infrastructure as a service",
+        "Software as a service",
+        "Function as a service",
+        "Database as a service"
+      ],
+      "correctAnswer": "Infrastructure as a service",
+      "explanation": "IaaS typically exposes virtual infrastructure and leaves guest operating-system management to the customer.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-028",
+      "track": "cloud-computing",
+      "topic": "Cost",
+      "text": "A virtual machine costs 0.20 currency units per hour and runs for 15 hours. Ignoring other charges, what is the cost?",
+      "options": [
+        "0.75",
+        "3.00",
+        "15.20",
+        "75.00"
+      ],
+      "correctAnswer": "3.00",
+      "explanation": "Multiply the hourly rate by the hours: 0.20 × 15 = 3.00.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-029",
+      "track": "commerce",
+      "topic": "Trade",
+      "text": "What does importing mean?",
+      "options": [
+        "Selling goods to another country",
+        "Producing goods domestically",
+        "Purchasing goods or services from another country",
+        "Selling goods only to wholesalers"
+      ],
+      "correctAnswer": "Purchasing goods or services from another country",
+      "explanation": "Imports are goods or services purchased from abroad.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-030",
+      "track": "accounting",
+      "topic": "Profit",
+      "text": "Revenue is 12,000; cost of sales is 7,000; operating expenses are 2,000. What is operating profit, assuming no other operating items?",
+      "options": [
+        "5,000",
+        "10,000",
+        "17,000",
+        "3,000"
+      ],
+      "correctAnswer": "3,000",
+      "explanation": "Operating profit is 12,000 − 7,000 − 2,000 = 3,000.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-031",
+      "track": "accounting",
+      "topic": "Ratios",
+      "text": "Current assets are 30,000 and current liabilities are 15,000. What is the current ratio?",
+      "options": [
+        "2:1",
+        "1:2",
+        "3:1",
+        "1:1"
+      ],
+      "correctAnswer": "2:1",
+      "explanation": "Current ratio equals current assets divided by current liabilities.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-032",
+      "track": "business-studies",
+      "topic": "Operations",
+      "text": "A factory produces 80 units in 10 labour hours. What is labour productivity per hour?",
+      "options": [
+        "10 units",
+        "8 units",
+        "80 units",
+        "800 units"
+      ],
+      "correctAnswer": "8 units",
+      "explanation": "Labour productivity is output divided by labour hours.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-033",
+      "track": "business-studies",
+      "topic": "Marketing",
+      "text": "Grouping consumers according to shared characteristics is called what?",
+      "options": [
+        "Product differentiation",
+        "Vertical integration",
+        "Market segmentation",
+        "Inventory valuation"
+      ],
+      "correctAnswer": "Market segmentation",
+      "explanation": "Segmentation groups consumers with similar needs or characteristics.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-034",
+      "track": "economics",
+      "topic": "Inflation",
+      "text": "A price index rises from 120 to 126. What is the percentage change?",
+      "options": [
+        "6%",
+        "4%",
+        "20%",
+        "5%"
+      ],
+      "correctAnswer": "5%",
+      "explanation": "The change relative to the original index is (126 − 120)/120 × 100 = 5%.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-035",
+      "track": "economics",
+      "topic": "Market structure",
+      "text": "In the standard model, a market with one seller and barriers to entry is called what?",
+      "options": [
+        "Monopoly",
+        "Perfect competition",
+        "Monopolistic competition",
+        "Oligopoly"
+      ],
+      "correctAnswer": "Monopoly",
+      "explanation": "A monopoly has a single seller in the defined market.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-036",
+      "track": "arabic",
+      "topic": "Vocabulary",
+      "text": "ما ضد كلمة «كبير»؟",
+      "options": [
+        "طويل",
+        "صغير",
+        "قريب",
+        "جديد"
+      ],
+      "correctAnswer": "صغير",
+      "explanation": "صغير هو ضد كبير.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK"
+      ],
+      "language": "ar",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-037",
+      "track": "arabic",
+      "topic": "Grammar",
+      "text": "أي كلمة تدل على اثنين؟",
+      "options": [
+        "كتاب",
+        "كتب",
+        "كتابان",
+        "مكتبة"
+      ],
+      "correctAnswer": "كتابان",
+      "explanation": "كتابان مثنى يدل على كتابين.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK"
+      ],
+      "language": "ar",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-038",
+      "track": "urdu",
+      "topic": "Vocabulary",
+      "text": "لفظ «دن» کا متضاد کیا ہے؟",
+      "options": [
+        "صبح",
+        "ہفتہ",
+        "سال",
+        "رات"
+      ],
+      "correctAnswer": "رات",
+      "explanation": "دن کا متضاد رات ہے۔",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK"
+      ],
+      "language": "ur",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-039",
+      "track": "urdu",
+      "topic": "Grammar",
+      "text": "جملے «علی کتاب پڑھتا ہے» میں فاعل کون ہے؟",
+      "options": [
+        "علی",
+        "کتاب",
+        "پڑھتا",
+        "ہے"
+      ],
+      "correctAnswer": "علی",
+      "explanation": "علی کام کرنے والا ہے، اس لیے وہ فاعل ہے۔",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK"
+      ],
+      "language": "ur",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-040",
+      "track": "turkish",
+      "topic": "Vocabulary",
+      "text": "Türkçede ‘teşekkür ederim’ ne demektir?",
+      "options": [
+        "Good evening",
+        "Thank you",
+        "Goodbye",
+        "Excuse me"
+      ],
+      "correctAnswer": "Thank you",
+      "explanation": "Teşekkür ederim expresses thanks.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK"
+      ],
+      "language": "tr",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-041",
+      "track": "turkish",
+      "topic": "Grammar",
+      "text": "‘Okulda’ kelimesinde bulunma hâli eki hangisidir?",
+      "options": [
+        "-lar",
+        "-dan",
+        "-da",
+        "-ım"
+      ],
+      "correctAnswer": "-da",
+      "explanation": "Okul + da means at school; -da is the locative suffix.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK"
+      ],
+      "language": "tr",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-042",
+      "track": "welsh",
+      "topic": "Vocabulary",
+      "text": "What does ‘Nos da’ mean in Welsh?",
+      "options": [
+        "Good morning",
+        "Thank you",
+        "See you tomorrow",
+        "Good night"
+      ],
+      "correctAnswer": "Good night",
+      "explanation": "Nos da is the Welsh expression for good night.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-003-043",
+      "track": "welsh",
+      "topic": "Numbers",
+      "text": "What is ‘tri’ in Welsh when counting abstract numbers?",
+      "options": [
+        "Three",
+        "Two",
+        "Four",
+        "Five"
+      ],
+      "correctAnswer": "Three",
+      "explanation": "Tri means three in ordinary abstract counting.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    }
+  ]
+}
