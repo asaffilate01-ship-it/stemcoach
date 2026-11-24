@@ -20,4 +20,4 @@ jobs:
             echo "Protected content is tracked in the public repository"; exit 1
           fi
       - name: Verify generator without dependency installation
-        run: node --test scripts/test-private-content.mjs
+        run: node --test scripts/test-private-content.mjs scripts/test-private-bank-reconciliation.mjs
