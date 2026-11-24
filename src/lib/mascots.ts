@@ -243,6 +243,7 @@ export function getMascot(subjectId: string): MascotInfo {
     "cyber-security": "computer-science", "cloud-computing": "computer-science",
     "english-language": "ielts", english: "ielts", "german-visa-preparation": "german",
     commerce: "business-studies", accounting: "business-studies",
+    urdu: "ielts", turkish: "ielts", welsh: "ielts", arabic: "ielts",
   };
   const key = Object.prototype.hasOwnProperty.call(aliases, normalized) ? aliases[normalized] : normalized;
   return Object.prototype.hasOwnProperty.call(mascotMap, key)
