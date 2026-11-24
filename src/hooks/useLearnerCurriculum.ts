@@ -1,55 +1,39 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { curricula } from "@/data/questions";
 
-const STORAGE_KEY = "stemcoach:learner-curriculum";
-const curriculumIds = new Set(curricula.map((curriculum) => curriculum.id));
-
-function readStoredCurriculum(): string | null {
-  try {
-    const value = localStorage.getItem(STORAGE_KEY);
-    return value && curriculumIds.has(value) ? value : null;
-  } catch {
-    return null;
-  }
-}
+const curriculumIds = new Set(curricula.map(item => item.id));
+type Snapshot = { accountId: string; attempt: number; status: "ready" | "error"; curriculumId: string | null };
 
 export function useLearnerCurriculum() {
-  const { user } = useAuth();
-  const [curriculumId, setCurriculumId] = useState<string | null>(readStoredCurriculum);
-  const [loading, setLoading] = useState(Boolean(user));
+  const { user, loading: authLoading } = useAuth();
+  const accountId = user?.id;
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const retry = useCallback(() => setAttempt(n => n + 1), []);
 
   useEffect(() => {
+    if (!accountId) { setSnapshot(null); return; }
     let active = true;
-    if (!user) {
-      setLoading(false);
-      return () => { active = false; };
-    }
-
-    setLoading(true);
-    supabase
-      .from("user_preferences")
-      .select("curriculum")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active) return;
-        const remote = data?.curriculum;
-        if (remote && curriculumIds.has(remote)) {
-          setCurriculumId(remote);
-          try { localStorage.setItem(STORAGE_KEY, remote); } catch { /* storage unavailable */ }
-        }
-        setLoading(false);
-      });
-
+    void (async () => {
+      try {
+        const { data, error } = await supabase.from("user_preferences").select("curriculum").eq("user_id", accountId).maybeSingle();
+        if (error) throw error;
+        const curriculumId = data?.curriculum || null;
+        // Null means a successful lookup with no preference; an unknown ID is
+        // a data error, not permission to request every curriculum.
+        if (curriculumId && !curriculumIds.has(curriculumId)) throw new Error("Unknown curriculum");
+        if (active) setSnapshot({ accountId, attempt, status: "ready", curriculumId });
+      } catch {
+        if (active) setSnapshot({ accountId, attempt, status: "error", curriculumId: null });
+      }
+    })();
     return () => { active = false; };
-  }, [user]);
+  }, [accountId, attempt]);
 
-  const curriculum = useMemo(
-    () => curricula.find((item) => item.id === curriculumId) || null,
-    [curriculumId],
-  );
-
-  return { curriculumId, curriculum, loading };
+  const current = accountId && snapshot?.accountId === accountId && snapshot.attempt === attempt ? snapshot : null;
+  const curriculumId = current?.status === "ready" ? current.curriculumId : null;
+  const curriculum = curricula.find(item => item.id === curriculumId) || null;
+  return { curriculumId, curriculum, loading: Boolean(authLoading || (accountId && !current)), error: current?.status === "error", retry };
 }

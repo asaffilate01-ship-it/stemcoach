@@ -8,7 +8,7 @@ export async function purgeLegacyQuestionCaches(): Promise<void> {
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);
-      if (key?.startsWith("stemcoach:coach-thread:")) localStorage.removeItem(key);
+      if (key?.startsWith("stemcoach:coach-thread:") || key === "stemcoach:learner-curriculum" || key === "stemcoach:preferred-coach") localStorage.removeItem(key);
     }
   } catch { /* storage unavailable */ }
   if (typeof indexedDB !== "undefined") {

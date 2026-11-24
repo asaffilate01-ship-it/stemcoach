@@ -125,7 +125,7 @@ export default function Settings() {
   const chooseCoach = async (coachId: CoachId, name: string) => {
     const { error } = await setPreferredCoachId(coachId);
     toast(error
-      ? { title: "Coach saved on this device", description: "It will sync to your account after the database update is applied." }
+      ? { title: "Coach preference could not be saved", description: "Please retry. Your previous account preference is unchanged.", variant: "destructive" }
       : { title: `${name} is now your coach`, description: "This choice will follow you across STEMCoach sessions." });
   };
 

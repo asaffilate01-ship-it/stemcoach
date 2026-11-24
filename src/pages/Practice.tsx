@@ -71,7 +71,7 @@ export default function Practice() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { curriculumId, curriculum, loading: curriculumLoading } = useLearnerCurriculum();
+  const { curriculumId, curriculum, loading: curriculumLoading, error: curriculumError, retry: retryCurriculum } = useLearnerCurriculum();
   const { toast } = useToast();
   const { stats, newBadges, dismissBadge, fetchStats } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject, error: quotaError, refresh: refreshQuota } = useSubscriptionGate();
@@ -111,7 +111,7 @@ export default function Practice() {
   const practiceMode: PracticeMode = requestedMode === "diagnostic" || requestedMode === "focus" ? requestedMode : "mixed";
 
   useEffect(() => {
-    if (!subjectId || curriculumLoading) return;
+    if (!subjectId || curriculumLoading || curriculumError) return;
     let active = true;
     const version = ++loadVersion.current;
     const isCurrent = () => active && loadVersion.current === version;
@@ -162,8 +162,8 @@ export default function Practice() {
     };
 
     void loadQuestions();
-    return () => { active = false; };
-  }, [curriculumId, curriculumLoading, practiceMode, reloadQuestions, subjectId, user, t, toast]);
+    return () => { active = false; loadVersion.current++; };
+  }, [curriculumId, curriculumLoading, curriculumError, practiceMode, reloadQuestions, subjectId, user, t, toast]);
 
   // Clear legacy per-question AI output that was shared across accounts on one device.
   useEffect(() => {
@@ -181,7 +181,7 @@ export default function Practice() {
   // Number keys toggle multi-select answers; Enter submits/advances when valid.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (questions.length === 0 || dbLoading || submitting || loadingAI || shouldIgnorePracticeShortcut(e)) {
+      if (questions.length === 0 || dbLoading || curriculumLoading || curriculumError || submitting || loadingAI || shouldIgnorePracticeShortcut(e)) {
         return;
       }
       const q = questions[currentIndex];
@@ -227,7 +227,7 @@ export default function Practice() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [questions, currentIndex, showFeedback, selectedAnswer, selectedAnswers, essayAnswer, dbLoading, submitting, loadingAI]);
+  }, [questions, currentIndex, showFeedback, selectedAnswer, selectedAnswers, essayAnswer, dbLoading, curriculumLoading, curriculumError, submitting, loadingAI]);
 
   // Empty / loading states
   if (!subject) {
@@ -250,6 +250,13 @@ export default function Practice() {
     );
   }
 
+  if (curriculumError) {
+    return <div className="min-h-screen bg-background"><AppHeader /><main className="mx-auto max-w-md px-6 py-20 text-center">
+      <h1 className="text-xl font-semibold">Your curriculum could not be verified</h1>
+      <p role="alert" className="my-4 text-sm text-muted-foreground">Retry before loading your practice questions.</p>
+      <Button onClick={retryCurriculum} className="min-h-11">{t("common.retry")}</Button>
+    </main></div>;
+  }
   if (dbLoading || curriculumLoading) {
     const mascot = getMascot(subjectId || "");
     return (

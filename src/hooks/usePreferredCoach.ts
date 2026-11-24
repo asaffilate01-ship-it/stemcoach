@@ -1,99 +1,70 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  DEFAULT_COACH_ID,
-  getCoachById,
-  isCoachId,
-  type CoachId,
-} from "@/lib/mascots";
+import { DEFAULT_COACH_ID, getCoachById, isCoachId, type CoachId } from "@/lib/mascots";
 
-const STORAGE_KEY = "stemcoach:preferred-coach";
 const CHANGE_EVENT = "stemcoach:preferred-coach-change";
-
-function readLocalPreference(): CoachId {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return isCoachId(stored) ? stored : DEFAULT_COACH_ID;
-  } catch {
-    return DEFAULT_COACH_ID;
-  }
-}
-
-function writeLocalPreference(coachId: CoachId) {
-  try {
-    localStorage.setItem(STORAGE_KEY, coachId);
-  } catch {
-    // The database preference still persists for signed-in users.
-  }
-}
+type Snapshot = { accountId: string; attempt: number; coachId: CoachId; status: "ready" | "error" };
 
 export function usePreferredCoach() {
-  const { user } = useAuth();
-  const [preferredCoachId, setPreferredCoachIdState] = useState<CoachId>(readLocalPreference);
-  const [loading, setLoading] = useState(Boolean(user));
+  const { user, loading: authLoading } = useAuth();
+  const accountId = user?.id;
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const saveInFlight = useRef(false);
+  const activeAccount = useRef(accountId);
+  const retry = useCallback(() => setAttempt(n => n + 1), []);
 
   useEffect(() => {
+    activeAccount.current = accountId;
+    if (!accountId) { setSnapshot(null); return; }
+    let active = true;
     const sync = (event: Event) => {
-      const detail = (event as CustomEvent<string>).detail;
-      setPreferredCoachIdState(isCoachId(detail) ? detail : readLocalPreference());
-    };
-    const storage = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY) setPreferredCoachIdState(readLocalPreference());
+      if ((event as CustomEvent<{ accountId: string }>).detail?.accountId === accountId) retry();
     };
     window.addEventListener(CHANGE_EVENT, sync);
-    window.addEventListener("storage", storage);
+    void (async () => {
+      try {
+        const { data, error } = await supabase.from("user_preferences").select("preferred_mascot").eq("user_id", accountId).maybeSingle();
+        if (error) throw error;
+        const coachId = isCoachId(data?.preferred_mascot) ? data.preferred_mascot : DEFAULT_COACH_ID;
+        if (active) setSnapshot({ accountId, attempt, coachId, status: "ready" });
+      } catch {
+        if (active) setSnapshot({ accountId, attempt, coachId: DEFAULT_COACH_ID, status: "error" });
+      }
+    })();
     return () => {
+      active = false;
+      activeAccount.current = undefined;
       window.removeEventListener(CHANGE_EVENT, sync);
-      window.removeEventListener("storage", storage);
     };
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    if (!user) {
-      setLoading(false);
-      return () => { active = false; };
-    }
-
-    setLoading(true);
-    supabase
-      .from("user_preferences")
-      .select("preferred_mascot")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active) return;
-        const remote = (data as { preferred_mascot?: unknown } | null)?.preferred_mascot;
-        if (isCoachId(remote)) {
-          writeLocalPreference(remote);
-          setPreferredCoachIdState(remote);
-        }
-        setLoading(false);
-      });
-
-    return () => { active = false; };
-  }, [user]);
+  }, [accountId, attempt, retry]);
 
   const setPreferredCoachId = useCallback(async (coachId: CoachId) => {
-    writeLocalPreference(coachId);
-    setPreferredCoachIdState(coachId);
-    window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: coachId }));
-
-    if (!user) return { error: null };
-    const { error } = await supabase
-      .from("user_preferences")
-      .upsert(
-        { user_id: user.id, preferred_mascot: coachId, updated_at: new Date().toISOString() },
+    if (!accountId || !isCoachId(coachId) || activeAccount.current !== accountId || saveInFlight.current) {
+      return { error: new Error("Coach preference cannot be saved right now") };
+    }
+    saveInFlight.current = true;
+    try {
+      const { error } = await supabase.from("user_preferences").upsert(
+        { user_id: accountId, preferred_mascot: coachId, updated_at: new Date().toISOString() },
         { onConflict: "user_id" },
       );
-    return { error };
-  }, [user]);
+      if (error) return { error };
+      if (activeAccount.current !== accountId) return { error: new Error("Account changed") };
+      // Other mounted consumers reload the preference from the server. No
+      // local transcript, account preference or optimistic success is stored.
+      window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { accountId } }));
+      return { error: null };
+    } catch {
+      return { error: new Error("Coach preference could not be saved") };
+    } finally {
+      saveInFlight.current = false;
+    }
+  }, [accountId]);
 
-  return {
-    preferredCoachId,
-    preferredCoach: getCoachById(preferredCoachId),
-    setPreferredCoachId,
-    loading,
-  };
+  const current = accountId && snapshot?.accountId === accountId && snapshot.attempt === attempt ? snapshot : null;
+  const preferredCoachId = current?.status === "ready" ? current.coachId : DEFAULT_COACH_ID;
+  return { preferredCoachId, preferredCoach: getCoachById(preferredCoachId), setPreferredCoachId,
+    loading: Boolean(authLoading || (accountId && !current)), error: current?.status === "error", retry };
 }
