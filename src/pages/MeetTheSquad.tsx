@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { motion } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
@@ -56,7 +57,7 @@ export default function MeetTheSquad() {
           >
             <div className="flex flex-col items-center gap-5 md:flex-row md:items-start">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-lg md:h-28 md:w-28">
-                <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
+                <MascotAvatar mascot={coach} decorative className="h-full w-full" />
               </div>
               <div className="text-center md:text-left">
                 <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">{t("squad.leader")} · {coach.personality}</div>
@@ -88,7 +89,7 @@ export default function MeetTheSquad() {
               >
                 <div className="flex items-center gap-4 p-5">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 shadow-md">
-                    <img src={member.image} alt={member.name} className="h-full w-full object-cover" />
+                    <MascotAvatar mascot={member} decorative className="h-full w-full" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-lg font-bold">{member.name} {member.emoji}</h3>
