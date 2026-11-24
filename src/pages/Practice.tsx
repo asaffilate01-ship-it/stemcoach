@@ -20,7 +20,7 @@ import { CorrectAnimation } from "@/components/gamification/CorrectAnimation";
 import { QuizTimer } from "@/components/gamification/QuizTimer";
 import { MascotReaction } from "@/components/gamification/MascotReaction";
 import ReactMarkdown from "react-markdown";
-import { getCachedQuestions, cacheQuestions } from "@/lib/questionCache";
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { getMascot } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
 import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
@@ -74,14 +74,13 @@ export default function Practice() {
   const { curriculumId, curriculum, loading: curriculumLoading } = useLearnerCurriculum();
   const { toast } = useToast();
   const { stats, newBadges, dismissBadge, fetchStats } = useGameStats();
-  const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject } = useSubscriptionGate();
+  const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject, error: quotaError, refresh: refreshQuota } = useSubscriptionGate();
   const subject = subjects.find((s) => s.id === subjectId);
   useDocumentTitle(subject ? t("practice.practiceSubject", { subject: subject.name }) : t("practice.title"));
 
   const [questions, setQuestions] = useState<DBQuestion[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
   const [questionLoadFailed, setQuestionLoadFailed] = useState(false);
-  const [usingCachedQuestions, setUsingCachedQuestions] = useState(false);
   const [reloadQuestions, setReloadQuestions] = useState(0);
   const loadVersion = useRef(0);
   const answerSubmissionInFlight = useRef(false);
@@ -120,7 +119,6 @@ export default function Practice() {
     const loadQuestions = async () => {
       setDbLoading(true);
       setQuestionLoadFailed(false);
-      setUsingCachedQuestions(false);
       // A previous subject or mode must never remain visible as new content loads.
       setQuestions([]);
       setCurrentIndex(0);
@@ -143,48 +141,21 @@ export default function Practice() {
       setTimeTaken(0);
       setTimerRunning(true);
 
-      const loadCached = async () => {
-        const cached = await getCachedQuestions(subjectId, curriculumId);
-        if (!isCurrent()) return false;
-        if (!cached?.length) return false;
-        setQuestions(cached as DBQuestion[]);
-        setUsingCachedQuestions(true);
-        return true;
-      };
-
       try {
-        let records: unknown[] = [];
-        if (user) {
-          const adaptive = await (supabase.rpc as any)("get_adaptive_practice_questions", {
-            _subject: subjectId,
-            _curriculum: curriculumId || null,
-            _mode: practiceMode,
-            _count: 30,
-          });
-          if (!isCurrent()) return;
-          if (!adaptive.error && Array.isArray(adaptive.data)) records = adaptive.data;
-        }
-
-        if (!records.length) {
-          let query = supabase.from("questions_safe" as any).select("*").eq("subject", subjectId);
-          if (curriculumId) query = query.eq("curriculum", curriculumId);
-          const result = await query.limit(50);
-          if (!isCurrent()) return;
-          if (result.error) throw result.error;
-          records = Array.isArray(result.data) ? result.data : [];
-        }
-
-        if (records.length) {
-          if (!isCurrent()) return;
-          setQuestions(records as DBQuestion[]);
-          void cacheQuestions(subjectId, records, curriculumId);
-        } else {
-          await loadCached();
-        }
+        if (!user) return;
+        const result = await (supabase.rpc as any)("get_adaptive_practice_questions", {
+          _subject: subjectId,
+          _curriculum: curriculumId || null,
+          _mode: practiceMode,
+          _count: 30,
+        });
+        if (!isCurrent()) return;
+        if (result.error || !Array.isArray(result.data)) throw new Error("Practice access could not be verified");
+        // Do not fall back to a less restrictive view or a prior device cache
+        // after an authorization failure or an empty result.
+        setQuestions(result.data as DBQuestion[]);
       } catch {
-        if (isCurrent() && !(await loadCached()) && isCurrent()) {
-          setQuestionLoadFailed(true);
-        }
+        if (isCurrent()) setQuestionLoadFailed(true);
       } finally {
         if (isCurrent()) setDbLoading(false);
       }
@@ -285,14 +256,10 @@ export default function Practice() {
       <div className="min-h-screen bg-background">
         <AppHeader />
         <div className="flex flex-col items-center justify-center gap-4 py-32">
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="h-16 w-16 overflow-hidden rounded-2xl shadow-md"
-          >
-            <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
-          </motion.div>
-          <p className="text-sm text-muted-foreground">{mascot.name} {t("practice.loadingQuestions")}</p>
+          <div className="h-16 w-16 overflow-hidden rounded-2xl shadow-md">
+            <MascotAvatar mascot={mascot} decorative className="h-full w-full" />
+          </div>
+          <p role="status" className="text-sm text-muted-foreground">{mascot.name} {t("practice.loadingQuestions")}</p>
         </div>
       </div>
     );
@@ -306,7 +273,7 @@ export default function Practice() {
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="mx-auto max-w-md">
             <div className="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-2xl shadow-md">
-              <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+              <MascotAvatar mascot={mascot} decorative className="h-full w-full" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">{questionLoadFailed ? t("practice.loadFailed") : t("practice.noQuestionsYet")}</h2>
             <p className="mb-8 text-muted-foreground">{questionLoadFailed
@@ -550,11 +517,11 @@ export default function Practice() {
       </div>
 
       <main className="container mx-auto max-w-4xl px-4 py-6 md:py-10">
-        {/* Cached questions can be read offline, but assessment is still server-checked. */}
-        {usingCachedQuestions && (
-          <p role="status" className="mb-5 rounded-xl border border-warning/25 bg-warning/5 p-3 text-sm text-foreground">
-            {t("practice.cachedNeedsConnection")}
-          </p>
+        {quotaError && (
+          <div role="alert" className="mb-5 rounded-xl border border-destructive/25 p-4 text-sm">
+            <p>Learning access could not be verified. Answer submission is disabled until the check succeeds.</p>
+            <Button onClick={() => void refreshQuota()} variant="outline" className="mt-2 min-h-11">{t("common.retry")}</Button>
+          </div>
         )}
         {/* Quota banner */}
         {isFree && user && (
@@ -630,7 +597,7 @@ export default function Practice() {
                   type="button"
                   onClick={() => setSearchParams({ mode })}
                   disabled={submitting || loadingAI}
-                  className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${practiceMode === mode ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground hover:text-foreground"}`}
+                  className={`rounded-xl min-h-11 px-3 py-2 text-xs font-semibold transition-colors ${practiceMode === mode ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground hover:text-foreground"}`}
                   aria-pressed={practiceMode === mode}
                 >
                   {t(`practice.mode.${mode}`)}
@@ -838,7 +805,7 @@ export default function Practice() {
                 {!showFeedback ? (
                   <Button
                     onClick={handleSubmit}
-                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim() && !isOrdering) || loadingAI || submitting || (isFree && !canPracticeSubjectFree(subjectId || ""))}
+                    disabled={(!selectedAnswer && selectedAnswers.size === 0 && !essayAnswer.trim() && !isOrdering) || loadingAI || submitting || (!canPractice && !canPracticeSubjectFree(subjectId || ""))}
                     className="rounded-xl px-6"
                     size="lg"
                   >

@@ -130,7 +130,7 @@ const App = () => (
 
                     {/* Student features — available without login; pages handle anonymous state */}
                     <Route path="/subjects" element={<Pub><Subjects /></Pub>} />
-                    <Route path="/practice/:subjectId" element={<Pub><Practice /></Pub>} />
+                    <Route path="/practice/:subjectId" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
                     <Route path="/mock-exam" element={<Pub><MockExam /></Pub>} />
                     <Route path="/ai-tutor" element={<Pub><AITutor /></Pub>} />
                     <Route path="/qa-clinic" element={<Pub><QAClinic /></Pub>} />

@@ -13,6 +13,8 @@ export function useSubscriptionGate() {
     remainingToday: quota.remainingQuestions,
     todayCount: quota.usedQuestions,
     loading: quota.loading,
+    error: quota.error,
+    refresh: quota.refresh,
     incrementCount: quota.incrementUsed,
     incrementMockExam: quota.incrementMockExam,
     FREE_DAILY_LIMIT: quota.totalQuestions || quota.FREE_QUESTIONS_PER_SUBJECT,

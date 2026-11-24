@@ -50,7 +50,7 @@ export default function InstallApp() {
   };
 
   const benefits = [
-    "Review previously loaded questions offline; grading and AI coaching require internet",
+    "Open the installed app offline; protected questions, grading and AI coaching require internet",
     "Instant launch from your home screen",
     "Full-screen experience without browser bars",
     "Push notifications for streaks and study reminders",
