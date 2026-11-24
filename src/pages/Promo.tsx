@@ -52,7 +52,7 @@ const featureGroups: { label: string; items: Feature[] }[] = [
     items: [
       { icon: Users, variant: "purple", title: "Parent & teacher portals", description: "Approved parent links, class rosters and progress reports for every stakeholder around the learner." },
       { icon: Building2, variant: "primary", title: "White-label for schools", description: "Multi-tenant branding, seat tiers and institution admin — your logo, your colours, our engine." },
-      { icon: Globe, variant: "success", title: "Global curricula, 3 languages", description: "Country, level, exam board and difficulty filters, with the interface localised in English, French and German." },
+      { icon: Globe, variant: "success", title: "Three markets, five study languages", description: "UK, German and Pakistani curriculum discovery; English, German, Arabic, Urdu and Welsh study tracks. English and German interfaces." },
       { icon: CreditCard, variant: "accent", title: "Localised pay-as-you-go", description: "No subscriptions. Region-aware pricing in GBP, USD, EUR and PHP with server-verified purchases." },
     ],
   },
@@ -66,7 +66,7 @@ const platformPoints = [
 
 const stats = [
   { value: "170K+", label: "Questions live" },
-  { value: "Global", label: "Curricula" },
+  { value: "3", label: "Markets" },
   { value: "14", label: "Coach mascots" },
   { value: "Full", label: "Study workflow" },
 ];
@@ -74,7 +74,7 @@ const stats = [
 const faqs = [
   { q: "What exactly is STEMCoach?", a: "A virtual tuition centre. Learners use reviewed, exam-style practice with a squad of subject coaches that explain the thinking behind each answer — not just whether it was right." },
   { q: "Is this a subscription?", a: "No. STEMCoach is pay-as-you-go with regionally priced question and exam packs, so families only pay for what they actually use." },
-  { q: "Which subjects and curricula are covered?", a: "The platform maps practice to global qualification frameworks by country, level and exam board. Availability is based on the reviewed questions currently published for each subject." },
+  { q: "Which subjects and curricula are covered?", a: "The platform maps practice to qualification frameworks in the UK, Germany and Pakistan by country, level and exam board. Availability is based on the reviewed questions currently published for each subject." },
   { q: "How do parents and teachers fit in?", a: "Parents request a link that the student approves, then see progress reports and streaks. Teachers get class rosters, assignments and cohort analytics; institutions get a white-label admin portal." },
   { q: "Does it work on phones and offline?", a: "Yes. It installs as a PWA with offline caching, uses a native-style bottom navigation on mobile, and ships as Capacitor iOS and Android builds." },
   { q: "How is learner data protected?", a: "Every table is behind row-level security, sensitive lookups run through ownership-checked functions, grading happens server-side, and GDPR export plus right-to-erasure flows are built in." },

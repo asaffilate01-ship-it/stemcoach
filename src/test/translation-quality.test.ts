@@ -54,7 +54,7 @@ describe("translation quality", () => {
   });
 
   it("normalises browser regional language codes to supported translations", () => {
-    expect(normalizeLanguage("fr-FR")).toBe("fr");
+    expect(normalizeLanguage("fr-FR")).toBe("en");
     expect(normalizeLanguage("de_DE")).toBe("de");
     expect(normalizeLanguage("en-GB")).toBe("en");
     expect(normalizeLanguage("es-ES")).toBe("en");

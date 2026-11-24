@@ -20,6 +20,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import type { Icon3DVariant } from "@/components/ui/icon-3d";
+import { launchStudyLanguages } from "@/lib/launchDiscovery";
 import { normalizeLanguage } from "@/i18n/language";
 import type { SupportedLanguage } from "@/i18n/language";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,13 +40,13 @@ interface NavItem {
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
   { code: "de", label: "Deutsch", flag: "🇩🇪" },
 ] as const;
 
 function LanguageSelector() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const currentCode = normalizeLanguage(i18n.resolvedLanguage || i18n.language);
   const current = LANGUAGES.find(l => l.code === currentCode) || LANGUAGES[0];
 
@@ -89,8 +90,8 @@ function LanguageSelector() {
           <Globe className="h-3.5 w-3.5 hidden sm:block" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[140px]">
-        <DropdownMenuLabel className="text-xs">{t("common.language")}</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-[min(19rem,calc(100vw-1rem))]">
+        <DropdownMenuLabel className="text-xs">Interface · {t("common.language")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {LANGUAGES.map(lang => (
           <DropdownMenuItem
@@ -103,6 +104,12 @@ function LanguageSelector() {
             <span className="text-sm">{lang.label}</span>
           </DropdownMenuItem>
         ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Study languages</DropdownMenuLabel>
+        {launchStudyLanguages.map(lang => <DropdownMenuItem key={lang.id} className="min-h-11 gap-2" onClick={() => navigate(lang.available ? "/qa-clinic?subject=" + lang.subject : "/subjects#study-languages")}>
+          <span className="flex-1">{lang.name}</span><span dir="auto" className="text-xs text-muted-foreground">{lang.native}</span>
+        </DropdownMenuItem>)}
+        <p className="px-2 py-1 text-xs text-muted-foreground">Arabic, Urdu and Welsh interface translations are not yet available.</p>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -224,15 +231,15 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/20 bg-background/70 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300">
-      <div className="container mx-auto flex h-12 items-center justify-between px-4 sm:h-14">
+      <div className="container mx-auto flex min-h-14 items-center justify-between gap-2 px-3 sm:px-4">
         {/* Logo */}
-        <Link to="/home" className="group flex items-center gap-2">
+        <Link to="/home" className="group flex min-w-0 items-center gap-2">
           <img
             src={tenant.logoUrl || "/assets/coach-stem.png"}
             alt={tenant.name || "STEMCoach"}
             className="h-7 w-7 rounded-lg shadow-sm shadow-primary/20 transition-transform duration-300 group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-xl object-cover"
           />
-          <span className="font-bold tracking-tight text-foreground text-sm sm:text-base">
+          <span className="truncate font-bold tracking-tight text-foreground text-sm sm:text-base">
             {tenant.name ? (
               <>{tenant.name}</>
             ) : (
@@ -255,7 +262,7 @@ export function AppHeader() {
         <div className="flex items-center gap-1 sm:gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button type="button" className="xl:hidden flex min-h-10 min-w-10 items-center justify-center gap-1 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              <button type="button" className="xl:hidden flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
                 aria-label={t("nav.more")}>
                 <Menu className="h-5 w-5" aria-hidden="true" />
                 <span className="sr-only">{t("nav.more")}</span>

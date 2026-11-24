@@ -41,7 +41,7 @@ test("checklist ticks and a working focus timer are local optional controls", as
   await expect(page.getByText("0 of 4 considered")).toBeVisible();
 });
 
-test("German and French study guides are translated rather than empty English placeholders", async ({ page }) => {
+test("German guides are translated and hidden French locale falls back to English", async ({ page }) => {
   await page.goto("/study-skills");
   await dismissCookies(page);
   await page.evaluate(() => localStorage.setItem("i18nextLng", "de"));
@@ -50,6 +50,6 @@ test("German and French study guides are translated rather than empty English pl
   await expect(page.getByRole("heading", { name: "Mit einem kleinen Schritt beginnen" })).toBeVisible();
   await page.evaluate(() => localStorage.setItem("i18nextLng", "fr"));
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Méthodes d'étude et d'examen" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Commencer par une petite tâche" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Study & exam skills" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Méthodes d'étude et d'examen" })).toHaveCount(0);
 });
