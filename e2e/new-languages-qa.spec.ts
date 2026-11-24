@@ -5,10 +5,8 @@ async function dismissCookies(page: import("@playwright/test").Page) {
   if (await reject.isVisible().catch(() => false)) await reject.click();
 }
 
-test("Italian, Spanish and Arabic topics each offer ten authored practice checks", async ({ page }) => {
+test("Arabic topic offers ten authored practice checks", async ({ page }) => {
   for (const [id, subject] of [
-    ["italian-essere-avere-present", "italian"],
-    ["spanish-ser-estar", "spanish"],
     ["arabic-greetings-pronouns", "arabic"],
   ] as const) {
     await page.goto("/qa-clinic?topic=" + id);
@@ -28,10 +26,10 @@ test("Arabic question and answer text retains automatic text direction", async (
   await expect(first.locator("button span[dir=auto]").first()).toBeVisible();
 });
 
-test("Three new language names appear in the subject filter", async ({ page }) => {
+test("Only launch language subjects appear in the subject filter", async ({ page }) => {
   await page.goto("/qa-clinic");
   await dismissCookies(page);
-  for (const name of ["Italian", "Spanish", "Arabic (Modern Standard)"]) {
-    await expect(page.getByLabel("Filter subject").locator("option", { hasText: name })).toHaveCount(1);
-  }
+  const filter = page.getByLabel("Filter subject");
+  await expect(filter.locator("option[value=arabic]")).toHaveCount(1);
+  for (const id of ["italian", "spanish", "french", "turkish"]) await expect(filter.locator("option[value=" + id + "]")).toHaveCount(0);
 });
