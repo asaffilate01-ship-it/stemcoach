@@ -661,7 +661,7 @@ export default function Subjects() {
             </Sheet>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)]>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
             {/* Desktop sidebar filters */}
             <aside className="hidden lg:block min-w-0">
                 <div className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
