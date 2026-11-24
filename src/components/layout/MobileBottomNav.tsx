@@ -1,3 +1,5 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
+import { getCoachStem } from "@/lib/mascots";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -51,11 +53,7 @@ export function MobileBottomNav() {
                 active ? "opacity-100" : "opacity-75"
               }`}>
                 {item.image ? (
-                  <img
-                    src={item.image}
-                    alt=""
-                    className="h-8 w-8 rounded-xl object-cover shadow-md ring-1 ring-border/20"
-                  />
+                  <MascotAvatar mascot={getCoachStem()} decorative className="h-8 w-8 shadow-md" />
                 ) : item.icon ? (
                   <Icon3D icon={item.icon} variant={item.variant} size="sm" />
                 ) : null}
