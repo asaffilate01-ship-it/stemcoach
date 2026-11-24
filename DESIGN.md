@@ -44,7 +44,7 @@ Pass existing repo lint/build/tests and domain acceptance; inspect actual render
 - The installed shell may be available offline, but protected questions, private coaching conversations, grading, credits and verified progress require the server. Do not persist protected question payloads or learner transcripts in shared-device browser storage.
 
 ## Localisation and accessible content
-- The UI currently has English, French and German locale resources. Italian, Spanish and Modern Standard Arabic subject content is distinct from a fully translated interface.
+- The active interface locales are English and German. Visible study languages are English, German, Arabic, Urdu and Welsh. Existing translations and historic content outside the launch scope remain archived in source. Study content is distinct from a fully translated interface.
 - Before adding Arabic UI, verify RTL navigation, mixed-direction mathematical notation, numbers, keyboard controls, forms, focus, diagrams and screen-reader labels. Use direction isolation for equations rather than blindly mirroring symbols.
 - Each locale requires overflow and accessibility checks at 360, 390, 768 and 1440 pixels. Never silently fall back to a different language without a visible content-language notice.
 - Every question should have curriculum/specification metadata, approved key and revision provenance before being labelled reviewed. AI essay feedback remains provisional unless a verified moderation workflow explicitly says otherwise.

@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { subjects, type Question as LocalQuestion } from "@/data/questions";
+import { launchSubjects as subjects, launchCurricula } from "@/lib/launchDiscovery";
+import { readPracticeFilters, choosePracticeCurriculum, narrowPracticeSample } from "@/lib/launchPractice";
 import { ArrowRight, CheckCircle2, XCircle, Lightbulb, BookOpen, MessageSquare, Loader2, Lock, Trophy, Zap, ChevronLeft, Timer, Target, Sparkles, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,6 +42,7 @@ interface DBQuestion {
   topic: string;
   subtopic: string;
   subject: string;
+  curriculum?: string;
   difficulty: number;
   points: number;
   question_type: string;
@@ -66,12 +68,22 @@ function parseOptions(value: unknown): string[] {
 }
 
 export default function Practice() {
+  const location = useLocation();
+  return <PracticeWorkspace key={location.pathname + location.search} />;
+}
+
+function PracticeWorkspace() {
   const { t } = useTranslation();
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { curriculumId, curriculum, loading: curriculumLoading, error: curriculumError, retry: retryCurriculum } = useLearnerCurriculum();
+  const { curriculumId, loading: curriculumLoading, error: curriculumError, retry: retryCurriculum } = useLearnerCurriculum();
+  const filters = useMemo(() => readPracticeFilters(searchParams), [searchParams]);
+  const activeCurriculumId = filters ? choosePracticeCurriculum(filters, curriculumId) : null;
+  const curriculum = launchCurricula.find(c => c.id === activeCurriculumId);
+  const hasSampleFilters = Boolean(filters && (filters.boards.length || filters.difficulty !== null));
+  const selectQualification = (id: string) => { const next = new URLSearchParams(searchParams); next.set("qualification", id); setSearchParams(next); };
   const { toast } = useToast();
   const { stats, newBadges, dismissBadge, fetchStats } = useGameStats();
   const { isFree, canPractice, remainingToday, incrementCount, FREE_DAILY_LIMIT, canUseAITutor: canUseCoaching, canPracticeSubjectFree, getFreeRemainingForSubject, error: quotaError, refresh: refreshQuota } = useSubscriptionGate();
@@ -111,7 +123,7 @@ export default function Practice() {
   const practiceMode: PracticeMode = requestedMode === "diagnostic" || requestedMode === "focus" ? requestedMode : "mixed";
 
   useEffect(() => {
-    if (!subjectId || curriculumLoading || curriculumError) return;
+    if (!subjectId || !subject || !filters || !activeCurriculumId || curriculumLoading || curriculumError) return;
     let active = true;
     const version = ++loadVersion.current;
     const isCurrent = () => active && loadVersion.current === version;
@@ -145,15 +157,15 @@ export default function Practice() {
         if (!user) return;
         const result = await (supabase.rpc as any)("get_adaptive_practice_questions", {
           _subject: subjectId,
-          _curriculum: curriculumId || null,
+          _curriculum: activeCurriculumId,
           _mode: practiceMode,
-          _count: 30,
+          _count: hasSampleFilters ? 50 : 30,
         });
         if (!isCurrent()) return;
         if (result.error || !Array.isArray(result.data)) throw new Error("Practice access could not be verified");
         // Do not fall back to a less restrictive view or a prior device cache
         // after an authorization failure or an empty result.
-        setQuestions(result.data as DBQuestion[]);
+        setQuestions(narrowPracticeSample(result.data as DBQuestion[], subjectId, activeCurriculumId, filters));
       } catch {
         if (isCurrent()) setQuestionLoadFailed(true);
       } finally {
@@ -163,7 +175,7 @@ export default function Practice() {
 
     void loadQuestions();
     return () => { active = false; loadVersion.current++; };
-  }, [curriculumId, curriculumLoading, curriculumError, practiceMode, reloadQuestions, subjectId, user, t, toast]);
+  }, [activeCurriculumId, filters, hasSampleFilters, curriculumLoading, curriculumError, practiceMode, reloadQuestions, subjectId, subject, user, t, toast]);
 
   // Clear legacy per-question AI output that was shared across accounts on one device.
   useEffect(() => {
@@ -257,6 +269,8 @@ export default function Practice() {
       <Button onClick={retryCurriculum} className="min-h-11">{t("common.retry")}</Button>
     </main></div>;
   }
+  if (!filters) return <div className="min-h-screen bg-background"><AppHeader /><main className="mx-auto max-w-md px-6 py-16 text-center"><h1 className="text-xl font-semibold">These practice filters are not available</h1><p role="alert" className="my-4 text-sm text-muted-foreground">Choose a qualification from the current launch catalogue.</p><Button onClick={() => navigate("/subjects")}>{t("practice.backToSubjects")}</Button></main></div>;
+  if (!curriculumLoading && !activeCurriculumId) return <div className="min-h-screen bg-background"><AppHeader /><main className="mx-auto max-w-2xl px-4 py-8"><h1 className="text-2xl font-semibold">Choose your qualification</h1><p className="my-3 text-sm text-muted-foreground">Choose one curriculum for this practice session. Your saved account preference will not change.</p><div className="grid gap-2 sm:grid-cols-2">{launchCurricula.filter(c => filters.curricula.includes(c.id)).map(c => <button key={c.id} type="button" className="min-h-12 rounded-xl border bg-card p-3 text-left text-sm font-semibold hover:border-primary focus-visible:ring-2 focus-visible:ring-ring" onClick={() => selectQualification(c.id)}>{c.country} {c.label}</button>)}</div><Button variant="outline" className="mt-5" onClick={() => navigate("/subjects")}>{t("practice.backToSubjects")}</Button></main></div>;
   if (dbLoading || curriculumLoading) {
     const mascot = getMascot(subjectId || "");
     return (
@@ -282,11 +296,11 @@ export default function Practice() {
             <div className="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-2xl shadow-md">
               <MascotAvatar mascot={mascot} decorative className="h-full w-full" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">{questionLoadFailed ? t("practice.loadFailed") : t("practice.noQuestionsYet")}</h2>
+            <h2 className="mb-2 text-2xl font-bold">{questionLoadFailed ? t("practice.loadFailed") : hasSampleFilters ? "No matching questions in this sample" : t("practice.noQuestionsYet")}</h2>
             <p className="mb-8 text-muted-foreground">{questionLoadFailed
               ? t("practice.loadFailedDesc")
-              : <>{mascot.name} {t("practice.preparingQuestions")} {subject.name}{curriculum ? ` for ${curriculum.label}` : ""}. {t("practice.checkBackSoon")}</>}</p>
-            {questionLoadFailed && (
+              : hasSampleFilters ? "The server returned a bounded curriculum sample. Other questions may match your filters; try a different sample or adjust the filters." : <>{mascot.name} {t("practice.preparingQuestions")} {subject.name}{curriculum ? ` for ${curriculum.label}` : ""}. {t("practice.checkBackSoon")}</>}</p>
+            {(questionLoadFailed || hasSampleFilters) && (
               <Button onClick={() => setReloadQuestions(count => count + 1)} variant="outline" className="mb-3 w-full">
                 {t("common.retry")}
               </Button>
@@ -588,6 +602,7 @@ export default function Practice() {
 
         {user && (
           <div className="mb-6 rounded-2xl border border-border/60 bg-card p-3">
+            <div className="mb-3 grid gap-2 rounded-xl bg-muted/30 p-3 text-sm sm:grid-cols-2"><label className="min-w-0 font-medium">Session qualification<select aria-label="Session qualification" value={activeCurriculumId || ""} disabled={submitting || loadingAI} onChange={e => selectQualification(e.target.value)} className="mt-1 min-h-11 w-full rounded-lg border bg-background px-2">{launchCurricula.filter(c => filters.curricula.includes(c.id)).map(c => <option key={c.id} value={c.id}>{c.label}</option>)}</select></label><div className="min-w-0 text-xs text-muted-foreground"><p>{filters.boards.length ? filters.boards.join(" · ") : "All boards in this qualification"}</p><p>{filters.difficulty === null ? "All difficulty levels" : "Difficulty " + filters.difficulty}</p>{hasSampleFilters && <p className="mt-1">Filters narrow the server sample, not the entire bank.</p>}</div></div>
             <div className="mb-2 flex items-center justify-between gap-3 px-1">
               <div>
                 <div className="text-sm font-semibold">{t("practice.adaptiveSession")}</div>
@@ -602,7 +617,7 @@ export default function Practice() {
                 <button
                   key={mode}
                   type="button"
-                  onClick={() => setSearchParams({ mode })}
+                  onClick={() => { const next = new URLSearchParams(searchParams); next.set("mode", mode); setSearchParams(next); }}
                   disabled={submitting || loadingAI}
                   className={`rounded-xl min-h-11 px-3 py-2 text-xs font-semibold transition-colors ${practiceMode === mode ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground hover:text-foreground"}`}
                   aria-pressed={practiceMode === mode}

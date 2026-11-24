@@ -41,7 +41,8 @@ describe("curriculum-aware personalised coaching", () => {
 
   it("filters learner practice and coach requests by the selected curriculum", () => {
     expect(practice).toContain('"get_adaptive_practice_questions"');
-    expect(practice).toContain("_curriculum: curriculumId || null");
+    expect(practice).toContain("_curriculum: activeCurriculumId");
+    expect(practice).toContain("narrowPracticeSample");
     expect(adaptive).toContain("(_curriculum IS NULL OR q.curriculum = _curriculum)");
     expect(practice).not.toContain('from("questions_safe"');
     expect(practice).not.toContain("getCachedQuestions");
