@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFile, stat, writeFile, realpath } from "node:fs/promises";
-import { dirname, resolve, relative, isAbsolute } from "node:path";
+import { dirname, resolve, relative, isAbsolute, basename, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateBatches } from "./validate-private-content.mjs";
 
@@ -22,7 +22,7 @@ const safeDraft = item => item.status === "draft" && item.published !== true && 
 function scopeOf(item) {
   const regions = regionsOf(item);
   if (!Array.isArray(regions) || !regions.length || new Set(regions).size !== regions.length || regions.some(r => !REGION.has(r))) return null;
-  if (item.markets && item.candidateMarkets && JSON.stringify([...item.markets].sort()) !== JSON.stringify([...item.candidateMarkets].sort())) return null;
+  if (item.markets !== undefined && item.candidateMarkets !== undefined && (!Array.isArray(item.markets) || !Array.isArray(item.candidateMarkets) || JSON.stringify([...item.markets].sort()) !== JSON.stringify([...item.candidateMarkets].sort()))) return null;
   if (item.track === "turkish") return ["en","tr"].includes(item.language) && regions.every(r => r === "PK") ? "archived" : null;
   if (!TRACKS.has(item.track) || !(EXPECTED_LANG.get(item.track) ?? ["en","de"]).includes(item.language)) return null;
   if (["arabic","urdu"].includes(item.track) && regions.some(r => r !== "PK")) return null;
@@ -142,9 +142,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     if (output && report.valid) {
       // Require an existing destination directory outside the repository, and never overwrite.
       const root = await realpath(resolve(dirname(fileURLToPath(import.meta.url)),".."));
-      const target = resolve(await realpath(dirname(resolve(output))),resolve(output).split(/[\\/]/).pop());
+      const target = resolve(await realpath(dirname(resolve(output))),basename(output));
       const rel = relative(root,target);
-      if (!rel.startsWith("..") || !rel.startsWith(".."+(process.platform === "win32" ? "\\" : "/")) || isAbsolute(rel)) throw new Error("private output required");
+      if (!(rel === ".." || rel.startsWith(".."+sep)) || isAbsolute(rel)) throw new Error("private output required");
       await writeFile(target,JSON.stringify({schemaVersion:1,status:"draft-review-index",approvedCount:0,publishedCount:0,items:reviewIndex}),{flag:"wx",mode:0o600});
     }
     process.stdout.write(JSON.stringify(report,null,2)+"\n");
