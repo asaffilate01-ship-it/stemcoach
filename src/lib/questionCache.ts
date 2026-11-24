@@ -1,70 +1,14 @@
 /**
- * IndexedDB-based question cache for offline PWA support.
- * Caches questions per subject so students can practice without internet.
+ * Protected question payloads must not persist on a shared browser or be
+ * resurrected after access is revoked. Public static app assets may still be
+ * cached by the PWA. This best-effort migration removes the legacy stores.
+ * Old open tabs or browsers without storage APIs may delay cleanup.
  */
-
-const DB_NAME = "stemcoach-offline";
-const DB_VERSION = 1;
-const STORE_NAME = "questions";
-const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
-
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "subject" });
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-export interface CachedQuestionSet {
-  subject: string;
-  questions: any[];
-  cachedAt: number;
-}
-
-function cacheKey(subject: string, curriculum?: string | null): string {
-  return curriculum ? `${subject}:${curriculum}` : `${subject}:all`;
-}
-
-export async function getCachedQuestions(subject: string, curriculum?: string | null): Promise<any[] | null> {
-  try {
-    const db = await openDB();
-    return new Promise((resolve) => {
-      const tx = db.transaction(STORE_NAME, "readonly");
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.get(cacheKey(subject, curriculum));
-      req.onsuccess = () => {
-        const result = req.result as CachedQuestionSet | undefined;
-        if (result && Date.now() - result.cachedAt < CACHE_TTL) {
-          resolve(result.questions);
-        } else {
-          resolve(null);
-        }
-      };
-      req.onerror = () => resolve(null);
-    });
-  } catch {
-    return null;
+export async function purgeLegacyQuestionCaches(): Promise<void> {
+  if (typeof indexedDB !== "undefined") {
+    try { indexedDB.deleteDatabase("stemcoach-offline"); } catch { /* unavailable */ }
   }
-}
-
-export async function cacheQuestions(subject: string, questions: any[], curriculum?: string | null): Promise<void> {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    store.put({ subject: cacheKey(subject, curriculum), questions, cachedAt: Date.now() } satisfies CachedQuestionSet);
-    await new Promise<void>((resolve, reject) => {
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  } catch {
-    // Silent fail — caching is best-effort
+  if (typeof caches !== "undefined") {
+    try { await caches.delete("questions-api-cache"); } catch { /* unavailable */ }
   }
 }

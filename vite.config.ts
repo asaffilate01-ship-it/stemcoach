@@ -43,13 +43,7 @@ export default defineConfig(() => ({
           },
           {
             urlPattern: /\/rest\/v1\/questions/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "questions-api-cache",
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
-              cacheableResponse: { statuses: [0, 200] },
-              networkTimeoutSeconds: 5,
-            },
+            handler: "NetworkOnly",
           },
         ],
       },
