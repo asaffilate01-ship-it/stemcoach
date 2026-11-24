@@ -7,11 +7,11 @@ import { emptyResponse, getQuestionFormat, hasResponse, inspectQuestion, isCorre
 
 const checksOf = (lesson: typeof tutorials[number]) => [lesson.checkpoint, ...(lesson.practice || [])];
 
-describe("200 substantive guided lessons and additional formative Q&A", () => {
+describe("212 substantive guided lessons and additional formative Q&A", () => {
   it("adds 24 original lessons across seven subjects with 192 different self-check IDs", () => {
     expect(milestone200Lessons).toHaveLength(24);
-    expect(tutorials).toHaveLength(200);
-    expect(qaEntries).toHaveLength(1166);
+    expect(tutorials).toHaveLength(212);
+    expect(qaEntries).toHaveLength(1262);
     const bySubject = Object.fromEntries(
       [...new Set(milestone200Lessons.map(lesson => lesson.subject))]
         .map(subject => [subject, milestone200Lessons.filter(lesson => lesson.subject === subject).length]),
@@ -20,9 +20,9 @@ describe("200 substantive guided lessons and additional formative Q&A", () => {
       mathematics: 4, physics: 4, chemistry: 4, biology: 4,
       "computer-science": 4, economics: 2, geography: 2,
     });
-    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(200);
-    expect(new Set(tutorials.map(lesson => lesson.subject + "::" + lesson.title.toLocaleLowerCase().trim())).size).toBe(200);
-    expect(new Set(qaEntries.map(item => item.id)).size).toBe(1166);
+    expect(new Set(tutorials.map(lesson => lesson.id)).size).toBe(212);
+    expect(new Set(tutorials.map(lesson => lesson.subject + "::" + lesson.title.toLocaleLowerCase().trim())).size).toBe(212);
+    expect(new Set(qaEntries.map(item => item.id)).size).toBe(1262);
     expect(milestone200Lessons.every(lesson => checksOf(lesson).length === 8)).toBe(true);
     expect(milestone200Lessons.reduce((sum, lesson) => sum + checksOf(lesson).length, 0)).toBe(192);
     expect(TUTORIAL_CONTEXTS.map(({ id, subject, title }) => ({ id, subject, title })))

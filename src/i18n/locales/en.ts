@@ -56,6 +56,7 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    deviceScopedNotice: "Saved questions and review history are kept on this browser separately for each signed-in learner or guest, not synced between devices. Older shared-browser progress is not imported.",
     firstTryAccuracy: "First-attempt accuracy: {{accuracy}}% ({{correct}} of {{total}} attempts)",
     firstTryEmpty: "First-attempt accuracy appears after you try a question.",
     studySkillsLink: "How to revise, study and prepare for exams",

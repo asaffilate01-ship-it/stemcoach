@@ -13,9 +13,9 @@ describe("Q&A next phase: diagrams, cloze and adaptive review", () => {
   it("adds 14 lessons, 56 new questions and nine answer formats without duplicates", () => {
     expect(nextQAExpansion).toHaveLength(14);
     expect(new Set(nextQAExpansion.map((lesson) => lesson.subject)).size).toBe(14);
-    expect(tutorials).toHaveLength(200);
-    expect(qaEntries).toHaveLength(1166);
-    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(1166);
+    expect(tutorials).toHaveLength(212);
+    expect(qaEntries).toHaveLength(1262);
+    expect(new Set(qaEntries.map((entry) => entry.id)).size).toBe(1262);
     const formats = new Set(qaEntries.map((entry) => entry.format));
     expect([...formats].sort()).toEqual([
       "single", "multiple", "true-false", "numeric", "short-text",
@@ -131,7 +131,7 @@ describe("Q&A next phase: diagrams, cloze and adaptive review", () => {
     expect(page).toContain('startChallenge("adaptive")');
     expect(page).toContain('startChallenge("timed")');
     expect(page).toContain("recordReviewAttempt");
-    expect(page).toContain("QA_HISTORY_KEY");
+    expect(page).toContain("qaScopedStorageKeys(ownerId)");
     expect(page).not.toContain('functions.invoke("ai-chat"');
   });
 });

@@ -1,0 +1,98 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, numeric, trueFalse, multi, order, short } from "./tutorialQuestions";
+
+/** New worked formative science examples, not an approved exam question bank. */
+export const nextReasoningPhysicalScience: Tutorial[] = [
+{
+"id": "force-time-impulse-graph",
+"subject": "physics",
+"title": "Force–Time Graphs, Impulse and Momentum Change",
+"level": "Advanced",
+"minutes": 18,
+"summary": "Read the area under force–time data as impulse and relate changes in momentum to collision and safety scenarios.",
+"objectives": ["Calculate impulse from constant-force intervals","Interpret area under a force–time graph","Relate impulse to change in momentum with consistent units"],
+"lesson": ["Impulse J is the change in momentum: J = Δp. For a constant net force F acting over a time Δt, J = FΔt, measured in newton seconds or kg m/s.","The signed area under a resultant force–time graph gives impulse. For a triangular force pulse, area equals half the base multiplied by its height.","For the same momentum change, spreading a collision over a longer time reduces the average force magnitude. This helps explain seat belts, airbags and protective padding."],
+"workedExample": "A force-time graph shows a 40 N constant net force for 0.25 s, producing impulse 40 × 0.25 = 10 N s. A triangular pulse of height 80 N and base 0.25 s also encloses an area 0.5 × 80 × 0.25 = 10 N s.",
+"examTip": "Identify the shape and signed area below the force–time curve; a triangle needs the factor one-half, while a rectangle does not.",
+"commonMistake": "Multiplying the peak force by the entire duration for a triangular pulse overestimates impulse; use the area under the graph.",
+checkpoint: mcq("A constant resultant force of 40 N acts for 0.25 s. What is the impulse?", ["10 N s","40 N s","160 N s","0.00625 N s"], "10 N s", "Impulse for a constant force is F × Δt, so 40 × 0.25 = 10 newton seconds.", "Multiply force by time in seconds."),
+practice: [
+numeric("A constant net force of 12 N acts for 3 s. Find the impulse in N s.", 36, "Impulse = FΔt = 12 N × 3 s = 36 N s, equal to the change in momentum.", "Use the whole time interval in seconds."),
+numeric("A triangular net force–time pulse has base 4 s and height 6 N. Find its impulse in N s.", 12, "Area of the triangle is 1/2 × base × height = 0.5 × 4 × 6 = 12 N s.", "A triangular pulse has half the area of its bounding rectangle."),
+mcq("Which physical quantity equals the signed area under a resultant force–time graph?", ["Impulse","Speed","Power","Mass"], "Impulse", "Integrating resultant force with respect to time gives the momentum change, called impulse.", "The graph's horizontal axis is time, not distance."),
+trueFalse("For the same momentum change, extending collision time can reduce the average force.", true, "Since average force equals impulse divided by time, a longer stopping interval means a smaller average force for fixed impulse.", "Rearrange impulse = average force × collision duration."),
+multi("Which statements about impulse are correct?", ["Its unit can be N s","It equals momentum change","Area under a net force–time graph represents it","It always equals kinetic energy"], ["Its unit can be N s","It equals momentum change","Area under a net force–time graph represents it"], "Impulse concerns momentum, not energy; its equivalent unit is kg m/s rather than joules.", "Think of momentum change and force multiplied by time."),
+order("Order these steps for finding impulse from a triangular force pulse.", ["Identify pulse base duration and peak net force","Calculate one-half times base times height","State impulse magnitude in newton seconds"], "The impulse magnitude is the triangular graph area, with the time and force axes supplying the dimensions.", "Start by reading both axes of the triangular pulse."),
+short("What is the name for the change in momentum caused by a force acting over time?", "impulse", "Impulse is the integral of net force over time and equals the object's change in momentum.", "This quantity is measured in newton seconds."),
+]
+},
+{
+"id": "parallel-resistors-junctions",
+"subject": "physics",
+"title": "Parallel Resistors, Branch Currents and Equivalent Resistance",
+"level": "Intermediate",
+"minutes": 18,
+"summary": "Calculate currents and effective resistance in parallel resistor networks using common potential difference.",
+"objectives": ["Explain equal potential difference across parallel branches","Use Ohm's law to find each branch current","Calculate total current and equivalent resistance without confusing series rules"],
+"lesson": ["In a parallel circuit, every branch is connected across the same pair of junctions, so each has the same potential difference as the supply (ignoring internal losses).","Use Ohm's law I = V/R to find current in each resistor. Conservation of charge at a junction means total supply current equals the sum of branch currents.","Equivalent resistance satisfies 1/Rtotal = 1/R1 + 1/R2 for two resistors. Adding a parallel branch lowers the equivalent resistance for positive resistor values."],
+"workedExample": "Two resistors of 6 Ω and 3 Ω are connected in parallel across a 12 V supply. The branch currents are 12/6 = 2 A and 12/3 = 4 A, so the supply provides 6 A. Equivalent resistance is R = 12/6 = 2 Ω.",
+"examTip": "Do not add parallel resistances as though they were in series; first compute conductance or use total V divided by total current.",
+"commonMistake": "Assuming current is identical through every parallel branch overlooks the fact that each branch's resistance determines its current.",
+checkpoint: mcq("A 6 Ω and a 3 Ω resistor are connected in parallel. What is their equivalent resistance?", ["2 Ω","3 Ω","6 Ω","9 Ω"], "2 Ω", "The reciprocal resistance is 1/6 + 1/3 = 1/2, so equivalent resistance is 2 Ω.", "Combine reciprocals or use a common 12 V supply."),
+practice: [
+numeric("A 6 Ω resistor is across 12 V. Find its branch current in amperes.", 2, "Ohm's law gives I = V/R = 12/6 = 2 A in that resistor's branch.", "Potential difference across each parallel branch is the supply voltage."),
+numeric("Two parallel branches draw 2 A and 4 A. Find the total supply current in amperes.", 6, "Conservation of charge at the junction means total current = 2 A + 4 A = 6 A.", "Add all branch currents entering or leaving the junction."),
+mcq("What is the potential difference across each resistor connected in parallel to an ideal 9 V supply?", ["9 V","4.5 V","18 V","0 V"], "9 V", "Parallel branches share the same two junctions and therefore the same potential difference as the ideal supply.", "Parallel branches share the same voltage."),
+trueFalse("Adding another positive resistor in parallel increases the equivalent resistance.", false, "Parallel conductances add, so adding an additional conducting branch increases conductance and lowers total resistance.", "Another pathway allows more current for the same potential difference."),
+multi("Which statements are correct for an ideal parallel-resistor circuit?", ["Voltage is the same across each branch","Total current is the sum of branch currents","Branch current depends on branch resistance","Total resistance is always greater than the largest branch resistor"], ["Voltage is the same across each branch","Total current is the sum of branch currents","Branch current depends on branch resistance"], "Adding parallel paths reduces equivalent resistance and allows current to divide according to each branch's resistance.", "Apply junction conservation and equal branch voltage."),
+order("Order the steps for determining equivalent resistance from parallel branch currents.", ["Use V/R to calculate each branch current","Add branch currents to find total supply current","Divide supply voltage by total current to find equivalent resistance"], "Current conservation gives total draw, and Ohm's law for the whole network yields its equivalent resistance.", "Calculate branch currents before replacing the whole network."),
+short("Which quantity is identical across every ideal resistor connected in parallel between the same two junctions?", "potential difference", "Parallel branches share two common node potentials, giving each branch the same voltage difference.", "It is measured in volts."),
+]
+},
+{
+"id": "rate-of-reaction-graph-slope",
+"subject": "chemistry",
+"title": "Rates of Reaction from Concentration–Time and Gas Graphs",
+"level": "Intermediate",
+"minutes": 18,
+"summary": "Use changes in measured quantity over time to calculate average reaction rates and infer changing reaction speed from graphs.",
+"objectives": ["Calculate average rate as change divided by elapsed time","Recognise steep and shallow slopes on reaction progress graphs","Explain how collision frequency changes as reactants are used up"],
+"lesson": ["Average rate of a reaction can be estimated by change in measured reactant concentration, product mass or gas volume divided by the corresponding time interval.","On a gas-volume–time graph, the positive gradient is steepest when gas is produced fastest. The graph may level off as a limiting reactant is consumed.","Temperature, concentration, surface area and catalysts can affect reaction rate. Increasing temperature generally raises the proportion of collisions with sufficient energy for reaction."],
+"workedExample": "A gas-collection experiment produces 36 cm³ of gas in the first 12 s. Its average gas-production rate over that interval is 36 ÷ 12 = 3 cm³/s. If the same graph later levels off, the rate approaches zero because its slope becomes small.",
+"examTip": "Choose the interval correctly and label units of the rate, such as cm³/s or mol dm⁻³ s⁻¹, rather than giving an unlabelled number.",
+"commonMistake": "Reading total gas volume as though it were rate ignores the time interval and the slope of the progress curve.",
+checkpoint: mcq("A reaction produces 36 cm³ gas in 12 s. What is its average production rate?", ["3 cm³/s","12 cm³/s","24 cm³/s","432 cm³/s"], "3 cm³/s", "Average rate is gas-volume change divided by time = 36/12 = 3 cubic centimetres per second.", "Divide the amount of gas produced by the elapsed seconds."),
+practice: [
+numeric("A gas-volume graph rises by 48 cm³ in 16 s. Find the average gas-production rate in cm³/s.", 3, "The average change per second is 48/16 = 3 cm³/s over the measured sixteen-second interval.", "Read a change in volume and a change in time."),
+numeric("A reaction makes 80 cm³ gas in 20 s at a constant average rate. Find the rate in cm³/s.", 4, "The average gas-production rate over the interval is 80/20 = 4 cm³/s.", "Use total gas collected divided by elapsed time."),
+mcq("What does a horizontal plateau on a completed gas-volume–time graph typically indicate?", ["Gas production has stopped or become negligible","The gas volume must be zero","The reaction rate is increasing indefinitely","The thermometer is always faulty"], "Gas production has stopped or become negligible", "A horizontal slope means the measured gas volume is no longer increasing appreciably, often because the limiting reactant has been used up.", "The slope shows the speed of gas production."),
+trueFalse("On a gas-volume–time plot, a steeper upward slope represents a faster instantaneous rate of gas production.", true, "Rate corresponds to the gradient of product volume versus time, so a greater positive slope means more gas produced each second.", "Compare vertical change for equal horizontal time intervals."),
+multi("Which factors can increase reaction rate in suitable reactions?", ["Higher reactant concentration","Higher temperature","Greater solid surface area","A lower number of effective collisions"], ["Higher reactant concentration","Higher temperature","Greater solid surface area"], "More collisions or a larger fraction with enough energy can raise rate; fewer effective collisions would reduce rate instead.", "Consider collision frequency and activation energy."),
+order("Order the steps for calculating average gas-production rate from a graph.", ["Read gas-volume values at the chosen start and end times","Subtract to find volume produced in the interval","Divide volume change by elapsed time and state units"], "Average rate measures change in the recorded quantity per time interval, not its absolute final value.", "Take the difference in measurements before dividing."),
+short("What is the graphical quantity used to find instantaneous reaction rate on a gas-volume–time curve?", "gradient", "The instantaneous gradient or tangent slope describes the changing volume per unit of time.", "A tangent line helps measure this quantity on a curved graph."),
+]
+},
+{
+"id": "galvanic-cells-and-electron-flow",
+"subject": "chemistry",
+"title": "Electrochemical Cells: Redox and Electron Flow",
+"level": "Advanced",
+"minutes": 19,
+"summary": "Contrast spontaneous galvanic cells with powered electrolysis and identify oxidation and reduction in a simple zinc–copper cell.",
+"objectives": ["Identify oxidation and reduction using electrons","Explain electron transfer through an external circuit","Distinguish the anode/cathode roles and energy direction in a galvanic cell"],
+"lesson": ["An electrochemical (galvanic) cell converts chemical energy from a spontaneous redox reaction into electrical energy flowing through an external circuit.","In a simple zinc–copper galvanic cell, zinc is oxidised: Zn → Zn²⁺ + 2e⁻. At the copper half-cell, Cu²⁺ + 2e⁻ → Cu is reduction. Electrons pass through the external wire from zinc to copper.","The anode is always the site of oxidation and the cathode the site of reduction. In a galvanic cell the anode is normally negative, unlike the positive anode in a powered electrolytic cell."],
+"workedExample": "Place zinc in zinc-ion solution and copper in copper-ion solution, joined by a wire and an ion-conducting salt bridge. Zinc atoms release electrons to the external circuit, zinc ions enter solution and copper ions gain the electrons to deposit copper. The overall reaction is Zn + Cu²⁺ → Zn²⁺ + Cu.",
+"examTip": "Use the rule oxidation at the anode, reduction at the cathode, then determine the electrode sign from whether the cell is galvanic or electrolytic.",
+"commonMistake": "Assuming anode always means positive is wrong: electrochemical and electrolytic cells have different power sources and electrode signs.",
+checkpoint: mcq("In a zinc–copper galvanic cell, which electrode undergoes oxidation?", ["Zinc anode","Copper cathode","Salt bridge only","Both electrodes are reduced"], "Zinc anode", "Zinc atoms lose electrons to become Zn²⁺ at the anode, while Cu²⁺ ions are reduced at the copper cathode.", "Oxidation is the loss of electrons."),
+practice: [
+mcq("In a zinc–copper galvanic cell, which way do electrons flow through the external wire?", ["From zinc to copper","From copper to zinc","Only from solution to salt bridge","No electrons can flow"], "From zinc to copper", "Oxidation at the zinc electrode supplies electrons, which travel through the wire to reduce copper ions at the cathode.", "Electron flow is from the oxidation half-cell to the reduction half-cell."),
+numeric("How many electrons are transferred when two Zn atoms each become Zn²⁺ ions?", 4, "Each Zn atom releases two electrons in Zn → Zn²⁺ + 2e⁻, so two atoms together release four electrons.", "Multiply the two-electron oxidation by the number of zinc atoms."),
+mcq("Which statement is correct for oxidation and reduction in electrochemical cells?", ["Oxidation occurs at the anode","Oxidation occurs at every cathode","Anode is always positive","Reduction means losing electrons"], "Oxidation occurs at the anode", "Electrode names refer to the reaction type: oxidation at anode, reduction at cathode, irrespective of cell sign.", "Use the meaning of anode rather than relying on its sign."),
+trueFalse("A simple spontaneous galvanic cell requires an external power supply to force its redox reaction.", false, "A galvanic cell harnesses a spontaneous redox reaction to provide electrical energy; powered electrolysis instead drives a nonspontaneous reaction.", "Distinguish energy-producing cells from energy-consuming electrolysis."),
+multi("Which descriptions of a zinc–copper galvanic cell are correct?", ["Zinc is oxidised to Zn²⁺","Cu²⁺ gains electrons at the cathode","A salt bridge permits ionic charge balance","Electrons travel through the external wire from copper to zinc"], ["Zinc is oxidised to Zn²⁺","Cu²⁺ gains electrons at the cathode","A salt bridge permits ionic charge balance"], "Oxidation at zinc releases electrons toward the copper cathode; the salt bridge carries ions rather than external-circuit electrons.", "Trace oxidation and reduction through the external circuit."),
+order("Order the simplified operations in a zinc–copper galvanic cell.", ["Zinc atoms lose electrons at the anode","Electrons travel through the external conductor","Copper(II) ions gain electrons at the cathode"], "The separate half-reactions are linked by electron flow through the wire, with ionic balancing through the bridge.", "Start with the electrode that releases electrons."),
+short("Which type of reaction involves simultaneous oxidation and reduction?", "redox", "A redox reaction transfers electrons between chemical species and combines oxidation with reduction.", "This is a shortened name combining two processes."),
+]
+},
+];

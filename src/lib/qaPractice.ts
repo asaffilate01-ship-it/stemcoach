@@ -2,6 +2,23 @@
 export const QA_HISTORY_KEY = "stemcoach:qa-review-v1";
 export const QA_BOOKMARKS_KEY = "stemcoach:qa-bookmarks-v1";
 
+/**
+ * Local practice is device-only. Separate guest and signed-in learner data,
+ * including saved questions and review history, on shared browsers.
+ *
+ * Deliberately do NOT import legacy unscoped v1 values into any account:
+ * their original owner cannot be determined safely.
+ * Browser storage is not encrypted or a substitute for account sync/RLS.
+ */
+export function qaScopedStorageKeys(ownerId: string | null): { history: string; bookmarks: string } {
+  const scope = ownerId ? "user:" + encodeURIComponent(ownerId) : "guest";
+  return {
+    history: QA_HISTORY_KEY + ":scope-v2:" + scope,
+    bookmarks: QA_BOOKMARKS_KEY + ":scope-v2:" + scope,
+  };
+}
+
+
 export interface QuestionHistory {
   attempts: number;
   correctFirst: number;

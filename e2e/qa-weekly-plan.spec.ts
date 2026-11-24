@@ -18,7 +18,7 @@ test("seven-day formative Q&A plan launches a real five-question set", async ({ 
 test("practice history prioritises due questions without exposing typed answers", async ({ page }) => {
   await page.addInitScript(() => {
     const id = "arithmetic-sequences-nth-term-0";
-    localStorage.setItem("stemcoach:qa-review-v1", JSON.stringify({
+    localStorage.setItem("stemcoach:qa-review-v1:scope-v2:guest", JSON.stringify({
       version: 1,
       entries: { [id]: {
         attempts: 1, correctFirst: 0, incorrectFirst: 1, firstTryStreak: 0,

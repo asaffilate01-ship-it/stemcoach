@@ -1,0 +1,98 @@
+import type { Tutorial } from "./tutorials";
+import { mcq, numeric, trueFalse, multi, order, short } from "./tutorialQuestions";
+
+/** Formative content: written keys and worked solutions are awaiting qualified academic review. */
+export const nextReasoningMathsPhysics: Tutorial[] = [
+{
+"id": "conditional-probability-no-replacement",
+"subject": "mathematics",
+"title": "Conditional Probability Without Replacement",
+"level": "Intermediate",
+"minutes": 18,
+"summary": "Use changing sample spaces to calculate the probability of two successive draws when the first object is not replaced.",
+"objectives": ["Identify the updated sample space after the first draw","Multiply successive conditional probabilities","Distinguish without-replacement sampling from independent sampling"],
+"lesson": ["When an item is drawn and not replaced, the contents of the bag change. The probability on the second draw depends on which item was selected first.","Multiply probabilities along a sequence: P(A and B) = P(A) × P(B given A). The second fraction must use the new numerator and denominator.","To find the probability of two events in either order, add the probabilities of disjoint paths, such as red–blue and blue–red. Do not add overlapping paths twice."],
+"workedExample": "A bag contains 3 red and 2 blue counters. Two counters are drawn without replacement. The chance of two red is 3/5 × 2/4 = 6/20 = 3/10. Red followed by blue is 3/5 × 2/4 = 3/10, while blue then red is 2/5 × 3/4 = 3/10.",
+"examTip": "On a tree diagram, label the reduced denominator after the first selection and multiply along a branch before adding different orders.",
+"commonMistake": "Reusing the original total on the second draw incorrectly assumes the first counter was replaced; independence does not hold here.",
+checkpoint: mcq("A bag contains 3 red and 2 blue counters. What is P(two red) without replacement?", ["3/10","9/25","6/25","2/5"], "3/10", "The first red has probability 3/5, then only two red remain among four counters, giving 3/5 × 2/4 = 3/10.", "Reduce both the numerator and the denominator after a red draw."),
+practice: [
+numeric("A bag holds 4 green and 1 yellow counter. What percentage probability is there of drawing yellow then green without replacement?", 20, "The yellow-first probability is 1/5; after that, all four remaining counters are green, so 1/5 × 4/4 = 1/5 = 20%.", "The second draw is certain after the only yellow counter is taken."),
+mcq("Two counters are drawn without replacement from 3 red and 2 blue. What is P(one of each in either order)?", ["3/5","3/10","1/2","4/5"], "3/5", "Red–blue has probability 3/5 × 2/4 = 3/10, and blue–red has probability 2/5 × 3/4 = 3/10; add the paths to obtain 3/5.", "Add the two different orders after multiplying each branch."),
+trueFalse("After a counter is removed without replacement, the denominator for the next draw decreases by one.", true, "One fewer object remains in the sample space, so the next probability has a smaller denominator for an ordinary single draw.", "The bag has one fewer counter after the first selection."),
+multi("Which statements about drawing twice without replacement are true?", ["The second probability may depend on the first colour","A tree diagram can show changing denominators","Probabilities on each complete path are multiplied","All two-draw outcomes are always independent"], ["The second probability may depend on the first colour","A tree diagram can show changing denominators","Probabilities on each complete path are multiplied"], "Removing an object changes the remaining population; conditional probabilities along branches therefore reflect the first draw.", "The changed contents mean the draws are generally dependent."),
+order("Put these stages for solving a two-draw probability problem into order.", ["Write the probability of the first outcome","Update the remaining counts after the first draw","Multiply by the conditional probability of the second outcome"], "The first outcome determines the contents for the second draw; multiplying both stage probabilities gives the path probability.", "Update the bag contents before writing the second fraction."),
+numeric("A bag contains 2 red and 3 blue counters. What is P(red then blue) as a percentage without replacement?", 30, "The chance is 2/5 × 3/4 = 6/20 = 0.30, so 30% of such two-draw sequences are red then blue.", "Multiply the red first-draw fraction by the blue second-draw fraction."),
+short("What word describes a probability for event B after event A is known to have occurred?", "conditional", "Conditional probability measures the chance of an event under an already known condition; it is written P(B given A).", "The condition changes which outcomes remain possible."),
+]
+},
+{
+"id": "rounding-error-intervals",
+"subject": "mathematics",
+"title": "Error Intervals, Rounding and Calculation Bounds",
+"level": "Intermediate",
+"minutes": 17,
+"summary": "Represent rounded measurements as intervals, identify inclusive and exclusive endpoints and calculate safe bounds for positive quantities.",
+"objectives": ["Find half a rounding unit for any stated precision","Write the lower and upper bounds for a rounded value","Use positive interval endpoints to estimate product and quotient bounds"],
+"lesson": ["A number rounded to the nearest unit represents a range of possible original values. The half-unit determines how far either bound is from the reported value.","If x rounds to 3.4 to the nearest 0.1, then 3.35 ≤ x < 3.45 under the usual nearest rounding rule. The lower endpoint is included; the upper is excluded.","For positive measurements, a product's least possible value uses both lower bounds. For a quotient a/b with a and b positive, use the smallest numerator and largest denominator for its lower bound."],
+"workedExample": "A rectangle has measured sides 6 cm and 4 cm to the nearest centimetre. Their true lengths lie within 5.5 ≤ L < 6.5 and 3.5 ≤ W < 4.5. The smallest possible area is 5.5 × 3.5 = 19.25 cm² and the greatest possible area is less than 6.5 × 4.5 = 29.25 cm².",
+"examTip": "Write the interval with ≤ at the lower bound and < at the upper bound, then state whether a bound is included or just approached.",
+"commonMistake": "Using the full rounding unit instead of half a unit, or claiming the excluded upper boundary is attained, changes the possible measurements.",
+checkpoint: mcq("A length is 3.4 cm to the nearest 0.1 cm. Which interval is correct?", ["3.35 ≤ x < 3.45","3.30 ≤ x < 3.50","3.4 ≤ x < 3.5","3.39 ≤ x < 3.41"], "3.35 ≤ x < 3.45", "The half-unit for 0.1 cm is 0.05 cm, giving a lower bound of 3.35 and an excluded upper bound of 3.45.", "Take half of 0.1 away from and add it to 3.4."),
+practice: [
+numeric("A mass is 7 kg to the nearest kilogram. Give its lower bound in kg.", 6.5, "Half of one kilogram is 0.5 kg, so a value rounding to 7 kg is at least 6.5 kg.", "Subtract half the rounding unit from the reported mass."),
+numeric("A measured distance is 20 m to the nearest metre. What is its excluded upper boundary in metres?", 20.5, "The actual distance must be less than 20.5 m; exactly 20.5 m would round to 21 m under the stated nearest-unit convention.", "Add half a metre to the recorded measurement."),
+mcq("Two positive lengths round to 6 and 4 cm to the nearest centimetre. What is the minimum possible area?", ["19.25 cm²","20 cm²","24 cm²","29.25 cm²"], "19.25 cm²", "The lengths can be as small as 5.5 and 3.5 cm, and their product is 19.25 cm².", "Multiply both lower bounds, not both rounded measurements."),
+trueFalse("The excluded upper endpoint in a rounded-value error interval is itself one of the possible true values.", false, "At the upper endpoint, conventional rounding moves the result to the next increment, so the interval uses a strict upper inequality.", "A value at the upper boundary would round upward."),
+multi("Which are valid statements about a value rounded to the nearest whole number 8?", ["Its lower bound is 7.5","Its upper boundary is 8.5","The value can be 8.49","The value can be 8.5 under ordinary half-up rounding"], ["Its lower bound is 7.5","Its upper boundary is 8.5","The value can be 8.49"], "The accepted interval is 7.5 ≤ x < 8.5 under half-up rounding; values at 8.5 round to 9.", "Use a half-unit on each side of eight."),
+order("Order the steps to find an error interval for a rounded measurement.", ["Identify the stated rounding precision","Find half of the rounding unit","Subtract and add this half-unit to obtain the lower and excluded upper bounds"], "Precision fixes the half-unit, and the two arithmetic operations produce the valid interval around the displayed value.", "Do not begin with the full rounding unit."),
+short("What is the name of the smallest possible value represented by a rounded measurement?", "lower bound", "The lower bound is the least value consistent with the stated rounding rule, usually included in the rounding interval.", "It describes the bottom endpoint of the interval."),
+]
+},
+{
+"id": "quadratic-completing-square-graphs",
+"subject": "mathematics",
+"title": "Quadratic Graphs: Completing the Square and Turning Points",
+"level": "Advanced",
+"minutes": 19,
+"summary": "Convert a quadratic to vertex form and interpret its minimum, axis of symmetry and x-intercepts.",
+"objectives": ["Rewrite monic quadratics by completing the square","Identify turning-point coordinates from vertex form","Relate discriminant sign to real x-axis intersections"],
+"lesson": ["For a quadratic y = x² + bx + c, complete the square by writing (x + b/2)² + c − (b/2)². This produces a visible turning-point form.","In y = (x − h)² + k with a positive squared coefficient, the minimum occurs at (h,k) and the axis of symmetry is x = h.","The discriminant b² − 4ac distinguishes two, one or zero real roots of ax² + bx + c = 0. A positive discriminant means two distinct real x-intercepts."],
+"workedExample": "y = x² − 6x + 5 can be written (x − 3)² − 4 because expanding (x − 3)² gives x² − 6x + 9. The graph has minimum (3, −4), axis x = 3, and roots x = 1 and x = 5.",
+"examTip": "Expand the completed-square expression after rewriting it to verify the original quadratic coefficients and constants.",
+"commonMistake": "Reading (x − 3)² as a vertex at x = −3 reverses the horizontal sign; the squared term vanishes at x = +3.",
+checkpoint: mcq("What is the turning point of y = (x − 2)² + 3?", ["(2, 3)","(−2, 3)","(3, 2)","(2, −3)"], "(2, 3)", "The squared term reaches its minimum zero when x = 2, leaving y = 3, so the vertex is (2,3).", "Set the expression inside the square equal to zero."),
+practice: [
+numeric("For y = x² − 6x + 5, at which x-coordinate is the minimum?", 3, "Completing the square gives y = (x − 3)² − 4, and the square is smallest at x = 3.", "Half the coefficient of x and reverse its sign."),
+numeric("For y = x² − 6x + 5, what is the minimum y-value?", -4, "At x = 3 the function is 9 − 18 + 5 = −4, which is the minimum because the leading coefficient is positive.", "Substitute the vertex x-coordinate back into the equation."),
+mcq("Which expression is equal to x² + 4x + 1?", ["(x + 2)² − 3","(x − 2)² − 3","(x + 2)² + 1","(x + 4)² − 3"], "(x + 2)² − 3", "The square (x+2)² expands to x² + 4x + 4, so subtracting three gives x² + 4x + 1.", "Square half of the x coefficient and adjust the constant."),
+trueFalse("An upward-opening parabola written y = (x − h)² + k has its minimum at (h,k).", true, "The square is nonnegative and is exactly zero when x = h, so the lowest y-value equals k.", "The smallest square of a real number is zero."),
+multi("For y = x² − 4x + 3, which statements are true?", ["The axis of symmetry is x = 2","The minimum is −1","The graph crosses the x-axis at 1 and 3","The vertex is at (−2, −1)"], ["The axis of symmetry is x = 2","The minimum is −1","The graph crosses the x-axis at 1 and 3"], "Completing the square gives (x − 2)² − 1 and factoring gives (x − 1)(x − 3), so the vertex is (2,−1).", "Use the completed-square and factor forms together."),
+order("Order the steps to complete the square for a monic quadratic.", ["Halve the coefficient of the x term","Form the square (x + half-coefficient)²","Adjust the constant to preserve the original expression"], "The square introduces an extra constant equal to the half-coefficient squared, which must then be subtracted or compensated.", "The constant correction preserves algebraic equality."),
+short("What is the vertical line through the vertex of a symmetric parabola called?", "axis of symmetry", "The axis of symmetry divides the quadratic graph into mirror-image halves and passes through its turning point.", "The answer names the graph's central symmetry line."),
+]
+},
+{
+"id": "stopping-distance-and-energy",
+"subject": "physics",
+"title": "Stopping Distance, Reaction Time and Braking Energy",
+"level": "Intermediate",
+"minutes": 17,
+"summary": "Separate thinking distance from braking distance and explain the effects of reaction time, speed and road conditions.",
+"objectives": ["Calculate total stopping distance from two components","Use distance = speed × reaction time for thinking distance","Explain why braking-energy demand rises quadratically with speed"],
+"lesson": ["Stopping distance is the sum of thinking distance while the driver reacts and braking distance while the vehicle slows after braking begins.","Thinking distance is speed × reaction time for approximately constant speed before braking. Fatigue, distraction or intoxication can increase reaction time.","Braking removes the vehicle's kinetic energy. At fixed mass, kinetic energy is proportional to speed squared, so doubling speed quadruples the energy that the brakes and road must dissipate."],
+"workedExample": "A driver travels at 20 m/s and takes 0.7 s to react, giving thinking distance 20 × 0.7 = 14 m. If braking distance then is 36 m, total stopping distance is 50 m. At 40 m/s the kinetic energy would be four times as large for the same vehicle.",
+"examTip": "Keep thinking and braking distances separate; convert km/h to m/s when applying distance = speed × reaction time.",
+"commonMistake": "Assuming the braking distance always doubles when speed doubles misses the quadratic growth in kinetic energy under comparable braking conditions.",
+checkpoint: mcq("A driver's thinking distance is 14 m and braking distance is 36 m. What is total stopping distance?", ["22 m","36 m","50 m","504 m"], "50 m", "Stopping distance is the sum of thinking distance and braking distance: 14 + 36 = 50 m.", "Add the two distance components, rather than multiplying them."),
+practice: [
+numeric("A car moves at 20 m/s with reaction time 0.7 s. Find thinking distance in metres.", 14, "During the reaction interval the car travels 20 m/s × 0.7 s = 14 m before braking begins.", "Multiply speed by the time before the brakes are applied."),
+numeric("For a fixed vehicle mass, by what factor does kinetic energy rise if speed doubles?", 4, "Kinetic energy E = 1/2 mv² depends on the square of speed, so (2v)² / v² = 4.", "Square the speed multiplier rather than using it directly."),
+mcq("Which change most directly increases thinking distance at constant speed?", ["Longer driver reaction time","Lower engine mass","More reflective road signs","A larger fuel tank"], "Longer driver reaction time", "Thinking distance is proportional to the time between seeing a hazard and beginning braking, at a given speed.", "The driver continues moving before braking begins."),
+trueFalse("On an otherwise comparable road, increasing speed generally increases braking energy that must be dissipated.", true, "A faster vehicle has more kinetic energy, so stopping it requires more energy transfer through the braking and tyre-road system.", "Compare kinetic energy at different speeds."),
+multi("Which factors may increase a vehicle's stopping distance?", ["Reduced tyre-road grip","Longer reaction time","Higher initial speed","A properly functioning brake that increases achievable deceleration"], ["Reduced tyre-road grip","Longer reaction time","Higher initial speed"], "Less grip lengthens braking, longer reaction time lengthens thinking distance, and higher initial speed increases both; stronger effective braking can shorten braking distance.", "Separate driver reaction from physical deceleration."),
+order("Order the stages of a driver's stopping manoeuvre.", ["The driver perceives a hazard and begins reacting","The vehicle moves during reaction time before braking starts","Brakes slow the vehicle until it stops"], "Thinking distance accumulates before braking begins, and braking distance occurs afterward as the vehicle loses speed.", "The hazard is noticed before any braking response."),
+short("What distance is covered between noticing a hazard and starting to brake?", "thinking distance", "Thinking distance is the distance travelled during the reaction period, before the braking system begins slowing the vehicle.", "It is the first component of total stopping distance."),
+]
+},
+];

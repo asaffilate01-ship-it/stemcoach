@@ -56,6 +56,7 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    deviceScopedNotice: "Gespeicherte Fragen und Lernverlauf bleiben in diesem Browser, getrennt nach angemeldetem Konto oder Gast, und werden nicht zwischen Geräten synchronisiert. Alte gemeinsam gespeicherte Daten werden nicht übernommen.",
     firstTryAccuracy: "Beim ersten Versuch richtig: {{accuracy}} % ({{correct}} von {{total}} Versuchen)",
     firstTryEmpty: "Die Erstversuchsquote erscheint nach deiner ersten Antwort.",
     studySkillsLink: "Lernen, Wiederholen und Prüfungen vorbereiten",

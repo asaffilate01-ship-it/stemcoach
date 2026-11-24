@@ -211,6 +211,18 @@ export const TUTORIAL_CONTEXTS = [
   { id: "competition-monopoly-market-power", subject: "economics", title: "Competition, Monopoly and Market Concentration" },
   { id: "population-pyramids-dependency", subject: "geography", title: "Population Pyramids and Dependency Ratios" },
   { id: "storm-hydrograph-flood-response", subject: "geography", title: "Storm Hydrographs, Lag Time and River Discharge" },
+  { id: "conditional-probability-no-replacement", subject: "mathematics", title: "Conditional Probability Without Replacement" },
+  { id: "rounding-error-intervals", subject: "mathematics", title: "Error Intervals, Rounding and Calculation Bounds" },
+  { id: "quadratic-completing-square-graphs", subject: "mathematics", title: "Quadratic Graphs: Completing the Square and Turning Points" },
+  { id: "stopping-distance-and-energy", subject: "physics", title: "Stopping Distance, Reaction Time and Braking Energy" },
+  { id: "force-time-impulse-graph", subject: "physics", title: "Force–Time Graphs, Impulse and Momentum Change" },
+  { id: "parallel-resistors-junctions", subject: "physics", title: "Parallel Resistors, Branch Currents and Equivalent Resistance" },
+  { id: "rate-of-reaction-graph-slope", subject: "chemistry", title: "Rates of Reaction from Concentration–Time and Gas Graphs" },
+  { id: "galvanic-cells-and-electron-flow", subject: "chemistry", title: "Electrochemical Cells: Redox and Electron Flow" },
+  { id: "immune-response-vaccination-memory", subject: "biology", title: "Immune Response, Vaccination and Memory Cells" },
+  { id: "reflex-arcs-synapses", subject: "biology", title: "Reflex Arcs, Synapses and Rapid Responses" },
+  { id: "binary-search-trace-invariants", subject: "computer-science", title: "Binary Search: Trace Tables and Sorted-Array Preconditions" },
+  { id: "equivalence-partition-testing", subject: "computer-science", title: "Equivalence Partitions and Boundary-Value Test Design" },
 ] as const satisfies readonly TutorialContext[];
 
 export function findTutorialContext(id: unknown): TutorialContext | null {
