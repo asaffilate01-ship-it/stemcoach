@@ -13,6 +13,7 @@ export function normaliseCoachThread(value: unknown): CoachMessage[] {
 /** Superseded requests cannot write into a different tutor's conversation. */
 export class CoachRequestScope {
   private active: AbortController | null = null;
+  get inFlight(): boolean { return this.active !== null && !this.active.signal.aborted; }
   begin(): AbortController {
     this.cancel();
     const request = new AbortController();
