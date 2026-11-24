@@ -2,7 +2,7 @@ import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { getCoachStem } from "@/lib/mascots";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe, Target, Menu } from "lucide-react";
+import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe, Target, Menu, FlaskConical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Icon3D } from "@/components/ui/icon-3d";
 import { Button } from "@/components/ui/button";
@@ -137,6 +137,7 @@ const navItems: NavItem[] = [
   { to: "/my-classes", labelKey: "nav.myClasses", label: "My Classes", icon: BookCheck, roles: ["student"], group: "classes", variant: "primary" },
   { to: "/live-classroom", labelKey: "nav.liveClass", label: "Live Class", icon: Video, roles: ["student", "teacher", "admin"], group: "classes", comingSoon: true, variant: "destructive" },
   { to: "/formulas", labelKey: "nav.formulaSheets", label: "Formula Sheets", icon: ScrollText, group: "resources", variant: "accent" },
+  { to: "/virtual-labs", labelKey: "nav.virtualLabs", label: "Virtual laboratories", icon: FlaskConical, group: "resources", roles: ["student", "teacher", "admin"], variant: "primary" },
   { to: "/tutorials", labelKey: "nav.tutorials", label: "Tutorials", icon: BookOpen, group: "resources", variant: "success" },
   { to: "/qa-clinic", labelKey: "nav.qaClinic", label: "Q&A Clinic", icon: BookCheck, group: "resources", variant: "purple" },
   { to: "/study-skills", labelKey: "nav.studySkills", label: "Study & exam skills", icon: Brain, group: "resources", variant: "success" },

@@ -64,6 +64,7 @@ const TeacherInvitation = lazy(() => import("./pages/TeacherInvitation"));
 const JoinInstitution = lazy(() => import("./pages/JoinInstitution"));
 const Support = lazy(() => import("./pages/Support"));
 const Tutorials = lazy(() => import("./pages/Tutorials"));
+const VirtualLabs = lazy(() => import("./pages/VirtualLabs"));
 const Mastery = lazy(() => import("./pages/Mastery"));
 const EducationConnections = lazy(() => import("./pages/EducationConnections"));
 
@@ -127,6 +128,7 @@ const App = () => (
                     <Route path="/formulas" element={<Pub><FormulaSheets /></Pub>} />
                     <Route path="/support" element={<Pub><Support /></Pub>} />
                     <Route path="/tutorials" element={<Pub><Tutorials /></Pub>} />
+                    <Route path="/virtual-labs" element={<ProtectedRoute allowedRoles={["student", "teacher", "admin"]}><VirtualLabs /></ProtectedRoute>} />
 
                     {/* Student features — available without login; pages handle anonymous state */}
                     <Route path="/subjects" element={<Pub><Subjects /></Pub>} />
