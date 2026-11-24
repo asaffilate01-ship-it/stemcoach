@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-24",
+  "status": "planning-only",
+  "markets": {
+    "PK": 400000,
+    "GB": 350000,
+    "DE": 250000
+  },
+  "subjectTargets": [
+    {
+      "group": "mathematics-statistics",
+      "target": 160000
+    },
+    {
+      "group": "physics",
+      "target": 100000
+    },
+    {
+      "group": "chemistry",
+      "target": 100000
+    },
+    {
+      "group": "biology",
+      "target": 100000
+    },
+    {
+      "group": "computing-programming",
+      "target": 75000
+    },
+    {
+      "group": "ai-ml",
+      "target": 40000
+    },
+    {
+      "group": "cyber-cloud-networking",
+      "target": 50000
+    },
+    {
+      "group": "english-language-literature",
+      "target": 90000
+    },
+    {
+      "group": "german-visa-language",
+      "target": 50000
+    },
+    {
+      "group": "ielts-celta",
+      "target": 35000
+    },
+    {
+      "group": "accounting-business-commerce",
+      "target": 65000
+    },
+    {
+      "group": "economics",
+      "target": 35000
+    },
+    {
+      "group": "psychology",
+      "target": 25000
+    },
+    {
+      "group": "geography",
+      "target": 25000
+    },
+    {
+      "group": "other-agreed-languages",
+      "target": 30000
+    },
+    {
+      "group": "general-science",
+      "target": 20000
+    }
+  ],
+  "sources": [
+    {
+      "market": "PK",
+      "scope": "national",
+      "url": "https://ncc.gov.pk/",
+      "status": "directory-identified",
+      "outcomesImported": false
+    },
+    {
+      "market": "PK",
+      "scope": "notifications",
+      "url": "https://ncc.gov.pk/Detail/ODQzMmE3YTAtMmFkYy00NGM0LTk2YmItNjg4ZmNiNjMwOTMw",
+      "status": "directory-identified",
+      "outcomesImported": false
+    },
+    {
+      "market": "PK",
+      "scope": "Peshawar",
+      "url": "https://bisep.gov.pk/page-10030.html",
+      "status": "directory-identified",
+      "outcomesImported": false
+    },
+    {
+      "market": "GB",
+      "scope": "England",
+      "url": "https://www.gov.uk/government/collections/national-curriculum",
+      "status": "directory-identified",
+      "outcomesImported": false
+    },
+    {
+      "market": "GB",
+      "scope": "qualifications",
+      "url": "https://www.gov.uk/find-a-regulated-qualification",
+      "status": "directory-identified",
+      "outcomesImported": false
+    },
+    {
+      "market": "GB",
+      "scope": "four-nation overview",
+      "url": "https://commonslibrary.parliament.uk/research-briefings/cbp-9834/",
+      "status": "directory-identified",
+      "outcomesImported": false
+    },
+    {
+      "market": "DE",
+      "scope": "state curricula",
+      "url": "https://www.kmk.org/downloads-dokumente/rechtsvorschriften-/-lehrplaene/uebersicht-lehrplaene.html",
+      "status": "directory-identified",
+      "outcomesImported": false
+    },
+    {
+      "market": "DE",
+      "scope": "national standards",
+      "url": "https://www.kmk.org/bildungsministerkonferenz/bildungsthemen/bildungsstandards.html",
+      "status": "directory-identified",
+      "outcomesImported": false
+    }
+  ],
+  "releaseRules": {
+    "uniqueAcrossMarkets": true,
+    "requireVersionedOutcome": true,
+    "requireOriginalStem": true,
+    "requireIndependentAnswerCheck": true,
+    "requireHumanReview": true,
+    "requireLanguageReview": true,
+    "requireRightsReview": true,
+    "excludeDraftsFromPublishedCount": true
+  },
+  "note": "Targets are allocations, not inventory. Source directories require individual qualification and outcome mapping. Subject-group targets must be reconciled with market targets using approved outcomes, not a Cartesian duplication of all items."
+}
