@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { PUBLISHED_BANK_TARGET, summariseBankMetrics } from "@/lib/questionBankProgramme";
+import { LaunchBankPlanner } from "@/components/admin/LaunchBankPlanner";
 import { ReviewCapacityPlanner } from "@/components/admin/ReviewCapacityPlanner";
 import { DraftVariantPreview } from "@/components/admin/DraftVariantPreview";
 
@@ -292,6 +293,7 @@ export default function AdminGenerate() {
           </p>
         </section>
 
+        <LaunchBankPlanner />
         <ReviewCapacityPlanner published={bankProgress?.published ?? null} target={PUBLISHED_BANK_TARGET} />
         <DraftVariantPreview />
 
