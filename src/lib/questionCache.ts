@@ -5,6 +5,12 @@
  * Old open tabs or browsers without storage APIs may delay cleanup.
  */
 export async function purgeLegacyQuestionCaches(): Promise<void> {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("stemcoach:coach-thread:")) localStorage.removeItem(key);
+    }
+  } catch { /* storage unavailable */ }
   if (typeof indexedDB !== "undefined") {
     try { indexedDB.deleteDatabase("stemcoach-offline"); } catch { /* unavailable */ }
   }
