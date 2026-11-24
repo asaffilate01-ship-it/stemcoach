@@ -1,3 +1,5 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
+import { getCoachStem } from "@/lib/mascots";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { BookOpen, LayoutDashboard, GraduationCap, Trophy, LogOut, Users, Sparkles, Award, Medal, ScrollText, Eye, Building2, BookCheck, Bot, CreditCard, BarChart3, Settings, Database, CalendarDays, Brain, Video, FileText, Layers, ChevronDown, Moon, Sun, Flame, Globe, Target, Menu } from "lucide-react";
@@ -133,8 +135,9 @@ const navItems: NavItem[] = [
   { to: "/study-skills", labelKey: "nav.studySkills", label: "Study & exam skills", icon: Brain, group: "resources", variant: "success" },
   { to: "/blog", labelKey: "nav.blog", label: "Blog", icon: FileText, group: "resources", variant: "purple" },
   { to: "/parent", labelKey: "nav.parentPortal", label: "Parent Portal", icon: Eye, roles: ["parent"], variant: "success" },
-  { to: "/teacher", labelKey: "nav.teacher", label: "Teacher", icon: Users, roles: ["teacher", "admin"], variant: "primary" },
+  { to: "/teacher", labelKey: "nav.teacher", label: "Teacher", icon: Users, roles: ["teacher"], variant: "primary" },
   { to: "/institution", labelKey: "nav.myInstitution", label: "My Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
+  { to: "/education-connections", label: "Education connections", icon: Building2, group: "classes", roles: ["student", "admin"], variant: "primary" },
   { to: "/join-institution", labelKey: "nav.joinInstitution", label: "Join Institution", icon: Building2, group: "classes", variant: "purple", roles: ["student", "teacher", "admin"] },
   { to: "/admin/generate", labelKey: "nav.generate", label: "Generate", icon: Sparkles, roles: ["admin"], variant: "warning" },
   { to: "/admin/questions", labelKey: "nav.content", label: "Content", icon: Database, roles: ["admin", "reviewer"], variant: "accent" },
@@ -178,6 +181,7 @@ export function AppHeader() {
   const NavLink = ({ item }: { item: NavItem }) => (
     <Link
       to={item.to}
+      aria-current={isActive(item.to) ? "page" : undefined}
       className={`group flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
         isActive(item.to)
           ? "bg-primary/10 text-primary"
@@ -185,7 +189,7 @@ export function AppHeader() {
       }`}
     >
       {item.image ? (
-        <img src={item.image} alt={item.label} className="h-5 w-5 rounded-sm object-cover" />
+        <MascotAvatar mascot={getCoachStem()} decorative className="h-6 w-6" />
       ) : (
         <Icon3D icon={item.icon} variant={item.variant || "primary"} size="xs" />
       )}

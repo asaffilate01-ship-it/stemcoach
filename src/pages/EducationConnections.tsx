@@ -93,12 +93,12 @@ export default function EducationConnections() {
       <AppHeader />
       <main className="container mx-auto max-w-5xl px-4 py-8">
         <div className="mb-7">
-          <div className="stem-label mb-2">Education partnerships · Phase 1</div>
+          <div className="stem-label mb-2">Education connections</div>
           <h1 className="stem-heading text-3xl">School & Tuition Connections</h1>
           <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
             Connect with an approved school or tuition centre, then follow your own
-            STEMCoach revision priorities. SchoolDash and UniPathway remain separate
-            services: there is no automatic sign-in, access grant or progress transfer yet.
+            STEMCoach revision priorities. STEMCoach, UniPathway, Skillfinch and TrainDirekt are the intended student access routes.
+            Verified course previews are not automatic sign-in, access grants or progress transfers.
           </p>
         </div>
 
@@ -200,12 +200,13 @@ export default function EducationConnections() {
               {partnerState === "loading" ? (
                 <p role="status" className="text-sm text-muted-foreground">Checking mapped courses…</p>
               ) : partnerState === "unavailable" ? (
-                <p className="text-sm text-muted-foreground">Partner mapping is not yet enabled on this backend. Personal STEMCoach learning remains available.</p>
+                <p className="text-sm text-muted-foreground">Partner mapping could not be verified. Retry before relying on this information.</p>
               ) : partnerCourses.length ? (
                 <ul className="space-y-2">{partnerCourses.map((course,index) => (
                   <li key={course.source_product+":"+course.subject+":"+index} className="rounded-xl border border-border p-3 text-sm">
                     <span className="font-medium">{course.institution_name} · {course.subject}</span>
                     <p className="text-xs text-muted-foreground">{course.source_product} · {course.curriculum} · Reviewed mapping; subscription activation separate</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Valid until {new Date(course.valid_until).toLocaleDateString()}</p>
                   </li>
                 ))}</ul>
               ) : (
@@ -224,7 +225,7 @@ export default function EducationConnections() {
                 <Download className="h-4 w-4" /> Download my summary
               </Button>
               <p className="mt-3 text-xs text-muted-foreground">
-                Downloading does not send it to SchoolDash, UniPathway or Omniqora.
+                Downloading does not send it to another education platform.
                 Automatic progress sharing requires a separately verified connection and consent.
               </p>
             </section>
