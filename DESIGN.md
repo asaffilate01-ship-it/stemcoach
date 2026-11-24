@@ -41,7 +41,7 @@ Pass existing repo lint/build/tests and domain acceptance; inspect actual render
 - Questions and worked explanations must remain fully readable at 200% browser zoom. Display equations, units, graphs and diagram markers without cropping or horizontal page overflow.
 - Prefer restrained motion. Streaks, mascots and popovers must not obstruct a question or its submit control; honour reduced-motion preferences.
 - A UI status should state where data is kept: device-only, account-synced, submitted to a tutor, or officially verified. Device-only practice is not automatic cross-device sync.
-- Cached questions may be displayed while offline but **graded answers, credits and verified progress still require the server** unless a separately reviewed offline-sync protocol is released.
+- The installed shell may be available offline, but protected questions, private coaching conversations, grading, credits and verified progress require the server. Do not persist protected question payloads or learner transcripts in shared-device browser storage.
 
 ## Localisation and accessible content
 - The UI currently has English, French and German locale resources. Italian, Spanish and Modern Standard Arabic subject content is distinct from a fully translated interface.
