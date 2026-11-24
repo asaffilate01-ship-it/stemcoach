@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-24",
+  "status": "source-discovery",
+  "sources": [
+    {
+      "country": "PK",
+      "authority": "NCC",
+      "url": "https://www.ncc.gov.pk/",
+      "scope": "National framework and subject curricula; verify adopted versions",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "PK",
+      "authority": "NCC notifications",
+      "url": "https://www.ncc.gov.pk/Detail/ODQzMmE3YTAtMmFkYy00NGM0LTk2YmItNjg4ZmNiNjMwOTMw",
+      "scope": "2026 notifications and historical versions; adoption must be checked",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "PK",
+      "authority": "IBCC forum members",
+      "url": "https://ibcc.edu.pk/ibcc-forum-members/",
+      "scope": "Board discovery; not a complete syllabus import",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "PK",
+      "authority": "IBCC foreign boards",
+      "url": "https://ibcc.edu.pk/registered-qabs-foreign-examination-boards/",
+      "scope": "Qualification-specific eligibility and validity; not blanket equivalence",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "PK",
+      "authority": "BISE Peshawar",
+      "url": "https://bisep.gov.pk/page-10030.html",
+      "scope": "Combined grade-level curriculum listings",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "PK",
+      "authority": "Balochistan SED",
+      "url": "https://www.sed.gob.pk/curriculum.html",
+      "scope": "Grade-level curriculum directory",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "GB",
+      "authority": "England DfE",
+      "url": "https://www.gov.uk/government/publications/national-curriculum-in-england-framework-for-key-stages-1-to-4",
+      "scope": "KS3 and KS4 framework",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "GB",
+      "authority": "Wales Hwb",
+      "url": "https://hwb.gov.wales/curriculum-for-wales/",
+      "scope": "Statements of what matters and progression",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "GB",
+      "authority": "Education Scotland",
+      "url": "https://education.gov.scot/curriculum-for-excellence/",
+      "scope": "Experiences, outcomes and benchmarks",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "GB",
+      "authority": "UK Parliament",
+      "url": "https://commonslibrary.parliament.uk/research-briefings/cbp-9834/",
+      "scope": "Four-nation overview; Northern Ireland primary authority and individual specifications still needed",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    },
+    {
+      "country": "DE",
+      "authority": "KMK Land directory",
+      "url": "https://www.kmk.org/downloads-dokumente/rechtsvorschriften-/-lehrplaene/uebersicht-lehrplaene.html",
+      "scope": "October 2026 state curriculum index; retrieve individual Land and subject version",
+      "verifiedDirectory": true,
+      "outcomesImported": false
+    }
+  ],
+  "pakistan": {
+    "candidateDomesticAuthorities": [
+      "AJK BISE Mirpur",
+      "BIE Karachi",
+      "BISE Abbottabad",
+      "BISE Bannu",
+      "BISE D. I. Khan",
+      "BISE Faisalabad",
+      "BISE Gujranwala",
+      "BISE Kohat",
+      "BISE Lahore",
+      "BISE Larkana",
+      "BISE Mardan",
+      "BISE Malakand",
+      "BISE Mirpur Khas",
+      "BISE Multan",
+      "BISE Peshawar",
+      "BISE Quetta",
+      "BISE Rawalpindi",
+      "BISE Sahiwal",
+      "BISE Sargodha",
+      "BISE Shaheed Benazirabad",
+      "BISE Sukkur",
+      "BISE Swat",
+      "FBISE",
+      "AKU-EB",
+      "KIU",
+      "Ziauddin Board"
+    ],
+    "additionalAuthorityDiscoveryRequired": true,
+    "technicalBoards": [
+      "PBTE",
+      "SBTE",
+      "KPBTE",
+      "BBTE"
+    ],
+    "foreignQualificationBodies": [
+      "Cambridge International Education",
+      "City & Guilds",
+      "GED Testing Service",
+      "International Baccalaureate",
+      "LRN",
+      "London Assessment Board",
+      "NCC Education",
+      "OxfordAQA",
+      "Pearson",
+      "Qualifi"
+    ],
+    "note": "Validate individual awarding-body specifications, validity, provincial adoption, additional boards and higher education programmes independently."
+  },
+  "uk": {
+    "nations": [
+      "England",
+      "Wales",
+      "Scotland",
+      "Northern Ireland"
+    ],
+    "candidateAwardingOrganisations": [
+      "AQA",
+      "Pearson Edexcel",
+      "OCR",
+      "WJEC",
+      "Eduqas",
+      "CCEA",
+      "Scottish qualifications authority / successor"
+    ],
+    "note": "Discover each qualification and specification; Northern Ireland primary source review pending."
+  },
+  "germany": {
+    "states": [
+      "Baden-Württemberg",
+      "Bayern",
+      "Berlin",
+      "Brandenburg",
+      "Bremen",
+      "Hamburg",
+      "Hessen",
+      "Mecklenburg-Vorpommern",
+      "Niedersachsen",
+      "Nordrhein-Westfalen",
+      "Rheinland-Pfalz",
+      "Saarland",
+      "Sachsen",
+      "Sachsen-Anhalt",
+      "Schleswig-Holstein",
+      "Thüringen"
+    ],
+    "note": "Each Land and school type needs its own versioned outcome mapping; higher education is programme-specific."
+  },
+  "requiredMappingFields": [
+    "country",
+    "jurisdiction",
+    "authority",
+    "qualification",
+    "stage",
+    "subject",
+    "specificationVersion",
+    "outcomeCode",
+    "sourceUrl",
+    "reviewedBy"
+  ],
+  "publish": false
+}
