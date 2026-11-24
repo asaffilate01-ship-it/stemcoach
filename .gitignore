@@ -30,3 +30,9 @@ playwright-report
 
 # Omniqora Knowledge Core sync ledger stays local to the operator
 var/omniqora-stemcoach-revisions.json
+
+# Commercial question banks and generated practice material must stay private.
+/content/drafts/
+/content/generated/
+/content/private/
+/var/stemcoach-content/

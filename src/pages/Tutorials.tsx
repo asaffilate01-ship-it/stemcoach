@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -213,7 +214,7 @@ export default function Tutorials() {
 
         {continueTutorial && (
           <section className="mb-6 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:flex-row sm:items-center">
-            <img src={getMascot(continueTutorial.subject).image} alt="" className="h-14 w-14 rounded-xl bg-background object-contain" />
+            <MascotAvatar mascot={getMascot(continueTutorial.subject)} decorative className="h-14 w-14" />
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold uppercase tracking-wider text-primary">{t("tutorials.continueLabel")}</p>
               <h2 className="truncate font-bold">{continueTutorial.title}</h2>
@@ -245,7 +246,7 @@ export default function Tutorials() {
             return (
               <article id={`tutorial-${tutorial.id}`} key={tutorial.id} className="scroll-mt-24 overflow-hidden rounded-2xl border bg-card shadow-sm">
                 <button onClick={() => toggleTutorial(tutorial.id)} className="flex w-full items-center gap-4 p-5 text-left" aria-expanded={open}>
-                  <img src={mascot.image} alt="" className="h-14 w-14 rounded-xl bg-muted object-contain" />
+                  <MascotAvatar mascot={mascot} decorative className="h-14 w-14" />
                   <div className="flex-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t(`subjects.names.${tutorial.subject}`)} · {t(`tutorials.levels.${tutorial.level.toLowerCase()}`)}</p>
                     <h2 className="mt-1 flex items-center gap-2 text-lg font-bold">{tutorial.title}{isComplete && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}</h2>
@@ -277,7 +278,7 @@ export default function Tutorials() {
                         </Link>
                       </Button>
                       <Button variant="outline" className="gap-2" onClick={() => navigate(`/ai-tutor?subject=${encodeURIComponent(tutorial.subject)}&tutorial=${encodeURIComponent(tutorial.id)}`)}>
-                        <img src={mascot.image} alt="" className="h-6 w-6 rounded-lg object-cover" /><MessageCircle className="h-4 w-4" />{t("tutorials.askCoach", { name: mascot.name })}
+                        <MascotAvatar mascot={mascot} decorative className="h-6 w-6" /><MessageCircle className="h-4 w-4" />{t("tutorials.askCoach", { name: mascot.name })}
                       </Button>
                     </div>
                     <OmniqoraEvidencePanel key={tutorial.id} tutorialId={tutorial.id} checkIndex={0} />

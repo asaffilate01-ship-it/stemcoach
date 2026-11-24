@@ -222,7 +222,7 @@ const coachStem: MascotInfo = {
 };
 
 export function isCoachId(value: unknown): value is CoachId {
-  return value === DEFAULT_COACH_ID || (typeof value === "string" && value in mascotMap);
+  return value === DEFAULT_COACH_ID || (typeof value === "string" && Object.prototype.hasOwnProperty.call(mascotMap, value));
 }
 
 export function getCoachById(coachId: string): MascotInfo {
@@ -236,7 +236,18 @@ export function getCoachChoices(): Array<MascotInfo & { id: CoachId }> {
   ];
 }
 export function getMascot(subjectId: string): MascotInfo {
-  return mascotMap[subjectId] || getCoachStem();
+  const normalized = subjectId.trim().toLowerCase();
+  const aliases: Record<string, keyof typeof mascotMap> = {
+    maths: "mathematics", math: "mathematics", coding: "computer-science",
+    programming: "computer-science", "artificial-intelligence": "computer-science",
+    "cyber-security": "computer-science", "cloud-computing": "computer-science",
+    "english-language": "ielts", english: "ielts", "german-visa-preparation": "german",
+    commerce: "business-studies", accounting: "business-studies",
+    urdu: "ielts", turkish: "ielts", welsh: "ielts", arabic: "ielts",
+  };
+  const key = Object.prototype.hasOwnProperty.call(aliases, normalized) ? aliases[normalized] : normalized;
+  return Object.prototype.hasOwnProperty.call(mascotMap, key)
+    ? mascotMap[key as keyof typeof mascotMap] : getCoachStem();
 }
 
 export function getCoachStem(): MascotInfo {

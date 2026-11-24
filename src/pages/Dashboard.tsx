@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { useState, useEffect, useMemo } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
@@ -211,7 +212,7 @@ export default function Dashboard() {
                 transition={{ delay: 0.1, type: "spring", damping: 15 }}
                 className="hidden sm:block h-14 w-14 shrink-0 overflow-hidden rounded-2xl shadow-md ring-1 ring-border/30"
               >
-                <img src={getCoachStem().image} alt="STEMCoach" className="h-full w-full object-cover" />
+                <MascotAvatar mascot={getCoachStem()} className="h-full w-full" />
               </motion.div>
               <div>
                 <div className="stem-label mb-1 text-[10px] md:mb-2 md:text-[11px]">{t("dashboard.studentDashboard")}</div>

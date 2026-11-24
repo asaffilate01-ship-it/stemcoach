@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { MessageCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,7 +29,7 @@ export function PersistentCoach() {
       title={t("coach.askNamed", { name: preferredCoach.name })}
     >
       <span className="relative block h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-primary/10 ring-2 ring-primary/10">
-        <img src={preferredCoach.image} alt="" className="h-full w-full object-cover" />
+        <MascotAvatar mascot={preferredCoach} decorative className="h-full w-full" />
         <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-card bg-emerald-500" />
       </span>
       <span className="hidden min-w-0 sm:block">

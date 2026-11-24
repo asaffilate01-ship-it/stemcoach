@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { motion } from "framer-motion";
 import { getMascot } from "@/lib/mascots";
 
@@ -35,7 +36,7 @@ export function MascotReaction({ subjectId, correct, show, reactionKey = "defaul
       className="flex items-center gap-3 rounded-xl border border-border/40 bg-card p-3 shadow-md"
     >
       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl">
-        <img src={mascot.image} alt={mascot.name} className="h-full w-full object-cover" />
+        <MascotAvatar mascot={mascot} decorative className="h-full w-full" />
       </div>
       <div>
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{mascot.name}</span>

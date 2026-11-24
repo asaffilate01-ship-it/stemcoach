@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { getCoachStem, getSquadMembers } from "@/lib/mascots";
@@ -27,11 +28,7 @@ export function StemSquadSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-premium-lg ring-2 ring-primary/20 sm:h-28 sm:w-28"
           >
-              <img
-                src={coach.image}
-                alt="STEMCoach — leader of the STEM Squad"
-                className="h-full w-full object-contain p-1"
-              />
+              <MascotAvatar mascot={coach} className="h-full w-full" />
           </motion.div>
           <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-primary">
             {t("landing.meetYourTutors")}
@@ -55,17 +52,7 @@ export function StemSquadSection() {
               className="group flex flex-col items-center"
             >
               <div className="relative mb-3 h-20 w-20 overflow-hidden rounded-2xl bg-[hsl(var(--squad-avatar-bg))] shadow-md ring-1 ring-border/30 transition-all duration-300 group-hover:shadow-lg group-hover:ring-primary/30 group-hover:scale-105 sm:h-24 sm:w-24">
-                <img
-                  src={member.image}
-                  alt={t("squad.mascotAlt", {
-                    name: member.name,
-                    subject: member.subjectId === "ielts"
-                      ? `${t("subjects.names.ielts")} & ${t("subjects.names.celta")}`
-                      : t(`subjects.names.${member.subjectId}`),
-                  })}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
+                <MascotAvatar mascot={member} decorative className="h-full w-full" />
               </div>
               <span className="text-sm font-bold tracking-tight">{member.name}</span>
               <span className="text-[11px] text-muted-foreground">

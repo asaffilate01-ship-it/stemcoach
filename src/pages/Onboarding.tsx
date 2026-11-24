@@ -1,3 +1,4 @@
+import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -98,7 +99,7 @@ export default function Onboarding() {
             {step === "welcome" && (
               <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
                 <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-lg">
-                  <img src={coach.image} alt={coach.name} className="h-full w-full object-cover" />
+                  <MascotAvatar mascot={coach} decorative className="h-full w-full" />
                 </div>
                 <h1 className="mb-3 text-3xl font-bold">Welcome to STEMCoach!</h1>
                 <p className="mb-2 text-muted-foreground">
@@ -125,7 +126,7 @@ export default function Onboarding() {
                 className="w-full text-center"
               >
                 <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 shadow-lg">
-                  <img src={currentMascot.image} alt={currentMascot.name} className="h-full w-full object-cover" />
+                  <MascotAvatar mascot={currentMascot} decorative className="h-full w-full" />
                 </div>
                 <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">
                   {squadIndex + 1} of {squadMembers.length}
@@ -221,7 +222,7 @@ export default function Onboarding() {
                       return (
                         <div key={s.id} className="flex items-center gap-2 rounded-lg border p-2.5 text-sm">
                           {mascot ? (
-                            <img src={mascot.image} alt={mascot.name} className="h-5 w-5 rounded object-cover" />
+                            <MascotAvatar mascot={mascot} decorative className="h-6 w-6" />
                           ) : (
                             <BookOpen className="h-3.5 w-3.5 text-primary" />
                           )}

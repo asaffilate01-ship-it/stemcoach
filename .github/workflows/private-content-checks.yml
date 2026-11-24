@@ -1,0 +1,23 @@
+name: Private content checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reject tracked private bank paths
+        run: |
+          if git ls-files content/drafts content/generated content/private var/stemcoach-content | grep -q .; then
+            echo "Protected content is tracked in the public repository"; exit 1
+          fi
+      - name: Verify generator without dependency installation
+        run: node --test scripts/test-private-content.mjs
