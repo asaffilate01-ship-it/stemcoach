@@ -114,7 +114,7 @@ export function reconcilePrivatePacks(packs) {
   return result(index);
 }
 
-async function loadPack(dir) {
+export async function loadPack(dir) {
   async function load(name, optional = false) {
     const path = resolve(dir,name);
     try {
