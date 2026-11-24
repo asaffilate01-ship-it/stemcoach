@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { curricula, subjects } from "@/data/questions";
+import { launchCurricula as curricula, launchSubjects as subjects, isLaunchCurriculum, isLaunchSubject } from "@/lib/launchDiscovery";
 import { tutorials } from "@/data/tutorials";
 import { useAuth } from "@/hooks/useAuth";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -142,6 +142,7 @@ export default function TeacherDashboard() {
 
   const createClass = useMutation({
     mutationFn: async () => {
+      if (!isLaunchCurriculum(newClassCurriculum) || !isLaunchSubject(newClassSubject)) throw new Error("Choose a subject and curriculum from the launch catalogue.");
       const { error } = await supabase.from("classes").insert({ teacher_id: user!.id, name: newClassName.trim(), subject: newClassSubject, curriculum: newClassCurriculum });
       if (error) throw error;
     },
