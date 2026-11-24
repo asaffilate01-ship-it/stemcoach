@@ -162,7 +162,7 @@ export default function Practice() {
     };
 
     void loadQuestions();
-    return () => { active = false; };
+    return () => { active = false; loadVersion.current++; };
   }, [curriculumId, curriculumLoading, curriculumError, practiceMode, reloadQuestions, subjectId, user, t, toast]);
 
   // Clear legacy per-question AI output that was shared across accounts on one device.
