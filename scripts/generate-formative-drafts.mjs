@@ -10,8 +10,14 @@ const families = [
  {id:'gross-profit',track:'accounting',topic:'Gross profit',make:(i)=>{const c=100+10*(i%90),p=10+10*(Math.floor(i/90)%40);return [`Revenue is ${c+p} currency units and cost of goods sold is ${c}. Calculate gross profit in currency units.`,p,`Revenue minus cost of goods sold = ${c+p} − ${c}.`,[p+10,p-10,p+20]]}},
  {id:'break-even',track:'business-studies',topic:'Break-even',make:(i)=>{const c=2+i%20,v=3+Math.floor(i/20)%20,q=10+Math.floor(i/400)%20;return [`Fixed costs are ${q*c}, selling price per unit is ${v+c} and variable cost per unit is ${v}, all in currency units. Find break-even output in units.`,q,`Contribution per unit is ${c}; divide fixed costs ${q*c} by ${c}.`,[q+1,q-1,q+2]]}},
  {id:'integer-division',track:'coding',topic:'Python arithmetic',make:(i)=>{const d=2+i%20,q=1+Math.floor(i/20)%50,r=Math.floor(i/1000);return [`Evaluate the Python expression ${q*d+r} // ${d}.`,q,`Floor division returns the integer quotient, ${q}.`,[q+1,q-1,q+2]]}},
+
+ {id:'percentage-discount',track:'mathematics',topic:'Percentages',make:(i)=>{const price=10*(2+i%80),discount=10*(1+Math.floor(i/80)),answer=price*(100-discount)/100;return [`An item costs ${price} currency units and is discounted by ${discount}%. Find the new price in currency units.`,answer,`Multiply ${price} by (${100-discount}/100) to obtain ${answer}.`,[answer+1,answer-1,answer+2]]}},
+ {id:'average-power',track:'physics',topic:'Energy and power',make:(i)=>{const t=2+i%40,p=2+Math.floor(i/40);return [`A device transfers ${t*p} joules in ${t} seconds. Calculate its average power in watts.`,p,`Power equals energy divided by time: ${t*p} / ${t} = ${p} W.`,[p+1,p-1,p+2]]}},
+ {id:'population-density',track:'biology',topic:'Ecology',make:(i)=>{const area=1+i%30,density=2+Math.floor(i/30);return [`A survey counts ${area*density} plants in a plot of ${area} square metres. Calculate the observed density in plants per square metre.`,density,`Divide the plant count by the area: ${area*density} / ${area} = ${density}.`,[density+1,density-1,density+2]]}},
+ {id:'amount-of-substance',track:'chemistry',topic:'Moles',make:(i)=>{const molar=10+i%25,n=1+Math.floor(i/25);return [`A pure substance has mass ${molar*n} grams and molar mass ${molar} grams per mole. Calculate the amount in moles.`,n,`Amount equals mass divided by molar mass: ${molar*n} / ${molar} = ${n} mol.`,[n+1,n-1,n+2]]}},
+ {id:'integer-remainder',track:'coding',topic:'Python arithmetic',make:(i)=>{const d=5+i%20,q=1+Math.floor(i/20)%30,remainder=1+Math.floor(i/600);return [`Evaluate the Python expression ${q*d+remainder} % ${d}.`,remainder,`The modulo operator returns the remainder after division: ${q*d+remainder} = ${q} × ${d} + ${remainder}.`,[remainder-1,remainder+1,remainder+2]]}},
 ];
-const capacity={'linear-equation':9880,force:1225,'mass-number':100,'gross-profit':3600,'break-even':8000,'integer-division':2000};
+const capacity={'linear-equation':9880,force:1225,'mass-number':100,'gross-profit':3600,'break-even':8000,'integer-division':2000,'percentage-discount':720,'average-power':2000,'population-density':1200,'amount-of-substance':1000,'integer-remainder':1200};
 const hash=s=>createHash('sha256').update(s).digest('hex');
 export function generateDrafts(limitPerFamily=100) {
  if(!Number.isSafeInteger(limitPerFamily)||limitPerFamily<1)throw Error('Positive integer limit required');
@@ -19,7 +25,7 @@ export function generateDrafts(limitPerFamily=100) {
  for(const f of families)for(let i=0;i<Math.min(limitPerFamily,capacity[f.id]);i++){
   const [text,answer,explanation,wrong]=f.make(i);
   const fingerprint=hash(text.normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim());
-  if(seen.has(fingerprint))throw Error('Duplicate stem: '+text);
+  if(seen.has(fingerprint))throw Error('Duplicate stem in family '+f.id+' at index '+i);
   seen.add(fingerprint);
   const options=wrong.map(String);options.splice(i%4,0,String(answer));
   if(new Set(options).size!==4||!options.includes(String(answer)))throw Error('Invalid choices');
