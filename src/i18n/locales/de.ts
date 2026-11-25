@@ -1,6 +1,7 @@
 const de = {
   // ── Nav & Layout ──
   nav: {
+    languageLabs: "Sprachlabor",
     virtualLabs: "Virtuelle Labore",
     more: "Mehr",
     mobileNavigation: "Mobile Navigation",

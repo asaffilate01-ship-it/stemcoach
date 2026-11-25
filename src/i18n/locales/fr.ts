@@ -1,6 +1,7 @@
 const fr = {
   // ── Nav & Layout ──
   nav: {
+    languageLabs: "Laboratoire de langues",
     virtualLabs: "Laboratoires virtuels",
     more: "Plus",
     mobileNavigation: "Navigation mobile",

@@ -1,6 +1,7 @@
 const en = {
   // ── Nav & Layout ──
   nav: {
+    languageLabs: "Language laboratory",
     virtualLabs: "Virtual laboratories",
     more: "More",
     mobileNavigation: "Mobile navigation",
