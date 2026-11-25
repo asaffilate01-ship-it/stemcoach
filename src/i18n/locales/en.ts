@@ -1,6 +1,7 @@
 const en = {
   // ── Nav & Layout ──
   nav: {
+    virtualLabs: "Virtual laboratories",
     more: "More",
     mobileNavigation: "Mobile navigation",
     skipToContent: "Skip to content",

@@ -5,11 +5,12 @@ import { Footer } from "@/components/layout/Footer";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { DashboardSkeleton } from "@/components/layout/DashboardSkeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, BookOpen, Brain, Layers, BarChart3, Trophy, Star, Sparkles } from "lucide-react";
+import { Flame, Target, Zap, TrendingUp, AlertTriangle, Calendar, ArrowRight, BookOpen, Brain, Layers, BarChart3, Trophy, Star, Sparkles, FlaskConical } from "lucide-react";
 import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   useDocumentTitle(t("dashboard.title"));
   const { user } = useAuth();
+  const { isStudent, isTeacher, isAdmin } = useUserRole();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
@@ -186,6 +188,7 @@ export default function Dashboard() {
 
   const suggestedFocus = weakTopics[0];
   const quickActions = [
+    ...((isStudent || isTeacher || isAdmin) ? [{ label: t("nav.virtualLabs"), icon: FlaskConical, to: "/virtual-labs", variant: "primary" as const }] : []),
     { label: t("dashboard.practiceAction"), icon: BookOpen, to: "/subjects", variant: "primary" as const },
     { label: t("dashboard.weakDrills"), icon: Brain, to: "/weak-drills", variant: "warning" as const },
     { label: t("dashboard.flashcardsAction"), icon: Layers, to: "/flashcards", variant: "success" as const },

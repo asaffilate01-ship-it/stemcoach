@@ -1,6 +1,7 @@
 const de = {
   // ── Nav & Layout ──
   nav: {
+    virtualLabs: "Virtuelle Labore",
     more: "Mehr",
     mobileNavigation: "Mobile Navigation",
     skipToContent: "Zum Inhalt springen",
