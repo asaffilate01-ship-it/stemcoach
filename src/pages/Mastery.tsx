@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { MasteryWeekPlan } from "@/components/learning/MasteryWeekPlan";
+import { normalizeLanguage } from "@/i18n/language";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -121,6 +123,7 @@ export default function Mastery() {
               ))}
             </div>
 
+            <MasteryWeekPlan key={activeCurriculum!} rows={rows} curriculum={activeCurriculum!} language={normalizeLanguage(i18n.resolvedLanguage||i18n.language)==="de"?"de":"en"} now={new Date(now)}/>
             <div className="mb-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
               <section className="stem-card rounded-2xl p-5">
                 <h2 className="mb-4 flex items-center gap-2 font-semibold"><Target className="h-4 w-4 text-primary" />{t("mastery.priorityTopics")}</h2>
