@@ -429,6 +429,13 @@ const de = {
     },
   },
   mastery: {
+    unavailable: "Lernstand nicht verfügbar",
+    unavailableDesc: "Dein gespeicherter Fortschritt ist unverändert. Versuche erneut, deinen Lehrplan und Lernstand zu prüfen.",
+    chooseCurriculum: "Lehrplan auswählen",
+    chooseCurriculumDesc: "Wähle in den Einstellungen einen aktuellen Lehrplan, bevor du deinen Lernstand öffnest.",
+    focusTopic: "Schwerpunktthema: {{topic}}",
+    removeTopic: "Stattdessen das ganze Fach üben",
+    sampleNotice: "Schwerpunktthemen nutzen eine begrenzte Fragenstichprobe. Weitere passende Fragen können vorhanden sein.",
     eyebrow: "Adaptives Lernen",
     title: "Lernstandskarte",
     subtitle: "Deine dauerhafte Lernstandskarte nach Themen für {{curriculum}}. STEMCoach und das STEM-Team wählen damit aus, was du als Nächstes üben solltest.",

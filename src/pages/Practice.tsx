@@ -82,7 +82,7 @@ function PracticeWorkspace() {
   const filters = useMemo(() => readPracticeFilters(searchParams), [searchParams]);
   const activeCurriculumId = filters ? choosePracticeCurriculum(filters, curriculumId) : null;
   const curriculum = launchCurricula.find(c => c.id === activeCurriculumId);
-  const hasSampleFilters = Boolean(filters && (filters.boards.length || filters.difficulty !== null));
+  const hasSampleFilters = Boolean(filters && (filters.boards.length || filters.difficulty !== null || filters.topic !== undefined));
   const selectQualification = (id: string) => { const next = new URLSearchParams(searchParams); next.set("qualification", id); setSearchParams(next); };
   const { toast } = useToast();
   const { stats, newBadges, dismissBadge, fetchStats } = useGameStats();
@@ -300,6 +300,7 @@ function PracticeWorkspace() {
             <p className="mb-8 text-muted-foreground">{questionLoadFailed
               ? t("practice.loadFailedDesc")
               : hasSampleFilters ? "The server returned a bounded curriculum sample. Other questions may match your filters; try a different sample or adjust the filters." : <>{mascot.name} {t("practice.preparingQuestions")} {subject.name}{curriculum ? ` for ${curriculum.label}` : ""}. {t("practice.checkBackSoon")}</>}</p>
+            {filters.topic && !questionLoadFailed && <Button variant="outline" className="mb-3 w-full min-h-11" onClick={()=>{const next=new URLSearchParams(searchParams);next.delete("topic");setSearchParams(next);}}>{t("mastery.removeTopic")}</Button>}
             {(questionLoadFailed || hasSampleFilters) && (
               <Button onClick={() => setReloadQuestions(count => count + 1)} variant="outline" className="mb-3 w-full">
                 {t("common.retry")}
@@ -602,7 +603,7 @@ function PracticeWorkspace() {
 
         {user && (
           <div className="mb-6 rounded-2xl border border-border/60 bg-card p-3">
-            <div className="mb-3 grid gap-2 rounded-xl bg-muted/30 p-3 text-sm sm:grid-cols-2"><label className="min-w-0 font-medium">Session qualification<select aria-label="Session qualification" value={activeCurriculumId || ""} disabled={submitting || loadingAI} onChange={e => selectQualification(e.target.value)} className="mt-1 min-h-11 w-full rounded-lg border bg-background px-2">{launchCurricula.filter(c => filters.curricula.includes(c.id)).map(c => <option key={c.id} value={c.id}>{c.label}</option>)}</select></label><div className="min-w-0 text-xs text-muted-foreground"><p>{filters.boards.length ? filters.boards.join(" · ") : "All boards in this qualification"}</p><p>{filters.difficulty === null ? "All difficulty levels" : "Difficulty " + filters.difficulty}</p>{hasSampleFilters && <p className="mt-1">Filters narrow the server sample, not the entire bank.</p>}</div></div>
+            <div className="mb-3 grid gap-2 rounded-xl bg-muted/30 p-3 text-sm sm:grid-cols-2"><label className="min-w-0 font-medium">Session qualification<select aria-label="Session qualification" value={activeCurriculumId || ""} disabled={submitting || loadingAI} onChange={e => selectQualification(e.target.value)} className="mt-1 min-h-11 w-full rounded-lg border bg-background px-2">{launchCurricula.filter(c => filters.curricula.includes(c.id)).map(c => <option key={c.id} value={c.id}>{c.label}</option>)}</select></label><div className="min-w-0 text-xs text-muted-foreground"><p>{filters.boards.length ? filters.boards.join(" · ") : "All boards in this qualification"}</p><p>{filters.difficulty === null ? "All difficulty levels" : "Difficulty " + filters.difficulty}</p>{filters.topic && <p className="break-words">{t("mastery.focusTopic", {topic:filters.topic})}</p>}{hasSampleFilters && <p className="mt-1">Filters narrow the server sample, not the entire bank.</p>}</div></div>
             <div className="mb-2 flex items-center justify-between gap-3 px-1">
               <div>
                 <div className="text-sm font-semibold">{t("practice.adaptiveSession")}</div>

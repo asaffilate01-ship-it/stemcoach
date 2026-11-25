@@ -5,12 +5,19 @@ export interface LaunchPracticeFilters {
   qualification: string | null;
   boards: string[];
   difficulty: number | null;
+  topic?: string;
+}
+
+export function validPracticeTopic(value:unknown):value is string {
+  return typeof value==="string"&&value.length>0&&value.length<=160&&value.trim()===value&&!/[\u0000-\u001f\u007f]/u.test(value);
 }
 
 export function readPracticeFilters(params: URLSearchParams): LaunchPracticeFilters | null {
   const requested = params.getAll("curriculum");
   const qualifications = params.getAll("qualification");
   const difficulties = params.getAll("difficulty");
+  const topics = params.getAll("topic");
+  if(topics.length>1||topics.some(topic=>!validPracticeTopic(topic)))return null;
   if (requested.some(id => !isLaunchCurriculum(id)) || qualifications.length > 1 || difficulties.length > 1) return null;
   const curricula = requested.length ? [...new Set(requested)] : launchCurricula.map(c => c.id);
   const qualification = qualifications[0] || null;
@@ -19,7 +26,7 @@ export function readPracticeFilters(params: URLSearchParams): LaunchPracticeFilt
   const allowedBoards = new Set(launchCurricula.filter(c => curricula.includes(c.id)).flatMap(c => c.boards));
   if (boards.some(board => !allowedBoards.has(board))) return null;
   if (difficulties.length && !/^[1-5]$/.test(difficulties[0])) return null;
-  return { curricula, qualification, boards, difficulty: difficulties.length ? Number(difficulties[0]) : null };
+  return { curricula, qualification, boards, difficulty: difficulties.length ? Number(difficulties[0]) : null, ...(topics.length?{topic:topics[0]}:{}) };
 }
 
 export function choosePracticeCurriculum(filters: LaunchPracticeFilters, savedId?: string | null): string | null {
@@ -43,9 +50,10 @@ export function buildPracticePath(subject: string, curricula: string[], boards: 
  * Narrow that sample without requesting a broader curriculum or making an
  * assertion about the total number of matching database questions.
  */
-export function narrowPracticeSample<T extends { curriculum?: string; subject: string; boards: string[]; difficulty: number }>(rows: T[], subject: string, curriculum: string, filters: LaunchPracticeFilters): T[] {
+export function narrowPracticeSample<T extends { curriculum?: string; subject: string; boards: string[]; difficulty: number; topic?: string }>(rows: T[], subject: string, curriculum: string, filters: LaunchPracticeFilters): T[] {
   return rows.filter(row =>
     row.curriculum === curriculum && row.subject === subject &&
+    (filters.topic === undefined || row.topic === filters.topic) &&
     (!filters.boards.length || (Array.isArray(row.boards) && row.boards.some(board => filters.boards.includes(board)))) &&
     (filters.difficulty === null || row.difficulty === filters.difficulty));
 }
@@ -58,7 +66,7 @@ export function safePracticeReturn(value: unknown): string | null {
     if (parsed.origin !== "https://stemcoach.invalid" || parsed.hash || parsed.pathname.includes("%")) return null;
     const subject = parsed.pathname.slice("/practice/".length);
     if (!launchSubjects.some(s => s.id === subject) || !readPracticeFilters(parsed.searchParams)) return null;
-    const keys = new Set(["curriculum", "qualification", "board", "difficulty", "mode"]);
+    const keys = new Set(["curriculum", "qualification", "board", "difficulty", "mode", "topic"]);
     if ([...parsed.searchParams.keys()].some(key => !keys.has(key))) return null;
     const modes = parsed.searchParams.getAll("mode");
     if (modes.length > 1 || modes.some(mode => !["mixed", "focus", "diagnostic"].includes(mode))) return null;
