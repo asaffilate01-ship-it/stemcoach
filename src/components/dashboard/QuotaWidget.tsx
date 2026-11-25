@@ -9,11 +9,13 @@ export function QuotaWidget() {
   const {
     totalQuestions, usedQuestions, remainingQuestions,
     mockExamsTotal, mockExamsUsed, mockExamsRemaining,
-    subjects, levels, hasPurchased, loading,
+    subjects, levels, hasPurchased, loading, error, refresh,
   } = useQuotaGate();
   const navigate = useNavigate();
 
   if (loading) return null;
+
+  if (error) return <section role="alert" className="rounded-2xl border bg-card p-5"><h3 className="text-base font-bold">Question balance unavailable</h3><p className="mt-2 text-sm text-muted-foreground">Your current credits could not be verified. Retry before making a purchase decision.</p><Button variant="outline" className="mt-3 min-h-11" onClick={()=>void refresh()}>Try again</Button></section>;
 
   const usagePercent = totalQuestions > 0 ? Math.round((usedQuestions / totalQuestions) * 100) : 0;
   const isLow = remainingQuestions < 500 && hasPurchased;
@@ -92,10 +94,10 @@ export function QuotaWidget() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
             <Sparkles className="h-7 w-7 text-primary" />
           </div>
-          <p className="mb-1 text-sm font-semibold">Unlock 5,000+ questions & 20 mock exams</p>
-          <p className="mb-4 text-xs text-muted-foreground">One-time purchase. No subscriptions.</p>
+          <p className="mb-1 text-sm font-semibold">No purchased question pack recorded</p>
+          <p className="mb-4 text-xs text-muted-foreground">Access also depends on verified institutional enrolment.</p>
           <Button onClick={() => navigate("/pricing")} className="gap-2 rounded-xl bg-gradient-to-r from-primary to-[hsl(258_60%_52%)] hover:opacity-90 transition-opacity">
-            <CreditCard className="h-4 w-4" /> Get Started
+            <CreditCard className="h-4 w-4" /> View access options
           </Button>
         </div>
       )}
