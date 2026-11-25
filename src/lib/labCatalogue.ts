@@ -16,11 +16,14 @@ export const LAB_CATALOGUE = [
   {id:"marketEquilibrium",subject:"economics",group:"business",keywords:"economics supply demand equilibrium market shortage surplus angebot nachfrage"},
   {id:"bookkeeping",subject:"business-studies",group:"business",keywords:"accounting double entry ledger debit credit journal trial balance buchführung soll haben"},
   {id:"elasticity",subject:"economics",group:"business",keywords:"economics price elasticity midpoint demand revenue preiselastizität bogenelastizität"},
+  {id:"mapScale",subject:"geography",group:"humanities",keywords:"map scale distance area cartography kartenmaßstab fläche"},
+  {id:"population",subject:"geography",group:"humanities",keywords:"population change demography births deaths migration bevölkerung wanderung"},
+  {id:"confounding",subject:"psychology",group:"humanities",keywords:"psychology research methods confounding sampling simpson paradox stratification störvariable konfundierung"},
 ] as const;
 
 export type LabId=typeof LAB_CATALOGUE[number]["id"];
 export type LabGroup="all"|typeof LAB_CATALOGUE[number]["group"];
-export const LAB_GROUPS:readonly LabGroup[]=["all","science","maths","technology","business"];
+export const LAB_GROUPS:readonly LabGroup[]=["all","science","maths","technology","business","humanities"];
 const knownIds=new Set<string>(LAB_CATALOGUE.map(lab=>lab.id));
 export function parseLabSelection(value:unknown):LabId{
   return typeof value==="string"&&knownIds.has(value)?value as LabId:"circuit";
