@@ -13,7 +13,7 @@ describe("additional virtual lab models", () => {
     expect(quadraticModel(1,0,0).roots).toEqual([0]);
     expect(quadraticModel(1,0,1).roots).toEqual([]);
     expect(a.points[0].x).toBe(-5);
-    expect(a.points.at(-1)?.x).toBe(5);
+    expect(a.points[a.points.length-1].x).toBe(5);
     expect(a.points.every(p=>p.y>=a.yMin&&p.y<=a.yMax)).toBe(true);
   });
   it("rejects degenerate and invalid quadratic parameters",()=>{
@@ -50,7 +50,8 @@ describe("additional virtual lab models", () => {
       });
       const last=m.steps[m.steps.length-1];
       if(m.found)expect(last.decision).toBe("found");
-      else expect(last.low).toBe(last.high);
+      else if(last.decision==="left")expect(last.mid-1).toBeLessThan(last.low);
+      else expect(last.mid+1).toBeGreaterThan(last.high);
     }
     expect(()=>binarySearchModel(-1)).toThrow();
     expect(()=>binarySearchModel(2.5)).toThrow();
