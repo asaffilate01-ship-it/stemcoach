@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Control, Metric, ModelFrame } from "./LabPrimitives";
 import { AppliedLabPanel } from "./AppliedLabPanel";
 import { appliedLabLabels } from "./appliedLabLabels";
+import { TechnologyLabPanel } from "./TechnologyLabPanel";
+import { technologyLabLabels } from "./technologyLabLabels";
 import { Button } from "@/components/ui/button";
 import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { getMascot } from "@/lib/mascots";
 import { circuitModel, motionModel, dilutionModel, quadraticModel, inheritanceModel, binarySearchModel, BINARY_SEARCH_VALUES, type Genotype } from "@/lib/virtualLabs";
-import { Zap, Gauge, FlaskConical, ChartNoAxesCombined, Dna, Code2, ChevronLeft, ChevronRight, Brain, ChartBar, Calculator } from "lucide-react";
+import { Zap, Gauge, FlaskConical, ChartNoAxesCombined, Dna, Code2, ChevronLeft, ChevronRight, Brain, ChartBar, Calculator, Network, Cloud, ShieldCheck } from "lucide-react";
 
-type Lab = "circuit" | "motion" | "dilution" | "quadratic" | "inheritance" | "binarySearch" | "statistics" | "classifier" | "breakEven";
+type Lab = "circuit" | "motion" | "dilution" | "quadratic" | "inheritance" | "binarySearch" | "statistics" | "classifier" | "breakEven" | "subnet" | "cloudCapacity" | "policy";
 const labels = {
   en: {
     "quadratic": "Quadratic graph explorer",
@@ -198,14 +200,14 @@ function BinarySearch({c,locale}:{c:Copy;locale:string}) {
   </>} tip={c.binaryTip} limit={c.binaryLimit}/>;
 }
 export function VirtualLabWorkspace({ language="en" }: { language?: "en"|"de" }) {
-  const c={...labels[language],...appliedLabLabels[language]},locale=language==="de"?"de-DE":"en-GB";
+  const c={...labels[language],...appliedLabLabels[language],...technologyLabLabels[language]},locale=language==="de"?"de-DE":"en-GB";
   const [lab,setLab]=useState<Lab>("circuit");
-  const labs=[{id:"circuit",icon:Zap,subject:"physics"},{id:"motion",icon:Gauge,subject:"physics"},{id:"dilution",icon:FlaskConical,subject:"chemistry"},{id:"quadratic",icon:ChartNoAxesCombined,subject:"mathematics"},{id:"inheritance",icon:Dna,subject:"biology"},{id:"binarySearch",icon:Code2,subject:"computer-science"},{id:"statistics",icon:ChartBar,subject:"mathematics"},{id:"classifier",icon:Brain,subject:"computer-science"},{id:"breakEven",icon:Calculator,subject:"business-studies"}] as const;
+  const labs=[{id:"circuit",icon:Zap,subject:"physics"},{id:"motion",icon:Gauge,subject:"physics"},{id:"dilution",icon:FlaskConical,subject:"chemistry"},{id:"quadratic",icon:ChartNoAxesCombined,subject:"mathematics"},{id:"inheritance",icon:Dna,subject:"biology"},{id:"binarySearch",icon:Code2,subject:"computer-science"},{id:"statistics",icon:ChartBar,subject:"mathematics"},{id:"classifier",icon:Brain,subject:"computer-science"},{id:"breakEven",icon:Calculator,subject:"business-studies"},{id:"subnet",icon:Network,subject:"computer-science"},{id:"cloudCapacity",icon:Cloud,subject:"computer-science"},{id:"policy",icon:ShieldCheck,subject:"computer-science"}] as const;
   const active=labs.find(item=>item.id===lab)!;
   return <main id="main-content" className="container mx-auto max-w-6xl px-4 py-6 pb-28 sm:py-10">
     <header className="mb-5 flex items-start gap-3 sm:gap-5"><MascotAvatar mascot={getMascot(active.subject)} className="h-14 w-14 sm:h-20 sm:w-20"/><div className="min-w-0"><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{c.heading}</h1><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.subtitle}</p></div></header>
     <div role="group" aria-label={c.heading} className="mb-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">{labs.map(item=><button key={item.id} type="button" aria-pressed={lab===item.id} onClick={()=>setLab(item.id)} className={`flex min-h-14 min-w-0 items-center gap-3 rounded-xl border p-3 text-left focus-visible:ring-2 focus-visible:ring-ring ${lab===item.id?"border-primary bg-primary/5":"bg-card"}`}><item.icon className="h-5 w-5 shrink-0 text-primary" aria-hidden="true"/><span className="min-w-0"><span className="block text-sm font-semibold">{c[item.id]}</span><span className="block text-xs text-muted-foreground">{c[item.subject]}</span></span></button>)}</div>
-    {lab==="circuit"?<Circuit c={c} locale={locale}/>:lab==="motion"?<Motion c={c} locale={locale}/>:lab==="dilution"?<Dilution c={c} locale={locale}/>:lab==="quadratic"?<Quadratic c={c} locale={locale}/>:lab==="inheritance"?<Inheritance c={c} locale={locale}/>:lab==="binarySearch"?<BinarySearch c={c} locale={locale}/>:<AppliedLabPanel lab={lab} language={language}/>}
+    {lab==="circuit"?<Circuit c={c} locale={locale}/>:lab==="motion"?<Motion c={c} locale={locale}/>:lab==="dilution"?<Dilution c={c} locale={locale}/>:lab==="quadratic"?<Quadratic c={c} locale={locale}/>:lab==="inheritance"?<Inheritance c={c} locale={locale}/>:lab==="binarySearch"?<BinarySearch c={c} locale={locale}/> :lab==="subnet"||lab==="cloudCapacity"||lab==="policy"?<TechnologyLabPanel lab={lab} language={language}/>:<AppliedLabPanel lab={lab} language={language}/>}
     <footer className="mt-4 space-y-1 text-xs text-muted-foreground"><p>{c.local}</p><p>{c.modeNotice}</p></footer>
   </main>;
 }
