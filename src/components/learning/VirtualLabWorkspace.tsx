@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { Control, Metric, ModelFrame } from "./LabPrimitives";
+import { AppliedLabPanel, appliedLabLabels } from "./AppliedLabPanel";
 import { Button } from "@/components/ui/button";
 import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { getMascot } from "@/lib/mascots";
 import { circuitModel, motionModel, dilutionModel, quadraticModel, inheritanceModel, binarySearchModel, BINARY_SEARCH_VALUES, type Genotype } from "@/lib/virtualLabs";
-import { RotateCcw, Zap, Gauge, FlaskConical, ChartNoAxesCombined, Dna, Code2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Zap, Gauge, FlaskConical, ChartNoAxesCombined, Dna, Code2, ChevronLeft, ChevronRight, Brain, ChartBar, Calculator } from "lucide-react";
 
-type Lab = "circuit" | "motion" | "dilution" | "quadratic" | "inheritance" | "binarySearch";
+type Lab = "circuit" | "motion" | "dilution" | "quadratic" | "inheritance" | "binarySearch" | "statistics" | "classifier" | "breakEven";
 const labels = {
   en: {
     "quadratic": "Quadratic graph explorer",
@@ -135,35 +137,6 @@ const labels = {
   },
 };
 type Copy = typeof labels.en;
-function Control({ label, value, unit, min, max, step=1, change, locale }: { label:string; value:number; unit:string; min:number; max:number; step?:number; change:(v:number)=>void; locale:string }) {
-  const display = new Intl.NumberFormat(locale, { maximumFractionDigits: 3 }).format(value) + " " + unit;
-  return <label className="block rounded-xl border bg-background p-3">
-    <span className="flex flex-wrap items-center justify-between gap-2 text-sm font-medium"><span>{label}</span><span className="tabular-nums font-semibold text-primary">{display}</span></span>
-    <input type="range" aria-label={label} aria-valuetext={display} min={min} max={max} step={step} value={value} onChange={e=>change(Number(e.target.value))}
-      className="mt-2 h-11 w-full cursor-pointer accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
-    <span className="flex justify-between text-xs text-muted-foreground" aria-hidden="true"><span>{min} {unit}</span><span>{max} {unit}</span></span>
-  </label>;
-}
-function Metric({ label, value, unit, locale }: { label:string; value:number; unit:string; locale:string }) {
-  return <div className="min-w-0 rounded-xl border bg-background p-3">
-    <dt className="text-xs text-muted-foreground">{label}</dt>
-    <dd className="mt-1 break-words text-xl font-semibold tabular-nums">{new Intl.NumberFormat(locale,{maximumFractionDigits:4}).format(value)} <span className="text-sm font-medium text-muted-foreground">{unit}</span></dd>
-  </div>;
-}
-function ModelFrame({ title, c, reset, inputs, results, formula, tip, limit }: { title:string; c:Copy; reset:()=>void; inputs:React.ReactNode; results:React.ReactNode; formula:string; tip:string; limit:string }) {
-  return <section aria-label={title} className="rounded-2xl border bg-card p-4 sm:p-6">
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <Button type="button" variant="outline" onClick={reset} className="min-h-11 gap-2"><RotateCcw className="h-4 w-4" aria-hidden="true" />{c.reset}</Button>
-    </div>
-    <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-      <div className="min-w-0 space-y-3"><h3 className="text-sm font-semibold">{c.inputs}</h3>{inputs}</div>
-      <div className="min-w-0 space-y-3"><h3 className="text-sm font-semibold">{c.results}</h3><p dir="ltr" className="break-words rounded-xl bg-primary/5 px-3 py-2 text-sm font-semibold text-primary">{formula}</p>{results}</div>
-    </div>
-    <div className="mt-5 rounded-xl border bg-muted/20 p-4"><h3 className="text-sm font-semibold">{c.experiment}</h3><p className="mt-1 text-sm leading-relaxed">{tip}</p></div>
-    <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{limit}</p>
-  </section>;
-}
 function Circuit({c,locale}:{c:Copy;locale:string}) {
   const [voltage,V]=useState(12),[r1,R1]=useState(30),[r2,R2]=useState(60),[topology,T]=useState<"series"|"parallel">("series");
   const m=circuitModel(voltage,r1,r2,topology);
@@ -224,14 +197,14 @@ function BinarySearch({c,locale}:{c:Copy;locale:string}) {
   </>} tip={c.binaryTip} limit={c.binaryLimit}/>;
 }
 export function VirtualLabWorkspace({ language="en" }: { language?: "en"|"de" }) {
-  const c=labels[language],locale=language==="de"?"de-DE":"en-GB";
+  const c={...labels[language],...appliedLabLabels[language]},locale=language==="de"?"de-DE":"en-GB";
   const [lab,setLab]=useState<Lab>("circuit");
-  const labs=[{id:"circuit",icon:Zap,subject:"physics"},{id:"motion",icon:Gauge,subject:"physics"},{id:"dilution",icon:FlaskConical,subject:"chemistry"},{id:"quadratic",icon:ChartNoAxesCombined,subject:"mathematics"},{id:"inheritance",icon:Dna,subject:"biology"},{id:"binarySearch",icon:Code2,subject:"computer-science"}] as const;
+  const labs=[{id:"circuit",icon:Zap,subject:"physics"},{id:"motion",icon:Gauge,subject:"physics"},{id:"dilution",icon:FlaskConical,subject:"chemistry"},{id:"quadratic",icon:ChartNoAxesCombined,subject:"mathematics"},{id:"inheritance",icon:Dna,subject:"biology"},{id:"binarySearch",icon:Code2,subject:"computer-science"},{id:"statistics",icon:ChartBar,subject:"mathematics"},{id:"classifier",icon:Brain,subject:"computer-science"},{id:"breakEven",icon:Calculator,subject:"business-studies"}] as const;
   const active=labs.find(item=>item.id===lab)!;
   return <main id="main-content" className="container mx-auto max-w-6xl px-4 py-6 pb-28 sm:py-10">
     <header className="mb-5 flex items-start gap-3 sm:gap-5"><MascotAvatar mascot={getMascot(active.subject)} className="h-14 w-14 sm:h-20 sm:w-20"/><div className="min-w-0"><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{c.heading}</h1><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.subtitle}</p></div></header>
     <div role="group" aria-label={c.heading} className="mb-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">{labs.map(item=><button key={item.id} type="button" aria-pressed={lab===item.id} onClick={()=>setLab(item.id)} className={`flex min-h-14 min-w-0 items-center gap-3 rounded-xl border p-3 text-left focus-visible:ring-2 focus-visible:ring-ring ${lab===item.id?"border-primary bg-primary/5":"bg-card"}`}><item.icon className="h-5 w-5 shrink-0 text-primary" aria-hidden="true"/><span className="min-w-0"><span className="block text-sm font-semibold">{c[item.id]}</span><span className="block text-xs text-muted-foreground">{c[item.subject]}</span></span></button>)}</div>
-    {lab==="circuit"?<Circuit c={c} locale={locale}/>:lab==="motion"?<Motion c={c} locale={locale}/>:lab==="dilution"?<Dilution c={c} locale={locale}/>:lab==="quadratic"?<Quadratic c={c} locale={locale}/>:lab==="inheritance"?<Inheritance c={c} locale={locale}/>:<BinarySearch c={c} locale={locale}/>}
+    {lab==="circuit"?<Circuit c={c} locale={locale}/>:lab==="motion"?<Motion c={c} locale={locale}/>:lab==="dilution"?<Dilution c={c} locale={locale}/>:lab==="quadratic"?<Quadratic c={c} locale={locale}/>:lab==="inheritance"?<Inheritance c={c} locale={locale}/>:lab==="binarySearch"?<BinarySearch c={c} locale={locale}/>:<AppliedLabPanel lab={lab} language={language}/>}
     <footer className="mt-4 space-y-1 text-xs text-muted-foreground"><p>{c.local}</p><p>{c.modeNotice}</p></footer>
   </main>;
 }
