@@ -14,6 +14,8 @@ export const LAB_CATALOGUE = [
   {id:"policy",subject:"computer-science",group:"technology",keywords:"cyber security defensive access control least privilege authentication RLS zugriffskontrolle"},
   {id:"cashAccrual",subject:"business-studies",group:"business",keywords:"accounting cash flow accrual profit receivables depreciation buchhaltung abschreibung"},
   {id:"marketEquilibrium",subject:"economics",group:"business",keywords:"economics supply demand equilibrium market shortage surplus angebot nachfrage"},
+  {id:"bookkeeping",subject:"business-studies",group:"business",keywords:"accounting double entry ledger debit credit journal trial balance buchführung soll haben"},
+  {id:"elasticity",subject:"economics",group:"business",keywords:"economics price elasticity midpoint demand revenue preiselastizität bogenelastizität"},
 ] as const;
 
 export type LabId=typeof LAB_CATALOGUE[number]["id"];
