@@ -1,0 +1,599 @@
+{
+  "schemaVersion": 1,
+  "batch": "three-market-20261125-2201",
+  "note": "Original formative drafts; independent academic review and board mapping required.",
+  "items": [
+    {
+      "id": "three-market-20261125-2201-001",
+      "track": "mathematics",
+      "topic": "Probability",
+      "text": "A bag contains 4 red and 6 blue counters. Two are drawn without replacement. What is the probability both are red?",
+      "options": [
+        "2/15",
+        "4/25",
+        "1/5",
+        "3/10"
+      ],
+      "correctAnswer": "2/15",
+      "explanation": "(4/10) × (3/9) = 2/15.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-002",
+      "track": "mathematics",
+      "topic": "Algebra",
+      "text": "Solve 5(x−2)=3x+8.",
+      "options": [
+        "4",
+        "−9",
+        "6",
+        "9"
+      ],
+      "correctAnswer": "9",
+      "explanation": "5x−10=3x+8, so 2x=18 and x=9.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-003",
+      "track": "physics",
+      "topic": "Energy",
+      "text": "A 3 kg object is raised 4 m. Using g=10 N/kg, what is the increase in gravitational potential energy?",
+      "options": [
+        "40 J",
+        "30 J",
+        "120 J",
+        "12 J"
+      ],
+      "correctAnswer": "120 J",
+      "explanation": "mgh=3×10×4=120 J.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-004",
+      "track": "physics",
+      "topic": "Electricity",
+      "text": "A device transfers 360 J in 12 s. What is its average power?",
+      "options": [
+        "348 W",
+        "30 W",
+        "4320 W",
+        "3 W"
+      ],
+      "correctAnswer": "30 W",
+      "explanation": "Power is energy divided by time: 360/12=30 W.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-005",
+      "track": "chemistry",
+      "topic": "Stoichiometry",
+      "text": "How many moles are in 11 g of CO₂, with molar mass 44 g/mol?",
+      "options": [
+        "0.25 mol",
+        "4 mol",
+        "0.5 mol",
+        "484 mol"
+      ],
+      "correctAnswer": "0.25 mol",
+      "explanation": "Amount = mass / molar mass = 11/44.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-006",
+      "track": "chemistry",
+      "topic": "Atomic structure",
+      "text": "An ion has 17 protons and 18 electrons. What is its charge in elementary-charge units?",
+      "options": [
+        "+1",
+        "0",
+        "−2",
+        "−1"
+      ],
+      "correctAnswer": "−1",
+      "explanation": "17 positive charges and 18 negative charges give −1.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-007",
+      "track": "biology",
+      "topic": "Inheritance",
+      "text": "In a cross Aa × Aa, what is the probability of genotype aa?",
+      "options": [
+        "75%",
+        "100%",
+        "25%",
+        "50%"
+      ],
+      "correctAnswer": "25%",
+      "explanation": "The four equally likely combinations are AA, Aa, aA and aa.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-008",
+      "track": "biology",
+      "topic": "Ecology",
+      "text": "A quadrat of area 0.5 m² contains 8 plants. What is the estimated density?",
+      "options": [
+        "0.0625 plants/m²",
+        "16 plants/m²",
+        "4 plants/m²",
+        "8 plants/m²"
+      ],
+      "correctAnswer": "16 plants/m²",
+      "explanation": "Density equals count divided by area: 8/0.5=16.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-009",
+      "track": "english-language",
+      "topic": "Grammar",
+      "text": "Which sentence has subject–verb agreement?",
+      "options": [
+        "The list of names is complete.",
+        "The list of names are complete.",
+        "The lists of names is complete.",
+        "The names on the list is complete."
+      ],
+      "correctAnswer": "The list of names is complete.",
+      "explanation": "The singular subject list requires is.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-010",
+      "track": "ielts",
+      "topic": "Reading",
+      "text": "Passage: The library opens at 9 on weekdays and 10 on Saturdays. Statement: The library opens at 9 on Saturdays. Is this true, false or not given?",
+      "options": [
+        "False",
+        "True",
+        "Not given"
+      ],
+      "correctAnswer": "False",
+      "explanation": "The passage explicitly states 10 on Saturdays, contradicting the statement.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-011",
+      "track": "german",
+      "topic": "Grammatik",
+      "text": "Ergänze: Ich fahre mit ___ Bus.",
+      "options": [
+        "der",
+        "das",
+        "dem",
+        "den"
+      ],
+      "correctAnswer": "dem",
+      "explanation": "Mit verlangt den Dativ; der Bus wird zu dem Bus.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "de",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-012",
+      "track": "german-visa-preparation",
+      "topic": "Alltagssprache",
+      "text": "Welche Frage passt, wenn Sie nach dem Bahnhof suchen?",
+      "options": [
+        "Wann essen Sie?",
+        "Wo ist der Bahnhof?",
+        "Wie alt sind Sie?",
+        "Was kostet das Brot?"
+      ],
+      "correctAnswer": "Wo ist der Bahnhof?",
+      "explanation": "Mit Wo fragt man nach einem Ort.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "de",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-013",
+      "track": "artificial-intelligence",
+      "topic": "Evaluation",
+      "text": "A classifier identifies 18 of 24 actual positive cases. What is recall?",
+      "options": [
+        "75%",
+        "25%",
+        "18%",
+        "133%"
+      ],
+      "correctAnswer": "75%",
+      "explanation": "Recall = true positives / actual positives = 18/24.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-014",
+      "track": "coding",
+      "topic": "Python",
+      "text": "What is the result of list(range(2, 8, 2)) in Python?",
+      "options": [
+        "[2, 4, 6, 8]",
+        "[2, 3, 4, 5, 6, 7]",
+        "[4, 6, 8]",
+        "[2, 4, 6]"
+      ],
+      "correctAnswer": "[2, 4, 6]",
+      "explanation": "The stop value is excluded and the step is 2.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-015",
+      "track": "cyber-security",
+      "topic": "Authentication",
+      "text": "Which combination uses two distinct authentication factor types?",
+      "options": [
+        "Password and PIN",
+        "Two security questions",
+        "Password and hardware security key",
+        "Two passwords"
+      ],
+      "correctAnswer": "Password and hardware security key",
+      "explanation": "A password is knowledge; a hardware key is possession.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-016",
+      "track": "cloud-computing",
+      "topic": "Reliability",
+      "text": "Which approach helps a service remain available when one availability zone fails?",
+      "options": [
+        "Use one instance with no backup",
+        "Deploy redundant instances across zones",
+        "Store all instances in one zone",
+        "Disable health checks"
+      ],
+      "correctAnswer": "Deploy redundant instances across zones",
+      "explanation": "Zone redundancy reduces dependence on one failure domain.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-017",
+      "track": "commerce",
+      "topic": "Distribution",
+      "text": "Which business typically sells bulk quantities to retailers?",
+      "options": [
+        "Wholesaler",
+        "Final consumer",
+        "Central bank",
+        "Household"
+      ],
+      "correctAnswer": "Wholesaler",
+      "explanation": "A wholesaler supplies retailers in bulk.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-018",
+      "track": "accounting",
+      "topic": "Depreciation",
+      "text": "An asset costs 9,000, has residual value 1,000 and useful life 4 years. What is annual straight-line depreciation?",
+      "options": [
+        "2,250",
+        "2,500",
+        "8,000",
+        "2,000"
+      ],
+      "correctAnswer": "2,000",
+      "explanation": "(9,000−1,000)/4=2,000.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-019",
+      "track": "business-studies",
+      "topic": "Break-even",
+      "text": "Fixed costs are 600, selling price is 15 and variable cost is 9 per unit. How many units break even?",
+      "options": [
+        "67",
+        "150",
+        "100",
+        "40"
+      ],
+      "correctAnswer": "100",
+      "explanation": "Contribution per unit is 6; 600/6=100.",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-020",
+      "track": "economics",
+      "topic": "Elasticity",
+      "text": "Quantity demanded falls by 10% when price rises by 5%. What is the absolute price elasticity of demand?",
+      "options": [
+        "10",
+        "2",
+        "0.5",
+        "5"
+      ],
+      "correctAnswer": "2",
+      "explanation": "Absolute percentage quantity change divided by percentage price change = 10/5.",
+      "type": "mcq",
+      "difficulty": 3,
+      "markets": [
+        "PK",
+        "GB",
+        "DE"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-021",
+      "track": "arabic",
+      "topic": "Vocabulary",
+      "text": "ما جمع كلمة «قلم»؟",
+      "options": [
+        "أقلام",
+        "قلمان",
+        "قلم",
+        "قلمة"
+      ],
+      "correctAnswer": "أقلام",
+      "explanation": "أقلام جمع كلمة قلم.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK"
+      ],
+      "language": "ar",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-022",
+      "track": "urdu",
+      "topic": "Grammar",
+      "text": "جملے «بچے کھیل رہے ہیں» میں فعل کون سا ہے؟",
+      "options": [
+        "بچے",
+        "بچے کھیل",
+        "بچے ہیں",
+        "کھیل رہے ہیں"
+      ],
+      "correctAnswer": "کھیل رہے ہیں",
+      "explanation": "کھیل رہے ہیں عمل کو ظاہر کرتا ہے۔",
+      "type": "mcq",
+      "difficulty": 2,
+      "markets": [
+        "PK"
+      ],
+      "language": "ur",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-023",
+      "track": "turkish",
+      "topic": "Grammar",
+      "text": "‘Evler’ kelimesindeki çoğul eki hangisidir?",
+      "options": [
+        "-den",
+        "-im",
+        "-ler",
+        "-de"
+      ],
+      "correctAnswer": "-ler",
+      "explanation": "-ler çoğul ekidir.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK"
+      ],
+      "language": "tr",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    },
+    {
+      "id": "three-market-20261125-2201-024",
+      "track": "welsh",
+      "topic": "Vocabulary",
+      "text": "What does ‘bore da’ mean in Welsh?",
+      "options": [
+        "Goodbye",
+        "Good morning",
+        "Good night",
+        "Thank you"
+      ],
+      "correctAnswer": "Good morning",
+      "explanation": "Bore da is a morning greeting.",
+      "type": "mcq",
+      "difficulty": 1,
+      "markets": [
+        "PK",
+        "GB"
+      ],
+      "language": "en",
+      "status": "draft",
+      "boards": [],
+      "curriculumOutcome": null
+    }
+  ]
+}
