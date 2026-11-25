@@ -10,7 +10,7 @@ describe("language laboratory interaction",()=>{
     const tracks=screen.getByRole("group",{name:"Study language"});
     expect(within(tracks).getAllByRole("button")).toHaveLength(5);
     fireEvent.click(within(tracks).getByRole("button",{name:/Urdu/}));
-    expect(screen.getByRole("button",{name:"Listen",exact:true})).toBeDisabled();
+    expect(screen.getByRole("button",{name:/^Listen$/})).toBeDisabled();
     expect(screen.getByText(/No matching on-device voice/)).toBeVisible();
     fireEvent.click(screen.getByRole("button",{name:"Show transcript"}));
     const phrase=screen.getByText("کتب خانہ کہاں ہے؟");
