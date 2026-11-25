@@ -429,6 +429,13 @@ const fr = {
     },
   },
   mastery: {
+    unavailable: "Maîtrise indisponible",
+    unavailableDesc: "Votre progression enregistrée reste inchangée. Réessayez pour vérifier le programme et les résultats.",
+    chooseCurriculum: "Choisissez votre programme",
+    chooseCurriculumDesc: "Sélectionnez un programme actuel dans les paramètres avant de consulter votre maîtrise.",
+    focusTopic: "Thème ciblé : {{topic}}",
+    removeTopic: "Pratiquer toute la matière",
+    sampleNotice: "Les thèmes prioritaires utilisent un échantillon limité. D’autres questions correspondantes peuvent exister.",
     eyebrow: "Apprentissage adaptatif",
     title: "Carte de maîtrise",
     subtitle: "Votre carte d’apprentissage persistante par thème pour {{curriculum}}. STEMCoach et l’Équipe STEM l’utilisent pour choisir votre prochaine révision.",

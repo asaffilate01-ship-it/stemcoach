@@ -429,6 +429,13 @@ const en = {
     },
   },
   mastery: {
+    unavailable: "Mastery data unavailable",
+    unavailableDesc: "Your saved progress has not changed. Retry to verify your curriculum and mastery records.",
+    chooseCurriculum: "Choose your curriculum",
+    chooseCurriculumDesc: "Select a current launch curriculum in settings before loading your mastery map.",
+    focusTopic: "Focus topic: {{topic}}",
+    removeTopic: "Practise the whole subject instead",
+    sampleNotice: "Priority topics use a bounded practice sample. Other matching questions may exist in the bank.",
     eyebrow: "Adaptive learning",
     title: "Mastery Map",
     subtitle: "Your persistent topic-level learning map for {{curriculum}}. STEMCoach and the STEM Team use it to choose what you should practise next.",
