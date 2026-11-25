@@ -5,17 +5,17 @@ const entries=LAB_CATALOGUE.map(item=>({...item,title:item.id,subjectLabel:item.
 
 describe("lab catalogue discovery",()=>{
   it("retains every existing simulation with a unique known id",()=>{
-    expect(LAB_CATALOGUE).toHaveLength(14);
-    expect(new Set(LAB_CATALOGUE.map(lab=>lab.id)).size).toBe(14);
+    expect(LAB_CATALOGUE).toHaveLength(16);
+    expect(new Set(LAB_CATALOGUE.map(lab=>lab.id)).size).toBe(16);
     for(const lab of LAB_CATALOGUE)expect(parseLabSelection(lab.id)).toBe(lab.id);
     for(const value of [null,undefined,"",42,"CIRCUIT","../../admin","https://example.com","__proto__"])expect(parseLabSelection(value)).toBe("circuit");
   });
-  it("filters all fourteen entries by stable subject groups",()=>{
-    expect(filterLabCatalogue(entries,"all","")).toHaveLength(14);
+  it("filters all sixteen entries by stable subject groups",()=>{
+    expect(filterLabCatalogue(entries,"all","")).toHaveLength(16);
     expect(filterLabCatalogue(entries,"science","").map(x=>x.id)).toEqual(["circuit","motion","dilution","inheritance"]);
     expect(filterLabCatalogue(entries,"maths","").map(x=>x.id)).toEqual(["quadratic","statistics"]);
     expect(filterLabCatalogue(entries,"technology","")).toHaveLength(5);
-    expect(filterLabCatalogue(entries,"business","")).toHaveLength(3);
+    expect(filterLabCatalogue(entries,"business","")).toHaveLength(5);
   });
   it("matches case-insensitive topic words and German diacritics",()=>{
     expect(filterLabCatalogue(entries,"technology","AI confusion").map(x=>x.id)).toEqual(["classifier"]);
