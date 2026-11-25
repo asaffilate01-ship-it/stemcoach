@@ -7,7 +7,7 @@ describe("responsive laboratory catalogue",()=>{
   it("filters by subject, retains the active experiment, and restores all models",()=>{
     render(<VirtualLabWorkspace/>);
     const catalogue=screen.getByRole("group",{name:"Find a laboratory"});
-    expect(within(catalogue).getAllByRole("button")).toHaveLength(16);
+    expect(within(catalogue).getAllByRole("button")).toHaveLength(19);
     fireEvent.change(screen.getByRole("combobox",{name:"Subject group"}),{target:{value:"business"}});
     expect(within(catalogue).getAllByRole("button")).toHaveLength(5);
     expect(screen.getByText(/selected laboratory is outside your current filters/i)).toBeVisible();
@@ -19,7 +19,7 @@ describe("responsive laboratory catalogue",()=>{
     expect(screen.getByText(/No matching laboratories/)).toBeVisible();
     expect(screen.getByRole("slider",{name:"Sales collected immediately"})).toHaveValue("0");
     fireEvent.click(screen.getByRole("button",{name:"Clear filters"}));
-    expect(within(catalogue).getAllByRole("button")).toHaveLength(16);
+    expect(within(catalogue).getAllByRole("button")).toHaveLength(19);
     expect(screen.getByRole("slider",{name:"Sales collected immediately"})).toHaveValue("0");
   });
   it("requests a validated deep-link selection and responds to external navigation",()=>{
