@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Control, Metric, ModelFrame } from "./LabPrimitives";
-import { AppliedLabPanel, appliedLabLabels } from "./AppliedLabPanel";
+import { AppliedLabPanel } from "./AppliedLabPanel";
+import { appliedLabLabels } from "./appliedLabLabels";
 import { Button } from "@/components/ui/button";
 import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { getMascot } from "@/lib/mascots";

@@ -2,10 +2,8 @@ import { useState } from "react";
 import { Control, Metric, ModelFrame } from "./LabPrimitives";
 import { statisticsModel, classifierModel, breakEvenModel } from "@/lib/appliedLabs";
 
-export const appliedLabLabels = {
-  en: { statistics:"Statistics and outliers", classifier:"AI classification thresholds", breakEven:"Business break-even", "business-studies":"Business" },
-  de: { statistics:"Statistik und Ausreißer", classifier:"KI-Klassifikationsschwellen", breakEven:"Gewinnschwelle", "business-studies":"Wirtschaft" },
-};
+import { appliedLabLabels } from "./appliedLabLabels";
+
 const copy = {
   en: {
     reset:"Reset model",inputs:"Model controls",results:"Calculated results",experiment:"Predict, explore, explain",
