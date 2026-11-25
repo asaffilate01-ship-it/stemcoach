@@ -73,7 +73,6 @@ export default function TeacherDashboard() {
   const linksQuery = useQuery({
     queryKey: ["teacher-institution-class-links", user?.id],
     enabled: Boolean(user),
-    enabled: Boolean(user),
     queryFn: async (): Promise<Array<{ class_id: string; tenant_id: string }>> => {
       const { data, error } = await (supabase as any).rpc("get_my_institution_class_links");
       if (error || !Array.isArray(data)) throw error || new Error("Institution links unavailable");
