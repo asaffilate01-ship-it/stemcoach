@@ -9,7 +9,7 @@ export interface LaunchPracticeFilters {
 }
 
 export function validPracticeTopic(value:unknown):value is string {
-  return typeof value==="string"&&value.length>0&&value.length<=160&&value.trim()===value&&!/[\u0000-\u001f\u007f]/u.test(value);
+  return typeof value==="string"&&value.length>0&&value.length<=160&&value.trim()===value&&![...value].some(character=>character.charCodeAt(0)<32||character.charCodeAt(0)===127);
 }
 
 export function readPracticeFilters(params: URLSearchParams): LaunchPracticeFilters | null {
