@@ -28,10 +28,10 @@ describe("humanities laboratory interactions",()=>{
     expect(screen.getByRole("status")).toHaveTextContent("No pooled reversal");
     expect(screen.getByText("Pooled B minus A").nextElementSibling).toHaveTextContent("10 pp");
   });
-  it("finds the three new labs in the humanities group and preserves a German locale switch",()=>{
+  it("finds the humanities labs in the humanities group and preserves a German locale switch",()=>{
     const {rerender}=render(<VirtualLabWorkspace/>);
     fireEvent.change(screen.getByRole("combobox",{name:"Subject group"}),{target:{value:"humanities"}});
-    expect(within(screen.getByRole("group",{name:"Find a laboratory"})).getAllByRole("button")).toHaveLength(3);
+    expect(within(screen.getByRole("group",{name:"Find a laboratory"})).getAllByRole("button")).toHaveLength(4);
     fireEvent.click(screen.getByRole("button",{name:/Population change/}));
     fireEvent.change(screen.getByRole("slider",{name:"Departures"}),{target:{value:"1000"}});
     rerender(<VirtualLabWorkspace language="de"/>);

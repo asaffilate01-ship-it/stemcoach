@@ -19,6 +19,9 @@ export const LAB_CATALOGUE = [
   {id:"mapScale",subject:"geography",group:"humanities",keywords:"map scale distance area cartography kartenmaßstab fläche"},
   {id:"population",subject:"geography",group:"humanities",keywords:"population change demography births deaths migration bevölkerung wanderung"},
   {id:"confounding",subject:"psychology",group:"humanities",keywords:"psychology research methods confounding sampling simpson paradox stratification störvariable konfundierung"},
+  {id:"buoyancy",subject:"physics",group:"science",keywords:"density buoyancy displacement flotation archimedes dichte auftrieb"},
+  {id:"thermalEnergy",subject:"physics",group:"science",keywords:"thermal energy specific heat capacity temperature wärmeenergie temperatur"},
+  {id:"closeReading",subject:"english-literature",group:"humanities",keywords:"english literature close reading evidence metaphor simile analysis textanalyse literatur"},
 ] as const;
 
 export type LabId=typeof LAB_CATALOGUE[number]["id"];
