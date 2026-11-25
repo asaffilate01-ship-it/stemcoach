@@ -9,15 +9,17 @@ import { technologyLabLabels } from "./technologyLabLabels";
 import { FinanceLabPanel } from "./FinanceLabPanel";
 import { AdvancedFinanceLabPanel } from "./AdvancedFinanceLabPanel";
 import { HumanitiesLabPanel } from "./HumanitiesLabPanel";
+import { ScienceLiteratureLabPanel } from "./ScienceLiteratureLabPanel";
+import { scienceLabLabels } from "./scienceLabLabels";
 import { humanitiesLabLabels } from "./humanitiesLabLabels";
 import { financeLabLabels } from "./financeLabLabels";
 import { Button } from "@/components/ui/button";
 import { MascotAvatar } from "@/components/ui/mascot-avatar";
 import { getMascot } from "@/lib/mascots";
 import { circuitModel, motionModel, dilutionModel, quadraticModel, inheritanceModel, binarySearchModel, BINARY_SEARCH_VALUES, type Genotype } from "@/lib/virtualLabs";
-import { Zap, Gauge, FlaskConical, ChartNoAxesCombined, Dna, Code2, ChevronLeft, ChevronRight, Brain, ChartBar, Calculator, Network, Cloud, ShieldCheck, Wallet, TrendingUp, BookOpen, ChartLine, Map, Users, BrainCircuit } from "lucide-react";
+import { Zap, Gauge, FlaskConical, ChartNoAxesCombined, Dna, Code2, ChevronLeft, ChevronRight, Brain, ChartBar, Calculator, Network, Cloud, ShieldCheck, Wallet, TrendingUp, BookOpen, ChartLine, Map, Users, BrainCircuit, Waves, Thermometer, BookText } from "lucide-react";
 
-const labIcons = {circuit:Zap,motion:Gauge,dilution:FlaskConical,quadratic:ChartNoAxesCombined,inheritance:Dna,binarySearch:Code2,statistics:ChartBar,classifier:Brain,breakEven:Calculator,subnet:Network,cloudCapacity:Cloud,policy:ShieldCheck,cashAccrual:Wallet,marketEquilibrium:TrendingUp,bookkeeping:BookOpen,elasticity:ChartLine,mapScale:Map,population:Users,confounding:BrainCircuit};
+const labIcons = {circuit:Zap,motion:Gauge,dilution:FlaskConical,quadratic:ChartNoAxesCombined,inheritance:Dna,binarySearch:Code2,statistics:ChartBar,classifier:Brain,breakEven:Calculator,subnet:Network,cloudCapacity:Cloud,policy:ShieldCheck,cashAccrual:Wallet,marketEquilibrium:TrendingUp,bookkeeping:BookOpen,elasticity:ChartLine,mapScale:Map,population:Users,confounding:BrainCircuit,buoyancy:Waves,thermalEnergy:Thermometer,closeReading:BookText};
 const labels = {
   en: {
     "quadratic": "Quadratic graph explorer",
@@ -207,7 +209,7 @@ function BinarySearch({c,locale}:{c:Copy;locale:string}) {
   </>} tip={c.binaryTip} limit={c.binaryLimit}/>;
 }
 export function VirtualLabWorkspace({ language="en",selectedLab,onSelectLab }: { language?: "en"|"de"; selectedLab?:LabId; onSelectLab?:(id:LabId)=>void }) {
-  const c={...labels[language],...appliedLabLabels[language],...technologyLabLabels[language],...financeLabLabels[language],...humanitiesLabLabels[language]},locale=language==="de"?"de-DE":"en-GB";
+  const c={...labels[language],...appliedLabLabels[language],...technologyLabLabels[language],...financeLabLabels[language],...humanitiesLabLabels[language],...scienceLabLabels[language]},locale=language==="de"?"de-DE":"en-GB";
   const [localLab,setLocalLab]=useState<LabId>("circuit");
   const lab=parseLabSelection(selectedLab??localLab);
   const setLab=(id:LabId)=>{setLocalLab(id);onSelectLab?.(id);};
@@ -223,7 +225,7 @@ export function VirtualLabWorkspace({ language="en",selectedLab,onSelectLab }: {
     <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,290px)_minmax(0,1fr)]">
       <LabCatalogue entries={labs} selected={lab} onSelect={setLab} onJump={jumpToExperiment} language={language}/>
       <div ref={experimentRef} tabIndex={-1} role="region" aria-label={active.title} className="min-w-0 scroll-mt-24 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
-    {lab==="circuit"?<Circuit c={c} locale={locale}/>:lab==="motion"?<Motion c={c} locale={locale}/>:lab==="dilution"?<Dilution c={c} locale={locale}/>:lab==="quadratic"?<Quadratic c={c} locale={locale}/>:lab==="inheritance"?<Inheritance c={c} locale={locale}/>:lab==="binarySearch"?<BinarySearch c={c} locale={locale}/> :lab==="subnet"||lab==="cloudCapacity"||lab==="policy"?<TechnologyLabPanel lab={lab} language={language}/> :lab==="cashAccrual"||lab==="marketEquilibrium"?<FinanceLabPanel lab={lab} language={language}/> :lab==="bookkeeping"||lab==="elasticity"?<AdvancedFinanceLabPanel lab={lab} language={language}/> :lab==="mapScale"||lab==="population"||lab==="confounding"?<HumanitiesLabPanel lab={lab} language={language}/>:<AppliedLabPanel lab={lab} language={language}/>}
+    {lab==="circuit"?<Circuit c={c} locale={locale}/>:lab==="motion"?<Motion c={c} locale={locale}/>:lab==="dilution"?<Dilution c={c} locale={locale}/>:lab==="quadratic"?<Quadratic c={c} locale={locale}/>:lab==="inheritance"?<Inheritance c={c} locale={locale}/>:lab==="binarySearch"?<BinarySearch c={c} locale={locale}/> :lab==="subnet"||lab==="cloudCapacity"||lab==="policy"?<TechnologyLabPanel lab={lab} language={language}/> :lab==="cashAccrual"||lab==="marketEquilibrium"?<FinanceLabPanel lab={lab} language={language}/> :lab==="bookkeeping"||lab==="elasticity"?<AdvancedFinanceLabPanel lab={lab} language={language}/> :lab==="mapScale"||lab==="population"||lab==="confounding"?<HumanitiesLabPanel lab={lab} language={language}/> :lab==="buoyancy"||lab==="thermalEnergy"||lab==="closeReading"?<ScienceLiteratureLabPanel lab={lab} language={language}/>:<AppliedLabPanel lab={lab} language={language}/>}
       </div>
     </div>
     <footer className="mt-4 space-y-1 text-xs text-muted-foreground"><p>{c.local}</p><p>{c.modeNotice}</p></footer>
