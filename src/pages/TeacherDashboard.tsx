@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { assignmentReport, teacherReportStatus } from "@/lib/teacherReporting";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { BarChart3, BookOpen, Calendar, CheckCircle2, ClipboardList, Copy, ListChecks, Plus, Route, Send, Users, X } from "lucide-react";
@@ -18,7 +19,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function TeacherDashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const de=(i18n.resolvedLanguage||i18n.language||"en").startsWith("de");
+  const reportCopy=de?{loading:"Berichte werden überprüft…",error:"Berichte konnten nicht bestätigt werden.",retry:"Erneut versuchen",note:"Auswertung der zurückgegebenen Datensätze; serverseitige Begrenzungen sind möglich. Fehlende Ergebnisse sind keine Nullwerte.",unknown:"—",invalid:"Einige abgeschlossene Bewertungen sind ungültig und wurden nicht in den Mittelwert aufgenommen."}:{loading:"Verifying classroom reports…",error:"Classroom reports could not be verified.",retry:"Try again",note:"Reports describe returned records and may be limited by the server. Missing results do not count as zero scores.",unknown:"—",invalid:"Some completed scores are invalid and excluded from the average."};
+  const actionLock=useRef(false);
   useDocumentTitle(t("teacherDashboard.documentTitle"));
   const { user } = useAuth();
   const { toast } = useToast();
@@ -42,41 +46,45 @@ export default function TeacherDashboard() {
   const [pathDueDate, setPathDueDate] = useState("");
   const [selectedTutorialIds, setSelectedTutorialIds] = useState<string[]>([]);
 
-  const { data: classes = [], isLoading } = useQuery({
+  const classesQuery = useQuery({
     queryKey: ["teacher-classes", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from("classes").select("*").eq("teacher_id", user!.id);
-      if (error) throw error;
+      if (error || !Array.isArray(data)) throw error || new Error("Report unavailable");
       return data;
     },
     enabled: Boolean(user),
   });
+  const {data:classes=[]}= classesQuery;
 
   // Class/institution associations are explicit; personal classes remain private.
-  const { data: teacherInstitutions = [] } = useQuery({
+  const institutionsQuery = useQuery({
     queryKey: ["teacher-institutions", user?.id],
     enabled: Boolean(user),
     queryFn: async () => {
       const { data, error } = await supabase.from("tenant_members")
         .select("tenant_id, tenants(name)")
         .eq("user_id", user!.id).eq("role", "teacher").eq("status", "approved");
-      if (error) throw error;
-      return (data || []) as Array<{ tenant_id: string; tenants: { name: string } | null }>;
+      if (error || !Array.isArray(data)) throw error || new Error("Institution report unavailable");
+      return data as Array<{ tenant_id: string; tenants: { name: string } | null }>;
     },
   });
-  const { data: institutionClassLinks = [] } = useQuery({
+  const {data:teacherInstitutions=[]}= institutionsQuery;
+  const linksQuery = useQuery({
     queryKey: ["teacher-institution-class-links", user?.id],
+    enabled: Boolean(user),
     enabled: Boolean(user),
     queryFn: async (): Promise<Array<{ class_id: string; tenant_id: string }>> => {
       const { data, error } = await (supabase as any).rpc("get_my_institution_class_links");
-      if (error) throw error;
-      return data || [];
+      if (error || !Array.isArray(data)) throw error || new Error("Institution links unavailable");
+      return data;
     },
   });
-  const activeInstitutionId = selectedInstitutionId || teacherInstitutions[0]?.tenant_id || "";
+  const {data:institutionClassLinks=[]}= linksQuery;
+  const activeInstitutionId = teacherInstitutions.some(i=>i.tenant_id===selectedInstitutionId)?selectedInstitutionId:teacherInstitutions[0]?.tenant_id||"";
   const linkInstitutionClass = useMutation({
     mutationFn: async (classId: string) => {
-      if (!activeInstitutionId) throw new Error("Select an institution before linking a class.");
+      if (!activeInstitutionId || !classes.some(row=>row.id===classId&&row.teacher_id===user?.id)) throw new Error("Verify class ownership and institution before linking.");
       const { error } = await (supabase as any).rpc("link_institution_class", {
         _tenant_id: activeInstitutionId,
         _class_id: classId,
@@ -90,64 +98,69 @@ export default function TeacherDashboard() {
     onError: (error: Error) => toast({ title: "Class could not be linked", description: error.message, variant: "destructive" }),
   });
 
-  const { data: assignments = [] } = useQuery({
+  const assignmentsQuery = useQuery({
     queryKey: ["teacher-assignments", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from("assignments").select("*").eq("teacher_id", user!.id).order("created_at", { ascending: false });
-      if (error) throw error;
+      if (error || !Array.isArray(data)) throw error || new Error("Report unavailable");
       return data;
     },
     enabled: Boolean(user),
   });
+  const {data:assignments=[]}= assignmentsQuery;
 
-  const { data: assignmentResults = [] } = useQuery({
+  const resultsQuery = useQuery({
     queryKey: ["teacher-assignment-results", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_teacher_assignment_results");
-      if (error) throw error;
+      if (error || !Array.isArray(data)) throw error || new Error("Report unavailable");
       return data;
     },
     enabled: Boolean(user),
   });
+  const {data:assignmentResults=[]}= resultsQuery;
 
-  const { data: learningPaths = [] } = useQuery({
+  const pathsQuery = useQuery({
     queryKey: ["teacher-learning-paths", user?.id],
     queryFn: async () => {
       const { data, error } = await (supabase as any).from("class_learning_paths").select("*").eq("teacher_id", user!.id).order("created_at", { ascending: false });
-      if (error) throw error;
+      if (error || !Array.isArray(data)) throw error || new Error("Report unavailable");
       return data;
     },
     enabled: Boolean(user),
   });
+  const {data:learningPaths=[]}= pathsQuery;
 
-  const { data: learningPathItems = [] } = useQuery({
-    queryKey: ["teacher-learning-path-items", learningPaths.map((path) => path.id)],
+  const itemsQuery = useQuery({
+    queryKey: ["teacher-learning-path-items", user?.id, learningPaths.map((path) => path.id)],
     queryFn: async () => {
       const { data, error } = await (supabase as any).from("class_learning_path_items").select("*").in("path_id", learningPaths.map((path) => path.id)).order("position");
-      if (error) throw error;
+      if (error || !Array.isArray(data)) throw error || new Error("Report unavailable");
       return data;
     },
-    enabled: learningPaths.length > 0,
+    enabled: Boolean(user) && learningPaths.length > 0,
   });
+  const {data:learningPathItems=[]}= itemsQuery;
 
-  const { data: learningPathProgress = [] } = useQuery({
+  const progressQuery = useQuery({
     queryKey: ["teacher-learning-path-progress", user?.id],
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("get_teacher_learning_path_progress");
-      if (error) throw error;
+      if (error || !Array.isArray(data)) throw error || new Error("Report unavailable");
       return data;
     },
     enabled: Boolean(user),
   });
+  const {data:learningPathProgress=[]}= progressQuery;
 
   const createClass = useMutation({
     mutationFn: async () => {
-      if (!isLaunchCurriculum(newClassCurriculum) || !isLaunchSubject(newClassSubject)) throw new Error("Choose a subject and curriculum from the launch catalogue.");
+      if (!user || !newClassName.trim() || !isLaunchCurriculum(newClassCurriculum) || !isLaunchSubject(newClassSubject)) throw new Error("Choose a subject and curriculum from the launch catalogue.");
       const { error } = await supabase.from("classes").insert({ teacher_id: user!.id, name: newClassName.trim(), subject: newClassSubject, curriculum: newClassCurriculum });
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["teacher-classes"] });
+      void queryClient.invalidateQueries({ queryKey: ["teacher-classes", user?.id] });
       setShowCreate(false);
       setNewClassName("");
       toast({ title: t("teacherDashboard.classCreated"), description: t("teacherDashboard.classCreatedDescription") });
@@ -157,6 +170,7 @@ export default function TeacherDashboard() {
 
   const createAssignment = useMutation({
     mutationFn: async (classId: string) => {
+      if(!classes.some(row=>row.id===classId&&row.teacher_id===user?.id)||!assignTitle.trim()||!Number.isInteger(assignCount)||assignCount<1||assignCount>50)throw Error("Verify class and assignment settings.");
       const { error } = await supabase.rpc("create_quiz_assignment", {
         _class_id: classId,
         _title: assignTitle.trim(),
@@ -170,8 +184,8 @@ export default function TeacherDashboard() {
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["teacher-assignments"] });
-      void queryClient.invalidateQueries({ queryKey: ["teacher-assignment-results"] });
+      void queryClient.invalidateQueries({ queryKey: ["teacher-assignments", user?.id] });
+      void queryClient.invalidateQueries({ queryKey: ["teacher-assignment-results", user?.id] });
       setShowAssign(null);
       setAssignTitle("");
       setAssignDesc("");
@@ -191,6 +205,8 @@ export default function TeacherDashboard() {
 
   const createLearningPath = useMutation({
     mutationFn: async (classId: string) => {
+      const classroom=classes.find(row=>row.id===classId&&row.teacher_id===user?.id);
+      if(!classroom||!pathTitle.trim()||!selectedTutorialIds.length||selectedTutorialIds.length>12||selectedTutorialIds.some(id=>!tutorials.some(t=>t.id===id&&t.subject===classroom.subject)))throw Error("Verify class and tutorial selection.");
       const { error } = await (supabase as any).rpc("create_class_learning_path", {
         _class_id: classId,
         _title: pathTitle.trim(),
@@ -201,8 +217,8 @@ export default function TeacherDashboard() {
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["teacher-learning-paths"] });
-      void queryClient.invalidateQueries({ queryKey: ["teacher-learning-path-progress"] });
+      void queryClient.invalidateQueries({ queryKey: ["teacher-learning-paths", user?.id] });
+      void queryClient.invalidateQueries({ queryKey: ["teacher-learning-path-progress", user?.id] });
       setShowLearningPath(null);
       setPathTitle("");
       setPathDescription("");
@@ -241,16 +257,28 @@ export default function TeacherDashboard() {
       : current.length < 12 ? [...current, tutorialId] : current);
   };
 
+  const requiredReads=[classesQuery,institutionsQuery,linksQuery,assignmentsQuery,resultsQuery,pathsQuery,progressQuery,...(learningPaths.length?[itemsQuery]:[])];
+  const reportStatus=teacherReportStatus(requiredReads);
+  const busy=createClass.isPending||createAssignment.isPending||createLearningPath.isPending||linkInstitutionClass.isPending;
+  const runWrite=async(write:()=>Promise<unknown>)=>{
+    if(actionLock.current||busy||reportStatus!=="ready"||!user)return;
+    actionLock.current=true;
+    try{await write();}catch{/* Existing mutation handlers display failure. */}finally{actionLock.current=false;}
+  };
+  if(reportStatus!=="ready"){
+    return <div className="min-h-screen bg-background"><AppHeader/><main id="main-content" className="container mx-auto max-w-4xl px-4 py-10"><section role={reportStatus==="error"?"alert":"status"} className="rounded-2xl border bg-card p-6"><h1 className="text-xl font-semibold">{t("teacherDashboard.title")}</h1><p className="mt-2 text-sm text-muted-foreground">{reportStatus==="error"?reportCopy.error:reportCopy.loading}</p>{reportStatus==="error"&&<Button className="mt-4 min-h-11" onClick={()=>{void Promise.all(requiredReads.map(read=>read.refetch()));}}>{reportCopy.retry}</Button>}</section></main></div>;
+  }
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
       <PageTransition>
-        <main className="container mx-auto px-4 py-8">
+        <main id="main-content" className="container mx-auto px-4 py-8 pb-28">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div><div className="stem-label mb-2">{t("teacherDashboard.label")}</div><h1 className="stem-heading text-3xl">{t("teacherDashboard.title")}</h1><p className="mt-2 max-w-2xl text-sm text-muted-foreground">{t("teacherDashboard.description")}</p></div>
             <Button onClick={() => setShowCreate((current) => !current)} className="gap-2 rounded-xl"><Plus className="h-4 w-4" /> {t("teacherDashboard.createClass")}</Button>
           </div>
 
+          <p className="mb-4 rounded-xl border bg-card p-3 text-xs text-muted-foreground">{reportCopy.note}</p>
           {teacherInstitutions.length > 0 && (
             <section className="stem-card mb-6 rounded-xl p-5">
               <h2 className="mb-2 flex items-center gap-2 text-base font-semibold"><BarChart3 className="h-4 w-4 text-primary" /> Share classes with your institution</h2>
@@ -270,11 +298,11 @@ export default function TeacherDashboard() {
                 <div><Label className="text-sm">{t("mockExam.subject")}</Label><select value={newClassSubject} onChange={(event) => setNewClassSubject(event.target.value)} className="mt-1.5 w-full rounded-xl border bg-background px-3 py-2 text-sm">{subjects.map((item) => <option key={item.id} value={item.id}>{t(`subjects.names.${item.id}`)}</option>)}</select></div>
                 <div><Label className="text-sm">{t("mockExam.curriculum")}</Label><select value={newClassCurriculum} onChange={(event) => setNewClassCurriculum(event.target.value)} className="mt-1.5 w-full rounded-xl border bg-background px-3 py-2 text-sm">{curricula.map((item) => <option key={item.id} value={item.id}>{item.country} {item.label}</option>)}</select></div>
               </div>
-              <div className="mt-4 flex gap-2"><Button onClick={() => createClass.mutate()} disabled={!newClassName.trim() || createClass.isPending} className="rounded-xl">{t("teacherDashboard.create")}</Button><Button variant="outline" onClick={() => setShowCreate(false)} className="rounded-xl">{t("common.cancel")}</Button></div>
+              <div className="mt-4 flex gap-2"><Button onClick={()=>void runWrite(()=>createClass.mutateAsync())} disabled={!newClassName.trim() || busy} className="rounded-xl">{t("teacherDashboard.create")}</Button><Button variant="outline" onClick={() => setShowCreate(false)} className="rounded-xl">{t("common.cancel")}</Button></div>
             </motion.div>
           )}
 
-          {isLoading ? <div className="text-center text-muted-foreground">{t("common.loading")}</div> : classes.length === 0 ? (
+          {classes.length === 0 ? (
             <div className="stem-card rounded-xl p-8 text-center"><Users className="mx-auto mb-4 h-10 w-10 text-muted-foreground" /><h2 className="mb-2 font-semibold">{t("teacherDashboard.noClasses")}</h2><p className="text-sm text-muted-foreground">{t("teacherDashboard.noClassesDescription")}</p></div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -295,7 +323,7 @@ export default function TeacherDashboard() {
                         {institutionClassLinks.some((linked) => linked.class_id === classroom.id) ? (
                           <p className="flex items-center gap-1.5 text-xs font-semibold text-success"><CheckCircle2 className="h-4 w-4" /> Linked to institution report</p>
                         ) : (
-                          <Button variant="outline" size="sm" className="w-full gap-2 text-xs" disabled={!activeInstitutionId || linkInstitutionClass.isPending} onClick={() => linkInstitutionClass.mutate(classroom.id)}>
+                          <Button variant="outline" size="sm" className="w-full gap-2 text-xs" disabled={!activeInstitutionId || busy} onClick={()=>void runWrite(()=>linkInstitutionClass.mutateAsync(classroom.id))}>
                             <BarChart3 className="h-4 w-4" /> Link to institution report
                           </Button>
                         )}
@@ -314,7 +342,7 @@ export default function TeacherDashboard() {
                             <div><Label className="text-xs">{t("teacherDashboard.difficultyMax")}</Label><select value={assignDifficultyMax} onChange={(event) => { const value = Number(event.target.value); setAssignDifficultyMax(value); if (value < assignDifficultyMin) setAssignDifficultyMin(value); }} className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm">{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>{level}</option>)}</select></div>
                           </div>
                           <div><Label className="text-xs">{t("teacherDashboard.dueDateOptional")}</Label><Input type="datetime-local" value={assignDueDate} onChange={(event) => setAssignDueDate(event.target.value)} className="mt-1 rounded-xl" /></div>
-                          <Button onClick={() => createAssignment.mutate(classroom.id)} disabled={!assignTitle.trim() || createAssignment.isPending} size="sm" className="gap-1.5 rounded-xl"><Send className="h-3.5 w-3.5" /> {t("teacherDashboard.assign")}</Button>
+                          <Button onClick={()=>void runWrite(()=>createAssignment.mutateAsync(classroom.id))} disabled={!assignTitle.trim() || busy} size="sm" className="gap-1.5 rounded-xl"><Send className="h-3.5 w-3.5" /> {t("teacherDashboard.assign")}</Button>
                         </div>
                       </motion.div>
                     )}
@@ -329,7 +357,7 @@ export default function TeacherDashboard() {
                           <fieldset><legend className="mb-2 text-xs font-medium">{t("learningPaths.chooseTutorials", { count: selectedTutorialIds.length })}</legend><div className="max-h-64 space-y-2 overflow-y-auto pr-1">
                             {availableTutorials.map((tutorial) => { const selected = selectedTutorialIds.includes(tutorial.id); return <button key={tutorial.id} type="button" aria-pressed={selected} onClick={() => toggleTutorial(tutorial.id)} className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${selected ? "border-primary bg-primary/5" : "border-border/50 hover:bg-muted/50"}`}><span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>{selected && <CheckCircle2 className="h-3.5 w-3.5" />}</span><span><span className="block text-xs font-semibold">{tutorial.title}</span><span className="mt-0.5 block text-[10px] text-muted-foreground">{t(`tutorials.levels.${tutorial.level.toLowerCase()}`)} · {t("tutorials.minutes", { count: tutorial.minutes })}</span></span></button>; })}
                           </div></fieldset>
-                          <Button onClick={() => createLearningPath.mutate(classroom.id)} disabled={!pathTitle.trim() || selectedTutorialIds.length === 0 || createLearningPath.isPending} size="sm" className="gap-1.5 rounded-xl"><Send className="h-3.5 w-3.5" /> {t("learningPaths.assign")}</Button>
+                          <Button onClick={()=>void runWrite(()=>createLearningPath.mutateAsync(classroom.id))} disabled={!pathTitle.trim() || selectedTutorialIds.length === 0 || busy} size="sm" className="gap-1.5 rounded-xl"><Send className="h-3.5 w-3.5" /> {t("learningPaths.assign")}</Button>
                         </div>
                       </motion.div>
                     )}
@@ -346,9 +374,9 @@ export default function TeacherDashboard() {
                 const pathItems = learningPathItems.filter((item) => item.path_id === path.id);
                 const learnerRows = learningPathProgress.filter((row) => row.path_id === path.id);
                 const completedLearners = learnerRows.filter((row) => row.path_completed).length;
-                const completionPercent = learnerRows.length ? Math.round((completedLearners / learnerRows.length) * 100) : 0;
+                const completionPercent = learnerRows.length ? Math.round((completedLearners / learnerRows.length) * 100) : null;
                 const classroom = classById.get(path.class_id);
-                return <article key={path.id} className="stem-card rounded-xl p-5"><div className="flex items-start justify-between gap-4"><div><h3 className="font-semibold">{path.title}</h3><p className="mt-1 text-xs text-muted-foreground">{classroom?.name} · {t("learningPaths.tutorialCount", { count: pathItems.length })}</p></div>{path.due_date && <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{new Date(path.due_date).toLocaleDateString()}</span>}</div><div className="mt-4"><div className="mb-1.5 flex items-center justify-between text-xs"><span>{t("learningPaths.learnersComplete", { completed: completedLearners, total: learnerRows.length })}</span><span className="font-semibold text-primary">{completionPercent}%</span></div><Progress value={completionPercent} className="h-2" /></div><div className="mt-4 space-y-2">{learnerRows.length === 0 ? <p className="text-xs text-muted-foreground">{t("learningPaths.noLearners")}</p> : learnerRows.map((row) => <div key={row.student_id} className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-xs"><span className="font-medium">{row.student_name}</span><span className={row.path_completed ? "font-semibold text-success" : "text-muted-foreground"}>{row.completed_count}/{row.tutorial_count}</span></div>)}</div>{pathItems.length > 0 && <p className="mt-3 text-[10px] leading-4 text-muted-foreground">{pathItems.map((item) => tutorialById.get(item.tutorial_id)?.title || item.tutorial_id).join(" → ")}</p>}</article>;
+                return <article key={path.id} className="stem-card rounded-xl p-5"><div className="flex items-start justify-between gap-4"><div><h3 className="font-semibold">{path.title}</h3><p className="mt-1 text-xs text-muted-foreground">{classroom?.name} · {t("learningPaths.tutorialCount", { count: pathItems.length })}</p></div>{path.due_date && <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{new Date(path.due_date).toLocaleDateString()}</span>}</div><div className="mt-4"><div className="mb-1.5 flex items-center justify-between text-xs"><span>{t("learningPaths.learnersComplete", { completed: completedLearners, total: learnerRows.length })}</span><span className="font-semibold text-primary">{completionPercent===null?reportCopy.unknown:completionPercent+"%"}</span></div>{completionPercent!==null&&<Progress value={completionPercent} className="h-2" />}</div><div className="mt-4 space-y-2">{learnerRows.length === 0 ? <p className="text-xs text-muted-foreground">{t("learningPaths.noLearners")}</p> : learnerRows.map((row) => <div key={row.student_id} className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-xs"><span className="font-medium">{row.student_name}</span><span className={row.path_completed ? "font-semibold text-success" : "text-muted-foreground"}>{row.completed_count}/{row.tutorial_count}</span></div>)}</div>{pathItems.length > 0 && <p className="mt-3 text-[10px] leading-4 text-muted-foreground">{pathItems.map((item) => tutorialById.get(item.tutorial_id)?.title || item.tutorial_id).join(" → ")}</p>}</article>;
               })}</div>
             </section>
           )}
@@ -359,14 +387,12 @@ export default function TeacherDashboard() {
               <div className="grid gap-4 lg:grid-cols-2">
                 {assignments.slice(0, 10).map((assignment) => {
                   const results = assignmentResults.filter((result) => result.assignment_id === assignment.id);
-                  const completedCount = results.filter((result) => result.completed_at).length;
-                  const averageScore = completedCount
-                    ? Math.round(results.filter((result) => result.completed_at).reduce((sum, result) => sum + ((result.score / Math.max(1, result.total)) * 100), 0) / completedCount)
-                    : 0;
+                  const report=assignmentReport(results);
+                  const completedCount=report.completed,averageScore=report.average;
                   return (
                     <article key={assignment.id} className="stem-card rounded-xl p-5">
                       <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-semibold">{assignment.title}</h3><p className="mt-1 text-xs text-muted-foreground">{t(`subjects.names.${assignment.subject}`)} · {t("teacherDashboard.questionCount", { count: assignment.question_count })}{assignment.topics.length > 0 && ` · ${assignment.topics.join(", ")}`}</p></div>{assignment.due_date ? <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{new Date(assignment.due_date).toLocaleDateString()}</span> : <span className="flex shrink-0 items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" />{t("teacherDashboard.noDeadline")}</span>}</div>
-                      <div className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-lg bg-muted/40 p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("teacherDashboard.learnersCompleted")}</p><p className="mt-1 text-lg font-bold">{completedCount}/{results.length}</p></div><div className="rounded-lg bg-muted/40 p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("teacherDashboard.averageScore")}</p><p className="mt-1 text-lg font-bold">{averageScore}%</p></div></div>
+                      <div className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-lg bg-muted/40 p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("teacherDashboard.learnersCompleted")}</p><p className="mt-1 text-lg font-bold">{completedCount}/{results.length}</p></div><div className="rounded-lg bg-muted/40 p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("teacherDashboard.averageScore")}</p><p className="mt-1 text-lg font-bold">{averageScore===null?reportCopy.unknown:averageScore+"%"}</p></div></div>{report.invalid>0&&<p className="mt-2 text-xs text-muted-foreground">{reportCopy.invalid}</p>}
                       <div className="mt-3 space-y-2">{results.length === 0 ? <p className="text-xs text-muted-foreground">{t("teacherDashboard.noLearners")}</p> : results.map((result) => <div key={result.student_id} className="flex items-center justify-between rounded-lg border border-border/40 px-3 py-2 text-xs"><span className="font-medium">{result.student_name}</span><span className={result.completed_at ? "font-semibold text-success" : "text-muted-foreground"}>{result.completed_at ? `${result.score}/${result.total}` : t("teacherDashboard.answered", { answered: result.answered_count, total: result.total })}</span></div>)}</div>
                     </article>
                   );

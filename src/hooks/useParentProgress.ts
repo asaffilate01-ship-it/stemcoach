@@ -5,6 +5,8 @@ type Snapshot<T>={key:string;attempt:number;data:T;error:false}|{key:string;atte
 function useScopedRead<T>(key:string|null,read:()=>Promise<T>){
   const [snapshot,setSnapshot]=useState<Snapshot<T>|null>(null);
   const [attempt,setAttempt]=useState(0);
+  const [previousKey,setPreviousKey]=useState(key);
+  if(previousKey!==key){setPreviousKey(key);setSnapshot(null);}
   const retry=useCallback(()=>setAttempt(n=>n+1),[]);
   useEffect(()=>{
     if(!key)return;
