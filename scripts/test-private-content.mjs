@@ -10,10 +10,10 @@ import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
   const items = generateDrafts(10000);
-  assert.equal(items.length, 100925);
+  assert.equal(items.length, 153525);
   const report = validateBatches([{ schemaVersion: 1, items }]);
   assert.equal(report.valid, true, report.errors.slice(0, 4).join("; "));
-  assert.equal(report.stats.variants, 100925);
+  assert.equal(report.stats.variants, 153525);
   assert.equal(report.stats.originals, 0);
   assert.equal(report.approvedCount, 0);
   assert.equal(report.publishedCount, 0);
@@ -54,6 +54,16 @@ test("independent arithmetic checks across every generated question", () => {
       case "cloud-storage-cost": expected = nums[0]*nums[1]; break;
       case "backup-recovery-gap": expected = nums[1]-nums[0]; break;
       case "nominal-output-value": expected = nums[0]*nums[1]; break;
+      case "simultaneous-equations": expected = (nums[0]+nums[1])/2; break;
+      case "kinetic-energy": expected = nums[0]*nums[1]**2/2; break;
+      case "percentage-yield": expected = nums[1]*100/nums[0]; break;
+      case "cardiac-output": expected = nums[0]*nums[1]; break;
+      case "classification-recall": expected = nums[1]*100/nums[0]; break;
+      case "python-slice-length": expected = nums[2]-nums[1]; break;
+      case "gross-profit-margin": expected = nums[1]*100/nums[0]; break;
+      case "inventory-reorder-level": expected = nums[0]*nums[1]+nums[2]; break;
+      case "service-availability": expected = nums[1]*100/nums[0]; break;
+      case "replicated-storage": expected = nums[0]*nums[1]; break;
       default: assert.fail("Unknown family");
     }
     assert.equal(Number(item.correctAnswer), expected, item.id);
@@ -81,22 +91,26 @@ test("new families are bounded and deterministic with no approved-credit inflati
     "rectangle-area": 5000, "electric-charge": 5000, "mass-concentration": 5000,
     "germination-rate": 5000, "nested-loop-count": 5000, "working-capital": 5000,
     "labour-productivity": 5000, "cloud-storage-cost": 5000,
-    "backup-recovery-gap": 3000, "nominal-output-value": 3000
+    "backup-recovery-gap": 3000, "nominal-output-value": 3000,
+    "simultaneous-equations": 4800, "kinetic-energy": 5000, "percentage-yield": 6000,
+    "cardiac-output": 6000, "classification-recall": 4800, "python-slice-length": 5000,
+    "gross-profit-margin": 6000, "inventory-reorder-level": 6000, "service-availability": 4000,
+    "replicated-storage": 5000
   })) {
     const items = all.filter(item => item.family === family);
     assert.equal(items.length, count, family);
     assert.ok(items.every(item => item.status === "draft" && item.countsTowardApprovedTarget === false));
   }
   assert.deepEqual(generateDrafts(3), generateDrafts(3));
-  assert.equal(generateDrafts(1).length, 29);
+  assert.equal(generateDrafts(1).length, 39);
   assert.throws(() => generateDrafts(0));
 });
 
 test("catalogue reports exact capacity and returns independent metadata", () => {
   const catalogue = getDraftFamilyCatalog();
-  assert.equal(catalogue.length, 29);
-  assert.equal(new Set(catalogue.map(f => f.id)).size, 29);
-  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 100925);
+  assert.equal(catalogue.length, 39);
+  assert.equal(new Set(catalogue.map(f => f.id)).size, 39);
+  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 153525);
   assert.equal(new Set(catalogue.map(f => f.track)).size, 12);
   catalogue[0].capacity = 0;
   assert.equal(getDraftFamilyCatalog()[0].capacity, 9880);
@@ -124,8 +138,8 @@ test("CLI lists metadata and writes selected drafts separately from the default 
   const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd, encoding: "utf8"}));
   try {
     const catalogue = run("--list");
-    assert.equal(catalogue.capacity, 100925);
-    assert.equal(catalogue.families.length, 29);
+    assert.equal(catalogue.capacity, 153525);
+    assert.equal(catalogue.families.length, 39);
     const original = run("2");
     const selected = run("2", "force", "arithmetic-sequence");
     const reordered = run("2", "arithmetic-sequence", "force");
@@ -137,7 +151,7 @@ test("CLI lists metadata and writes selected drafts separately from the default 
     const pack = JSON.parse(readFileSync(join(cwd, selected.output), "utf8"));
     assert.deepEqual(pack.items, generateDrafts(2, ["force", "arithmetic-sequence"]));
     const full = JSON.parse(readFileSync(join(cwd, original.output), "utf8"));
-    assert.equal(full.items.length, 58);
+    assert.equal(full.items.length, 78);
   } finally {
     rmSync(cwd, {recursive: true, force: true});
   }
@@ -169,14 +183,51 @@ test("review pages match full generation across family boundaries and preserve i
 });
 
 test("late-page access is bounded and reports accurate capacity", () => {
-  const p = generateDraftPage({limitPerFamily:10000,offset:100920,pageSize:100});
-  assert.equal(p.total,100925);
+  const p = generateDraftPage({limitPerFamily:10000,offset:153520,pageSize:100});
+  assert.equal(p.total,153525);
   assert.equal(p.items.length,5);
   assert.equal(p.nextOffset,null);
-  assert.ok(p.items.every(q=>q.family==="nominal-output-value"));
-  assert.deepEqual(p.items,generateDrafts(10000,["nominal-output-value"]).slice(-5));
+  assert.ok(p.items.every(q=>q.family==="replicated-storage"));
+  assert.deepEqual(p.items,generateDrafts(10000,["replicated-storage"]).slice(-5));
   for(const pageSize of [0,-1,1001,1.5,Infinity])assert.throws(()=>generateDraftPage({pageSize}),/Page size/);
   for(const offset of [-1,0.5,Infinity])assert.throws(()=>generateDraftPage({offset}),/offset/);
   assert.throws(()=>generateDraftPage({selectedFamilyIds:["unknown"]}),/unique known/);
   assert.throws(()=>generateDraftPage({limitPerFamily:0}),/Positive integer/);
+});
+
+test("applied percentage questions and distractors stay within 0–100%", () => {
+  const selected = ["percentage-yield","classification-recall","gross-profit-margin","service-availability"];
+  const items = generateDrafts(10000, selected);
+  assert.equal(items.length,20800);
+  assert.ok(items.every(q=>q.options.every(o=>Number.isInteger(Number(o)) && Number(o)>=0 && Number(o)<=100)));
+});
+
+test("operator CLI exports stable bounded pages separately, including the last page", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "stemcoach-review-page-"));
+  const script = fileURLToPath(new URL("./generate-formative-drafts.mjs", import.meta.url));
+  const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd,encoding:"utf8"}));
+  try {
+    const a=run("--page","3","5","6","force","replicated-storage");
+    const b=run("--page","3","5","6","replicated-storage","force");
+    assert.equal(a.output,b.output);
+    assert.equal(a.total,12);
+    assert.equal(a.nextOffset,8);
+    assert.equal(a.draftVariants,5);
+    assert.equal(a.approvedQuestions,0);
+    const saved=JSON.parse(readFileSync(join(cwd,a.output),"utf8"));
+    assert.equal(saved.status,"draft");
+    assert.deepEqual(saved.items,generateDrafts(6,["force","replicated-storage"]).slice(3,8));
+    const last=run("--page","8","5","6","force","replicated-storage");
+    assert.notEqual(last.output,a.output);
+    assert.equal(last.draftVariants,4);
+    assert.equal(last.nextOffset,null);
+    assert.deepEqual(JSON.parse(readFileSync(join(cwd,last.output),"utf8")).items,generateDrafts(6,["force","replicated-storage"]).slice(8));
+    const full=run("6","force","replicated-storage");
+    assert.notEqual(full.output,last.output);
+    const empty=run("--page","12","5","6","force","replicated-storage");
+    assert.equal(empty.draftVariants,0);
+    assert.equal(empty.nextOffset,null);
+    assert.throws(()=>execFileSync(process.execPath,[script,"--page","-1","5","6"],{cwd,stdio:"pipe"}));
+    assert.throws(()=>execFileSync(process.execPath,[script,"--page","0","1001","6"],{cwd,stdio:"pipe"}));
+  }finally{rmSync(cwd,{recursive:true,force:true});}
 });
