@@ -1,6 +1,7 @@
 // Deterministic formative practice generator. No database writes or publication.
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, writeFile, rename, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile, rename, rm, open } from 'node:fs/promises';
+import { advancedFamilies } from './formative-families-advanced.mjs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const families = [
@@ -69,8 +70,9 @@ const families = [
  {id:'contribution-total',track:'business-studies',topic:'Contribution and profit',make:(i)=>{const qty=10+i%100,cost=1+Math.floor(i/100)%10,margin=1+Math.floor(i/1000),price=cost+margin,answer=qty*margin;return [`A business sells ${qty} units at ${price} currency units per unit. Variable cost is ${cost} currency units per unit. Calculate total contribution before fixed costs.`,answer,`Contribution per unit = selling price − variable cost. Total contribution = ${qty} × (${price}−${cost}) = ${answer}.`,[qty*price,answer+1,answer-1]]}},
  {id:'network-throughput',track:'cloud-computing',topic:'Data transfer',make:(i)=>{const rate=1+i%100,seconds=1+Math.floor(i/100),answer=rate*seconds;return [`A cloud connection transfers ${rate} megabytes per second at a constant rate for ${seconds} seconds. Ignoring overhead, how many megabytes are transferred?`,answer,`Transferred data = transfer rate × elapsed time = ${rate} × ${seconds} = ${answer} MB.`,[answer+1,answer-1,answer+2]]}},
  {id:'security-training-coverage',track:'cyber-security',topic:'Security awareness',make:(i)=>{const total=100*(1+i%200),p=20+Math.floor(i/200),completed=total*p/100;return [`An organisation has ${total} employees and ${completed} have completed required security awareness training. Calculate the completion rate as a percentage.`,p,`Completion rate = employees who completed training / total employees × 100 = ${completed}/${total} × 100 = ${p}%.`,[p+1,p-1,p+2]]}},
+ ...advancedFamilies,
 ];
-const capacity={'linear-equation':9880,force:1225,'mass-number':100,'gross-profit':3600,'break-even':8000,'integer-division':2000,'percentage-discount':720,'average-power':2000,'population-density':1200,'amount-of-substance':1000,'integer-remainder':1200,'arithmetic-sequence':4000,'series-resistance':3600,'classification-accuracy':3000,'metered-cloud-cost':2400,'unit-purchase-cost':3000,'price-index-change':2000,'straight-line-depreciation':4000,'microscope-magnification':2000,'rectangle-area':5000,'electric-charge':5000,'mass-concentration':5000,'germination-rate':5000,'nested-loop-count':5000,'working-capital':5000,'labour-productivity':5000,'cloud-storage-cost':5000,'backup-recovery-gap':3000,'nominal-output-value':3000,'simultaneous-equations':4800,'kinetic-energy':5000,'percentage-yield':6000,'cardiac-output':6000,'classification-recall':4800,'python-slice-length':5000,'gross-profit-margin':6000,'inventory-reorder-level':6000,'service-availability':4000,'replicated-storage':5000,'trapezium-area':10000,'specific-heat-energy':10000,'solution-dilution':10000,'trophic-energy-transfer':10000,'python-range-count':10000,'classification-precision':10000,'closing-cash-balance':10000,'capacity-utilisation':10000,'trade-balance':10000,'purchase-invoice-total':10000,'compound-percentage':10000,'gravitational-work':10000,'molar-concentration':10000,'population-growth':10000,'python-affine-loop':10000,'classifier-error-count':10000,'operating-profit':10000,'contribution-total':10000,'network-throughput':10000,'security-training-coverage':10000};
+const capacity={'linear-equation':9880,force:1225,'mass-number':100,'gross-profit':3600,'break-even':8000,'integer-division':2000,'percentage-discount':720,'average-power':2000,'population-density':1200,'amount-of-substance':1000,'integer-remainder':1200,'arithmetic-sequence':4000,'series-resistance':3600,'classification-accuracy':3000,'metered-cloud-cost':2400,'unit-purchase-cost':3000,'price-index-change':2000,'straight-line-depreciation':4000,'microscope-magnification':2000,'rectangle-area':5000,'electric-charge':5000,'mass-concentration':5000,'germination-rate':5000,'nested-loop-count':5000,'working-capital':5000,'labour-productivity':5000,'cloud-storage-cost':5000,'backup-recovery-gap':3000,'nominal-output-value':3000,'simultaneous-equations':4800,'kinetic-energy':5000,'percentage-yield':6000,'cardiac-output':6000,'classification-recall':4800,'python-slice-length':5000,'gross-profit-margin':6000,'inventory-reorder-level':6000,'service-availability':4000,'replicated-storage':5000,'trapezium-area':10000,'specific-heat-energy':10000,'solution-dilution':10000,'trophic-energy-transfer':10000,'python-range-count':10000,'classification-precision':10000,'closing-cash-balance':10000,'capacity-utilisation':10000,'trade-balance':10000,'purchase-invoice-total':10000,'compound-percentage':10000,'gravitational-work':10000,'molar-concentration':10000,'population-growth':10000,'python-affine-loop':10000,'classifier-error-count':10000,'operating-profit':10000,'contribution-total':10000,'network-throughput':10000,'security-training-coverage':10000,...Object.fromEntries(advancedFamilies.map(f=>[f.id,f.capacity]))};
 const hash=s=>createHash('sha256').update(s).digest('hex');
 export function getDraftFamilyCatalog() {
  return families.map(({id,track,topic})=>({id,track,topic,capacity:capacity[id]}));
@@ -123,13 +125,43 @@ function addItem(items,seen,f,i){
  seen.add(item.fingerprint);
  items.push(item);
 }
-export function generateDrafts(limitPerFamily=100, selectedFamilyIds) {
+export function* iterateDrafts(limitPerFamily=100, selectedFamilyIds) {
  assertLimit(limitPerFamily);
- const seen=new Set(), items=[];
+ const seen=new Set();
  for(const f of selectFamilies(selectedFamilyIds))for(let i=0;i<Math.min(limitPerFamily,capacity[f.id]);i++){
-  addItem(items,seen,f,i);
+  const item=makeItem(f,i);
+  if(seen.has(item.fingerprint))throw Error('Duplicate stem in family '+f.id+' at index '+i);
+  seen.add(item.fingerprint);
+  yield item;
  }
- return items;
+}
+export function generateDrafts(limitPerFamily=100, selectedFamilyIds) {
+ return Array.from(iterateDrafts(limitPerFamily,selectedFamilyIds));
+}
+// Stream JSON in bounded chunks rather than materialising the bank and a second giant JSON string.
+async function writePrivateDraftStream(output,limitPerFamily,selectedFamilyIds){
+ const dir='content/generated';
+ const count=getDraftCoverage(limitPerFamily,selectedFamilyIds).totalVariants;
+ await mkdir(dir,{recursive:true,mode:0o700});
+ const temp=await mkdtemp(dir+'/.review-');
+ try{
+  const staged=temp+'/pack.json';
+  const file=await open(staged,'wx',0o600);
+  try{
+   await file.writeFile('{"schemaVersion":1,"status":"draft","count":'+count+',"items":[\n');
+   let chunk='',written=0;
+   for(const item of iterateDrafts(limitPerFamily,selectedFamilyIds)){
+    chunk+=(written?',\n':'')+JSON.stringify(item);
+    written++;
+    if(chunk.length>=262144){await file.writeFile(chunk);chunk='';}
+   }
+   if(written!==count)throw Error('Draft count mismatch');
+   await file.writeFile(chunk+'\n]}\n');
+   await file.sync();
+  }finally{await file.close();}
+  await rename(staged,output);
+ }finally{await rm(temp,{recursive:true,force:true});}
+ return count;
 }
 // Deterministic stratified samples: one item from each equal-width range of a family.
 export function generateDraftReviewSample({limitPerFamily=10000,selectedFamilyIds,samplesPerFamily=5,seed="review-v1"}={}){
@@ -198,10 +230,9 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
  }else{
   const selected=process.argv.slice(3);
   const limitPerFamily=Number(process.argv[2]??100);
-  const items=generateDrafts(limitPerFamily,selected.length?selected:undefined);
   const familyIds=getDraftFamilyCatalog().filter(f=>!selected.length||selected.includes(f.id)).map(f=>f.id);
   const filename=selected.length?'formative-variants-'+hash(JSON.stringify({familyIds,limitPerFamily})).slice(0,12)+'.json':'formative-variants.json';
-  await writePrivatePack('content/generated/'+filename,{schemaVersion:1,status:'draft',count:items.length,items});
-  console.log(JSON.stringify({draftVariants:items.length,approvedQuestions:0,familyIds,output:'content/generated/'+filename}));
+  const count=await writePrivateDraftStream('content/generated/'+filename,limitPerFamily,selected.length?selected:undefined);
+  console.log(JSON.stringify({draftVariants:count,approvedQuestions:0,familyIds,output:'content/generated/'+filename}));
  }
 }
