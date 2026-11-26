@@ -105,6 +105,18 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
  if(process.argv[2]==='--list' && process.argv.length===3){
   const catalogue=getDraftFamilyCatalog();
   console.log(JSON.stringify({families:catalogue,capacity:catalogue.reduce((sum,f)=>sum+f.capacity,0)},null,2));
+ }else if(process.argv[2]==='--page'){
+  const args=process.argv.slice(3);
+  if(args.length<3||args.slice(0,3).some(v=>!/^\d+$/.test(v)))throw Error('Usage: --page OFFSET SIZE LIMIT_PER_FAMILY [FAMILY_ID ...]');
+  const [offset,pageSize,limitPerFamily]=args.slice(0,3).map(Number);
+  const selectedFamilyIds=args.length>3?args.slice(3):undefined;
+  const page=generateDraftPage({offset,pageSize,limitPerFamily,selectedFamilyIds});
+  const familyIds=selectFamilies(selectedFamilyIds).map(f=>f.id);
+  const batchKey=hash(JSON.stringify({familyIds,limitPerFamily,offset,pageSize})).slice(0,20);
+  const output='content/generated/formative-review-page-'+batchKey+'.json';
+  await mkdir('content/generated',{recursive:true});
+  await writeFile(output,JSON.stringify({schemaVersion:1,status:'draft',count:page.items.length,total:page.total,offset:page.offset,nextOffset:page.nextOffset,items:page.items},null,2)+'\n',{mode:0o600});
+  console.log(JSON.stringify({draftVariants:page.items.length,total:page.total,offset:page.offset,nextOffset:page.nextOffset,approvedQuestions:0,familyIds,output}));
  }else{
   const selected=process.argv.slice(3);
   const items=generateDrafts(Number(process.argv[2]??100),selected.length?selected:undefined);
