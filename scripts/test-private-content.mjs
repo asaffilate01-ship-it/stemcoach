@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateDrafts, getDraftFamilyCatalog, generateDraftPage } from "./generate-formative-drafts.mjs";
+import { generateDrafts, getDraftFamilyCatalog, generateDraftPage, getDraftCoverage } from "./generate-formative-drafts.mjs";
 import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
@@ -258,4 +258,40 @@ test("new multi-step options are finite and distinct, with bounded percentage op
       if(id==="classification-precision"||id==="capacity-utilisation")assert.ok(q.options.every(o=>Number(o)<=100));
     }
   }
+});
+
+test("coverage reports capped family counts and contains no private content", () => {
+  const report=getDraftCoverage();
+  assert.equal(report.totalVariants,253525);
+  assert.equal(report.familyCount,49);
+  assert.equal(report.trackCount,12);
+  assert.equal(report.approvedQuestions,0);
+  assert.equal(report.publishedQuestions,0);
+  assert.equal(report.tracks.reduce((sum,t)=>sum+t.variants,0),report.totalVariants);
+  assert.deepEqual(getDraftCoverage(5,["trapezium-area","linear-equation","specific-heat-energy"]),{
+    familyCount:3,trackCount:2,totalVariants:15,
+    tracks:[{track:"mathematics",families:2,variants:10},{track:"physics",families:1,variants:5}],
+    approvedQuestions:0,publishedQuestions:0
+  });
+  assert.throws(()=>getDraftCoverage(0),/Positive integer/);
+  assert.throws(()=>getDraftCoverage(5,["missing"]),/unique known/);
+  assert.ok(!JSON.stringify(report).includes("correctAnswer"));
+});
+
+test("selected exports with different limits are isolated and private",()=>{
+  const cwd=mkdtempSync(join(tmpdir(),"stemcoach-private-export-"));
+  const script=fileURLToPath(new URL("./generate-formative-drafts.mjs",import.meta.url));
+  const run=(...args)=>JSON.parse(execFileSync(process.execPath,[script,...args],{cwd,encoding:"utf8"}));
+  try{
+    assert.deepEqual(run("--coverage","5","trapezium-area","specific-heat-energy"),getDraftCoverage(5,["trapezium-area","specific-heat-energy"]));
+    const first=run("2","force","solution-dilution");
+    const second=run("3","solution-dilution","force");
+    assert.notEqual(first.output,second.output);
+    assert.equal(JSON.parse(readFileSync(join(cwd,first.output),"utf8")).items.length,4);
+    assert.equal(JSON.parse(readFileSync(join(cwd,second.output),"utf8")).items.length,6);
+    const repeat=run("2","solution-dilution","force");
+    assert.equal(repeat.output,first.output);
+    if(process.platform!=="win32")assert.equal(statSync(join(cwd,first.output)).mode&0o777,0o600);
+    assert.ok(readdirSync(join(cwd,"content/generated")).every(name=>!name.startsWith(".review-")));
+  }finally{rmSync(cwd,{recursive:true,force:true});}
 });
