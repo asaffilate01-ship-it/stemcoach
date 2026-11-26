@@ -33,7 +33,7 @@ export function getDraftFamilyCatalog() {
 }
 export function generateDrafts(limitPerFamily=100, selectedFamilyIds) {
  if(!Number.isSafeInteger(limitPerFamily)||limitPerFamily<1)throw Error('Positive integer limit required');
- if(selectedFamilyIds!==undefined && (!Array.isArray(selectedFamilyIds)||!selectedFamilyIds.length||new Set(selectedFamilyIds).size!==selectedFamilyIds.length||selectedFamilyIds.some(id=>typeof id!=='string'||!Object.hasOwn(capacity,id))))throw Error('Select unique known family IDs');
+ if(selectedFamilyIds!==undefined && (!Array.isArray(selectedFamilyIds)||!selectedFamilyIds.length||new Set(selectedFamilyIds).size!==selectedFamilyIds.length||Array.from(selectedFamilyIds).some(id=>typeof id!=='string'||!Object.hasOwn(capacity,id))))throw Error('Select unique known family IDs');
  const selection=selectedFamilyIds===undefined?null:new Set(selectedFamilyIds);
  const seen=new Set(), items=[];
  for(const f of families.filter(f=>!selection||selection.has(f.id)))for(let i=0;i<Math.min(limitPerFamily,capacity[f.id]);i++){
@@ -48,8 +48,16 @@ export function generateDrafts(limitPerFamily=100, selectedFamilyIds) {
  return items;
 }
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- const items=generateDrafts(Number(process.argv[2]??100));
- await mkdir('content/generated',{recursive:true});
- await writeFile('content/generated/formative-variants.json',JSON.stringify({schemaVersion:1,status:'draft',count:items.length,items},null,2)+'\n');
- console.log(JSON.stringify({draftVariants:items.length,approvedQuestions:0}));
+ if(process.argv[2]==='--list' && process.argv.length===3){
+  const catalogue=getDraftFamilyCatalog();
+  console.log(JSON.stringify({families:catalogue,capacity:catalogue.reduce((sum,f)=>sum+f.capacity,0)},null,2));
+ }else{
+  const selected=process.argv.slice(3);
+  const items=generateDrafts(Number(process.argv[2]??100),selected.length?selected:undefined);
+  const familyIds=getDraftFamilyCatalog().filter(f=>!selected.length||selected.includes(f.id)).map(f=>f.id);
+  const filename=selected.length?'formative-variants-'+hash(familyIds.join(',')).slice(0,12)+'.json':'formative-variants.json';
+  await mkdir('content/generated',{recursive:true});
+  await writeFile('content/generated/'+filename,JSON.stringify({schemaVersion:1,status:'draft',count:items.length,items},null,2)+'\n',{mode:0o600});
+  console.log(JSON.stringify({draftVariants:items.length,approvedQuestions:0,familyIds,output:'content/generated/'+filename}));
+ }
 }
