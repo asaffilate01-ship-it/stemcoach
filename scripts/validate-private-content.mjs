@@ -13,7 +13,9 @@ const fingerprint = stem => createHash("sha256").update(normalise(stem)).digest(
 export function validateBatches(batches) {
   const errors = [], ids = new Set(), stems = new Set();
   const stats = { originals: 0, variants: 0, structurallyValid: 0, metadataReadyForReview: 0, byTrack: Object.create(null) };
-  for (const [batchIndex, batch] of batches.entries()) {
+  let nextBatchIndex = 0;
+  for (const batch of batches) {
+    const batchIndex = nextBatchIndex++;
     if (!batch || batch.schemaVersion !== 1 || !Array.isArray(batch.items)) {
       errors.push("batch " + batchIndex + ": invalid envelope"); continue;
     }
