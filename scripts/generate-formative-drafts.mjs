@@ -42,21 +42,53 @@ const hash=s=>createHash('sha256').update(s).digest('hex');
 export function getDraftFamilyCatalog() {
  return families.map(({id,track,topic})=>({id,track,topic,capacity:capacity[id]}));
 }
-export function generateDrafts(limitPerFamily=100, selectedFamilyIds) {
- if(!Number.isSafeInteger(limitPerFamily)||limitPerFamily<1)throw Error('Positive integer limit required');
+function selectFamilies(selectedFamilyIds) {
  if(selectedFamilyIds!==undefined && (!Array.isArray(selectedFamilyIds)||!selectedFamilyIds.length||new Set(selectedFamilyIds).size!==selectedFamilyIds.length||Array.from(selectedFamilyIds).some(id=>typeof id!=='string'||!Object.hasOwn(capacity,id))))throw Error('Select unique known family IDs');
  const selection=selectedFamilyIds===undefined?null:new Set(selectedFamilyIds);
+ return families.filter(f=>!selection||selection.has(f.id));
+}
+function makeItem(f,i){
+ const [text,answer,explanation,wrong]=f.make(i);
+ const fingerprint=hash(text.normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim());
+ const options=wrong.map(String);options.splice(i%4,0,String(answer));
+ if(new Set(options).size!==4||!options.includes(String(answer)))throw Error('Invalid choices');
+ return {id:'variant-'+fingerprint.slice(0,24),fingerprint,family:f.id,track:f.track,topic:f.topic,text,options,correctAnswer:String(answer),explanation,type:'mcq',language:'en',candidateMarkets:['PK','GB','DE'],status:'draft',curriculumOutcome:null,boards:[],variant:true,countsTowardApprovedTarget:false};
+}
+function assertLimit(limitPerFamily){
+ if(!Number.isSafeInteger(limitPerFamily)||limitPerFamily<1)throw Error('Positive integer limit required');
+}
+function addItem(items,seen,f,i){
+ const item=makeItem(f,i);
+ if(seen.has(item.fingerprint))throw Error('Duplicate stem in family '+f.id+' at index '+i);
+ seen.add(item.fingerprint);
+ items.push(item);
+}
+export function generateDrafts(limitPerFamily=100, selectedFamilyIds) {
+ assertLimit(limitPerFamily);
  const seen=new Set(), items=[];
- for(const f of families.filter(f=>!selection||selection.has(f.id)))for(let i=0;i<Math.min(limitPerFamily,capacity[f.id]);i++){
-  const [text,answer,explanation,wrong]=f.make(i);
-  const fingerprint=hash(text.normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim());
-  if(seen.has(fingerprint))throw Error('Duplicate stem in family '+f.id+' at index '+i);
-  seen.add(fingerprint);
-  const options=wrong.map(String);options.splice(i%4,0,String(answer));
-  if(new Set(options).size!==4||!options.includes(String(answer)))throw Error('Invalid choices');
-  items.push({id:'variant-'+fingerprint.slice(0,24),fingerprint,family:f.id,track:f.track,topic:f.topic,text,options,correctAnswer:String(answer),explanation,type:'mcq',language:'en',candidateMarkets:['PK','GB','DE'],status:'draft',curriculumOutcome:null,boards:[],variant:true,countsTowardApprovedTarget:false});
+ for(const f of selectFamilies(selectedFamilyIds))for(let i=0;i<Math.min(limitPerFamily,capacity[f.id]);i++){
+  addItem(items,seen,f,i);
  }
  return items;
+}
+// Bounded private review pages: skip unrelated families and construct only requested items.
+export function generateDraftPage({limitPerFamily=100,selectedFamilyIds,offset=0,pageSize=100}={}){
+ assertLimit(limitPerFamily);
+ if(!Number.isSafeInteger(offset)||offset<0)throw Error('Nonnegative integer offset required');
+ if(!Number.isSafeInteger(pageSize)||pageSize<1||pageSize>1000)throw Error('Page size must be 1–1000');
+ const selected=selectFamilies(selectedFamilyIds);
+ const total=selected.reduce((sum,f)=>sum+Math.min(limitPerFamily,capacity[f.id]),0);
+ const items=[],seen=new Set();
+ let remainingOffset=offset;
+ for(const f of selected){
+  const count=Math.min(limitPerFamily,capacity[f.id]);
+  if(remainingOffset>=count){remainingOffset-=count;continue;}
+  const end=Math.min(count,remainingOffset+pageSize-items.length);
+  for(let i=remainingOffset;i<end;i++)addItem(items,seen,f,i);
+  remainingOffset=0;
+  if(items.length===pageSize)break;
+ }
+ return {items,total,offset,nextOffset:offset+items.length<total?offset+items.length:null};
 }
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  if(process.argv[2]==='--list' && process.argv.length===3){
