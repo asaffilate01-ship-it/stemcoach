@@ -1,6 +1,6 @@
 // Deterministic formative practice generator. No database writes or publication.
 import { createHash } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile, rename, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const families = [
@@ -64,6 +64,33 @@ const hash=s=>createHash('sha256').update(s).digest('hex');
 export function getDraftFamilyCatalog() {
  return families.map(({id,track,topic})=>({id,track,topic,capacity:capacity[id]}));
 }
+// Metadata only: lets operators identify coverage gaps without generating answers.
+export function getDraftCoverage(limitPerFamily=10000,selectedFamilyIds){
+ assertLimit(limitPerFamily);
+ const tracks=new Map();
+ let total=0;
+ const selected=selectFamilies(selectedFamilyIds);
+ for(const f of selected){
+  const count=Math.min(limitPerFamily,capacity[f.id]);
+  const row=tracks.get(f.track)??{track:f.track,families:0,variants:0};
+  row.families++;row.variants+=count;total+=count;
+  tracks.set(f.track,row);
+ }
+ return {familyCount:selected.length,trackCount:tracks.size,totalVariants:total,tracks:[...tracks.values()],approvedQuestions:0,publishedQuestions:0};
+}
+// Use a private temporary directory and atomic rename to avoid half-written review packs.
+async function writePrivatePack(output,pack){
+ const dir='content/generated';
+ await mkdir(dir,{recursive:true,mode:0o700});
+ const temp=await mkdtemp(dir+'/.review-');
+ try{
+  const staged=temp+'/pack.json';
+  await writeFile(staged,JSON.stringify(pack,null,2)+'\n',{mode:0o600,flag:'wx'});
+  await rename(staged,output);
+ }finally{
+  await rm(temp,{recursive:true,force:true});
+ }
+}
 function selectFamilies(selectedFamilyIds) {
  if(selectedFamilyIds!==undefined && (!Array.isArray(selectedFamilyIds)||!selectedFamilyIds.length||new Set(selectedFamilyIds).size!==selectedFamilyIds.length||Array.from(selectedFamilyIds).some(id=>typeof id!=='string'||!Object.hasOwn(capacity,id))))throw Error('Select unique known family IDs');
  const selection=selectedFamilyIds===undefined?null:new Set(selectedFamilyIds);
@@ -116,6 +143,10 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
  if(process.argv[2]==='--list' && process.argv.length===3){
   const catalogue=getDraftFamilyCatalog();
   console.log(JSON.stringify({families:catalogue,capacity:catalogue.reduce((sum,f)=>sum+f.capacity,0)},null,2));
+ }else if(process.argv[2]==='--coverage'){
+  const args=process.argv.slice(3);
+  if(args.length && !/^\d+$/.test(args[0]))throw Error('Usage: --coverage [LIMIT_PER_FAMILY [FAMILY_ID ...]]');
+  console.log(JSON.stringify(getDraftCoverage(args.length?Number(args[0]):10000,args.length>1?args.slice(1):undefined),null,2));
  }else if(process.argv[2]==='--page'){
   const args=process.argv.slice(3);
   if(args.length<3||args.slice(0,3).some(v=>!/^\d+$/.test(v)))throw Error('Usage: --page OFFSET SIZE LIMIT_PER_FAMILY [FAMILY_ID ...]');
@@ -125,16 +156,15 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
   const familyIds=selectFamilies(selectedFamilyIds).map(f=>f.id);
   const batchKey=hash(JSON.stringify({familyIds,limitPerFamily,offset,pageSize})).slice(0,20);
   const output='content/generated/formative-review-page-'+batchKey+'.json';
-  await mkdir('content/generated',{recursive:true});
-  await writeFile(output,JSON.stringify({schemaVersion:1,status:'draft',count:page.items.length,total:page.total,offset:page.offset,nextOffset:page.nextOffset,items:page.items},null,2)+'\n',{mode:0o600});
+  await writePrivatePack(output,{schemaVersion:1,status:'draft',count:page.items.length,total:page.total,offset:page.offset,nextOffset:page.nextOffset,items:page.items});
   console.log(JSON.stringify({draftVariants:page.items.length,total:page.total,offset:page.offset,nextOffset:page.nextOffset,approvedQuestions:0,familyIds,output}));
  }else{
   const selected=process.argv.slice(3);
-  const items=generateDrafts(Number(process.argv[2]??100),selected.length?selected:undefined);
+  const limitPerFamily=Number(process.argv[2]??100);
+  const items=generateDrafts(limitPerFamily,selected.length?selected:undefined);
   const familyIds=getDraftFamilyCatalog().filter(f=>!selected.length||selected.includes(f.id)).map(f=>f.id);
-  const filename=selected.length?'formative-variants-'+hash(familyIds.join(',')).slice(0,12)+'.json':'formative-variants.json';
-  await mkdir('content/generated',{recursive:true});
-  await writeFile('content/generated/'+filename,JSON.stringify({schemaVersion:1,status:'draft',count:items.length,items},null,2)+'\n',{mode:0o600});
+  const filename=selected.length?'formative-variants-'+hash(JSON.stringify({familyIds,limitPerFamily})).slice(0,12)+'.json':'formative-variants.json';
+  await writePrivatePack('content/generated/'+filename,{schemaVersion:1,status:'draft',count:items.length,items});
   console.log(JSON.stringify({draftVariants:items.length,approvedQuestions:0,familyIds,output:'content/generated/'+filename}));
  }
 }
