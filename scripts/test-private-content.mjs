@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, rmSync, readdirSync, statSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateDrafts, getDraftFamilyCatalog, generateDraftPage, getDraftCoverage } from "./generate-formative-drafts.mjs";
+import { generateDrafts, getDraftFamilyCatalog, generateDraftPage, getDraftCoverage, generateDraftReviewSample } from "./generate-formative-drafts.mjs";
 import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
@@ -320,4 +320,49 @@ test("new applied questions have four distinct finite numeric options",()=>{
      if(family==="security-training-coverage")assert.ok(q.options.every(o=>Number(o)<=100),q.id);
    }
  }
+});
+
+test("stratified samples are reproducible, capped and cover every selected family range",()=>{
+ const selectedFamilyIds=["force","compound-percentage"];
+ const settings={selectedFamilyIds,samplesPerFamily:7,limitPerFamily:25,seed:"review-2026"};
+ const sample=generateDraftReviewSample(settings);
+ assert.equal(sample.count,14);
+ assert.equal(sample.approvedQuestions,0);
+ assert.equal(sample.status,"draft");
+ assert.deepEqual(sample,generateDraftReviewSample({...settings,selectedFamilyIds:[...selectedFamilyIds].reverse()}));
+ assert.equal(new Set(sample.items.map(q=>q.id)).size,14);
+ for(const family of selectedFamilyIds){
+   const all=generateDrafts(25,[family]),positions=new Map(all.map((q,i)=>[q.id,i]));
+   const rows=sample.items.filter(q=>q.family===family);
+   for(const [i,q] of rows.entries()){
+     assert.ok(positions.get(q.id)>=Math.floor(i*25/7));
+     assert.ok(positions.get(q.id)<Math.floor((i+1)*25/7));
+     assert.equal(q.countsTowardApprovedTarget,false);
+   }
+ }
+ assert.notDeepEqual(sample.items.map(q=>q.id),generateDraftReviewSample({...settings,seed:"another-review"}).items.map(q=>q.id));
+ assert.equal(generateDraftReviewSample({limitPerFamily:2,samplesPerFamily:100}).count,118);
+ assert.equal(generateDraftReviewSample().count,295);
+ for(const n of [0,101,1.5,Infinity])assert.throws(()=>generateDraftReviewSample({samplesPerFamily:n}),/Samples per family/);
+ for(const seed of ["",null,"x".repeat(129)])assert.throws(()=>generateDraftReviewSample({seed}),/Seed/);
+ assert.throws(()=>generateDraftReviewSample({selectedFamilyIds:["unknown"]}),/unique known/);
+});
+
+test("review sample CLI writes isolated private packs with metadata-only stdout",()=>{
+ const cwd=mkdtempSync(join(tmpdir(),"stemcoach-review-sample-"));
+ const script=fileURLToPath(new URL("./generate-formative-drafts.mjs",import.meta.url));
+ const run=(...args)=>JSON.parse(execFileSync(process.execPath,[script,...args],{cwd,encoding:"utf8"}));
+ try{
+  const a=run("--sample","3","20","review-a","compound-percentage","force");
+  const b=run("--sample","3","20","review-a","force","compound-percentage");
+  assert.equal(a.output,b.output);
+  assert.equal(a.draftVariants,6);
+  assert.equal(a.approvedQuestions,0);
+  assert.ok(!Object.hasOwn(a,"items"));
+  const pack=JSON.parse(readFileSync(join(cwd,a.output),"utf8"));
+  assert.deepEqual(pack,generateDraftReviewSample({samplesPerFamily:3,limitPerFamily:20,seed:"review-a",selectedFamilyIds:["force","compound-percentage"]}));
+  const c=run("--sample","3","20","review-b","force","compound-percentage");
+  assert.notEqual(c.output,a.output);
+  assert.throws(()=>execFileSync(process.execPath,[script,"--sample","101","20","review-a"],{cwd,stdio:"pipe"}));
+ }finally{rmSync(cwd,{recursive:true,force:true});}
 });
