@@ -10,10 +10,10 @@ import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
   const items = generateDrafts(10000);
-  assert.equal(items.length, 253525);
+  assert.equal(items.length, 353525);
   const report = validateBatches([{ schemaVersion: 1, items }]);
   assert.equal(report.valid, true, report.errors.slice(0, 4).join("; "));
-  assert.equal(report.stats.variants, 253525);
+  assert.equal(report.stats.variants, 353525);
   assert.equal(report.stats.originals, 0);
   assert.equal(report.approvedCount, 0);
   assert.equal(report.publishedCount, 0);
@@ -77,6 +77,16 @@ test("independent arithmetic checks across every generated question", () => {
       case "capacity-utilisation": expected = nums[1]*100/nums[0]; break;
       case "trade-balance": expected = nums[0]-nums[1]; break;
       case "purchase-invoice-total": expected = nums[0]*nums[1]+nums[2]; break;
+      case "compound-percentage": expected = nums[0]*(100+nums[1])*(100-nums[2])/10000; break;
+      case "gravitational-work": expected = nums[0]*nums[1]*nums[2]; break;
+      case "molar-concentration": expected = nums[0]/nums[1]; break;
+      case "population-growth": expected = nums[0]+nums[1]-nums[2]; break;
+      case "python-affine-loop": expected = nums[0]+nums[1]*nums[2]; break;
+      case "classifier-error-count": expected = nums[0]-nums[1]; break;
+      case "operating-profit": expected = nums[0]-nums[1]-nums[2]; break;
+      case "contribution-total": expected = nums[0]*(nums[1]-nums[2]); break;
+      case "network-throughput": expected = nums[0]*nums[1]; break;
+      case "security-training-coverage": expected = nums[1]*100/nums[0]; break;
       default: assert.fail("Unknown family");
     }
     assert.equal(Number(item.correctAnswer), expected, item.id);
@@ -111,22 +121,26 @@ test("new families are bounded and deterministic with no approved-credit inflati
     "trapezium-area": 10000, "specific-heat-energy": 10000, "solution-dilution": 10000,
     "trophic-energy-transfer": 10000, "python-range-count": 10000, "classification-precision": 10000,
     "closing-cash-balance": 10000, "capacity-utilisation": 10000, "trade-balance": 10000,
-    "purchase-invoice-total": 10000
+    "purchase-invoice-total": 10000,
+    "compound-percentage": 10000, "gravitational-work": 10000, "molar-concentration": 10000,
+    "population-growth": 10000, "python-affine-loop": 10000, "classifier-error-count": 10000,
+    "operating-profit": 10000, "contribution-total": 10000, "network-throughput": 10000,
+    "security-training-coverage": 10000
   })) {
     const items = generateDrafts(10000,[family]);
     assert.equal(items.length, count, family);
     assert.ok(items.every(item => item.status === "draft" && item.countsTowardApprovedTarget === false));
   }
   assert.deepEqual(generateDrafts(3), generateDrafts(3));
-  assert.equal(generateDrafts(1).length, 49);
+  assert.equal(generateDrafts(1).length, 59);
   assert.throws(() => generateDrafts(0));
 });
 
 test("catalogue reports exact capacity and returns independent metadata", () => {
   const catalogue = getDraftFamilyCatalog();
-  assert.equal(catalogue.length, 49);
-  assert.equal(new Set(catalogue.map(f => f.id)).size, 49);
-  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 253525);
+  assert.equal(catalogue.length, 59);
+  assert.equal(new Set(catalogue.map(f => f.id)).size, 59);
+  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 353525);
   assert.equal(new Set(catalogue.map(f => f.track)).size, 12);
   catalogue[0].capacity = 0;
   assert.equal(getDraftFamilyCatalog()[0].capacity, 9880);
@@ -154,8 +168,8 @@ test("CLI lists metadata and writes selected drafts separately from the default 
   const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd, encoding: "utf8"}));
   try {
     const catalogue = run("--list");
-    assert.equal(catalogue.capacity, 253525);
-    assert.equal(catalogue.families.length, 49);
+    assert.equal(catalogue.capacity, 353525);
+    assert.equal(catalogue.families.length, 59);
     const original = run("2");
     const selected = run("2", "force", "arithmetic-sequence");
     const reordered = run("2", "arithmetic-sequence", "force");
@@ -167,7 +181,7 @@ test("CLI lists metadata and writes selected drafts separately from the default 
     const pack = JSON.parse(readFileSync(join(cwd, selected.output), "utf8"));
     assert.deepEqual(pack.items, generateDrafts(2, ["force", "arithmetic-sequence"]));
     const full = JSON.parse(readFileSync(join(cwd, original.output), "utf8"));
-    assert.equal(full.items.length, 98);
+    assert.equal(full.items.length, 118);
   } finally {
     rmSync(cwd, {recursive: true, force: true});
   }
@@ -199,12 +213,12 @@ test("review pages match full generation across family boundaries and preserve i
 });
 
 test("late-page access is bounded and reports accurate capacity", () => {
-  const p = generateDraftPage({limitPerFamily:10000,offset:253520,pageSize:100});
-  assert.equal(p.total,253525);
+  const p = generateDraftPage({limitPerFamily:10000,offset:353520,pageSize:100});
+  assert.equal(p.total,353525);
   assert.equal(p.items.length,5);
   assert.equal(p.nextOffset,null);
-  assert.ok(p.items.every(q=>q.family==="purchase-invoice-total"));
-  assert.deepEqual(p.items,generateDrafts(10000,["purchase-invoice-total"]).slice(-5));
+  assert.ok(p.items.every(q=>q.family==="security-training-coverage"));
+  assert.deepEqual(p.items,generateDrafts(10000,["security-training-coverage"]).slice(-5));
   for(const pageSize of [0,-1,1001,1.5,Infinity])assert.throws(()=>generateDraftPage({pageSize}),/Page size/);
   for(const offset of [-1,0.5,Infinity])assert.throws(()=>generateDraftPage({offset}),/offset/);
   assert.throws(()=>generateDraftPage({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -262,8 +276,8 @@ test("new multi-step options are finite and distinct, with bounded percentage op
 
 test("coverage reports capped family counts and contains no private content", () => {
   const report=getDraftCoverage();
-  assert.equal(report.totalVariants,253525);
-  assert.equal(report.familyCount,49);
+  assert.equal(report.totalVariants,353525);
+  assert.equal(report.familyCount,59);
   assert.equal(report.trackCount,12);
   assert.equal(report.approvedQuestions,0);
   assert.equal(report.publishedQuestions,0);
@@ -294,4 +308,16 @@ test("selected exports with different limits are isolated and private",()=>{
     if(process.platform!=="win32")assert.equal(statSync(join(cwd,first.output)).mode&0o777,0o600);
     assert.ok(readdirSync(join(cwd,"content/generated")).every(name=>!name.startsWith(".review-")));
   }finally{rmSync(cwd,{recursive:true,force:true});}
+});
+
+test("new applied questions have four distinct finite numeric options",()=>{
+ for(const family of ["compound-percentage","gravitational-work","molar-concentration","population-growth","python-affine-loop","classifier-error-count","operating-profit","contribution-total","network-throughput","security-training-coverage"]){
+   const items=generateDrafts(10000,[family]);
+   assert.equal(items.length,10000);
+   for(const q of items){
+     assert.equal(new Set(q.options).size,4,q.id);
+     assert.ok(q.options.every(o=>Number.isSafeInteger(Number(o))&&Number(o)>=0),q.id);
+     if(family==="security-training-coverage")assert.ok(q.options.every(o=>Number(o)<=100),q.id);
+   }
+ }
 });
