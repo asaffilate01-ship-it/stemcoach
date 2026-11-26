@@ -5,22 +5,28 @@ import { mkdtempSync, readFileSync, rmSync, readdirSync, statSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateDrafts, getDraftFamilyCatalog, generateDraftPage, getDraftCoverage, generateDraftReviewSample } from "./generate-formative-drafts.mjs";
+import { generateDrafts, getDraftFamilyCatalog, generateDraftPage, getDraftCoverage, generateDraftReviewSample, iterateDrafts } from "./generate-formative-drafts.mjs";
 import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
-  const items = generateDrafts(10000);
-  assert.equal(items.length, 353525);
-  const report = validateBatches([{ schemaVersion: 1, items }]);
+  function* batches() {
+    let items=[];
+    for(const item of iterateDrafts(10000)){
+      items.push(item);
+      if(items.length===1000){yield {schemaVersion:1,items};items=[];}
+    }
+    if(items.length)yield {schemaVersion:1,items};
+  }
+  const report = validateBatches(batches());
   assert.equal(report.valid, true, report.errors.slice(0, 4).join("; "));
-  assert.equal(report.stats.variants, 353525);
+  assert.equal(report.stats.variants, 503525);
   assert.equal(report.stats.originals, 0);
   assert.equal(report.approvedCount, 0);
   assert.equal(report.publishedCount, 0);
 });
 
 function* allDraftItems() {
-  for(const family of getDraftFamilyCatalog())yield* generateDrafts(family.capacity,[family.id]);
+  yield* iterateDrafts(10000);
 }
 
 test("independent arithmetic checks across every generated question", () => {
@@ -87,6 +93,21 @@ test("independent arithmetic checks across every generated question", () => {
       case "contribution-total": expected = nums[0]*(nums[1]-nums[2]); break;
       case "network-throughput": expected = nums[0]*nums[1]; break;
       case "security-training-coverage": expected = nums[1]*100/nums[0]; break;
+      case "simple-interest": expected = nums[0]*nums[1]*nums[2]/100; break;
+      case "number-line-midpoint": expected = (nums[0]+nums[1])/2; break;
+      case "bulk-density": expected = nums[0]/nums[1]; break;
+      case "contact-pressure": expected = nums[0]/nums[1]; break;
+      case "percentage-purity": expected = nums[1]*100/nums[0]; break;
+      case "ammonia-limiting-reactant": expected = 2*Math.min(nums[0],nums[1]/3); break;
+      case "minute-ventilation": expected = nums[0]*nums[1]; break;
+      case "quadrat-population-estimate": expected = nums[0]*nums[1]; break;
+      case "python-list-repetition": expected = nums[0]*nums[1]; break;
+      case "classifier-specificity": expected = nums[1]*100/nums[0]; break;
+      case "accounting-equity": expected = nums[0]-nums[1]; break;
+      case "margin-of-safety-units": expected = nums[0]-nums[1]; break;
+      case "net-units-sold": expected = nums[0]-nums[1]; break;
+      case "constant-price-output": expected = nums[0]*nums[2]+nums[1]*nums[3]; break;
+      case "unremediated-patches": expected = nums[0]-nums[1]; break;
       default: assert.fail("Unknown family");
     }
     assert.equal(Number(item.correctAnswer), expected, item.id);
@@ -125,22 +146,27 @@ test("new families are bounded and deterministic with no approved-credit inflati
     "compound-percentage": 10000, "gravitational-work": 10000, "molar-concentration": 10000,
     "population-growth": 10000, "python-affine-loop": 10000, "classifier-error-count": 10000,
     "operating-profit": 10000, "contribution-total": 10000, "network-throughput": 10000,
-    "security-training-coverage": 10000
+    "security-training-coverage": 10000,
+    "simple-interest": 10000, "number-line-midpoint": 10000, "bulk-density": 10000,
+    "contact-pressure": 10000, "percentage-purity": 10000, "ammonia-limiting-reactant": 10000,
+    "minute-ventilation": 10000, "quadrat-population-estimate": 10000, "python-list-repetition": 10000,
+    "classifier-specificity": 10000, "accounting-equity": 10000, "margin-of-safety-units": 10000,
+    "net-units-sold": 10000, "constant-price-output": 10000, "unremediated-patches": 10000
   })) {
     const items = generateDrafts(10000,[family]);
     assert.equal(items.length, count, family);
     assert.ok(items.every(item => item.status === "draft" && item.countsTowardApprovedTarget === false));
   }
   assert.deepEqual(generateDrafts(3), generateDrafts(3));
-  assert.equal(generateDrafts(1).length, 59);
+  assert.equal(generateDrafts(1).length, 74);
   assert.throws(() => generateDrafts(0));
 });
 
 test("catalogue reports exact capacity and returns independent metadata", () => {
   const catalogue = getDraftFamilyCatalog();
-  assert.equal(catalogue.length, 59);
-  assert.equal(new Set(catalogue.map(f => f.id)).size, 59);
-  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 353525);
+  assert.equal(catalogue.length, 74);
+  assert.equal(new Set(catalogue.map(f => f.id)).size, 74);
+  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 503525);
   assert.equal(new Set(catalogue.map(f => f.track)).size, 12);
   catalogue[0].capacity = 0;
   assert.equal(getDraftFamilyCatalog()[0].capacity, 9880);
@@ -168,8 +194,8 @@ test("CLI lists metadata and writes selected drafts separately from the default 
   const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd, encoding: "utf8"}));
   try {
     const catalogue = run("--list");
-    assert.equal(catalogue.capacity, 353525);
-    assert.equal(catalogue.families.length, 59);
+    assert.equal(catalogue.capacity, 503525);
+    assert.equal(catalogue.families.length, 74);
     const original = run("2");
     const selected = run("2", "force", "arithmetic-sequence");
     const reordered = run("2", "arithmetic-sequence", "force");
@@ -181,7 +207,7 @@ test("CLI lists metadata and writes selected drafts separately from the default 
     const pack = JSON.parse(readFileSync(join(cwd, selected.output), "utf8"));
     assert.deepEqual(pack.items, generateDrafts(2, ["force", "arithmetic-sequence"]));
     const full = JSON.parse(readFileSync(join(cwd, original.output), "utf8"));
-    assert.equal(full.items.length, 118);
+    assert.equal(full.items.length, 148);
   } finally {
     rmSync(cwd, {recursive: true, force: true});
   }
@@ -213,12 +239,12 @@ test("review pages match full generation across family boundaries and preserve i
 });
 
 test("late-page access is bounded and reports accurate capacity", () => {
-  const p = generateDraftPage({limitPerFamily:10000,offset:353520,pageSize:100});
-  assert.equal(p.total,353525);
+  const p = generateDraftPage({limitPerFamily:10000,offset:503520,pageSize:100});
+  assert.equal(p.total,503525);
   assert.equal(p.items.length,5);
   assert.equal(p.nextOffset,null);
-  assert.ok(p.items.every(q=>q.family==="security-training-coverage"));
-  assert.deepEqual(p.items,generateDrafts(10000,["security-training-coverage"]).slice(-5));
+  assert.ok(p.items.every(q=>q.family==="unremediated-patches"));
+  assert.deepEqual(p.items,generateDrafts(10000,["unremediated-patches"]).slice(-5));
   for(const pageSize of [0,-1,1001,1.5,Infinity])assert.throws(()=>generateDraftPage({pageSize}),/Page size/);
   for(const offset of [-1,0.5,Infinity])assert.throws(()=>generateDraftPage({offset}),/offset/);
   assert.throws(()=>generateDraftPage({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -276,8 +302,8 @@ test("new multi-step options are finite and distinct, with bounded percentage op
 
 test("coverage reports capped family counts and contains no private content", () => {
   const report=getDraftCoverage();
-  assert.equal(report.totalVariants,353525);
-  assert.equal(report.familyCount,59);
+  assert.equal(report.totalVariants,503525);
+  assert.equal(report.familyCount,74);
   assert.equal(report.trackCount,12);
   assert.equal(report.approvedQuestions,0);
   assert.equal(report.publishedQuestions,0);
@@ -341,8 +367,8 @@ test("stratified samples are reproducible, capped and cover every selected famil
    }
  }
  assert.notDeepEqual(sample.items.map(q=>q.id),generateDraftReviewSample({...settings,seed:"another-review"}).items.map(q=>q.id));
- assert.equal(generateDraftReviewSample({limitPerFamily:2,samplesPerFamily:100}).count,118);
- assert.equal(generateDraftReviewSample().count,295);
+ assert.equal(generateDraftReviewSample({limitPerFamily:2,samplesPerFamily:100}).count,148);
+ assert.equal(generateDraftReviewSample().count,370);
  for(const n of [0,101,1.5,Infinity])assert.throws(()=>generateDraftReviewSample({samplesPerFamily:n}),/Samples per family/);
  for(const seed of ["",null,"x".repeat(129)])assert.throws(()=>generateDraftReviewSample({seed}),/Seed/);
  assert.throws(()=>generateDraftReviewSample({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -365,4 +391,38 @@ test("review sample CLI writes isolated private packs with metadata-only stdout"
   assert.notEqual(c.output,a.output);
   assert.throws(()=>execFileSync(process.execPath,[script,"--sample","101","20","review-a"],{cwd,stdio:"pipe"}));
  }finally{rmSync(cwd,{recursive:true,force:true});}
+});
+
+test("incremental validation catches duplicates across batches without leaking text",()=>{
+ const item=generateDrafts(1,["simple-interest"])[0];
+ function* batches(){yield {schemaVersion:1,items:[item]};yield {schemaVersion:1,items:[{...item,id:"synthetic-duplicate"}]};}
+ const report=validateBatches(batches());
+ assert.equal(report.valid,false);
+ assert.equal(report.stats.structurallyValid,1);
+ assert.ok(report.errors.some(e=>e.includes("batch 1 item 0: duplicate normalised stem")));
+ assert.ok(report.errors.every(e=>!e.includes(item.text)));
+});
+test("streamed export crosses buffer boundaries and matches existing question records",()=>{
+ const cwd=mkdtempSync(join(tmpdir(),"stemcoach-stream-"));
+ const script=fileURLToPath(new URL("./generate-formative-drafts.mjs",import.meta.url));
+ try{
+  const result=JSON.parse(execFileSync(process.execPath,[script,"600","simple-interest","ammonia-limiting-reactant"],{cwd,encoding:"utf8"}));
+  const pack=JSON.parse(readFileSync(join(cwd,result.output),"utf8"));
+  assert.equal(result.draftVariants,1200);
+  assert.equal(pack.count,1200);
+  assert.equal(pack.status,"draft");
+  assert.ok(statSync(join(cwd,result.output)).size>524288);
+  assert.deepEqual(pack.items,generateDrafts(600,["simple-interest","ammonia-limiting-reactant"]));
+  if(process.platform!=="win32")assert.equal(statSync(join(cwd,result.output)).mode&0o777,0o600);
+  assert.ok(readdirSync(join(cwd,"content/generated")).every(name=>!name.startsWith(".review-")));
+ }finally{rmSync(cwd,{recursive:true,force:true});}
+});
+test("advanced calculations have finite unique answers and percentage bounds",()=>{
+ for(const id of ["simple-interest","number-line-midpoint","bulk-density","contact-pressure","percentage-purity","ammonia-limiting-reactant","minute-ventilation","quadrat-population-estimate","python-list-repetition","classifier-specificity","accounting-equity","margin-of-safety-units","net-units-sold","constant-price-output","unremediated-patches"]){
+  for(const q of iterateDrafts(10000,[id])){
+   assert.equal(new Set(q.options).size,4);
+   assert.ok(q.options.every(o=>Number.isSafeInteger(Number(o))&&Number(o)>=0));
+   if(id==="percentage-purity"||id==="classifier-specificity")assert.ok(q.options.every(o=>Number(o)<=100));
+  }
+ }
 });
