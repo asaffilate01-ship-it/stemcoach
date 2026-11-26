@@ -201,3 +201,33 @@ test("applied percentage questions and distractors stay within 0–100%", () => 
   assert.equal(items.length,20800);
   assert.ok(items.every(q=>q.options.every(o=>Number.isInteger(Number(o)) && Number(o)>=0 && Number(o)<=100)));
 });
+
+test("operator CLI exports stable bounded pages separately, including the last page", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "stemcoach-review-page-"));
+  const script = fileURLToPath(new URL("./generate-formative-drafts.mjs", import.meta.url));
+  const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd,encoding:"utf8"}));
+  try {
+    const a=run("--page","3","5","6","force","replicated-storage");
+    const b=run("--page","3","5","6","replicated-storage","force");
+    assert.equal(a.output,b.output);
+    assert.equal(a.total,12);
+    assert.equal(a.nextOffset,8);
+    assert.equal(a.draftVariants,5);
+    assert.equal(a.approvedQuestions,0);
+    const saved=JSON.parse(readFileSync(join(cwd,a.output),"utf8"));
+    assert.equal(saved.status,"draft");
+    assert.deepEqual(saved.items,generateDrafts(6,["force","replicated-storage"]).slice(3,8));
+    const last=run("--page","8","5","6","force","replicated-storage");
+    assert.notEqual(last.output,a.output);
+    assert.equal(last.draftVariants,4);
+    assert.equal(last.nextOffset,null);
+    assert.deepEqual(JSON.parse(readFileSync(join(cwd,last.output),"utf8")).items,generateDrafts(6,["force","replicated-storage"]).slice(8));
+    const full=run("6","force","replicated-storage");
+    assert.notEqual(full.output,last.output);
+    const empty=run("--page","12","5","6","force","replicated-storage");
+    assert.equal(empty.draftVariants,0);
+    assert.equal(empty.nextOffset,null);
+    assert.throws(()=>execFileSync(process.execPath,[script,"--page","-1","5","6"],{cwd,stdio:"pipe"}));
+    assert.throws(()=>execFileSync(process.execPath,[script,"--page","0","1001","6"],{cwd,stdio:"pipe"}));
+  }finally{rmSync(cwd,{recursive:true,force:true});}
+});
