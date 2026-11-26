@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateDrafts, getDraftFamilyCatalog } from "./generate-formative-drafts.mjs";
+import { generateDrafts, getDraftFamilyCatalog, generateDraftPage } from "./generate-formative-drafts.mjs";
 import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
@@ -148,4 +148,35 @@ test("new percentage and positive-quantity choices stay in valid bounds", () => 
   assert.ok(percent.every(q => q.options.every(o => Number(o)>=0 && Number(o)<=100)));
   const selected = generateDrafts(10000, ["rectangle-area","electric-charge","nominal-output-value"]);
   assert.ok(selected.every(q => q.options.every(o => Number.isSafeInteger(Number(o)) && Number(o)>=0)));
+});
+
+test("review pages match full generation across family boundaries and preserve identifiers", () => {
+  const selectedFamilyIds = ["force","rectangle-area","backup-recovery-gap"];
+  const full = generateDrafts(9, selectedFamilyIds);
+  let offset = 0;
+  const collected = [];
+  do {
+    const page = generateDraftPage({limitPerFamily:9,selectedFamilyIds,offset,pageSize:7});
+    assert.equal(page.total,27);
+    assert.ok(page.items.length<=7);
+    assert.equal(page.offset,offset);
+    collected.push(...page.items);
+    offset = page.nextOffset;
+  } while(offset!==null);
+  assert.deepEqual(collected,full);
+  assert.deepEqual(generateDraftPage({limitPerFamily:9,selectedFamilyIds,offset:27}),{items:[],total:27,offset:27,nextOffset:null});
+  assert.deepEqual(generateDraftPage({limitPerFamily:9,selectedFamilyIds,offset:99}),{items:[],total:27,offset:99,nextOffset:null});
+});
+
+test("late-page access is bounded and reports accurate capacity", () => {
+  const p = generateDraftPage({limitPerFamily:10000,offset:100920,pageSize:100});
+  assert.equal(p.total,100925);
+  assert.equal(p.items.length,5);
+  assert.equal(p.nextOffset,null);
+  assert.ok(p.items.every(q=>q.family==="nominal-output-value"));
+  assert.deepEqual(p.items,generateDrafts(10000,["nominal-output-value"]).slice(-5));
+  for(const pageSize of [0,-1,1001,1.5,Infinity])assert.throws(()=>generateDraftPage({pageSize}),/Page size/);
+  for(const offset of [-1,0.5,Infinity])assert.throws(()=>generateDraftPage({offset}),/offset/);
+  assert.throws(()=>generateDraftPage({selectedFamilyIds:["unknown"]}),/unique known/);
+  assert.throws(()=>generateDraftPage({limitPerFamily:0}),/Positive integer/);
 });
