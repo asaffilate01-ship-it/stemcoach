@@ -1,27 +1,30 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateDrafts, getDraftFamilyCatalog, generateDraftPage } from "./generate-formative-drafts.mjs";
+import { generateDrafts, getDraftFamilyCatalog, generateDraftPage, getDraftCoverage } from "./generate-formative-drafts.mjs";
 import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
   const items = generateDrafts(10000);
-  assert.equal(items.length, 153525);
+  assert.equal(items.length, 253525);
   const report = validateBatches([{ schemaVersion: 1, items }]);
   assert.equal(report.valid, true, report.errors.slice(0, 4).join("; "));
-  assert.equal(report.stats.variants, 153525);
+  assert.equal(report.stats.variants, 253525);
   assert.equal(report.stats.originals, 0);
   assert.equal(report.approvedCount, 0);
   assert.equal(report.publishedCount, 0);
 });
 
+function* allDraftItems() {
+  for(const family of getDraftFamilyCatalog())yield* generateDrafts(family.capacity,[family.id]);
+}
+
 test("independent arithmetic checks across every generated question", () => {
-  const items = generateDrafts(10000);
-  for (const item of items) {
+  for (const item of allDraftItems()) {
     const nums = item.text.match(/\d+/g).map(Number);
     let expected;
     switch (item.family) {
@@ -64,6 +67,16 @@ test("independent arithmetic checks across every generated question", () => {
       case "inventory-reorder-level": expected = nums[0]*nums[1]+nums[2]; break;
       case "service-availability": expected = nums[1]*100/nums[0]; break;
       case "replicated-storage": expected = nums[0]*nums[1]; break;
+      case "trapezium-area": expected = (nums[0]+nums[1])*nums[2]/2; break;
+      case "specific-heat-energy": expected = nums[0]*nums[1]*nums[2]; break;
+      case "solution-dilution": expected = nums[0]*nums[1]/nums[2]; break;
+      case "trophic-energy-transfer": expected = nums[0]*nums[1]*nums[2]/10000; break;
+      case "python-range-count": expected = Math.ceil((nums[1]-nums[0])/nums[2]); break;
+      case "classification-precision": expected = nums[0]*100/(nums[0]+nums[1]); break;
+      case "closing-cash-balance": expected = nums[0]+nums[1]-nums[2]; break;
+      case "capacity-utilisation": expected = nums[1]*100/nums[0]; break;
+      case "trade-balance": expected = nums[0]-nums[1]; break;
+      case "purchase-invoice-total": expected = nums[0]*nums[1]+nums[2]; break;
       default: assert.fail("Unknown family");
     }
     assert.equal(Number(item.correctAnswer), expected, item.id);
@@ -82,7 +95,6 @@ test("rejects duplicate, non-draft and malformed items without leaking stems", (
 });
 
 test("new families are bounded and deterministic with no approved-credit inflation", () => {
-  const all = generateDrafts(10000);
   for (const [family, count] of Object.entries({
     "percentage-discount": 720, "average-power": 2000, "population-density": 1200,
     "amount-of-substance": 1000, "integer-remainder": 1200, "arithmetic-sequence": 4000, "series-resistance": 3600,
@@ -95,22 +107,26 @@ test("new families are bounded and deterministic with no approved-credit inflati
     "simultaneous-equations": 4800, "kinetic-energy": 5000, "percentage-yield": 6000,
     "cardiac-output": 6000, "classification-recall": 4800, "python-slice-length": 5000,
     "gross-profit-margin": 6000, "inventory-reorder-level": 6000, "service-availability": 4000,
-    "replicated-storage": 5000
+    "replicated-storage": 5000,
+    "trapezium-area": 10000, "specific-heat-energy": 10000, "solution-dilution": 10000,
+    "trophic-energy-transfer": 10000, "python-range-count": 10000, "classification-precision": 10000,
+    "closing-cash-balance": 10000, "capacity-utilisation": 10000, "trade-balance": 10000,
+    "purchase-invoice-total": 10000
   })) {
-    const items = all.filter(item => item.family === family);
+    const items = generateDrafts(10000,[family]);
     assert.equal(items.length, count, family);
     assert.ok(items.every(item => item.status === "draft" && item.countsTowardApprovedTarget === false));
   }
   assert.deepEqual(generateDrafts(3), generateDrafts(3));
-  assert.equal(generateDrafts(1).length, 39);
+  assert.equal(generateDrafts(1).length, 49);
   assert.throws(() => generateDrafts(0));
 });
 
 test("catalogue reports exact capacity and returns independent metadata", () => {
   const catalogue = getDraftFamilyCatalog();
-  assert.equal(catalogue.length, 39);
-  assert.equal(new Set(catalogue.map(f => f.id)).size, 39);
-  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 153525);
+  assert.equal(catalogue.length, 49);
+  assert.equal(new Set(catalogue.map(f => f.id)).size, 49);
+  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 253525);
   assert.equal(new Set(catalogue.map(f => f.track)).size, 12);
   catalogue[0].capacity = 0;
   assert.equal(getDraftFamilyCatalog()[0].capacity, 9880);
@@ -138,8 +154,8 @@ test("CLI lists metadata and writes selected drafts separately from the default 
   const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd, encoding: "utf8"}));
   try {
     const catalogue = run("--list");
-    assert.equal(catalogue.capacity, 153525);
-    assert.equal(catalogue.families.length, 39);
+    assert.equal(catalogue.capacity, 253525);
+    assert.equal(catalogue.families.length, 49);
     const original = run("2");
     const selected = run("2", "force", "arithmetic-sequence");
     const reordered = run("2", "arithmetic-sequence", "force");
@@ -151,7 +167,7 @@ test("CLI lists metadata and writes selected drafts separately from the default 
     const pack = JSON.parse(readFileSync(join(cwd, selected.output), "utf8"));
     assert.deepEqual(pack.items, generateDrafts(2, ["force", "arithmetic-sequence"]));
     const full = JSON.parse(readFileSync(join(cwd, original.output), "utf8"));
-    assert.equal(full.items.length, 78);
+    assert.equal(full.items.length, 98);
   } finally {
     rmSync(cwd, {recursive: true, force: true});
   }
@@ -183,12 +199,12 @@ test("review pages match full generation across family boundaries and preserve i
 });
 
 test("late-page access is bounded and reports accurate capacity", () => {
-  const p = generateDraftPage({limitPerFamily:10000,offset:153520,pageSize:100});
-  assert.equal(p.total,153525);
+  const p = generateDraftPage({limitPerFamily:10000,offset:253520,pageSize:100});
+  assert.equal(p.total,253525);
   assert.equal(p.items.length,5);
   assert.equal(p.nextOffset,null);
-  assert.ok(p.items.every(q=>q.family==="replicated-storage"));
-  assert.deepEqual(p.items,generateDrafts(10000,["replicated-storage"]).slice(-5));
+  assert.ok(p.items.every(q=>q.family==="purchase-invoice-total"));
+  assert.deepEqual(p.items,generateDrafts(10000,["purchase-invoice-total"]).slice(-5));
   for(const pageSize of [0,-1,1001,1.5,Infinity])assert.throws(()=>generateDraftPage({pageSize}),/Page size/);
   for(const offset of [-1,0.5,Infinity])assert.throws(()=>generateDraftPage({offset}),/offset/);
   assert.throws(()=>generateDraftPage({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -229,5 +245,53 @@ test("operator CLI exports stable bounded pages separately, including the last p
     assert.equal(empty.nextOffset,null);
     assert.throws(()=>execFileSync(process.execPath,[script,"--page","-1","5","6"],{cwd,stdio:"pipe"}));
     assert.throws(()=>execFileSync(process.execPath,[script,"--page","0","1001","6"],{cwd,stdio:"pipe"}));
+  }finally{rmSync(cwd,{recursive:true,force:true});}
+});
+
+test("new multi-step options are finite and distinct, with bounded percentage options", () => {
+  for(const id of ["trapezium-area","specific-heat-energy","solution-dilution","trophic-energy-transfer","python-range-count","classification-precision","closing-cash-balance","capacity-utilisation","trade-balance","purchase-invoice-total"]){
+    const items=generateDrafts(10000,[id]);
+    assert.equal(items.length,10000);
+    for(const q of items){
+      assert.equal(new Set(q.options).size,4);
+      assert.ok(q.options.every(o=>Number.isSafeInteger(Number(o))&&Number(o)>=0));
+      if(id==="classification-precision"||id==="capacity-utilisation")assert.ok(q.options.every(o=>Number(o)<=100));
+    }
+  }
+});
+
+test("coverage reports capped family counts and contains no private content", () => {
+  const report=getDraftCoverage();
+  assert.equal(report.totalVariants,253525);
+  assert.equal(report.familyCount,49);
+  assert.equal(report.trackCount,12);
+  assert.equal(report.approvedQuestions,0);
+  assert.equal(report.publishedQuestions,0);
+  assert.equal(report.tracks.reduce((sum,t)=>sum+t.variants,0),report.totalVariants);
+  assert.deepEqual(getDraftCoverage(5,["trapezium-area","linear-equation","specific-heat-energy"]),{
+    familyCount:3,trackCount:2,totalVariants:15,
+    tracks:[{track:"mathematics",families:2,variants:10},{track:"physics",families:1,variants:5}],
+    approvedQuestions:0,publishedQuestions:0
+  });
+  assert.throws(()=>getDraftCoverage(0),/Positive integer/);
+  assert.throws(()=>getDraftCoverage(5,["missing"]),/unique known/);
+  assert.ok(!JSON.stringify(report).includes("correctAnswer"));
+});
+
+test("selected exports with different limits are isolated and private",()=>{
+  const cwd=mkdtempSync(join(tmpdir(),"stemcoach-private-export-"));
+  const script=fileURLToPath(new URL("./generate-formative-drafts.mjs",import.meta.url));
+  const run=(...args)=>JSON.parse(execFileSync(process.execPath,[script,...args],{cwd,encoding:"utf8"}));
+  try{
+    assert.deepEqual(run("--coverage","5","trapezium-area","specific-heat-energy"),getDraftCoverage(5,["trapezium-area","specific-heat-energy"]));
+    const first=run("2","force","solution-dilution");
+    const second=run("3","solution-dilution","force");
+    assert.notEqual(first.output,second.output);
+    assert.equal(JSON.parse(readFileSync(join(cwd,first.output),"utf8")).items.length,4);
+    assert.equal(JSON.parse(readFileSync(join(cwd,second.output),"utf8")).items.length,6);
+    const repeat=run("2","solution-dilution","force");
+    assert.equal(repeat.output,first.output);
+    if(process.platform!=="win32")assert.equal(statSync(join(cwd,first.output)).mode&0o777,0o600);
+    assert.ok(readdirSync(join(cwd,"content/generated")).every(name=>!name.startsWith(".review-")));
   }finally{rmSync(cwd,{recursive:true,force:true});}
 });
