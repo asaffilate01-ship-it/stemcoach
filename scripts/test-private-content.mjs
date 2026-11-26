@@ -1,14 +1,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { generateDrafts } from "./generate-formative-drafts.mjs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { generateDrafts, getDraftFamilyCatalog } from "./generate-formative-drafts.mjs";
 import { validateBatches } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
   const items = generateDrafts(10000);
-  assert.equal(items.length, 30925);
+  assert.equal(items.length, 54925);
   const report = validateBatches([{ schemaVersion: 1, items }]);
   assert.equal(report.valid, true, report.errors.slice(0, 4).join("; "));
-  assert.equal(report.stats.variants, 30925);
+  assert.equal(report.stats.variants, 54925);
   assert.equal(report.stats.originals, 0);
   assert.equal(report.approvedCount, 0);
   assert.equal(report.publishedCount, 0);
@@ -31,6 +36,14 @@ test("independent arithmetic checks across every generated question", () => {
       case "population-density": expected = nums[0] / nums[1]; break;
       case "amount-of-substance": expected = nums[0] / nums[1]; break;
       case "integer-remainder": expected = nums[0] % nums[1]; break;
+      case "arithmetic-sequence": expected = nums[0] + (nums[2]-1)*nums[1]; break;
+      case "series-resistance": expected = nums[0]+nums[1]; break;
+      case "classification-accuracy": expected = nums[0]*100/nums[1]; break;
+      case "metered-cloud-cost": expected = nums[0]*nums[1]; break;
+      case "unit-purchase-cost": expected = nums[0]/nums[1]; break;
+      case "price-index-change": expected = (nums[1]-nums[0])*100/nums[0]; break;
+      case "straight-line-depreciation": expected = (nums[0]-nums[1])/nums[2]; break;
+      case "microscope-magnification": expected = nums[0]*1000/nums[1]; break;
       default: assert.fail("Unknown family");
     }
     assert.equal(Number(item.correctAnswer), expected, item.id);
@@ -52,13 +65,66 @@ test("new families are bounded and deterministic with no approved-credit inflati
   const all = generateDrafts(10000);
   for (const [family, count] of Object.entries({
     "percentage-discount": 720, "average-power": 2000, "population-density": 1200,
-    "amount-of-substance": 1000, "integer-remainder": 1200
+    "amount-of-substance": 1000, "integer-remainder": 1200, "arithmetic-sequence": 4000, "series-resistance": 3600,
+    "classification-accuracy": 3000, "metered-cloud-cost": 2400, "unit-purchase-cost": 3000,
+    "price-index-change": 2000, "straight-line-depreciation": 4000, "microscope-magnification": 2000
   })) {
     const items = all.filter(item => item.family === family);
     assert.equal(items.length, count, family);
     assert.ok(items.every(item => item.status === "draft" && item.countsTowardApprovedTarget === false));
   }
   assert.deepEqual(generateDrafts(3), generateDrafts(3));
-  assert.equal(generateDrafts(1).length, 11);
+  assert.equal(generateDrafts(1).length, 19);
   assert.throws(() => generateDrafts(0));
+});
+
+test("catalogue reports exact capacity and returns independent metadata", () => {
+  const catalogue = getDraftFamilyCatalog();
+  assert.equal(catalogue.length, 19);
+  assert.equal(new Set(catalogue.map(f => f.id)).size, 19);
+  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 54925);
+  assert.equal(new Set(catalogue.map(f => f.track)).size, 11);
+  catalogue[0].capacity = 0;
+  assert.equal(getDraftFamilyCatalog()[0].capacity, 9880);
+});
+
+test("selective generation preserves stable IDs and canonical ordering", () => {
+  const selected = ["microscope-magnification", "arithmetic-sequence"];
+  const baseline = generateDrafts(5).filter(item => selected.includes(item.family));
+  assert.deepEqual(generateDrafts(5, selected), baseline);
+  assert.equal(generateDrafts(10000, ["series-resistance"]).length, 3600);
+  for (const value of [[], null, "force", ["force","force"], ["missing"], ["__proto__"], [1], Array(1)]) {
+    assert.throws(() => generateDrafts(3, value), /unique known family IDs/);
+  }
+});
+
+test("classification choices remain physically valid percentages", () => {
+  for (const item of generateDrafts(10000, ["classification-accuracy"])) {
+    assert.ok(item.options.every(o => Number(o)>=0 && Number(o)<=100));
+  }
+});
+
+test("CLI lists metadata and writes selected drafts separately from the default export", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "stemcoach-drafts-"));
+  const script = fileURLToPath(new URL("./generate-formative-drafts.mjs", import.meta.url));
+  const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd, encoding: "utf8"}));
+  try {
+    const catalogue = run("--list");
+    assert.equal(catalogue.capacity, 54925);
+    assert.equal(catalogue.families.length, 19);
+    const original = run("2");
+    const selected = run("2", "force", "arithmetic-sequence");
+    const reordered = run("2", "arithmetic-sequence", "force");
+    assert.equal(original.output, "content/generated/formative-variants.json");
+    assert.notEqual(selected.output, original.output);
+    assert.equal(selected.output, reordered.output);
+    assert.equal(selected.draftVariants, 4);
+    assert.equal(selected.approvedQuestions, 0);
+    const pack = JSON.parse(readFileSync(join(cwd, selected.output), "utf8"));
+    assert.deepEqual(pack.items, generateDrafts(2, ["force", "arithmetic-sequence"]));
+    const full = JSON.parse(readFileSync(join(cwd, original.output), "utf8"));
+    assert.equal(full.items.length, 38);
+  } finally {
+    rmSync(cwd, {recursive: true, force: true});
+  }
 });
