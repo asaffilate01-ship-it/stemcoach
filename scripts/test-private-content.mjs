@@ -19,14 +19,24 @@ test("full generator capacity stays unique, draft-only and structurally valid", 
   }
   const report = validateBatches(batches());
   assert.equal(report.valid, true, report.errors.slice(0, 4).join("; "));
-  assert.equal(report.stats.variants, 503525);
+  assert.equal(report.stats.variants, 603717);
   assert.equal(report.stats.originals, 0);
   assert.equal(report.approvedCount, 0);
   assert.equal(report.publishedCount, 0);
 });
 
+const languageScopes={
+ "english-irregular-plurals":["english-language","en",["PK","GB","DE"],"children","child"],
+ "ielts-paraphrase-vocabulary":["ielts","en",["PK","GB","DE"],"in short supply","scarce"],
+ "german-everyday-nouns":["german","de",["PK","GB","DE"],"der Tisch","the table"],
+ "german-visa-daily-phrases":["german-visa-preparation","de",["PK","GB","DE"],"Wo ist der Bahnhof?","Where is the station?"],
+ "arabic-basic-nouns":["arabic","ar",["PK"],"كتاب","book"],
+ "urdu-basic-nouns":["urdu","ur",["PK"],"کتاب","book"],
+ "turkish-basic-nouns":["turkish","tr",["PK"],"kitap","book"],
+ "welsh-basic-nouns":["welsh","en",["PK","GB"],"llyfr","book"]
+};
 function* allDraftItems() {
-  yield* iterateDrafts(10000);
+  yield* iterateDrafts(10000,getDraftFamilyCatalog().filter(f=>!Object.hasOwn(languageScopes,f.id)).map(f=>f.id));
 }
 
 test("independent arithmetic checks across every generated question", () => {
@@ -108,6 +118,16 @@ test("independent arithmetic checks across every generated question", () => {
       case "net-units-sold": expected = nums[0]-nums[1]; break;
       case "constant-price-output": expected = nums[0]*nums[2]+nums[1]*nums[3]; break;
       case "unremediated-patches": expected = nums[0]-nums[1]; break;
+      case "triangle-area": expected = nums[0]*nums[1]/2; break;
+      case "electrical-energy-wh": expected = nums[0]*nums[1]; break;
+      case "atom-economy": expected = nums[1]*100/nums[0]; break;
+      case "water-uptake-rate": expected = nums[0]/nums[1]; break;
+      case "python-string-repeat": expected = nums[0]*nums[1]; break;
+      case "dataset-training-split": expected = nums[0]*nums[1]/100; break;
+      case "current-ratio": expected = nums[0]/nums[1]; break;
+      case "sales-commission": expected = nums[0]*nums[1]/100; break;
+      case "cloud-cpu-hours": expected = nums[0]*nums[1]; break;
+      case "restore-completion": expected = nums[0]+nums[1]; break;
       default: assert.fail("Unknown family");
     }
     assert.equal(Number(item.correctAnswer), expected, item.id);
@@ -151,23 +171,29 @@ test("new families are bounded and deterministic with no approved-credit inflati
     "contact-pressure": 10000, "percentage-purity": 10000, "ammonia-limiting-reactant": 10000,
     "minute-ventilation": 10000, "quadrat-population-estimate": 10000, "python-list-repetition": 10000,
     "classifier-specificity": 10000, "accounting-equity": 10000, "margin-of-safety-units": 10000,
-    "net-units-sold": 10000, "constant-price-output": 10000, "unremediated-patches": 10000
+    "net-units-sold": 10000, "constant-price-output": 10000, "unremediated-patches": 10000,
+    "triangle-area": 10000, "electrical-energy-wh": 10000, "atom-economy": 10000,
+    "water-uptake-rate": 10000, "python-string-repeat": 10000, "dataset-training-split": 10000,
+    "current-ratio": 10000, "sales-commission": 10000, "cloud-cpu-hours": 10000, "restore-completion": 10000,
+    "english-irregular-plurals":24,"ielts-paraphrase-vocabulary":24,"german-everyday-nouns":24,
+    "german-visa-daily-phrases":24,"arabic-basic-nouns":24,"urdu-basic-nouns":24,
+    "turkish-basic-nouns":24,"welsh-basic-nouns":24
   })) {
     const items = generateDrafts(10000,[family]);
     assert.equal(items.length, count, family);
     assert.ok(items.every(item => item.status === "draft" && item.countsTowardApprovedTarget === false));
   }
   assert.deepEqual(generateDrafts(3), generateDrafts(3));
-  assert.equal(generateDrafts(1).length, 74);
+  assert.equal(generateDrafts(1).length, 92);
   assert.throws(() => generateDrafts(0));
 });
 
 test("catalogue reports exact capacity and returns independent metadata", () => {
   const catalogue = getDraftFamilyCatalog();
-  assert.equal(catalogue.length, 74);
-  assert.equal(new Set(catalogue.map(f => f.id)).size, 74);
-  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 503525);
-  assert.equal(new Set(catalogue.map(f => f.track)).size, 12);
+  assert.equal(catalogue.length, 92);
+  assert.equal(new Set(catalogue.map(f => f.id)).size, 92);
+  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 603717);
+  assert.equal(new Set(catalogue.map(f => f.track)).size, 20);
   catalogue[0].capacity = 0;
   assert.equal(getDraftFamilyCatalog()[0].capacity, 9880);
 });
@@ -194,8 +220,8 @@ test("CLI lists metadata and writes selected drafts separately from the default 
   const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd, encoding: "utf8"}));
   try {
     const catalogue = run("--list");
-    assert.equal(catalogue.capacity, 503525);
-    assert.equal(catalogue.families.length, 74);
+    assert.equal(catalogue.capacity, 603717);
+    assert.equal(catalogue.families.length, 92);
     const original = run("2");
     const selected = run("2", "force", "arithmetic-sequence");
     const reordered = run("2", "arithmetic-sequence", "force");
@@ -207,7 +233,7 @@ test("CLI lists metadata and writes selected drafts separately from the default 
     const pack = JSON.parse(readFileSync(join(cwd, selected.output), "utf8"));
     assert.deepEqual(pack.items, generateDrafts(2, ["force", "arithmetic-sequence"]));
     const full = JSON.parse(readFileSync(join(cwd, original.output), "utf8"));
-    assert.equal(full.items.length, 148);
+    assert.equal(full.items.length, 184);
   } finally {
     rmSync(cwd, {recursive: true, force: true});
   }
@@ -239,12 +265,12 @@ test("review pages match full generation across family boundaries and preserve i
 });
 
 test("late-page access is bounded and reports accurate capacity", () => {
-  const p = generateDraftPage({limitPerFamily:10000,offset:503520,pageSize:100});
-  assert.equal(p.total,503525);
+  const p = generateDraftPage({limitPerFamily:10000,offset:603712,pageSize:100});
+  assert.equal(p.total,603717);
   assert.equal(p.items.length,5);
   assert.equal(p.nextOffset,null);
-  assert.ok(p.items.every(q=>q.family==="unremediated-patches"));
-  assert.deepEqual(p.items,generateDrafts(10000,["unremediated-patches"]).slice(-5));
+  assert.ok(p.items.every(q=>q.family==="welsh-basic-nouns"));
+  assert.deepEqual(p.items,generateDrafts(10000,["welsh-basic-nouns"]).slice(-5));
   for(const pageSize of [0,-1,1001,1.5,Infinity])assert.throws(()=>generateDraftPage({pageSize}),/Page size/);
   for(const offset of [-1,0.5,Infinity])assert.throws(()=>generateDraftPage({offset}),/offset/);
   assert.throws(()=>generateDraftPage({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -302,9 +328,9 @@ test("new multi-step options are finite and distinct, with bounded percentage op
 
 test("coverage reports capped family counts and contains no private content", () => {
   const report=getDraftCoverage();
-  assert.equal(report.totalVariants,503525);
-  assert.equal(report.familyCount,74);
-  assert.equal(report.trackCount,12);
+  assert.equal(report.totalVariants,603717);
+  assert.equal(report.familyCount,92);
+  assert.equal(report.trackCount,20);
   assert.equal(report.approvedQuestions,0);
   assert.equal(report.publishedQuestions,0);
   assert.equal(report.tracks.reduce((sum,t)=>sum+t.variants,0),report.totalVariants);
@@ -367,8 +393,8 @@ test("stratified samples are reproducible, capped and cover every selected famil
    }
  }
  assert.notDeepEqual(sample.items.map(q=>q.id),generateDraftReviewSample({...settings,seed:"another-review"}).items.map(q=>q.id));
- assert.equal(generateDraftReviewSample({limitPerFamily:2,samplesPerFamily:100}).count,148);
- assert.equal(generateDraftReviewSample().count,370);
+ assert.equal(generateDraftReviewSample({limitPerFamily:2,samplesPerFamily:100}).count,184);
+ assert.equal(generateDraftReviewSample().count,460);
  for(const n of [0,101,1.5,Infinity])assert.throws(()=>generateDraftReviewSample({samplesPerFamily:n}),/Samples per family/);
  for(const seed of ["",null,"x".repeat(129)])assert.throws(()=>generateDraftReviewSample({seed}),/Seed/);
  assert.throws(()=>generateDraftReviewSample({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -425,4 +451,39 @@ test("advanced calculations have finite unique answers and percentage bounds",()
    if(id==="percentage-purity"||id==="classifier-specificity")assert.ok(q.options.every(o=>Number(o)<=100));
   }
  }
+});
+
+test("multilingual recall preserves bidirectional keys, unique choices and market scope",()=>{
+ for(const [family,[track,language,markets,firstAnswer,reverseAnswer]] of Object.entries(languageScopes)){
+  const rows=generateDrafts(10000,[family]);
+  assert.equal(rows.length,24);
+  assert.equal(rows[0].correctAnswer,firstAnswer);
+  assert.equal(rows[12].correctAnswer,reverseAnswer);
+  for(let i=0;i<12;i++){
+   const forward=rows[i],reverse=rows[i+12];
+   const quoted=q=>q.text.match(/[“«](.+)[”»]/u)?.[1];
+   assert.equal(quoted(forward),reverse.correctAnswer);
+   assert.equal(quoted(reverse),forward.correctAnswer);
+   for(const q of [forward,reverse]){
+    assert.equal(q.language,language);
+    assert.equal(q.track,track);
+    assert.deepEqual(q.candidateMarkets,markets);
+    assert.equal(new Set(q.options).size,4);
+    assert.ok(q.options.includes(q.correctAnswer));
+    assert.equal(q.status,"draft");
+    assert.equal(q.countsTowardApprovedTarget,false);
+   }
+  }
+ }
+ const report=validateBatches([{schemaVersion:1,items:generateDrafts(10000,Object.keys(languageScopes))}]);
+ assert.equal(report.valid,true,report.errors.join("; "));
+ assert.equal(report.stats.variants,192);
+ assert.equal(report.approvedCount,0);
+});
+test("new numerical and multilingual families coexist in a private review sample",()=>{
+ const pack=generateDraftReviewSample({limitPerFamily:10000,samplesPerFamily:10,seed:"mixed-review",selectedFamilyIds:["atom-economy","urdu-basic-nouns"]});
+ assert.equal(pack.count,20);
+ assert.equal(pack.items.filter(q=>q.language==="ur").length,10);
+ assert.ok(pack.items.filter(q=>q.family==="atom-economy").every(q=>q.options.every(o=>Number(o)>=0&&Number(o)<=100)));
+ assert.equal(validateBatches([pack]).valid,true);
 });
