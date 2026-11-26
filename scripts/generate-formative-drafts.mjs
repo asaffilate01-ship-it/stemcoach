@@ -131,6 +131,24 @@ export function generateDrafts(limitPerFamily=100, selectedFamilyIds) {
  }
  return items;
 }
+// Deterministic stratified samples: one item from each equal-width range of a family.
+export function generateDraftReviewSample({limitPerFamily=10000,selectedFamilyIds,samplesPerFamily=5,seed="review-v1"}={}){
+ assertLimit(limitPerFamily);
+ if(!Number.isSafeInteger(samplesPerFamily)||samplesPerFamily<1||samplesPerFamily>100)throw Error('Samples per family must be 1–100');
+ if(typeof seed!=='string'||seed.length<1||seed.length>128)throw Error('Seed must contain 1–128 characters');
+ const families=selectFamilies(selectedFamilyIds);
+ const items=[],seen=new Set();
+ for(const f of families){
+  const count=Math.min(limitPerFamily,capacity[f.id]),n=Math.min(samplesPerFamily,count);
+  for(let j=0;j<n;j++){
+   const low=Math.floor(j*count/n),high=Math.floor((j+1)*count/n);
+   const draw=Number.parseInt(hash(JSON.stringify([seed,f.id,j])).slice(0,12),16);
+   const index=low+draw%(high-low);
+   addItem(items,seen,f,index);
+  }
+ }
+ return {schemaVersion:1,status:'draft',sampling:'stratified-family-v1',seed,samplesPerFamily,limitPerFamily,familyIds:families.map(f=>f.id),count:items.length,items,approvedQuestions:0};
+}
 // Bounded private review pages: skip unrelated families and construct only requested items.
 export function generateDraftPage({limitPerFamily=100,selectedFamilyIds,offset=0,pageSize=100}={}){
  assertLimit(limitPerFamily);
@@ -154,6 +172,14 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
  if(process.argv[2]==='--list' && process.argv.length===3){
   const catalogue=getDraftFamilyCatalog();
   console.log(JSON.stringify({families:catalogue,capacity:catalogue.reduce((sum,f)=>sum+f.capacity,0)},null,2));
+ }else if(process.argv[2]==='--sample'){
+  const args=process.argv.slice(3);
+  if(args.length<3||args.slice(0,2).some(v=>!/^\d+$/.test(v)))throw Error('Usage: --sample SAMPLES_PER_FAMILY LIMIT_PER_FAMILY SEED [FAMILY_ID ...]');
+  const pack=generateDraftReviewSample({samplesPerFamily:Number(args[0]),limitPerFamily:Number(args[1]),seed:args[2],selectedFamilyIds:args.length>3?args.slice(3):undefined});
+  const key=hash(JSON.stringify([pack.familyIds,pack.limitPerFamily,pack.samplesPerFamily,pack.seed])).slice(0,20);
+  const output='content/generated/formative-review-sample-'+key+'.json';
+  await writePrivatePack(output,pack);
+  console.log(JSON.stringify({draftVariants:pack.count,approvedQuestions:0,familyIds:pack.familyIds,output}));
  }else if(process.argv[2]==='--coverage'){
   const args=process.argv.slice(3);
   if(args.length && !/^\d+$/.test(args[0]))throw Error('Usage: --coverage [LIMIT_PER_FAMILY [FAMILY_ID ...]]');
