@@ -1,3 +1,5 @@
+import { tutorials } from "@/data/tutorials";
+import { isLaunchSubject } from "@/lib/launchDiscovery";
 import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, getQuestionHistory, type ReviewHistory, type ReviewCandidate } from "./qaPractice";
 
 /** Local preferences are isolated by the current authenticated identity or guest.
@@ -23,6 +25,18 @@ export function parseReviewFocus(value: unknown): ReviewFocus {
 export function qaReviewPath(focus: ReviewFocus): string {
   const safe = parseReviewFocus(focus);
   return safe === "all" ? "/qa-clinic" : "/qa-clinic?review=" + safe;
+}
+
+/** Exact authored lesson only. No raw question IDs, answers or account data in URLs. */
+export function qaTopicReviewPath(subject: unknown, tutorialId: unknown, focus: unknown): string {
+  const safeFocus = parseReviewFocus(focus);
+  const lesson = typeof subject === "string" && typeof tutorialId === "string" && isLaunchSubject(subject)
+    ? tutorials.find(item => item.id === tutorialId && item.subject === subject)
+    : undefined;
+  if (!lesson) return qaReviewPath(safeFocus);
+  const params = new URLSearchParams({ subject: lesson.subject, topic: lesson.id });
+  if (safeFocus !== "all") params.set("review", safeFocus);
+  return "/qa-clinic?" + params.toString();
 }
 
 type ReviewContext = { history: ReviewHistory; saved: ReadonlySet<string>; now: number };
