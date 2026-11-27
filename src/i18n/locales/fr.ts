@@ -58,6 +58,8 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    workspaceNavigation: "Espaces de révision Q&R",
+    exitChallenge: "Terminer cette série",
     firstTryAccuracy: "Réussite au premier essai : {{accuracy}} % ({{correct}} sur {{total}} tentatives)",
     firstTryEmpty: "La précision au premier essai apparaît après une première réponse.",
     studySkillsLink: "Apprendre à réviser et à préparer les examens",
