@@ -1,5 +1,12 @@
 import { getQuestionHistory, type ReviewCandidate, type ReviewHistory, type QuestionHistory } from "./qaPractice";
 
+export const WEEKLY_PLAN_CAPACITIES = [5, 10, 20] as const;
+export type WeeklyPlanCapacity = typeof WEEKLY_PLAN_CAPACITIES[number];
+export function parseWeeklyPlanCapacity(value: unknown): WeeklyPlanCapacity {
+  const numeric = typeof value === "string" && /^(5|10|20)$/.test(value) ? Number(value) : value;
+  return WEEKLY_PLAN_CAPACITIES.find(capacity => capacity === numeric) ?? 5;
+}
+
 export interface QAPlanDay {
   /** Local midnight on the learner's device. No dates or answers are uploaded. */
   startAt: number;
@@ -87,4 +94,29 @@ export function buildQAWeeklyPlan(
     });
   }
   return result;
+}
+
+/** Summarise only actual planned question IDs, not a promised workload.
+ * The due backlog counts eligible questions already due now and not scheduled
+ * anywhere in this week's proposed plan. Future reviews are not overdue.
+ */
+export function summariseQAWeeklyPlan(
+  plan: readonly QAPlanDay[], source: readonly ReviewCandidate[], history: ReviewHistory, now: number,
+) {
+  const plannedIds = new Set(plan.flatMap(day => day.questionIds));
+  const eligibleIds = new Set(source.map(item => item.id));
+  let backlog = 0;
+  if (Number.isFinite(now) && now >= 0) {
+    for (const id of eligibleIds) {
+      const evidence = getQuestionHistory(history, id);
+      if (evidence && evidence.dueAt <= now && !plannedIds.has(id)) backlog++;
+    }
+  }
+  return {
+    scheduled: plannedIds.size,
+    newCount: plan.reduce((sum, day) => sum + day.newCount, 0),
+    dueCount: plan.reduce((sum, day) => sum + day.dueCount, 0),
+    missedCount: plan.reduce((sum, day) => sum + day.missedCount, 0),
+    unscheduledDue: backlog,
+  };
 }
