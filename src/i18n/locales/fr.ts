@@ -749,6 +749,15 @@ const fr = {
   },
   coach: {
     workspace: {
+      jumpLatest: "Dernier message",
+      starterNotice: "Besoin d’un point de départ ? Ajoutez une suggestion au brouillon, puis modifiez-la ou envoyez-la.",
+      useStarter: "Utiliser une suggestion",
+      starters: {
+        "explain": "Explique une notion essentielle en {{subject}}, étape par étape, avec un exemple résolu et une vérification.",
+        "hint": "Aide-moi à résoudre un exercice de {{subject}}, indice par indice. Demande-moi d’abord l’énoncé.",
+        "quiz": "Interroge-moi sur {{subject}}, une question à la fois, et explique mes erreurs après ma réponse.",
+        "check": "Aide-moi à vérifier mon raisonnement en {{subject}}. Demande-moi d’abord ma solution."
+      },
       stopResponse: "Arrêter la réponse",
       responseStopped: "Réponse arrêtée. Votre question a été restaurée.",
       "title": "Votre coach d’apprentissage IA",

@@ -97,4 +97,20 @@ describe("AI tutor learner workflow",()=>{
     ]);
     expect(screen.queryByText("coach.workspace.responseStopped")).not.toBeInTheDocument();
   });
+  it("prepares a mode-specific study draft without sending or replacing existing text",async()=>{
+    open();
+    const input=await screen.findByRole("textbox",{name:"coach.inputPlaceholder"});
+    await waitFor(()=>expect(input).toBeEnabled());
+    fireEvent.click(screen.getByRole("radio",{name:/coach.workspace.modes.quiz.label/}));
+    const starter=screen.getByRole("button",{name:"coach.workspace.useStarter"});
+    fireEvent.click(starter);
+    expect(input).toHaveValue("coach.workspace.starters.quiz");
+    expect(input).toHaveFocus();
+    expect(mocks.fetch).not.toHaveBeenCalled();
+    fireEvent.change(input,{target:{value:"My own question"}});
+    expect(starter).toBeDisabled();
+    fireEvent.click(starter);
+    expect(input).toHaveValue("My own question");
+    expect(mocks.persist).not.toHaveBeenCalled();
+  });
 });
