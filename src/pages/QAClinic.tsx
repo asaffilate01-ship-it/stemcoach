@@ -5,6 +5,7 @@ import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3
 import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
+import { buildTopicRevisionInsights } from "@/lib/qaTopicInsights";
 import { summariseSprint, sprintAcceptsAttempt, selectSprintRetryIds } from "@/lib/qaSprintResults";
 import { qaStorageKeys, REVIEW_FOCUSES, matchesReviewFocus, getReviewFocusCounts, parseReviewFocus, type ReviewFocus } from "@/lib/qaReviewFocus";
 import { useAuth } from "@/hooks/useAuth";
@@ -199,6 +200,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
   const masteredCount = challengeIds.filter((id) => mastered[id] === true).length;
   const reviewSummary = useMemo(() => getReviewSummary(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const weeklyPlan = useMemo(() => buildQAWeeklyPlan(filtered, history, reviewTime), [filtered, history, reviewTime]);
+  const topicInsights = useMemo(() => buildTopicRevisionInsights(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const selectedCount = sprintQuestionCount(filtered.length, sprintSize);
   const timedMinutes = effectiveSprintDurationSeconds(filtered.length, sprintSize) / 60;
 
@@ -475,13 +477,35 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
                 <Trash2 className="h-4 w-4" /> {t("qa.clearPracticeHistory")}
               </Button>
             </div>
-            {reviewSummary.weakTopics.length > 0 && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-semibold">{t("qa.weakerTopics")}</span>
-                {reviewSummary.weakTopics.map((item) => (
-                  <span key={item.topic} className="rounded-full bg-amber-500/10 px-3 py-1 text-xs">{item.topic}</span>
-                ))}
-              </div>
+            {topicInsights.length > 0 && !sprintInProgress && (
+              <section aria-labelledby="qa-topic-revision-title" className="mt-4">
+                <h3 id="qa-topic-revision-title" className="text-sm font-semibold">{t("qa.topicRevision.title")}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{t("qa.topicRevision.notice")}</p>
+                <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                  {topicInsights.map(item => {
+                    const ids = item.reviewIds.slice(0, sprintSize);
+                    return (
+                      <article key={item.subject + ":" + item.tutorialId} className="flex min-w-0 flex-col gap-2 rounded-xl border bg-card p-3">
+                        <div>
+                          <p className="break-words text-xs font-medium text-muted-foreground">{t(`subjects.names.${item.subject}`)}</p>
+                          <h4 className="mt-1 break-words text-sm font-semibold">{item.topic}</h4>
+                        </div>
+                        <dl className="grid grid-cols-2 gap-2 text-xs">
+                          <div><dt className="text-muted-foreground">{t("qa.topicRevision.attempts")}</dt><dd className="font-semibold tabular-nums">{item.firstAttempts}</dd></div>
+                          <div><dt className="text-muted-foreground">{t("qa.topicRevision.mistakes")}</dt><dd className="font-semibold tabular-nums">{item.firstMistakes}</dd></div>
+                          <div><dt className="text-muted-foreground">{t("qa.topicRevision.practised")}</dt><dd className="font-semibold tabular-nums">{item.practicedQuestions}</dd></div>
+                          <div><dt className="text-muted-foreground">{t("qa.topicRevision.due")}</dt><dd className="font-semibold tabular-nums">{item.dueQuestions}</dd></div>
+                        </dl>
+                        <Button type="button" variant="outline" className="mt-auto min-h-11 w-full whitespace-normal rounded-lg"
+                          aria-label={t("qa.topicRevision.startLabel", { topic: item.topic, count: ids.length })}
+                          onClick={() => startPlannedSet(ids)}>
+                          {t("qa.topicRevision.start", { count: ids.length })}
+                        </Button>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
             )}
             <div role="group" aria-label={t("qa.quickReviewTitle")} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               {REVIEW_FOCUSES.map(focus => (
