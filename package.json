@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "knowledge:preview": "node scripts/sync-omniqora-learning.mjs --dry-run",
     "knowledge:sync": "node scripts/sync-omniqora-learning.mjs --apply",
-    "release:preflight": "npm run typecheck && npm run lint -- --max-warnings 30 && npm test && npm run build && npm run test:e2e",
+    "release:preflight": "npm run typecheck && npm run lint -- --max-warnings 30 && npm test && npm run test:publication-audit && npm run build && npm run test:e2e",
+    "test:publication-audit": "node scripts/test-publication-audit.mjs",
     "test:tuition-db": "node scripts/test-tuition.mjs"
   },
   "dependencies": {
