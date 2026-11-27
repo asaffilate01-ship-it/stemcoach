@@ -6,7 +6,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target } from "lucide-react";
+import { BookOpen, Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
@@ -45,6 +45,9 @@ function CoachWorkspace() {
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<CoachMode>("explain");
   const [isLoading, setIsLoading] = useState(false);
+  const [canStop, setCanStop] = useState(false);
+  const [responseStopped, setResponseStopped] = useState(false);
+  const stopResponseRef = useRef<(() => void) | null>(null);
   const [conversationLoading, setConversationLoading] = useState(true);
   const [loadedSubject, setLoadedSubject] = useState<string | null>(null);
   const [threadError, setThreadError] = useState("");
@@ -122,6 +125,9 @@ function CoachWorkspace() {
     setThreadError("");
     setSaveError("");
     setIsLoading(false);
+    setCanStop(false);
+    setResponseStopped(false);
+    stopResponseRef.current = null;
     setClearing(false);
     setConversationLoading(Boolean(accountId && canUseCoaching && !curriculumLoading && !curriculumError));
     if (accountId && canUseCoaching && !curriculumLoading && !curriculumError) {
@@ -140,7 +146,7 @@ function CoachWorkspace() {
         }
       })();
     }
-    return () => { active = false; scope.cancel(); };
+    return () => { active = false; stopResponseRef.current = null; scope.cancel(); };
   }, [accountId, subjectId, retry, canUseCoaching, curriculumId, curriculumLoading, curriculumError]);
 
   useEffect(() => {
@@ -172,11 +178,24 @@ function CoachWorkspace() {
     const request = requestScope.current.begin();
     const current = () => requestScope.current.isCurrent(request);
     setSaveError("");
+    setResponseStopped(false);
     const userMsg: Msg = { role: "user", content: msg };
     const allMessages = normaliseCoachThread([...messages, userMsg]);
     setMessages(allMessages);
     setInput("");
     setIsLoading(true);
+    setCanStop(true);
+    // Cancel only the in-flight generation, never a completed turn being saved.
+    stopResponseRef.current = () => {
+      if (!current()) return;
+      requestScope.current.cancel();
+      stopResponseRef.current = null;
+      setMessages(messages);
+      setInput(msg);
+      setCanStop(false);
+      setIsLoading(false);
+      setResponseStopped(true);
+    };
 
     let assistantSoFar = "";
     const upsertAssistant = (chunk: string) => {
@@ -225,6 +244,8 @@ function CoachWorkspace() {
       await readCoachStream(resp.body, upsertAssistant, request.signal);
       if (!current()) return;
       if (!assistantSoFar.trim()) throw new Error(t("coach.errors.generic"));
+      stopResponseRef.current = null;
+      setCanStop(false);
       try {
         await persistConversation([...allMessages, { role: "assistant", content: assistantSoFar }], request);
       } catch {
@@ -238,6 +259,8 @@ function CoachWorkspace() {
       }
     } finally {
       if (current()) {
+        stopResponseRef.current = null;
+        setCanStop(false);
         setIsLoading(false);
         requestScope.current.finish(request);
       }
@@ -462,10 +485,17 @@ function CoachWorkspace() {
               maxLength={2000}
               disabled={busy || !threadReady}
             />
-            <Button onClick={() => send()} disabled={busy || !threadReady || !input.trim()} className="min-h-12 min-w-12 rounded-xl" aria-label={t("coach.send")}>
-              <Send className="h-4 w-4" />
-            </Button>
+            {canStop ? (
+              <Button type="button" variant="outline" onClick={() => stopResponseRef.current?.()} className="min-h-12 min-w-12 shrink-0 gap-2 rounded-xl" aria-label={t("coach.workspace.stopResponse")}>
+                <Square className="h-4 w-4" aria-hidden="true" /> <span className="hidden sm:inline">{t("coach.workspace.stopResponse")}</span>
+              </Button>
+            ) : (
+              <Button onClick={() => send()} disabled={busy || !threadReady || !input.trim()} className="min-h-12 min-w-12 rounded-xl" aria-label={t("coach.send")}>
+                <Send className="h-4 w-4" />
+              </Button>
+            )}
             </div>
+            {responseStopped && <p role="status" className="mt-2 text-sm text-muted-foreground">{t("coach.workspace.responseStopped")}</p>}
             <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground"><span>{t("coach.workspace.answerNotice")}</span><span>{input.length}/2000</span></div>
           </div>
           </section>
