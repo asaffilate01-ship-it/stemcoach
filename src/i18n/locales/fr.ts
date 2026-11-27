@@ -58,6 +58,7 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    retainedReviewNotice: "Les questions auxquelles vous venez de répondre restent visibles jusqu’au changement de filtre pour vous laisser lire les solutions. Elles ne comptent pas dans les totaux des questions inédites ou à réviser.",
     quickReviewTitle: "Filtres de révision rapide",
     quickReviewDescription: "Les compteurs tiennent compte de la matière, du thème, du format et de la recherche. Les catégories peuvent se chevaucher.",
     scopeLoading: "Chargement de votre espace de révision…",
