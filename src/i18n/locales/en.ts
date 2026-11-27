@@ -58,6 +58,13 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    sprintResults: {
+      "correct": "Correct first try",
+      "missed": "Missed first try",
+      "unattempted": "No first attempt",
+      "notice": "The next focused sprint includes only questions without a correct independent first attempt. It is untimed and does not change the score of the previous sprint.",
+      "retry": "Retry {{count}} missed or unattempted"
+    },
     workspaceNavigation: "Q&A study areas",
     exitChallenge: "End this sprint",
     firstTryAccuracy: "First-attempt accuracy: {{accuracy}}% ({{correct}} of {{total}} attempts)",
@@ -737,6 +744,8 @@ const en = {
   },
   coach: {
     workspace: {
+      stopResponse: "Stop response",
+      responseStopped: "Response stopped. Your question has been restored.",
       "title": "Your AI study coach",
       "description": "Choose a subject and how you want to learn. Work through a concept, practise independently or get feedback on your own solution.",
       "modeLabel": "Coaching style",
