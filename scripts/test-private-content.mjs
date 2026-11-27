@@ -20,7 +20,7 @@ test("full generator capacity stays unique, draft-only and structurally valid", 
   }
   const report = validateBatches(batches());
   assert.equal(report.valid, true, report.errors.slice(0, 4).join("; "));
-  assert.equal(report.stats.variants, 803717);
+  assert.equal(report.stats.variants, 1003717);
   assert.equal(report.stats.originals, 0);
   assert.equal(report.approvedCount, 0);
   assert.equal(report.publishedCount, 0);
@@ -149,6 +149,26 @@ test("independent arithmetic checks across every generated question", () => {
       case "inventory-count-adjustment": expected = nums[0]-nums[1]; break;
       case "total-variable-cost": expected = nums[0]*nums[1]; break;
       case "cloud-compute-credit-balance": expected = nums[0]-nums[1]; break;
+      case "arithmetic-series-sum": expected = nums[2]*(2*nums[0]+(nums[2]-1)*nums[1])/2; break;
+      case "cylinder-volume-coefficient": expected = nums[0]**2*nums[1]; break;
+      case "origin-line-gradient": expected = nums[1]/nums[0]; break;
+      case "ohmic-potential-difference": expected = nums[0]*nums[1]; break;
+      case "wave-speed-frequency": expected = nums[0]*nums[1]; break;
+      case "substance-mass-from-moles": expected = nums[0]*nums[1]; break;
+      case "excess-reactant-after-reaction": expected = nums[0]-nums[1]; break;
+      case "specimen-size-from-magnification": expected = nums[0]*1000/nums[1]; break;
+      case "net-photosynthetic-oxygen": expected = nums[0]-nums[1]; break;
+      case "python-arithmetic-precedence": expected = nums[0]+nums[1]*nums[2]; break;
+      case "python-negative-index": expected = nums[0]-nums[1]; break;
+      case "classifier-false-positive-rate": expected = nums[0]*100/(nums[0]+nums[1]); break;
+      case "two-case-mse": expected = (nums[0]**2+nums[1]**2)/2; break;
+      case "incident-average-resolution": expected = (nums[0]+nums[1])/2; break;
+      case "recovery-objective-overrun": expected = nums[1]-nums[0]; break;
+      case "cloud-reserved-memory": expected = nums[0]*nums[1]; break;
+      case "unit-selling-price-markup": expected = nums[0]*(100+nums[1])/100; break;
+      case "prepaid-rent-balance": expected = nums[0]*(nums[1]-nums[2])/nums[1]; break;
+      case "target-profit-output": expected = (nums[0]+nums[2])/nums[1]; break;
+      case "market-excess-supply": expected = nums[0]-nums[1]; break;
       default: assert.fail("Unknown family");
     }
     assert.equal(Number(item.correctAnswer), expected, item.id);
@@ -204,22 +224,42 @@ test("new families are bounded and deterministic with no approved-credit inflati
     "fleet-compute-cost":10000,"retained-incremental-backups":10000,
     "weighted-mean-two-groups":10000,"constant-speed-distance":10000,"solution-solute-mass":10000,
     "transpiration-mass-loss":10000,"python-queue-length":10000,"dataset-holdout-count":10000,
-    "net-revenue-discount":10000,"inventory-count-adjustment":10000,"total-variable-cost":10000,"cloud-compute-credit-balance":10000
+    "net-revenue-discount":10000,"inventory-count-adjustment":10000,"total-variable-cost":10000,"cloud-compute-credit-balance":10000,
+    "arithmetic-series-sum":10000,
+    "cylinder-volume-coefficient":10000,
+    "origin-line-gradient":10000,
+    "ohmic-potential-difference":10000,
+    "wave-speed-frequency":10000,
+    "substance-mass-from-moles":10000,
+    "excess-reactant-after-reaction":10000,
+    "specimen-size-from-magnification":10000,
+    "net-photosynthetic-oxygen":10000,
+    "python-arithmetic-precedence":10000,
+    "python-negative-index":10000,
+    "classifier-false-positive-rate":10000,
+    "two-case-mse":10000,
+    "incident-average-resolution":10000,
+    "recovery-objective-overrun":10000,
+    "cloud-reserved-memory":10000,
+    "unit-selling-price-markup":10000,
+    "prepaid-rent-balance":10000,
+    "target-profit-output":10000,
+    "market-excess-supply":10000
   })) {
     const items = generateDrafts(10000,[family]);
     assert.equal(items.length, count, family);
     assert.ok(items.every(item => item.status === "draft" && item.countsTowardApprovedTarget === false));
   }
   assert.deepEqual(generateDrafts(3), generateDrafts(3));
-  assert.equal(generateDrafts(1).length, 112);
+  assert.equal(generateDrafts(1).length, 132);
   assert.throws(() => generateDrafts(0));
 });
 
 test("catalogue reports exact capacity and returns independent metadata", () => {
   const catalogue = getDraftFamilyCatalog();
-  assert.equal(catalogue.length, 112);
-  assert.equal(new Set(catalogue.map(f => f.id)).size, 112);
-  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 803717);
+  assert.equal(catalogue.length, 132);
+  assert.equal(new Set(catalogue.map(f => f.id)).size, 132);
+  assert.equal(catalogue.reduce((sum, f) => sum+f.capacity, 0), 1003717);
   assert.equal(new Set(catalogue.map(f => f.track)).size, 20);
   catalogue[0].capacity = 0;
   assert.equal(getDraftFamilyCatalog()[0].capacity, 9880);
@@ -247,8 +287,8 @@ test("CLI lists metadata and writes selected drafts separately from the default 
   const run = (...args) => JSON.parse(execFileSync(process.execPath, [script, ...args], {cwd, encoding: "utf8"}));
   try {
     const catalogue = run("--list");
-    assert.equal(catalogue.capacity, 803717);
-    assert.equal(catalogue.families.length, 112);
+    assert.equal(catalogue.capacity, 1003717);
+    assert.equal(catalogue.families.length, 132);
     const original = run("2");
     const selected = run("2", "force", "arithmetic-sequence");
     const reordered = run("2", "arithmetic-sequence", "force");
@@ -260,7 +300,7 @@ test("CLI lists metadata and writes selected drafts separately from the default 
     const pack = JSON.parse(readFileSync(join(cwd, selected.output), "utf8"));
     assert.deepEqual(pack.items, generateDrafts(2, ["force", "arithmetic-sequence"]));
     const full = JSON.parse(readFileSync(join(cwd, original.output), "utf8"));
-    assert.equal(full.items.length, 224);
+    assert.equal(full.items.length, 264);
   } finally {
     rmSync(cwd, {recursive: true, force: true});
   }
@@ -292,12 +332,12 @@ test("review pages match full generation across family boundaries and preserve i
 });
 
 test("late-page access is bounded and reports accurate capacity", () => {
-  const p = generateDraftPage({limitPerFamily:10000,offset:803712,pageSize:100});
-  assert.equal(p.total,803717);
+  const p = generateDraftPage({limitPerFamily:10000,offset:1003712,pageSize:100});
+  assert.equal(p.total,1003717);
   assert.equal(p.items.length,5);
   assert.equal(p.nextOffset,null);
-  assert.ok(p.items.every(q=>q.family==="cloud-compute-credit-balance"));
-  assert.deepEqual(p.items,generateDrafts(10000,["cloud-compute-credit-balance"]).slice(-5));
+  assert.ok(p.items.every(q=>q.family==="market-excess-supply"));
+  assert.deepEqual(p.items,generateDrafts(10000,["market-excess-supply"]).slice(-5));
   for(const pageSize of [0,-1,1001,1.5,Infinity])assert.throws(()=>generateDraftPage({pageSize}),/Page size/);
   for(const offset of [-1,0.5,Infinity])assert.throws(()=>generateDraftPage({offset}),/offset/);
   assert.throws(()=>generateDraftPage({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -355,8 +395,8 @@ test("new multi-step options are finite and distinct, with bounded percentage op
 
 test("coverage reports capped family counts and contains no private content", () => {
   const report=getDraftCoverage();
-  assert.equal(report.totalVariants,803717);
-  assert.equal(report.familyCount,112);
+  assert.equal(report.totalVariants,1003717);
+  assert.equal(report.familyCount,132);
   assert.equal(report.trackCount,20);
   assert.equal(report.approvedQuestions,0);
   assert.equal(report.publishedQuestions,0);
@@ -420,8 +460,8 @@ test("stratified samples are reproducible, capped and cover every selected famil
    }
  }
  assert.notDeepEqual(sample.items.map(q=>q.id),generateDraftReviewSample({...settings,seed:"another-review"}).items.map(q=>q.id));
- assert.equal(generateDraftReviewSample({limitPerFamily:2,samplesPerFamily:100}).count,224);
- assert.equal(generateDraftReviewSample().count,560);
+ assert.equal(generateDraftReviewSample({limitPerFamily:2,samplesPerFamily:100}).count,264);
+ assert.equal(generateDraftReviewSample().count,660);
  for(const n of [0,101,1.5,Infinity])assert.throws(()=>generateDraftReviewSample({samplesPerFamily:n}),/Samples per family/);
  for(const seed of ["",null,"x".repeat(129)])assert.throws(()=>generateDraftReviewSample({seed}),/Seed/);
  assert.throws(()=>generateDraftReviewSample({selectedFamilyIds:["unknown"]}),/unique known/);
@@ -655,4 +695,20 @@ test("similarity CLI emits row references and never includes question content",a
   assert.ok(!run.stdout.includes(stem));
   assert.equal(run.stderr,"");
  }finally{await fs.rm(root,{recursive:true,force:true});}
+});
+
+test("milestone families use unique, finite choices with valid answer bounds",()=>{
+ for(const family of ["arithmetic-series-sum","cylinder-volume-coefficient","origin-line-gradient","ohmic-potential-difference","wave-speed-frequency","substance-mass-from-moles","excess-reactant-after-reaction","specimen-size-from-magnification","net-photosynthetic-oxygen","python-arithmetic-precedence","python-negative-index","classifier-false-positive-rate","two-case-mse","incident-average-resolution","recovery-objective-overrun","cloud-reserved-memory","unit-selling-price-markup","prepaid-rent-balance","target-profit-output","market-excess-supply"]){
+  let count=0;
+  for(const q of iterateDrafts(10000,[family])){
+   count++;
+   assert.equal(new Set(q.options).size,4,q.id);
+   assert.ok(q.options.every(o=>Number.isSafeInteger(Number(o))&&Number(o)>=0),q.id);
+   assert.ok(q.options.includes(q.correctAnswer));
+   if(family==="classifier-false-positive-rate")assert.ok(q.options.every(o=>Number(o)<=100));
+   assert.equal(q.status,"draft");
+   assert.equal(q.countsTowardApprovedTarget,false);
+  }
+  assert.equal(count,10000,family);
+ }
 });
