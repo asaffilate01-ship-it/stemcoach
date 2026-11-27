@@ -744,6 +744,15 @@ const en = {
   },
   coach: {
     workspace: {
+      jumpLatest: "Jump to latest",
+      starterNotice: "Need a starting point? Add a prompt to your draft, then edit or send it.",
+      useStarter: "Use a study prompt",
+      starters: {
+        "explain": "Explain a key concept in {{subject}} step by step, with a worked example and a final check.",
+        "hint": "Help me work through a {{subject}} problem one hint at a time. Ask me for the problem first.",
+        "quiz": "Quiz me on {{subject}}, one question at a time, and explain any mistakes after I answer.",
+        "check": "Help me check my working in {{subject}}. Ask me to share my solution first."
+      },
       stopResponse: "Stop response",
       responseStopped: "Response stopped. Your question has been restored.",
       "title": "Your AI study coach",
