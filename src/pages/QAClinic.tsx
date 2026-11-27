@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3, Flag, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
 import { contentReportHref } from "@/lib/contentReport";
-import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
+import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, summariseSprint, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
 import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -142,24 +142,27 @@ export default function QAClinic() {
     ? qaEntries.find((entry) => entry.id === challengeIds[challengeIndex])
     : null;
   const visibleEntries = activeChallenge ? (challengeEntry ? [challengeEntry] : []) : filtered.slice(0, displayLimit);
-  const attemptedCount = challengeIds.filter((id) => id in firstAttempts).length;
-  const firstTryCorrect = challengeIds.filter((id) => firstAttempts[id] === true).length;
-  const masteredCount = challengeIds.filter((id) => mastered[id] === true).length;
+  const sprintSummary = useMemo(() => summariseSprint(challengeIds, firstAttempts, mastered), [challengeIds, firstAttempts, mastered]);
+  const attemptedCount = sprintSummary.attempted;
+  const firstTryCorrect = sprintSummary.firstTryCorrect;
+  const masteredCount = sprintSummary.solvedCount;
   const reviewSummary = useMemo(() => getReviewSummary(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const weeklyPlan = useMemo(() => buildQAWeeklyPlan(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const selectedCount = sprintQuestionCount(filtered.length, sprintSize);
   const timedMinutes = effectiveSprintDurationSeconds(filtered.length, sprintSize) / 60;
 
   const launchChallenge = (selected: string[], kind: ChallengeMode) => {
-    if (selected.length === 0) return;
-    setChallengeIds(selected);
+    const allowed = new Set(filtered.map((entry) => entry.id));
+    const unique = [...new Set(selected)].filter((id) => allowed.has(id));
+    if (unique.length === 0) return;
+    setChallengeIds(unique);
     setChallengeIndex(0);
     setFirstAttempts({});
     setMastered({});
     setChallengeStreak(0);
     setChallengeMode(kind);
     setChallengeRound((round) => round + 1);
-    const sprintSeconds = effectiveSprintDurationSeconds(selected.length, sprintSize);
+    const sprintSeconds = effectiveSprintDurationSeconds(unique.length, sprintSize);
     setSecondsRemaining(sprintSeconds);
     setDeadline(kind === "timed" ? Date.now() + sprintSeconds * 1000 : null);
     window.setTimeout(() => document.getElementById("qa-library")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
@@ -225,6 +228,10 @@ export default function QAClinic() {
 
   const recordAttempt = (id: string, correct: boolean, firstAttempt: boolean) => {
     const now = Date.now();
+    if (activeChallenge && challengeMode === "timed" && deadline !== null && now >= deadline) {
+      setSecondsRemaining(0);
+      return;
+    }
     setReviewTime(now);
     setHistory((previous) => recordReviewAttempt(previous, id, correct, firstAttempt, now));
     if (correct) setMastered((previous) => ({ ...previous, [id]: true }));
@@ -499,8 +506,8 @@ export default function QAClinic() {
                   </span>
                 )}
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round(100 * challengeIndex / challengeIds.length)}%` }} />
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={t("qa.sprintProgressLabel")} aria-valuemin={0} aria-valuemax={challengeIds.length} aria-valuenow={challengeCompleted ? challengeIds.length : challengeIndex}>
+                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${challengeCompleted ? 100 : Math.round(100 * challengeIndex / challengeIds.length)}%` }} />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{t("qa.challengeStreak", { count: challengeStreak })}</p>
               {challengeMode === "adaptive" && <p className="mt-1 text-xs text-muted-foreground">{t("qa.adaptiveExplanation")}</p>}
@@ -513,6 +520,31 @@ export default function QAClinic() {
               <h3 className="mb-2 text-xl font-bold">{t(challengeMode === "timed" && secondsRemaining === 0 ? "qa.timeExpired" : "qa.challengeFinished")}</h3>
               <p className="mb-2 text-sm">{t("qa.challengeSummary", { correct: firstTryCorrect, attempted: attemptedCount, total: challengeIds.length })}</p>
               <p className="mb-5 text-xs text-muted-foreground">{t("qa.challengeMastered", { count: masteredCount })}</p>
+              <div className="mx-auto mb-5 grid max-w-lg grid-cols-1 gap-2 sm:grid-cols-3">
+                {[
+                  { label: "qa.sprintCorrect", count: firstTryCorrect },
+                  { label: "qa.sprintMissed", count: sprintSummary.missedIds.length },
+                  { label: "qa.sprintUnanswered", count: sprintSummary.unansweredIds.length },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-xl border bg-muted/20 px-3 py-3">
+                    <p className="text-xl font-bold tabular-nums">{item.count}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{t(item.label)}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mx-auto mb-4 max-w-lg text-xs leading-5 text-muted-foreground">{t("qa.sprintRetryNote")}</p>
+              <div className="mb-3 flex flex-wrap justify-center gap-2">
+                {sprintSummary.missedIds.length > 0 && (
+                  <Button type="button" className="min-h-11 rounded-xl" onClick={() => startPlannedSet(sprintSummary.missedIds)}>
+                    {t("qa.retryMissed", { count: sprintSummary.missedIds.length })}
+                  </Button>
+                )}
+                {sprintSummary.unansweredIds.length > 0 && (
+                  <Button type="button" variant="outline" className="min-h-11 rounded-xl" onClick={() => startPlannedSet(sprintSummary.unansweredIds)}>
+                    {t("qa.retryUnanswered", { count: sprintSummary.unansweredIds.length })}
+                  </Button>
+                )}
+              </div>
               <div className="flex flex-wrap justify-center gap-2">
                 <Button onClick={() => startChallenge(challengeMode)} className="rounded-xl">{t("qa.playAgain")}</Button>
                 <Button variant="outline" className="rounded-xl" onClick={() => { setChallengeIds([]); setChallengeIndex(0); }}>
