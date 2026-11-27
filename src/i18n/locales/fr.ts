@@ -64,6 +64,8 @@ const fr = {
     scopeLoading: "Chargement de votre espace de révision…",
     scopedHistoryNotice: "La progression et les questions enregistrées sont séparées par compte ou accès invité dans ce navigateur. Les anciennes données communes ne sont pas importées automatiquement.",
     sprintResults: {
+      "retryMissed": "Reprendre les erreurs ({{count}})",
+      "retryUnanswered": "Réviser les questions sans réponse ({{count}})",
       "correct": "Réussies au premier essai",
       "missed": "Ratées au premier essai",
       "unattempted": "Sans premier essai",
