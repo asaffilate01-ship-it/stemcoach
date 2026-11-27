@@ -39,10 +39,10 @@ export function summariseSprint(
   mastered: Readonly<Record<string, boolean>>,
 ) {
   const ids = [...new Set(plannedIds)];
-  const missedIds = ids.filter(id => Object.hasOwn(firstAttempts, id) && firstAttempts[id] === false);
-  const correctIds = ids.filter(id => Object.hasOwn(firstAttempts, id) && firstAttempts[id] === true);
-  const unansweredIds = ids.filter(id => !Object.hasOwn(firstAttempts, id) || typeof firstAttempts[id] !== "boolean");
-  const solvedCount = ids.filter(id => Object.hasOwn(mastered, id) && mastered[id] === true).length;
+  const missedIds = ids.filter(id => Object.prototype.hasOwnProperty.call(firstAttempts, id) && firstAttempts[id] === false);
+  const correctIds = ids.filter(id => Object.prototype.hasOwnProperty.call(firstAttempts, id) && firstAttempts[id] === true);
+  const unansweredIds = ids.filter(id => !Object.prototype.hasOwnProperty.call(firstAttempts, id) || typeof firstAttempts[id] !== "boolean");
+  const solvedCount = ids.filter(id => Object.prototype.hasOwnProperty.call(mastered, id) && mastered[id] === true).length;
   return {
     total: ids.length,
     attempted: correctIds.length + missedIds.length,
