@@ -6,8 +6,8 @@ BEGIN
   IF current_setting('stemcoach.fixture_mode', true) IS DISTINCT FROM 'isolated-mock-exam-v1' THEN
     RAISE EXCEPTION 'Use the isolated mock exam test harness';
   END IF;
-END
-$$;
+END;
+$;
 
 CREATE TABLE stemcoach_exam_fixture.questions (
   id uuid PRIMARY KEY,
@@ -79,8 +79,8 @@ BEGIN
     EXECUTE format('ALTER TABLE stemcoach_exam_fixture.%I ENABLE ROW LEVEL SECURITY', table_name);
     EXECUTE format('CREATE POLICY server_only ON stemcoach_exam_fixture.%I TO service_role USING (true) WITH CHECK (true)', table_name);
   END LOOP;
-END
-$$;
+END;
+$;
 GRANT SELECT ON stemcoach_exam_fixture.questions, stemcoach_exam_fixture.user_quotas,
   stemcoach_exam_fixture.sessions, stemcoach_exam_fixture.session_questions,
   stemcoach_exam_fixture.receipts TO service_role;
@@ -248,7 +248,7 @@ BEGIN
     VALUES(p_session,p_actor,v_hash,v_result);
   -- No exception swallowing: all writes roll back if any step fails.
   RETURN v_result;
-END
-$$;
+END;
+$;
 REVOKE ALL ON FUNCTION stemcoach_exam_fixture.submit_mock_exam(uuid,uuid,jsonb) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.submit_mock_exam(uuid,uuid,jsonb) TO service_role;
