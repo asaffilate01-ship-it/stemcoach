@@ -113,4 +113,21 @@ describe("AI tutor learner workflow",()=>{
     expect(input).toHaveValue("My own question");
     expect(mocks.persist).not.toHaveBeenCalled();
   });
+  it("checks a calculation locally without sending it or persisting it to the tutor thread",async()=>{
+    open();
+    const composer=await screen.findByRole("textbox",{name:"coach.inputPlaceholder"});
+    await waitFor(()=>expect(composer).toBeEnabled());
+    fireEvent.click(screen.getByText("coach.calculator.title",{exact:true}));
+    const input=screen.getByLabelText("coach.calculator.expression");
+    fireEvent.change(input,{target:{value:"1/3+1/6"}});
+    fireEvent.click(screen.getByRole("button",{name:"coach.calculator.calculate"}));
+    expect(screen.getByText("1/2",{exact:true})).toBeInTheDocument();
+    expect(composer).toHaveValue("");
+    expect(mocks.fetch).not.toHaveBeenCalled();
+    expect(mocks.persist).not.toHaveBeenCalled();
+    fireEvent.change(input,{target:{value:"1/0"}});
+    expect(screen.queryByText("1/2",{exact:true})).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button",{name:"coach.calculator.calculate"}));
+    expect(screen.getByText("coach.calculator.errors.zero")).toBeInTheDocument();
+  });
 });
