@@ -140,7 +140,7 @@ const fr = {
       "diagram-label": "Légender le schéma"
     },
     "contentLanguageNotice": "Les questions et explications des leçons sont actuellement rédigées en anglais. Les commandes traduites ne signifient pas que tout le contenu l'est.",
-    "answerNumber": "Saisissez un nombre (sans unité)",
+    "answerNumber": "Saisissez un nombre ou une fraction (sans unité)",
     "answerWritten": "Écrivez une réponse courte",
     "numberPlaceholder": "Saisissez un nombre",
     "writtenPlaceholder": "Votre réponse",
@@ -748,6 +748,19 @@ const fr = {
     empty: "Aucune notification pour le moment",
   },
   coach: {
+    calculator: {
+      "title": "Vérifier un calcul",
+      "description": "Utilisez des nombres, des fractions, des parenthèses et les signes +, −, × et ÷. La virgule décimale et la notation scientifique sont acceptées, sans séparateur de milliers.",
+      "expression": "Calcul",
+      "calculate": "Calculer",
+      "exact": "Résultat exact",
+      "notice": "Calcul effectué sur cet appareil. Le choix de la formule et des unités n’est pas vérifié. Ce résultat n’est pas une note d’examen.",
+      "errors": {
+        "invalid": "Saisissez une expression arithmétique valide. Les variables, puissances et multiplications implicites ne sont pas prises en charge.",
+        "zero": "La division par zéro est indéfinie.",
+        "range": "Ce calcul dépasse la taille autorisée."
+      }
+    },
     workspace: {
       jumpLatest: "Dernier message",
       starterNotice: "Besoin d’un point de départ ? Ajoutez une suggestion au brouillon, puis modifiez-la ou envoyez-la.",

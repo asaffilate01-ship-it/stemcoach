@@ -19,6 +19,7 @@ import { normalizeLanguage } from "@/i18n/language";
 import { tutorials } from "@/data/tutorials";
 import { CoachRequestScope, normaliseCoachThread, type CoachMessage as Msg } from "@/lib/coachThread";
 import { readCoachStream } from "@/lib/coachStream";
+import { StudyCalculator } from "@/components/qa/StudyCalculator";
 import { COACH_MODES, type CoachMode } from "../../supabase/functions/_shared/coachModes";
 
 
@@ -379,6 +380,7 @@ function CoachWorkspace() {
             </div>
             <p className="mt-2 text-xs text-muted-foreground">{t("coach.workspace.modeNotice")}</p>
           </fieldset>
+          <StudyCalculator />
           </aside>
           <section className="flex min-w-0 flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card px-3 py-2">
