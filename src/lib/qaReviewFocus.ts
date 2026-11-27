@@ -15,6 +15,16 @@ export function qaStorageKeys(accountId: string | null) {
 export const REVIEW_FOCUSES = ["all", "due", "missed", "saved", "new"] as const;
 export type ReviewFocus = typeof REVIEW_FOCUSES[number];
 
+/** A public deep link carries only an allowlisted category, never learner IDs or answers. */
+export function parseReviewFocus(value: unknown): ReviewFocus {
+  return REVIEW_FOCUSES.find(focus => focus === value) ?? "all";
+}
+
+export function qaReviewPath(focus: ReviewFocus): string {
+  const safe = parseReviewFocus(focus);
+  return safe === "all" ? "/qa-clinic" : "/qa-clinic?review=" + safe;
+}
+
 type ReviewContext = { history: ReviewHistory; saved: ReadonlySet<string>; now: number };
 
 export function matchesReviewFocus(id: string, focus: ReviewFocus, context: ReviewContext): boolean {
