@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, readdirSync, statSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { generateDrafts, getDraftFamilyCatalog, generateDraftPage, getDraftCoverage, generateDraftReviewSample, iterateDrafts } from "./generate-formative-drafts.mjs";
-import { validateBatches } from "./validate-private-content.mjs";
+import { validateBatches, validateDraftShardManifest } from "./validate-private-content.mjs";
 
 test("full generator capacity stays unique, draft-only and structurally valid", () => {
   function* batches() {
@@ -514,4 +515,59 @@ test("new reasoning options remain distinct and physically meaningful",()=>{
   }
   assert.equal(count,10000,family);
  }
+});
+
+test("rejects false draft metadata, mismatched counts and forged fingerprints",()=>{
+ const q=generateDrafts(1,["force"])[0];
+ for(const extra of [{fingerprint:"bad"},{id:"forged-id"},{approved:true},{published:true},{variant:"false"},{difficulty:6},{countsTowardApprovedTarget:true},{markets:["PK"]}]){
+  const report=validateBatches([{schemaVersion:1,items:[{...q,...extra}]}]);
+  assert.equal(report.valid,false);
+  assert.equal(report.stats.structurallyValid,0);
+  assert.ok(report.errors.every(e=>!e.includes(q.text)));
+ }
+ assert.equal(validateBatches([{schemaVersion:1,count:2,items:[q]}]).valid,false);
+ assert.equal(validateBatches([{schemaVersion:1,count:1,items:[{...q,markets:["DE","GB","PK"]}]}]).valid,true);
+});
+test("shard exports are bounded, complete, private and verified sequentially",()=>{
+ const cwd=mkdtempSync(join(tmpdir(),"stemcoach-shards-"));
+ const script=fileURLToPath(new URL("./generate-formative-drafts.mjs",import.meta.url));
+ const validator=fileURLToPath(new URL("./validate-private-content.mjs",import.meta.url));
+ const run=(...args)=>JSON.parse(execFileSync(process.execPath,[script,...args],{cwd,encoding:"utf8"}));
+ try{
+  const result=run("--shards","2","3","ratio-allocation","force");
+  assert.equal(result.draftVariants,6);
+  assert.equal(result.shardCount,3);
+  const manifestPath=join(cwd,result.manifest);
+  const manifest=JSON.parse(readFileSync(manifestPath,"utf8"));
+  assert.equal(manifest.count,6);
+  const items=manifest.shards.flatMap(shard=>JSON.parse(readFileSync(join(dirname(manifestPath),shard.name),"utf8")).items);
+  assert.deepEqual(items,generateDrafts(3,["force","ratio-allocation"]));
+  const report=validateDraftShardManifest(manifestPath);
+  assert.equal(report.valid,true);
+  assert.equal(report.stats.variants,6);
+  assert.equal(JSON.parse(execFileSync(process.execPath,[validator,"--manifest",manifestPath],{cwd,encoding:"utf8"})).valid,true);
+  if(process.platform!=="win32"){
+    assert.equal(statSync(manifestPath).mode&0o777,0o600);
+    assert.equal(statSync(join(dirname(manifestPath),manifest.shards[0].name)).mode&0o777,0o600);
+  }
+  const partPath=join(dirname(manifestPath),manifest.shards[1].name);
+  const original=readFileSync(partPath);
+  writeFileSync(partPath,Buffer.concat([original,Buffer.from(" ")]));
+  assert.throws(()=>validateDraftShardManifest(manifestPath),/checksum mismatch/);
+  writeFileSync(partPath,original);
+  const pack=JSON.parse(original.toString("utf8"));
+  pack.items[0]=items[0];
+  const changed=JSON.stringify(pack);
+  writeFileSync(partPath,changed);
+  manifest.shards[1].sha256=createHash("sha256").update(changed).digest("hex");
+  writeFileSync(manifestPath,JSON.stringify(manifest));
+  const duplicated=validateDraftShardManifest(manifestPath);
+  assert.equal(duplicated.valid,false);
+  assert.ok(duplicated.errors.some(e=>e.includes("duplicate normalised stem")));
+  manifest.shards[1].name="../outside.json";
+  writeFileSync(manifestPath,JSON.stringify(manifest));
+  assert.throws(()=>validateDraftShardManifest(manifestPath),/Invalid shard entry/);
+  assert.throws(()=>execFileSync(process.execPath,[script,"--shards","10001","3"],{cwd,stdio:"pipe"}));
+  assert.ok(readdirSync(join(cwd,"content/generated")).every(name=>!name.startsWith(".review-")));
+ }finally{rmSync(cwd,{recursive:true,force:true});}
 });
