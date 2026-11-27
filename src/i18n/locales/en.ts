@@ -58,6 +58,8 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    workspaceNavigation: "Q&A study areas",
+    exitChallenge: "End this sprint",
     firstTryAccuracy: "First-attempt accuracy: {{accuracy}}% ({{correct}} of {{total}} attempts)",
     firstTryEmpty: "First-attempt accuracy appears after you try a question.",
     studySkillsLink: "How to revise, study and prepare for exams",
