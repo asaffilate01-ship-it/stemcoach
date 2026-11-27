@@ -19,6 +19,7 @@ export function validateBatches(batches) {
     if (!batch || batch.schemaVersion !== 1 || !Array.isArray(batch.items)) {
       errors.push("batch " + batchIndex + ": invalid envelope"); continue;
     }
+    if (batch.count !== undefined && (!Number.isSafeInteger(batch.count) || batch.count !== batch.items.length)) errors.push("batch " + batchIndex + ": declared count mismatch");
     for (const [index, item] of batch.items.entries()) {
       const prefix = "batch " + batchIndex + " item " + index;
       const fail = message => errors.push(prefix + ": " + message);
@@ -29,12 +30,21 @@ export function validateBatches(batches) {
       else {
         const hash = fingerprint(item.text);
         if (stems.has(hash)) fail("duplicate normalised stem"); else stems.add(hash);
+        if (item.fingerprint !== undefined && item.fingerprint !== hash) fail("stem fingerprint mismatch");
+        if (item.variant === true && item.fingerprint !== undefined && item.id !== "variant-" + hash.slice(0,24)) fail("variant identifier mismatch");
       }
       if (!text(item.track) || !text(item.topic) || !text(item.language) || !text(item.explanation)) fail("missing learning metadata");
-      if (item.status !== "draft") fail("only draft records accepted by this tool");
+      if (item.status !== "draft" || item.approved === true || item.published === true) fail("only draft records accepted by this tool");
+      if (item.variant !== undefined && typeof item.variant !== "boolean") fail("invalid variant flag");
+      if (item.difficulty !== undefined && (!Number.isInteger(item.difficulty) || item.difficulty < 1 || item.difficulty > 5)) fail("invalid difficulty");
+      if (item.countsTowardApprovedTarget === true) fail("drafts cannot count toward approved target");
       const regions = item.markets ?? item.candidateMarkets;
       if (!Array.isArray(regions) || !regions.length || new Set(regions).size !== regions.length || regions.some(m => !markets.has(m))) fail("invalid market scope");
       else if (localLanguages.has(item.track) && regions.some(m => m !== "PK")) fail("additional language outside configured market");
+      else if (item.track === "welsh" && regions.includes("DE")) fail("Welsh outside configured market");
+      if (item.markets !== undefined && item.candidateMarkets !== undefined &&
+          (!Array.isArray(item.markets) || !Array.isArray(item.candidateMarkets) ||
+           JSON.stringify([...item.markets].sort()) !== JSON.stringify([...item.candidateMarkets].sort()))) fail("conflicting market scopes");
       if (item.type === "mcq") {
         if (!Array.isArray(item.options) || item.options.length !== 4 || item.options.some(o => !text(o))) fail("MCQ requires four nonempty choices");
         else if (new Set(item.options.map(normalise)).size !== 4 || !item.options.includes(item.correctAnswer)) fail("duplicate choices or answer missing");
