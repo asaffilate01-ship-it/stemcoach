@@ -140,7 +140,7 @@ const de = {
       "diagram-label": "Diagramm beschriften"
     },
     "contentLanguageNotice": "Die Lernfragen und Erklärungen sind derzeit auf Englisch verfasst. Übersetzte Bedienelemente bedeuten nicht, dass alle Lerninhalte übersetzt wurden.",
-    "answerNumber": "Zahl eingeben (ohne Einheit)",
+    "answerNumber": "Gib eine Zahl oder einen Bruch ein (ohne Einheit)",
     "answerWritten": "Kurze Antwort schreiben",
     "numberPlaceholder": "Zahl eingeben",
     "writtenPlaceholder": "Antwort eingeben",
@@ -748,6 +748,19 @@ const de = {
     empty: "Noch keine Benachrichtigungen",
   },
   coach: {
+    calculator: {
+      "title": "Rechnung prüfen",
+      "description": "Rechne mit Zahlen, Brüchen und Klammern sowie +, −, × und ÷. Dezimalkommas und wissenschaftliche Schreibweise werden unterstützt; verwende keine Tausendertrennzeichen.",
+      "expression": "Rechnung",
+      "calculate": "Berechnen",
+      "exact": "Exaktes Ergebnis",
+      "notice": "Die Rechnung erfolgt auf diesem Gerät. Die Wahl der Formel und Einheiten wird nicht geprüft. Dies ist keine Prüfungsnote.",
+      "errors": {
+        "invalid": "Gib einen gültigen Rechenausdruck ein. Variablen, Potenzen und implizite Multiplikation werden nicht unterstützt.",
+        "zero": "Eine Division durch null ist nicht definiert.",
+        "range": "Diese Rechnung überschreitet die zulässige Größe."
+      }
+    },
     workspace: {
       jumpLatest: "Zur neuesten Nachricht",
       starterNotice: "Du brauchst einen Einstieg? Füge einen Vorschlag zum Entwurf hinzu und bearbeite oder sende ihn.",
