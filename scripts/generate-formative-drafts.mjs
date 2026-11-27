@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, writeFile, rename, rm, open } from 'node:fs/promises';
 import { advancedFamilies } from './formative-families-advanced.mjs';
 import { appliedFamilies, languageFamilies } from './formative-families-multilingual.mjs';
+import { reasoningFamilies } from './formative-families-reasoning.mjs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const families = [
@@ -74,8 +75,9 @@ const families = [
  ...advancedFamilies,
  ...appliedFamilies,
  ...languageFamilies,
+ ...reasoningFamilies,
 ];
-const capacity={'linear-equation':9880,force:1225,'mass-number':100,'gross-profit':3600,'break-even':8000,'integer-division':2000,'percentage-discount':720,'average-power':2000,'population-density':1200,'amount-of-substance':1000,'integer-remainder':1200,'arithmetic-sequence':4000,'series-resistance':3600,'classification-accuracy':3000,'metered-cloud-cost':2400,'unit-purchase-cost':3000,'price-index-change':2000,'straight-line-depreciation':4000,'microscope-magnification':2000,'rectangle-area':5000,'electric-charge':5000,'mass-concentration':5000,'germination-rate':5000,'nested-loop-count':5000,'working-capital':5000,'labour-productivity':5000,'cloud-storage-cost':5000,'backup-recovery-gap':3000,'nominal-output-value':3000,'simultaneous-equations':4800,'kinetic-energy':5000,'percentage-yield':6000,'cardiac-output':6000,'classification-recall':4800,'python-slice-length':5000,'gross-profit-margin':6000,'inventory-reorder-level':6000,'service-availability':4000,'replicated-storage':5000,'trapezium-area':10000,'specific-heat-energy':10000,'solution-dilution':10000,'trophic-energy-transfer':10000,'python-range-count':10000,'classification-precision':10000,'closing-cash-balance':10000,'capacity-utilisation':10000,'trade-balance':10000,'purchase-invoice-total':10000,'compound-percentage':10000,'gravitational-work':10000,'molar-concentration':10000,'population-growth':10000,'python-affine-loop':10000,'classifier-error-count':10000,'operating-profit':10000,'contribution-total':10000,'network-throughput':10000,'security-training-coverage':10000,...Object.fromEntries([...advancedFamilies,...appliedFamilies,...languageFamilies].map(f=>[f.id,f.capacity]))};
+const capacity={'linear-equation':9880,force:1225,'mass-number':100,'gross-profit':3600,'break-even':8000,'integer-division':2000,'percentage-discount':720,'average-power':2000,'population-density':1200,'amount-of-substance':1000,'integer-remainder':1200,'arithmetic-sequence':4000,'series-resistance':3600,'classification-accuracy':3000,'metered-cloud-cost':2400,'unit-purchase-cost':3000,'price-index-change':2000,'straight-line-depreciation':4000,'microscope-magnification':2000,'rectangle-area':5000,'electric-charge':5000,'mass-concentration':5000,'germination-rate':5000,'nested-loop-count':5000,'working-capital':5000,'labour-productivity':5000,'cloud-storage-cost':5000,'backup-recovery-gap':3000,'nominal-output-value':3000,'simultaneous-equations':4800,'kinetic-energy':5000,'percentage-yield':6000,'cardiac-output':6000,'classification-recall':4800,'python-slice-length':5000,'gross-profit-margin':6000,'inventory-reorder-level':6000,'service-availability':4000,'replicated-storage':5000,'trapezium-area':10000,'specific-heat-energy':10000,'solution-dilution':10000,'trophic-energy-transfer':10000,'python-range-count':10000,'classification-precision':10000,'closing-cash-balance':10000,'capacity-utilisation':10000,'trade-balance':10000,'purchase-invoice-total':10000,'compound-percentage':10000,'gravitational-work':10000,'molar-concentration':10000,'population-growth':10000,'python-affine-loop':10000,'classifier-error-count':10000,'operating-profit':10000,'contribution-total':10000,'network-throughput':10000,'security-training-coverage':10000,...Object.fromEntries([...advancedFamilies,...appliedFamilies,...languageFamilies,...reasoningFamilies].map(f=>[f.id,f.capacity]))};
 const hash=s=>createHash('sha256').update(s).digest('hex');
 export function getDraftFamilyCatalog() {
  return families.map(({id,track,topic})=>({id,track,topic,capacity:capacity[id]}));
@@ -166,6 +168,39 @@ async function writePrivateDraftStream(output,limitPerFamily,selectedFamilyIds){
  }finally{await rm(temp,{recursive:true,force:true});}
  return count;
 }
+// Atomic directory export. Each shard is a normal draft envelope; no entire-bank array is needed.
+async function writePrivateShards(shardSize,limitPerFamily,selectedFamilyIds){
+ assertLimit(limitPerFamily);
+ if(!Number.isSafeInteger(shardSize)||shardSize<1||shardSize>10000)throw Error('Shard size must be 1–10000');
+ const familyIds=selectFamilies(selectedFamilyIds).map(f=>f.id);
+ const total=getDraftCoverage(limitPerFamily,familyIds).totalVariants;
+ if(Math.ceil(total/shardSize)>10000)throw Error('Choose a larger shard size (maximum 10000 shards)');
+ const dir='content/generated';
+ const key=hash(JSON.stringify({familyIds,limitPerFamily,shardSize})).slice(0,20);
+ const output=dir+'/formative-shards-'+key;
+ await mkdir(dir,{recursive:true,mode:0o700});
+ const temp=await mkdtemp(dir+'/.review-');
+ try{
+  const shards=[];
+  let items=[],count=0;
+  const flush=async()=>{
+   const name='part-'+String(shards.length+1).padStart(6,'0')+'.json';
+   const payload=JSON.stringify({schemaVersion:1,status:'draft',count:items.length,items})+'\n';
+   await writeFile(temp+'/'+name,payload,{flag:'wx',mode:0o600});
+   shards.push({name,count:items.length,sha256:hash(payload)});
+   count+=items.length;items=[];
+  };
+  for(const item of iterateDrafts(limitPerFamily,familyIds)){
+   items.push(item);
+   if(items.length===shardSize)await flush();
+  }
+  if(items.length)await flush();
+  if(count!==total)throw Error('Draft count mismatch');
+  await writeFile(temp+'/manifest.json',JSON.stringify({schemaVersion:1,kind:'formative-draft-shards',status:'draft',count,shardSize,familyIds,limitPerFamily,shards},null,2)+'\n',{flag:'wx',mode:0o600});
+  await rename(temp,output);
+  return {draftVariants:count,approvedQuestions:0,shardCount:shards.length,manifest:output+'/manifest.json'};
+ }finally{await rm(temp,{recursive:true,force:true});}
+}
 // Deterministic stratified samples: one item from each equal-width range of a family.
 export function generateDraftReviewSample({limitPerFamily=10000,selectedFamilyIds,samplesPerFamily=5,seed="review-v1"}={}){
  assertLimit(limitPerFamily);
@@ -207,6 +242,10 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
  if(process.argv[2]==='--list' && process.argv.length===3){
   const catalogue=getDraftFamilyCatalog();
   console.log(JSON.stringify({families:catalogue,capacity:catalogue.reduce((sum,f)=>sum+f.capacity,0)},null,2));
+ }else if(process.argv[2]==='--shards'){
+  const args=process.argv.slice(3);
+  if(args.length<2||args.slice(0,2).some(v=>!/^\d+$/.test(v)))throw Error('Usage: --shards SHARD_SIZE LIMIT_PER_FAMILY [FAMILY_ID ...]');
+  console.log(JSON.stringify(await writePrivateShards(Number(args[0]),Number(args[1]),args.length>2?args.slice(2):undefined)));
  }else if(process.argv[2]==='--sample'){
   const args=process.argv.slice(3);
   if(args.length<3||args.slice(0,2).some(v=>!/^\d+$/.test(v)))throw Error('Usage: --sample SAMPLES_PER_FAMILY LIMIT_PER_FAMILY SEED [FAMILY_ID ...]');
