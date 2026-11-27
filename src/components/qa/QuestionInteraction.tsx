@@ -129,7 +129,8 @@ export function QuestionInteraction({ question, questionId, speechLanguage = "en
           <label className="mb-1 block text-xs font-semibold" htmlFor={questionId + "-response"}>
             {t(format === "numeric" ? "qa.answerNumber" : "qa.answerWritten")}
           </label>
-          <Input dir="auto" id={questionId + "-response"} type="text" inputMode={format === "numeric" ? "decimal" : "text"}
+          <Input dir="auto" id={questionId + "-response"} type="text" inputMode="text"
+            autoCapitalize={format === "numeric" ? "off" : undefined} spellCheck={format === "numeric" ? false : undefined}
             autoComplete="off" maxLength={120} disabled={revealed}
             placeholder={t(format === "numeric" ? "qa.numberPlaceholder" : "qa.writtenPlaceholder")}
             value={response.freeText} onChange={(event) => setResponse((prev) => ({ ...prev, freeText: event.target.value }))} />
