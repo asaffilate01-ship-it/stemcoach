@@ -485,7 +485,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
                   {topicInsights.map(item => {
                     const ids = item.reviewIds.slice(0, sprintSize);
                     return (
-                      <article key={item.subject + ":" + item.tutorialId} className="flex min-w-0 flex-col gap-2 rounded-xl border bg-card p-3">
+                      <div key={item.subject + ":" + item.tutorialId} className="flex min-w-0 flex-col gap-2 rounded-xl border bg-card p-3">
                         <div>
                           <p className="break-words text-xs font-medium text-muted-foreground">{t(`subjects.names.${item.subject}`)}</p>
                           <h4 className="mt-1 break-words text-sm font-semibold">{item.topic}</h4>
@@ -501,7 +501,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
                           onClick={() => startPlannedSet(ids)}>
                           {t("qa.topicRevision.start", { count: ids.length })}
                         </Button>
-                      </article>
+                      </div>
                     );
                   })}
                 </div>
