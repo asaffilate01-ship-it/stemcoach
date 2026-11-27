@@ -1,4 +1,7 @@
 import { createHash } from "node:crypto";
+import { readFile, lstat, realpath, writeFile } from "node:fs/promises";
+import { dirname, resolve, relative, basename, isAbsolute, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { reconcilePrivatePacks } from "./reconcile-private-bank.mjs";
 import { marketProgramme } from "../src/data/threeMarketProgramme.ts";
 
@@ -142,4 +145,45 @@ export function evaluateMarketReviewHandoff(packs, submission) {
   }
   report.uniqueCandidateOriginals=new Set(candidates.map(row=>row.questionId)).size;
   return finish(candidates);
+}
+
+const MAX_PRIVATE_INPUT_BYTES=64*1024*1024;
+async function readPrivateJson(path){
+  const stat=await lstat(path);
+  if(!stat.isFile()||stat.size>MAX_PRIVATE_INPUT_BYTES)throw Error("Invalid private input");
+  return JSON.parse(await readFile(path,"utf8"));
+}
+async function writeOutsideRepo(output,payload){
+  const root=await realpath(resolve(dirname(fileURLToPath(import.meta.url)),".."));
+  const target=resolve(await realpath(dirname(resolve(output))),basename(output));
+  const rel=relative(root,target);
+  if(isAbsolute(rel)||!(rel===".."||rel.startsWith(".."+sep)))throw Error("Private output required");
+  await writeFile(target,JSON.stringify(payload,null,2)+"\n",{flag:"wx",mode:0o600});
+}
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+  try{
+    const [command,...args]=process.argv.slice(2);
+    if(command!=="--plan"&&command!=="--evaluate")throw Error("Unknown command");
+    const submissionPath=command==="--evaluate"?args.shift():null;
+    const output=args.shift();
+    if(!output||(command==="--evaluate"&&!submissionPath)||!args.length||args.length>200||args.some(arg=>arg.startsWith("--")))throw Error("Invalid arguments");
+    const empty=()=>({schemaVersion:1,items:[]});
+    const packs=[];
+    for(const path of args)packs.push({originals:await readPrivateJson(path),variants:empty(),quizzes:empty(),lessons:empty()});
+    if(command==="--plan"){
+      const plan=buildMarketReviewPlan(packs);
+      if(!plan.valid)throw Error("Invalid source packs");
+      await writeOutsideRepo(output,plan);
+      const {items,...summary}=plan;
+      console.log(JSON.stringify(summary,null,2));
+    }else{
+      const result=evaluateMarketReviewHandoff(packs,await readPrivateJson(submissionPath));
+      if(!result.report.valid)throw Error("Invalid review submission");
+      await writeOutsideRepo(output,result);
+      console.log(JSON.stringify(result.report,null,2));
+    }
+  }catch{
+    console.error("Unable to prepare private market review. Use --plan NEW_PRIVATE_OUTPUT ORIGINAL_JSON... or --evaluate SUBMISSION_JSON NEW_PRIVATE_OUTPUT ORIGINAL_JSON... . Outputs must be outside the repository. No question or answer text is logged.");
+    process.exitCode=1;
+  }
 }
