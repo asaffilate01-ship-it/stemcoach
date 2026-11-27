@@ -1,5 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, writeFileSync, readFileSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 import { buildReviewWorklist, evaluateReviewHandoff, digestRecord, REVIEW_SCOPE, buildMarketReviewPlan, evaluateMarketReviewHandoff, MARKET_REVIEW_SCOPE } from "./private-review-handoff.mjs";
 const E=items=>({schemaVersion:1,items});
 const item={id:"a",track:"mathematics",topic:"Synthetic example",language:"en",markets:["GB"],status:"draft",type:"mcq",text:"Synthetic question",options:["a","b","c","d"],correctAnswer:"a",explanation:"Synthetic explanation.",countsTowardApprovedTarget:false};
@@ -123,4 +128,32 @@ test("market plans and empty submissions retain all unresolved assignments; revi
  assert.equal(result.report.rejectionRecordedAssignments,1);
  assert.equal(result.report.attestedCandidateAssignments,0);
  assert.equal(result.report.uniqueCandidateOriginals,0);
+});
+
+test("market review CLI writes private plan and evaluation reports, refuses overwrites and repository destinations",()=>{
+ const dir=mkdtempSync(join(tmpdir(),"stemcoach-market-review-"));
+ const script=fileURLToPath(new URL("./private-review-handoff.mjs",import.meta.url));
+ try{
+  const original=join(dir,"original.json"),plan=join(dir,"plan.json"),submitted=join(dir,"submission.json"),output=join(dir,"review.json");
+  const q={...item,markets:["GB","PK"]};
+  writeFileSync(original,JSON.stringify({schemaVersion:1,items:[q]}));
+  const run=(...args)=>execFileSync(process.execPath,["--experimental-strip-types",script,...args],{encoding:"utf8",stdio:["ignore","pipe","pipe"]});
+  const summary=JSON.parse(run("--plan",plan,original));
+  assert.equal(summary.totalAssignments,2);
+  assert.equal(summary.uniqueOriginals,1);
+  assert.equal(Object.hasOwn(summary,"items"),false);
+  const saved=JSON.parse(readFileSync(plan,"utf8"));
+  assert.equal(saved.items.length,2);
+  assert.ok(!JSON.stringify(saved).includes(q.text));
+  if(process.platform!=="win32")assert.equal(statSync(plan).mode&0o777,0o600);
+  assert.throws(()=>run("--plan",plan,original));
+  const inside=fileURLToPath(new URL("./market-review-test-must-not-exist.json",import.meta.url));
+  assert.throws(()=>run("--plan",inside,original));
+  writeFileSync(submitted,JSON.stringify(marketSubmission([review([attest("reviewer-a",q),attest("reviewer-b",q)],mapping,q)])));
+  const result=JSON.parse(run("--evaluate",submitted,output,original));
+  assert.equal(result.attestedCandidateAssignments,1);
+  assert.equal(result.pendingAssignments,1);
+  assert.equal(result.approvedCount,0);
+  assert.equal(JSON.parse(readFileSync(output,"utf8")).candidates.length,1);
+ }finally{rmSync(dir,{recursive:true,force:true});}
 });
