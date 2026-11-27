@@ -117,6 +117,10 @@ const en = {
     "reviewTitle": "Your revision progress",
     "reviewStats": "{{practiced}} of {{total}} questions practised · {{due}} due for review",
     "weakerTopics": "Topics to revisit:",
+    dashboardTopicReview: {
+      open: "Open {{focus}} ({{count}})",
+      openLabel: "Open {{focus}} for {{topic}} ({{count}} questions)",
+    },
     topicRevision: {
       title: "Recommended topic revision",
       notice: "Based on first attempts and due reviews stored in this browser for the current account or guest. These counts do not measure formal exam readiness.",
