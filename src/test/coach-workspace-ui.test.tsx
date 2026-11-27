@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import AITutor from "@/pages/AITutor";
 
 const mocks = vi.hoisted(() => ({
@@ -111,6 +111,28 @@ describe("AI tutor learner workflow",()=>{
     expect(starter).toBeDisabled();
     fireEvent.click(starter);
     expect(input).toHaveValue("My own question");
+    expect(mocks.persist).not.toHaveBeenCalled();
+  });
+  it("opens exact lesson review filters only after the learner chooses, preserving an unsent draft",async()=>{
+    function Destination(){const location=useLocation();return <output data-testid="learning-destination">{location.pathname+location.search}</output>;}
+    render(<MemoryRouter initialEntries={["/ai-tutor?subject=mathematics&tutorial=arithmetic-sequences-nth-term"]}>
+      <Routes><Route path="/ai-tutor" element={<AITutor />} /><Route path="/qa-clinic" element={<Destination />} /></Routes>
+    </MemoryRouter>);
+    const input=await screen.findByRole("textbox",{name:"coach.inputPlaceholder"});
+    await waitFor(()=>expect(input).toBeEnabled());
+    const button=screen.getByRole("button",{name:"coach.studyActions.due"});
+    expect(button).toBeEnabled();
+    fireEvent.change(input,{target:{value:"Keep this draft"}});
+    expect(button).toBeDisabled();
+    expect(screen.getByRole("combobox",{name:"coach.tutorLabel"})).toBeDisabled();
+    expect(screen.getByText("coach.studyActions.draftNotice")).toBeVisible();
+    fireEvent.click(button);
+    expect(input).toHaveValue("Keep this draft");
+    expect(mocks.fetch).not.toHaveBeenCalled();
+    fireEvent.change(input,{target:{value:""}});
+    fireEvent.click(button);
+    expect(await screen.findByTestId("learning-destination")).toHaveTextContent("/qa-clinic?subject=mathematics&topic=arithmetic-sequences-nth-term&review=due");
+    expect(mocks.fetch).not.toHaveBeenCalled();
     expect(mocks.persist).not.toHaveBeenCalled();
   });
   it("checks a calculation locally without sending it or persisting it to the tutor thread",async()=>{
