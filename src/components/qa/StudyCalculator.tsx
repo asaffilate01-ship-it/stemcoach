@@ -27,7 +27,7 @@ export function StudyCalculator() {
         </div>
       </form>
       {result && <div role="status" className="mt-3 min-w-0 rounded-xl border bg-muted/20 p-3">
-        {result.ok ? <><p className="text-xs font-medium text-muted-foreground">{t("coach.calculator.exact")}</p><p dir="ltr" className="mt-1 break-all text-lg font-semibold tabular-nums">{result.exact}</p></>
+        {"exact" in result ? <><p className="text-xs font-medium text-muted-foreground">{t("coach.calculator.exact")}</p><p dir="ltr" className="mt-1 break-all text-lg font-semibold tabular-nums">{result.exact}</p></>
           : <p className="text-sm text-muted-foreground">{t(`coach.calculator.errors.${result.reason}`)}</p>}
       </div>}
       <p className="mt-3 text-xs text-muted-foreground">{t("coach.calculator.notice")}</p>
