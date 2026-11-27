@@ -66,6 +66,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
   const [format, setFormat] = useState("all");
   const [level, setLevel] = useState("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFocus>("all");
+  const [retainedReviewIds, setRetainedReviewIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [reviewTime, setReviewTime] = useState(() => Date.now());
   const [displayLimit, setDisplayLimit] = useState(PAGE_SIZE);
@@ -136,6 +137,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
     const requested = searchParams.get("subject");
     setSubject(selected?.subject || (requested && subjects.some((item) => item.id === requested) ? requested : "all"));
     setTopic(selected?.id || "all");
+    setRetainedReviewIds([]);
     setChallengeIds([]);
     setChallengeIndex(0);
     setDeadline(null);
@@ -165,6 +167,16 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
   const filtered = useMemo(() => scopedEntries.filter(entry => matchesReviewFocus(entry.id, reviewFilter, reviewContext)),
     [scopedEntries, reviewFilter, reviewContext]);
 
+  // A newly answered question may leave the live New/Due filter. Keep its
+  // visible card so the learner can read the feedback and worked solution.
+  // Retained cards never become eligible for a fresh filtered sprint.
+  const browseEntries = useMemo(() => {
+    if (!retainedReviewIds.length) return filtered;
+    const displayIds = new Set([...filtered.map(entry => entry.id), ...retainedReviewIds]);
+    return scopedEntries.filter(entry => displayIds.has(entry.id));
+  }, [filtered, retainedReviewIds, scopedEntries]);
+  const hasRetainedReviews = browseEntries.length > filtered.length;
+
   const activeChallenge = challengeIds.length > 0;
   const challengeCompleted = activeChallenge && (challengeIndex >= challengeIds.length ||
     (challengeMode === "timed" && secondsRemaining === 0));
@@ -176,7 +188,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
   const challengeEntry = activeChallenge && !challengeCompleted
     ? qaEntries.find((entry) => entry.id === challengeIds[challengeIndex])
     : null;
-  const visibleEntries = activeChallenge ? (challengeEntry ? [challengeEntry] : []) : filtered.slice(0, displayLimit);
+  const visibleEntries = activeChallenge ? (challengeEntry ? [challengeEntry] : []) : browseEntries.slice(0, displayLimit);
   const sprintResult = useMemo(() => summariseSprint(challengeIds, firstAttempts), [challengeIds, firstAttempts]);
   const attemptedCount = sprintResult.attempted;
   const firstTryCorrect = sprintResult.correct;
@@ -231,6 +243,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
       : [...previous, id].slice(-500));
 
   const changeFilter = (change: () => void) => {
+    setRetainedReviewIds([]);
     setChallengeIds([]);
     setChallengeIndex(0);
     setDeadline(null);
@@ -279,6 +292,9 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
     if (activeChallenge && !sprintAcceptsAttempt({ id, activeId: challengeIds[challengeIndex], deadline, now })) {
       if (deadline !== null && now >= deadline) setSecondsRemaining(0);
       return;
+    }
+    if (!activeChallenge && firstAttempt && (reviewFilter === "new" || reviewFilter === "due")) {
+      setRetainedReviewIds(previous => previous.includes(id) ? previous : [...previous, id]);
     }
     setReviewTime(now);
     setHistory((previous) => recordReviewAttempt(previous, id, correct, firstAttempt, now));
@@ -549,7 +565,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
             </div>
           </div>
 
-          {filtered.length === 0 && !activeChallenge && (
+          {browseEntries.length === 0 && !activeChallenge && (
             <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
               {t("qa.noResults")}
             </div>
@@ -607,6 +623,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
             </div>
           )}
 
+          {!activeChallenge && hasRetainedReviews && <p className="mb-3 rounded-xl border bg-muted/20 p-3 text-sm text-muted-foreground">{t("qa.retainedReviewNotice")}</p>}
           <div className={activeChallenge ? "mx-auto max-w-2xl" : "grid gap-4 lg:grid-cols-2"}>
             {visibleEntries.map((entry) => {
               const mascot = getMascot(entry.subject);
@@ -664,7 +681,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
               </Button>
             </div>
           )}
-          {!activeChallenge && filtered.length > displayLimit && (
+          {!activeChallenge && browseEntries.length > displayLimit && (
             <div className="mt-5 flex justify-center">
               <Button variant="outline" className="rounded-xl" onClick={() => setDisplayLimit((count) => count + PAGE_SIZE)}>
                 {t("qa.loadMore")}
