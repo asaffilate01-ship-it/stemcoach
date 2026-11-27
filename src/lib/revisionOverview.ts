@@ -19,7 +19,7 @@ export function readRevisionOverview(
     const counts = getReviewFocusCounts(unique, { history, saved, now });
     const summary = getReviewSummary(unique, history, now);
     const topicCandidates = unique.flatMap(entry => typeof entry.tutorialId === "string" && entry.tutorialId.length > 0 ? [{ ...entry, tutorialId: entry.tutorialId }] : []);
-    const recommendedTopics = buildTopicRevisionInsights(topicCandidates, history, now, 3).map(({ reviewIds, ...insight }) => ({ ...insight, focus: insight.dueQuestions > 0 ? "due" as const : "missed" as const, eligibleCount: reviewIds.length }));
+    const recommendedTopics = buildTopicRevisionInsights(topicCandidates, history, now, 3).map(({ reviewIds, ...insight }) => ({ ...insight, focus: insight.dueQuestions > 0 ? "due" as const : "missed" as const, eligibleCount: insight.dueQuestions > 0 ? insight.dueQuestions : reviewIds.length }));
     return { counts, practiced: summary.practiced, recommendedTopics };
   } catch {
     // An inaccessible browser store is not evidence of an empty review queue.
