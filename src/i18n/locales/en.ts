@@ -64,6 +64,8 @@ const en = {
     scopeLoading: "Loading your revision workspace…",
     scopedHistoryNotice: "Your revision progress and saved questions are separate for each signed-in account or guest profile in this browser. Older shared records are not automatically imported.",
     sprintResults: {
+      "retryMissed": "Retry mistakes ({{count}})",
+      "retryUnanswered": "Practise unanswered ({{count}})",
       "correct": "Correct first try",
       "missed": "Missed first try",
       "unattempted": "No first attempt",
