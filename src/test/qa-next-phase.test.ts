@@ -131,7 +131,7 @@ describe("Q&A next phase: diagrams, cloze and adaptive review", () => {
     expect(page).toContain('startChallenge("adaptive")');
     expect(page).toContain('startChallenge("timed")');
     expect(page).toContain("recordReviewAttempt");
-    expect(page).toContain("QA_HISTORY_KEY");
+    expect(page).toContain("qaStorageKeys(accountId)");
     expect(page).not.toContain('functions.invoke("ai-chat"');
   });
 });

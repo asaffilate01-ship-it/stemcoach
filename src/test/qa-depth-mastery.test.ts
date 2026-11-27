@@ -74,8 +74,8 @@ describe("deeper tutorial and Q&A bank", () => {
     expect(parseBookmarks(JSON.stringify(["fake-id", qaEntries[2].id]), ids)).toEqual([qaEntries[2].id]);
     expect(parseBookmarks("{garbled", ids)).toEqual([]);
     const page = src("src/pages/QAClinic.tsx");
-    for (const filter of ["saved", "missed", "due"]) expect(page).toContain('reviewFilter === "' + filter + '"');
-    expect(page).toContain("QA_BOOKMARKS_KEY");
+    expect(page).toContain("matchesReviewFocus(entry.id, reviewFilter, reviewContext)");
+    expect(page).toContain("qaStorageKeys(accountId)");
   });
 
   it("aligns the trusted server-side AI tutor lesson allowlist with all 200 lessons", () => {
