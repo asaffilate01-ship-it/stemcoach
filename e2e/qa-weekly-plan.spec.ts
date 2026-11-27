@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { qaStorageKeys } from "../src/lib/qaReviewFocus";
 
 async function dismissCookies(page: import("@playwright/test").Page) {
   const reject = page.getByRole("button", { name: /Reject All|Tout refuser|Alle ablehnen/i });
@@ -16,16 +17,16 @@ test("seven-day formative Q&A plan launches a real five-question set", async ({ 
 });
 
 test("practice history prioritises due questions without exposing typed answers", async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.addInitScript((historyKey) => {
     const id = "arithmetic-sequences-nth-term-0";
-    localStorage.setItem("stemcoach:qa-review-v1", JSON.stringify({
+    localStorage.setItem(historyKey, JSON.stringify({
       version: 1,
       entries: { [id]: {
         attempts: 1, correctFirst: 0, incorrectFirst: 1, firstTryStreak: 0,
         lastAt: Date.now() - 60_000, dueAt: Date.now() - 60_000,
       } },
     }));
-  });
+  }, qaStorageKeys(null).history);
   await page.goto("/qa-clinic?topic=arithmetic-sequences-nth-term");
   await dismissCookies(page);
   await expect(page.getByText("4 new · 1 due", { exact: true })).toBeVisible();

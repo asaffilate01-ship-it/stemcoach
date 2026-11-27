@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { qaStorageKeys } from "../src/lib/qaReviewFocus";
 
 async function dismissCookies(page: import("@playwright/test").Page) {
   const reject = page.getByRole("button", { name: /Reject All|Tout refuser|Alle ablehnen/i });
@@ -20,16 +21,16 @@ test("new compound growth topic offers all ten original answers and a proportion
 });
 
 test("local Q&A history shows honest first-try accuracy without storing answers", async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.addInitScript((historyKey) => {
     const id = "compound-growth-percentages-0";
-    localStorage.setItem("stemcoach:qa-review-v1", JSON.stringify({
+    localStorage.setItem(historyKey, JSON.stringify({
       version: 1,
       entries: { [id]: {
         attempts: 2, correctFirst: 1, incorrectFirst: 1,
         firstTryStreak: 1, lastAt: Date.now() - 60_000, dueAt: Date.now() - 60_000,
       } },
     }));
-  });
+  }, qaStorageKeys(null).history);
   await page.goto("/qa-clinic?topic=compound-growth-percentages");
   await dismissCookies(page);
   await expect(page.getByText("First-attempt accuracy: 50% (1 of 2 attempts)")).toBeVisible();

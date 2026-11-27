@@ -6,7 +6,9 @@ import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
 import { summariseSprint, sprintAcceptsAttempt } from "@/lib/qaSprintResults";
-import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
+import { qaStorageKeys, REVIEW_FOCUSES, matchesReviewFocus, getReviewFocusCounts, type ReviewFocus } from "@/lib/qaReviewFocus";
+import { useAuth } from "@/hooks/useAuth";
+import { parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
 import { OmniqoraEvidencePanel } from "@/components/qa/OmniqoraEvidencePanel";
@@ -34,7 +36,24 @@ type ChallengeMode = "mixed" | "adaptive" | "timed";
 const existingQuestionIds = new Set(allQAEntries.map((entry) => entry.id));
 
 export default function QAClinic() {
+  const { user, loading } = useAuth();
+  const { t } = useTranslation();
+  if (loading) return (
+    <div className="min-h-screen bg-background">
+      <AppHeader />
+      <main className="mx-auto max-w-md px-6 py-20 text-center">
+        <p role="status" className="text-sm text-muted-foreground">{t("qa.scopeLoading")}</p>
+      </main>
+    </div>
+  );
+  // Remount synchronously when the active identity changes so local history,
+  // bookmarks and in-progress sprint state cannot follow another account.
+  return <QAWorkspace key={JSON.stringify(user?.id ?? null)} accountId={user?.id ?? null} />;
+}
+
+function QAWorkspace({ accountId }: { accountId: string | null }) {
   const { t, i18n } = useTranslation();
+  const { history: historyKey, bookmarks: bookmarksKey } = qaStorageKeys(accountId);
   useDocumentTitle(t("qa.title"));
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,7 +65,8 @@ export default function QAClinic() {
   const [topic, setTopic] = useState(linkedTopic?.id || "all");
   const [format, setFormat] = useState("all");
   const [level, setLevel] = useState("all");
-  const [reviewFilter, setReviewFilter] = useState<"all" | "due" | "missed" | "saved">("all");
+  const [reviewFilter, setReviewFilter] = useState<ReviewFocus>("all");
+  const [retainedReviewIds, setRetainedReviewIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [reviewTime, setReviewTime] = useState(() => Date.now());
   const [displayLimit, setDisplayLimit] = useState(PAGE_SIZE);
@@ -64,11 +84,11 @@ export default function QAClinic() {
   const [secondsRemaining, setSecondsRemaining] = useState(sprintDurationSeconds(10));
   const challengeHeading = useRef<HTMLHeadingElement>(null);
   const [savedIds, setSavedIds] = useState<string[]>(() => {
-    try { return parseBookmarks(localStorage.getItem(QA_BOOKMARKS_KEY), existingQuestionIds); }
+    try { return parseBookmarks(localStorage.getItem(bookmarksKey), existingQuestionIds); }
     catch { return []; }
   });
   const [history, setHistory] = useState<ReviewHistory>(() => {
-    try { return parseReviewHistory(localStorage.getItem(QA_HISTORY_KEY), existingQuestionIds); }
+    try { return parseReviewHistory(localStorage.getItem(historyKey), existingQuestionIds); }
     catch { return {}; }
   });
 
@@ -86,17 +106,17 @@ export default function QAClinic() {
 
   useEffect(() => {
     try {
-      if (savedIds.length) localStorage.setItem(QA_BOOKMARKS_KEY, serialiseBookmarks(savedIds));
-      else localStorage.removeItem(QA_BOOKMARKS_KEY);
+      if (savedIds.length) localStorage.setItem(bookmarksKey, serialiseBookmarks(savedIds));
+      else localStorage.removeItem(bookmarksKey);
     } catch { /* Storage is optional; the current session remains functional. */ }
-  }, [savedIds]);
+  }, [savedIds, bookmarksKey]);
 
   useEffect(() => {
     try {
-      if (Object.keys(history).length) localStorage.setItem(QA_HISTORY_KEY, serialiseReviewHistory(history));
-      else localStorage.removeItem(QA_HISTORY_KEY);
+      if (Object.keys(history).length) localStorage.setItem(historyKey, serialiseReviewHistory(history));
+      else localStorage.removeItem(historyKey);
     } catch { /* Private browsing or full storage: keep the in-memory session working. */ }
-  }, [history]);
+  }, [history, historyKey]);
 
   useEffect(() => {
     if (challengeMode !== "timed" || deadline === null || challengeIds.length === 0 ||
@@ -117,6 +137,7 @@ export default function QAClinic() {
     const requested = searchParams.get("subject");
     setSubject(selected?.subject || (requested && subjects.some((item) => item.id === requested) ? requested : "all"));
     setTopic(selected?.id || "all");
+    setRetainedReviewIds([]);
     setChallengeIds([]);
     setChallengeIndex(0);
     setDeadline(null);
@@ -128,21 +149,33 @@ export default function QAClinic() {
     [subject],
   );
 
-  const filtered = useMemo(() => {
+  // The focus counters reflect the current subject/topic/format/level/search,
+  // not the selected focus itself. Selecting "Due" does not hide other counts.
+  const scopedEntries = useMemo(() => {
     const phrase = search.trim().toLocaleLowerCase();
     return qaEntries.filter((entry) =>
       (subject === "all" || entry.subject === subject) &&
       (topic === "all" || entry.tutorialId === topic) &&
       (format === "all" || entry.format === format) &&
       (level === "all" || entry.level === level) &&
-      (reviewFilter === "all" ||
-        (reviewFilter === "saved" && savedIds.includes(entry.id)) ||
-        (reviewFilter === "due" && Boolean(history[entry.id]?.attempts) && history[entry.id].dueAt <= reviewTime) ||
-        (reviewFilter === "missed" && (history[entry.id]?.incorrectFirst || 0) > 0)) &&
       (!phrase || [entry.question, entry.topic, entry.explanation, entry.subject, entry.hint]
         .some((text) => text.toLocaleLowerCase().includes(phrase))),
     );
-  }, [subject, topic, format, level, search, history, reviewFilter, savedIds, reviewTime]);
+  }, [subject, topic, format, level, search]);
+  const reviewContext = useMemo(() => ({ history, saved: new Set(savedIds), now: reviewTime }), [history, savedIds, reviewTime]);
+  const focusCounts = useMemo(() => getReviewFocusCounts(scopedEntries, reviewContext), [scopedEntries, reviewContext]);
+  const filtered = useMemo(() => scopedEntries.filter(entry => matchesReviewFocus(entry.id, reviewFilter, reviewContext)),
+    [scopedEntries, reviewFilter, reviewContext]);
+
+  // A newly answered question may leave the live New/Due filter. Keep its
+  // visible card so the learner can read the feedback and worked solution.
+  // Retained cards never become eligible for a fresh filtered sprint.
+  const browseEntries = useMemo(() => {
+    if (!retainedReviewIds.length) return filtered;
+    const displayIds = new Set([...filtered.map(entry => entry.id), ...retainedReviewIds]);
+    return scopedEntries.filter(entry => displayIds.has(entry.id));
+  }, [filtered, retainedReviewIds, scopedEntries]);
+  const hasRetainedReviews = browseEntries.length > filtered.length;
 
   const activeChallenge = challengeIds.length > 0;
   const challengeCompleted = activeChallenge && (challengeIndex >= challengeIds.length ||
@@ -155,7 +188,7 @@ export default function QAClinic() {
   const challengeEntry = activeChallenge && !challengeCompleted
     ? qaEntries.find((entry) => entry.id === challengeIds[challengeIndex])
     : null;
-  const visibleEntries = activeChallenge ? (challengeEntry ? [challengeEntry] : []) : filtered.slice(0, displayLimit);
+  const visibleEntries = activeChallenge ? (challengeEntry ? [challengeEntry] : []) : browseEntries.slice(0, displayLimit);
   const sprintResult = useMemo(() => summariseSprint(challengeIds, firstAttempts), [challengeIds, firstAttempts]);
   const attemptedCount = sprintResult.attempted;
   const firstTryCorrect = sprintResult.correct;
@@ -210,6 +243,7 @@ export default function QAClinic() {
       : [...previous, id].slice(-500));
 
   const changeFilter = (change: () => void) => {
+    setRetainedReviewIds([]);
     setChallengeIds([]);
     setChallengeIndex(0);
     setDeadline(null);
@@ -258,6 +292,9 @@ export default function QAClinic() {
     if (activeChallenge && !sprintAcceptsAttempt({ id, activeId: challengeIds[challengeIndex], deadline, now })) {
       if (deadline !== null && now >= deadline) setSecondsRemaining(0);
       return;
+    }
+    if (!activeChallenge && firstAttempt && (reviewFilter === "new" || reviewFilter === "due")) {
+      setRetainedReviewIds(previous => previous.includes(id) ? previous : [...previous, id]);
     }
     setReviewTime(now);
     setHistory((previous) => recordReviewAttempt(previous, id, correct, firstAttempt, now));
@@ -387,9 +424,9 @@ export default function QAClinic() {
             <div>
               <label htmlFor="qa-review-filter" className="mb-1 block text-xs font-semibold">{t("qa.reviewFilterLabel")}</label>
               <select id="qa-review-filter" disabled={sprintInProgress} value={reviewFilter}
-                onChange={(event) => changeFilter(() => setReviewFilter(event.target.value as "all" | "due" | "missed" | "saved"))}
+                onChange={(event) => changeFilter(() => setReviewFilter(event.target.value as ReviewFocus))}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
-                {(["all", "due", "missed", "saved"] as const).map((choice) => (
+                {REVIEW_FOCUSES.map((choice) => (
                   <option key={choice} value={choice}>{t(`qa.reviewFilters.${choice}`)}</option>
                 ))}
               </select>
@@ -432,7 +469,19 @@ export default function QAClinic() {
                 ))}
               </div>
             )}
+            <div role="group" aria-label={t("qa.quickReviewTitle")} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {REVIEW_FOCUSES.map(focus => (
+                <button key={focus} type="button" disabled={sprintInProgress} aria-pressed={reviewFilter === focus}
+                  onClick={() => changeFilter(() => setReviewFilter(focus))}
+                  className={`min-h-16 min-w-0 rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${reviewFilter === focus ? "border-primary bg-primary/5" : "bg-muted/20 hover:bg-muted/50"}`}>
+                  <span className="block text-lg font-bold tabular-nums">{focusCounts[focus]}</span>
+                  <span className="mt-1 block break-words text-xs font-medium text-muted-foreground">{t(`qa.reviewFilters.${focus}`)}</span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">{t("qa.quickReviewDescription")}</p>
             <p className="mt-3 text-xs text-muted-foreground">{t("qa.privateHistoryNotice")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("qa.scopedHistoryNotice")}</p>
             <Link to="/study-skills" className="mt-3 inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
               <BookOpen className="h-4 w-4" aria-hidden="true" />{t("qa.studySkillsLink")}<ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
@@ -516,7 +565,7 @@ export default function QAClinic() {
             </div>
           </div>
 
-          {filtered.length === 0 && !activeChallenge && (
+          {browseEntries.length === 0 && !activeChallenge && (
             <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
               {t("qa.noResults")}
             </div>
@@ -574,6 +623,7 @@ export default function QAClinic() {
             </div>
           )}
 
+          {!activeChallenge && hasRetainedReviews && <p className="mb-3 rounded-xl border bg-muted/20 p-3 text-sm text-muted-foreground">{t("qa.retainedReviewNotice")}</p>}
           <div className={activeChallenge ? "mx-auto max-w-2xl" : "grid gap-4 lg:grid-cols-2"}>
             {visibleEntries.map((entry) => {
               const mascot = getMascot(entry.subject);
@@ -631,7 +681,7 @@ export default function QAClinic() {
               </Button>
             </div>
           )}
-          {!activeChallenge && filtered.length > displayLimit && (
+          {!activeChallenge && browseEntries.length > displayLimit && (
             <div className="mt-5 flex justify-center">
               <Button variant="outline" className="rounded-xl" onClick={() => setDisplayLimit((count) => count + PAGE_SIZE)}>
                 {t("qa.loadMore")}

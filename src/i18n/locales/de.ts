@@ -58,6 +58,11 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    retainedReviewNotice: "Gerade beantwortete Fragen bleiben bis zum Filterwechsel sichtbar, damit du die Lösungen lesen kannst. Sie zählen nicht als neue oder fällige Fragen.",
+    quickReviewTitle: "Schnelle Wiederholungsfilter",
+    quickReviewDescription: "Die Anzahl richtet sich nach Fach, Thema, Format und Suche. Kategorien können sich überschneiden.",
+    scopeLoading: "Dein Lernbereich wird geladen…",
+    scopedHistoryNotice: "Lernfortschritt und gespeicherte Fragen werden in diesem Browser getrennt nach Konto oder Gastzugang geführt. Ältere gemeinsame Daten werden nicht automatisch übernommen.",
     sprintResults: {
       "correct": "Beim ersten Versuch richtig",
       "missed": "Beim ersten Versuch falsch",
@@ -99,7 +104,7 @@ const de = {
     "openCitedLesson": "Zitiertes Tutorial öffnen",
     "clearFilters": "Filter zurücksetzen",
     "reviewFilterLabel": "Wiederholungsfilter",
-    "reviewFilters": {"all":"Alle Fragen","due":"Jetzt wiederholen","missed":"Früher falsch beantwortet","saved":"Gespeicherte Fragen"},
+    "reviewFilters": {"all":"Alle Fragen","due":"Jetzt wiederholen","missed":"Früher falsch beantwortet","saved":"Gespeicherte Fragen","new":"Noch nicht versucht"},
     "saveQuestion": "Frage speichern",
     "removeBookmark": "Gespeicherte Frage entfernen",
         "fillBlankPlaceholder": "Fehlendes Wort eingeben",
