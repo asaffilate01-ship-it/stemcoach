@@ -104,7 +104,9 @@ describe("expanded STEMCoach Question & Answer clinic", () => {
     expect(clinic).toContain("buildReviewQueue(filtered, history, sprintSize");
     expect(clinic).toContain("sprintQuestionCount(filtered.length, sprintSize)");
     expect(clinic).toContain("setChallengeIds(ids)");
-    expect(clinic).toContain("existingQuestionIds.has(id)");
+    expect(clinic).toContain("launchQuestionIds.has(id)");
+    expect(clinic).toContain('launchChallenge(missedRetryIds, "mixed")');
+    expect(clinic).toContain('launchChallenge(unansweredRetryIds, "mixed")');
     expect(clinic).toContain('launchChallenge(sprintResult.retryIds, "mixed")');
     expect(clinic).toContain("PAGE_SIZE = 16");
     expect(clinic).toContain("recordAttempt(entry.id, correct, firstAttempt)");
