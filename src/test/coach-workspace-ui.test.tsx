@@ -69,4 +69,32 @@ describe("AI tutor learner workflow",()=>{
     expect(await screen.findByRole("alert")).toHaveTextContent("interrupted");
     expect(screen.queryByText("Partial answer")).not.toBeInTheDocument();
   });
+  it("stops a streaming reply, restores the draft and safely sends a fresh turn",async()=>{
+    const cancel=vi.fn();
+    const pending=new Response(new ReadableStream<Uint8Array>({
+      start(controller){controller.enqueue(new TextEncoder().encode(chunk("Unfinished explanation")));},
+      cancel,
+    }),{status:200,headers:{"Content-Type":"text/event-stream"}});
+    mocks.fetch.mockResolvedValueOnce(pending).mockResolvedValueOnce(response(chunk("Completed new explanation")+"data: [DONE]\n\n"));
+    open();
+    const input=await screen.findByRole("textbox",{name:"coach.inputPlaceholder"});
+    await waitFor(()=>expect(input).toBeEnabled());
+    fireEvent.change(input,{target:{value:"Help with this problem"}});
+    fireEvent.click(screen.getByRole("button",{name:"coach.send"}));
+    await screen.findByText("Unfinished explanation");
+    fireEvent.click(screen.getByRole("button",{name:"coach.workspace.stopResponse"}));
+    await waitFor(()=>expect(input).toHaveValue("Help with this problem"));
+    expect(mocks.fetch.mock.calls[0][1].signal.aborted).toBe(true);
+    expect(cancel).toHaveBeenCalled();
+    expect(screen.queryByText("Unfinished explanation")).not.toBeInTheDocument();
+    expect(mocks.persist).not.toHaveBeenCalled();
+    expect(screen.getByText("coach.workspace.responseStopped")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button",{name:"coach.send"}));
+    await waitFor(()=>expect(mocks.persist).toHaveBeenCalledOnce());
+    expect(mocks.persist.mock.calls[0][0].messages).toEqual([
+      {role:"user",content:"Help with this problem"},
+      {role:"assistant",content:"Completed new explanation"},
+    ]);
+    expect(screen.queryByText("coach.workspace.responseStopped")).not.toBeInTheDocument();
+  });
 });

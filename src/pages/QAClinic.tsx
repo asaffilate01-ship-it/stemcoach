@@ -5,6 +5,7 @@ import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3
 import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
+import { summariseSprint, sprintAcceptsAttempt } from "@/lib/qaSprintResults";
 import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { QuestionInteraction } from "@/components/qa/QuestionInteraction";
@@ -155,8 +156,10 @@ export default function QAClinic() {
     ? qaEntries.find((entry) => entry.id === challengeIds[challengeIndex])
     : null;
   const visibleEntries = activeChallenge ? (challengeEntry ? [challengeEntry] : []) : filtered.slice(0, displayLimit);
-  const attemptedCount = challengeIds.filter((id) => id in firstAttempts).length;
-  const firstTryCorrect = challengeIds.filter((id) => firstAttempts[id] === true).length;
+  const sprintResult = useMemo(() => summariseSprint(challengeIds, firstAttempts), [challengeIds, firstAttempts]);
+  const attemptedCount = sprintResult.attempted;
+  const firstTryCorrect = sprintResult.correct;
+  const sprintInProgress = activeChallenge && !challengeCompleted;
   const masteredCount = challengeIds.filter((id) => mastered[id] === true).length;
   const reviewSummary = useMemo(() => getReviewSummary(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const weeklyPlan = useMemo(() => buildQAWeeklyPlan(filtered, history, reviewTime), [filtered, history, reviewTime]);
@@ -164,15 +167,17 @@ export default function QAClinic() {
   const timedMinutes = effectiveSprintDurationSeconds(filtered.length, sprintSize) / 60;
 
   const launchChallenge = (selected: string[], kind: ChallengeMode) => {
-    if (selected.length === 0) return;
-    setChallengeIds(selected);
+    if (sprintInProgress || selected.length === 0) return;
+    const ids = [...new Set(selected)].filter(id => existingQuestionIds.has(id)).slice(0, 20);
+    if (!ids.length) return;
+    setChallengeIds(ids);
     setChallengeIndex(0);
     setFirstAttempts({});
     setMastered({});
     setChallengeStreak(0);
     setChallengeMode(kind);
     setChallengeRound((round) => round + 1);
-    const sprintSeconds = effectiveSprintDurationSeconds(selected.length, sprintSize);
+    const sprintSeconds = effectiveSprintDurationSeconds(ids.length, sprintSize);
     setSecondsRemaining(sprintSeconds);
     setDeadline(kind === "timed" ? Date.now() + sprintSeconds * 1000 : null);
 
@@ -193,6 +198,9 @@ export default function QAClinic() {
     setChallengeIds([]);
     setChallengeIndex(0);
     setDeadline(null);
+    setFirstAttempts({});
+    setMastered({});
+    setChallengeStreak(0);
     window.requestAnimationFrame(() => document.getElementById("qa-library")?.focus());
   };
 
@@ -245,14 +253,18 @@ export default function QAClinic() {
 
   const recordAttempt = (id: string, correct: boolean, firstAttempt: boolean) => {
     const now = Date.now();
+    // A timer callback may run late when a tab is backgrounded. Reject late
+    // attempts synchronously so neither sprint score nor review history changes.
+    if (activeChallenge && !sprintAcceptsAttempt({ id, activeId: challengeIds[challengeIndex], deadline, now })) {
+      if (deadline !== null && now >= deadline) setSecondsRemaining(0);
+      return;
+    }
     setReviewTime(now);
     setHistory((previous) => recordReviewAttempt(previous, id, correct, firstAttempt, now));
     if (correct) setMastered((previous) => ({ ...previous, [id]: true }));
-    if (firstAttempt) {
-      setFirstAttempts((previous) => id in previous ? previous : { ...previous, [id]: correct });
-      if (activeChallenge && challengeIds[challengeIndex] === id) {
-        setChallengeStreak((previous) => correct ? previous + 1 : 0);
-      }
+    if (activeChallenge && firstAttempt) {
+      setFirstAttempts((previous) => Object.prototype.hasOwnProperty.call(previous, id) ? previous : { ...previous, [id]: correct });
+      setChallengeStreak((previous) => correct ? previous + 1 : 0);
     }
   };
 
@@ -330,7 +342,7 @@ export default function QAClinic() {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span role="status" className="text-sm text-muted-foreground">{t("qa.results", { count: filtered.length })}</span>
-              <Button type="button" variant="outline" disabled={subject === "all" && topic === "all" && format === "all" && level === "all" && reviewFilter === "all" && !search}
+              <Button type="button" variant="outline" disabled={sprintInProgress || (subject === "all" && topic === "all" && format === "all" && level === "all" && reviewFilter === "all" && !search)}
                 onClick={clearAllFilters}>
                 {t("qa.clearFilters")}
               </Button>
@@ -340,7 +352,7 @@ export default function QAClinic() {
           <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label htmlFor="qa-subject-filter" className="mb-1 block text-xs font-semibold">{t("qa.filterSubject")}</label>
-              <select id="qa-subject-filter" value={subject} onChange={(event) => chooseSubject(event.target.value)}
+              <select id="qa-subject-filter" disabled={sprintInProgress} value={subject} onChange={(event) => chooseSubject(event.target.value)}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allSubjects")}</option>
                 {subjects.map((item) => <option key={item.id} value={item.id}>{t(`subjects.names.${item.id}`)}</option>)}
@@ -349,7 +361,7 @@ export default function QAClinic() {
 
             <div>
               <label htmlFor="qa-topic-filter" className="mb-1 block text-xs font-semibold">{t("qa.filterTopic")}</label>
-              <select id="qa-topic-filter" value={topic} onChange={(event) => chooseTopic(event.target.value)}
+              <select id="qa-topic-filter" disabled={sprintInProgress} value={topic} onChange={(event) => chooseTopic(event.target.value)}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allTopics")}</option>
                 {availableTopics.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
@@ -357,7 +369,7 @@ export default function QAClinic() {
             </div>
             <div>
               <label htmlFor="qa-format-filter" className="mb-1 block text-xs font-semibold">{t("qa.filterFormat")}</label>
-              <select id="qa-format-filter" value={format} onChange={(event) => changeFilter(() => setFormat(event.target.value))}
+              <select id="qa-format-filter" disabled={sprintInProgress} value={format} onChange={(event) => changeFilter(() => setFormat(event.target.value))}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allFormats")}</option>
                 {questionFormats.map((item) => <option key={item} value={item}>{t(`qa.formats.${item}`)}</option>)}
@@ -365,7 +377,7 @@ export default function QAClinic() {
             </div>
             <div>
               <label htmlFor="qa-level-filter" className="mb-1 block text-xs font-semibold">{t("qa.filterLevel")}</label>
-              <select id="qa-level-filter" value={level} onChange={(event) => changeFilter(() => setLevel(event.target.value))}
+              <select id="qa-level-filter" disabled={sprintInProgress} value={level} onChange={(event) => changeFilter(() => setLevel(event.target.value))}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 <option value="all">{t("qa.allLevels")}</option>
                 {["Foundation", "Intermediate", "Advanced"].map((item) =>
@@ -374,7 +386,7 @@ export default function QAClinic() {
             </div>
             <div>
               <label htmlFor="qa-review-filter" className="mb-1 block text-xs font-semibold">{t("qa.reviewFilterLabel")}</label>
-              <select id="qa-review-filter" value={reviewFilter}
+              <select id="qa-review-filter" disabled={sprintInProgress} value={reviewFilter}
                 onChange={(event) => changeFilter(() => setReviewFilter(event.target.value as "all" | "due" | "missed" | "saved"))}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 {(["all", "due", "missed", "saved"] as const).map((choice) => (
@@ -386,7 +398,7 @@ export default function QAClinic() {
               <label htmlFor="qa-search" className="mb-1 block text-xs font-semibold">{t("qa.searchLabel")}</label>
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
-                <Input id="qa-search" value={search} onChange={(event) => changeFilter(() => setSearch(event.target.value))}
+                <Input id="qa-search" disabled={sprintInProgress} value={search} onChange={(event) => changeFilter(() => setSearch(event.target.value))}
                   placeholder={t("qa.searchPlaceholder")} className="h-11 rounded-xl pl-10" />
               </div>
             </div>
@@ -408,7 +420,7 @@ export default function QAClinic() {
                 </p>
               </div>
               <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-xs"
-                onClick={() => setHistory({})} disabled={Object.keys(history).length === 0}>
+                onClick={() => setHistory({})} disabled={sprintInProgress || Object.keys(history).length === 0}>
                 <Trash2 className="h-4 w-4" /> {t("qa.clearPracticeHistory")}
               </Button>
             </div>
@@ -490,14 +502,14 @@ export default function QAClinic() {
                 </select>
               </div>
               <Button type="button" variant="outline" className="min-h-11 gap-2 rounded-xl"
-                disabled={filtered.length === 0} onClick={() => startChallenge("adaptive")}>
+                disabled={sprintInProgress || filtered.length === 0} onClick={() => startChallenge("adaptive")}>
                 <Brain className="h-4 w-4" /> {t("qa.adaptiveReview")}
               </Button>
               <Button type="button" variant="outline" className="gap-2 rounded-xl"
-                disabled={filtered.length === 0} onClick={() => startChallenge("timed")}>
+                disabled={sprintInProgress || filtered.length === 0} onClick={() => startChallenge("timed")}>
                 <Clock3 className="h-4 w-4" /> {t("qa.timedChallenge", { minutes: timedMinutes })}
               </Button>
-              <Button type="button" className="gap-2 rounded-xl" disabled={filtered.length === 0}
+              <Button type="button" className="gap-2 rounded-xl" disabled={sprintInProgress || filtered.length === 0}
                 onClick={() => startChallenge("mixed")}>
                 <Target className="h-4 w-4" /> {t("qa.startChallenge")}
               </Button>
@@ -538,12 +550,26 @@ export default function QAClinic() {
               <Trophy className="mx-auto mb-3 h-12 w-12 text-primary" />
               <h3 className="mb-2 text-xl font-bold">{t(challengeMode === "timed" && secondsRemaining === 0 ? "qa.timeExpired" : "qa.challengeFinished")}</h3>
               <p className="mb-2 text-sm">{t("qa.challengeSummary", { correct: firstTryCorrect, attempted: attemptedCount, total: challengeIds.length })}</p>
-              <p className="mb-5 text-xs text-muted-foreground">{t("qa.challengeMastered", { count: masteredCount })}</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                <Button onClick={() => startChallenge(challengeMode)} className="rounded-xl">{t("qa.playAgain")}</Button>
-                <Button variant="outline" className="rounded-xl" onClick={exitChallenge}>
-                  {t("qa.browseAll")}
-                </Button>
+              <p className="mb-4 text-xs text-muted-foreground">{t("qa.challengeMastered", { count: masteredCount })}</p>
+              <dl className="mx-auto mb-4 grid max-w-xl grid-cols-3 gap-2 text-center">
+                {([
+                  ["qa.sprintResults.correct", sprintResult.correct, "text-emerald-600 dark:text-emerald-400"],
+                  ["qa.sprintResults.missed", sprintResult.missed, "text-amber-700 dark:text-amber-300"],
+                  ["qa.sprintResults.unattempted", sprintResult.unattempted, "text-muted-foreground"],
+                ] as const).map(([key, count, colour]) => (
+                  <div key={key} className="min-w-0 rounded-xl border bg-muted/20 px-2 py-3">
+                    <dd className={`text-2xl font-bold tabular-nums ${colour}`}>{count}</dd>
+                    <dt className="mt-1 break-words text-xs font-medium">{t(key)}</dt>
+                  </div>
+                ))}
+              </dl>
+              <p className="mx-auto mb-5 max-w-lg text-xs leading-relaxed text-muted-foreground">{t("qa.sprintResults.notice")}</p>
+              <div className="flex flex-col justify-center gap-2 sm:flex-row sm:flex-wrap">
+                {sprintResult.retryIds.length > 0 && <Button type="button" onClick={() => launchChallenge(sprintResult.retryIds, "mixed")} className="min-h-11 gap-2 rounded-xl">
+                  <Target className="h-4 w-4" aria-hidden="true" /> {t("qa.sprintResults.retry", { count: sprintResult.retryIds.length })}
+                </Button>}
+                <Button type="button" variant="outline" onClick={() => launchChallenge(challengeIds, challengeMode)} className="min-h-11 rounded-xl">{t("qa.playAgain")}</Button>
+                <Button type="button" variant="outline" className="min-h-11 rounded-xl" onClick={exitChallenge}>{t("qa.browseAll")}</Button>
               </div>
             </div>
           )}
@@ -596,7 +622,10 @@ export default function QAClinic() {
           {activeChallenge && !challengeCompleted && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4">
               <span className="text-xs text-muted-foreground">{t("qa.selfCheckNote")}</span>
-              <Button className="gap-2 rounded-xl" onClick={() => setChallengeIndex((index) => Math.min(challengeIds.length, index + 1))}>
+              <Button className="gap-2 rounded-xl" onClick={() => {
+                if (deadline !== null && Date.now() >= deadline) { setSecondsRemaining(0); return; }
+                setChallengeIndex((index) => Math.min(challengeIds.length, index + 1));
+              }}>
                 {challengeIndex === challengeIds.length - 1 ? t("qa.finishChallenge") : t("qa.nextQuestion")}
                 <ArrowRight className="h-4 w-4" />
               </Button>

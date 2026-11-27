@@ -58,6 +58,13 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    sprintResults: {
+      "correct": "Beim ersten Versuch richtig",
+      "missed": "Beim ersten Versuch falsch",
+      "unattempted": "Kein Erstversuch",
+      "notice": "Die nächste gezielte Übungsrunde enthält nur Fragen ohne einen richtigen selbstständigen Erstversuch. Sie hat kein Zeitlimit und ändert das Ergebnis der vorherigen Runde nicht.",
+      "retry": "{{count}} falsche oder nicht beantwortete Fragen wiederholen"
+    },
     workspaceNavigation: "Q&A-Lernbereiche",
     exitChallenge: "Diese Übungsrunde beenden",
     firstTryAccuracy: "Beim ersten Versuch richtig: {{accuracy}} % ({{correct}} von {{total}} Versuchen)",
@@ -737,6 +744,8 @@ const de = {
   },
   coach: {
     workspace: {
+      stopResponse: "Antwort stoppen",
+      responseStopped: "Antwort gestoppt. Deine Frage wurde wiederhergestellt.",
       "title": "Dein KI-Lerncoach",
       "description": "Wähle ein Fach und deinen Lernstil. Verstehe ein Konzept, übe selbstständig oder erhalte Rückmeldung zu deiner Lösung.",
       "modeLabel": "Lernstil",
