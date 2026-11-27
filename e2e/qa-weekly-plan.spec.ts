@@ -33,3 +33,16 @@ test("practice history prioritises due questions without exposing typed answers"
   await page.getByRole("button", { name: "Practise day 1" }).click();
   await expect(page.locator("article").first()).toContainText("What is the nth term of 3, 7, 11, 15");
 });
+
+test("daily workload selection respects the six-question lesson and launches the actual scheduled set", async ({ page }) => {
+  await page.goto("/qa-clinic?topic=arithmetic-sequences-nth-term");
+  await dismissCookies(page);
+  const planner=page.getByRole("region",{name:"Your 7-day revision plan"});
+  await expect(planner).toBeVisible();
+  await planner.getByLabel("Daily revision target").selectOption("20");
+  await expect(planner.getByText("6 new · 0 due",{exact:true})).toBeVisible();
+  await expect(planner.getByRole("button",{name:"Practise day 2",exact:true})).toBeDisabled();
+  await planner.getByRole("button",{name:"Practise day 1",exact:true}).click();
+  await expect(page.getByText("Question 1 of 6",{exact:true})).toBeVisible();
+  await expect(page.locator("article")).toHaveCount(1);
+});
