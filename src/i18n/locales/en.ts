@@ -140,7 +140,7 @@ const en = {
       "diagram-label": "Label the diagram"
     },
     "contentLanguageNotice": "The lesson questions and worked explanations are currently authored in English; translated controls do not mean the teaching content is fully translated.",
-    "answerNumber": "Enter your number (without units)",
+    "answerNumber": "Enter a number or fraction (without units)",
     "answerWritten": "Write a short answer",
     "numberPlaceholder": "Enter a number",
     "writtenPlaceholder": "Type your answer",
@@ -748,6 +748,19 @@ const en = {
     empty: "No notifications yet",
   },
   coach: {
+    calculator: {
+      "title": "Check a calculation",
+      "description": "Work with numbers, fractions and parentheses using +, −, × and ÷. Decimal commas and scientific notation are supported; do not use digit-group separators.",
+      "expression": "Calculation",
+      "calculate": "Calculate",
+      "exact": "Exact result",
+      "notice": "Calculated on this device. This does not check whether your formula or units are appropriate, and is not an exam mark.",
+      "errors": {
+        "invalid": "Enter a valid arithmetic expression. Variables, powers and implicit multiplication are not supported.",
+        "zero": "Division by zero is undefined.",
+        "range": "This calculation exceeds the supported size."
+      }
+    },
     workspace: {
       jumpLatest: "Jump to latest",
       starterNotice: "Need a starting point? Add a prompt to your draft, then edit or send it.",
