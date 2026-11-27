@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target, Square, ArrowDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { getMascot, getCoachStem } from "@/lib/mascots";
@@ -16,7 +16,7 @@ import { usePreferredCoach } from "@/hooks/usePreferredCoach";
 import { useLearnerCurriculum } from "@/hooks/useLearnerCurriculum";
 import { useTranslation } from "react-i18next";
 import { normalizeLanguage } from "@/i18n/language";
-import { tutorials } from "@/data/tutorials";
+import { COACH_SUBJECT_IDS, isCoachSubject, resolveCoachTutorial, buildCoachStudyActions } from "@/lib/coachStudyActions";
 import { CoachRequestScope, normaliseCoachThread, type CoachMessage as Msg } from "@/lib/coachThread";
 import { readCoachStream } from "@/lib/coachStream";
 import { StudyCalculator } from "@/components/qa/StudyCalculator";
@@ -25,7 +25,7 @@ import { COACH_MODES, type CoachMode } from "../../supabase/functions/_shared/co
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
-const SUBJECT_IDS = ["mathematics", "physics", "chemistry", "biology", "computer-science", "economics", "english-literature", "psychology", "geography", "business-studies", "ielts", "celta", "german"];
+const SUBJECT_IDS = COACH_SUBJECT_IDS;
 export default function AITutor() {
   const { user } = useAuth();
   const { search } = useLocation();
@@ -34,6 +34,7 @@ export default function AITutor() {
 
 function CoachWorkspace() {
   const { t, i18n } = useTranslation();
+  const reducedMotion = useReducedMotion();
   useDocumentTitle(t("nav.aiTutor"));
   const { user } = useAuth();
   const { canUseCoaching, loading: quotaLoading, error: quotaError, refresh: refreshQuota } = useQuotaGate();
@@ -57,13 +58,13 @@ function CoachWorkspace() {
   const [retry, setRetry] = useState(0);
   const requestScope = useRef(new CoachRequestScope());
   const requestedSubject = searchParams.get("subject");
-  const requestedTutorial = tutorials.find((tutorial) => tutorial.id === searchParams.get("tutorial")) || null;
-  const initialSubject = requestedTutorial?.subject || (requestedSubject && SUBJECT_IDS.includes(requestedSubject)
+  const requestedTutorial = resolveCoachTutorial(searchParams.get("tutorial"), requestedSubject);
+  const initialSubject = requestedTutorial?.subject || (isCoachSubject(requestedSubject)
     ? requestedSubject
-    : preferredCoachId !== "stemcoach" && SUBJECT_IDS.includes(preferredCoachId)
+    : preferredCoachId !== "stemcoach" && isCoachSubject(preferredCoachId)
       ? preferredCoachId
       : "mathematics");
-  const [subjectId, setSubjectId] = useState(initialSubject);
+  const [subjectId, setSubjectId] = useState<string>(initialSubject);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const followsLatest = useRef(true);
@@ -74,7 +75,7 @@ function CoachWorkspace() {
     const draft = (location.state as { qaDraft?: unknown } | null)?.qaDraft;
     if (typeof draft !== "string" || !draft.trim()) return;
     setInput(draft.slice(0, 2000));
-    if (requestedSubject && SUBJECT_IDS.includes(requestedSubject)) setSubjectId(requestedSubject);
+    if (isCoachSubject(requestedSubject)) setSubjectId(requestedSubject);
     // Discard route state so drafts are not replayed after another navigation.
     navigate(location.pathname + location.search, { replace: true, state: null });
   }, [location.key, location.pathname, location.search, location.state, navigate, requestedSubject]);
@@ -88,6 +89,8 @@ function CoachWorkspace() {
   const accountId = user?.id;
   const threadReady = !conversationLoading && loadedSubject === subjectId && !threadError && canUseCoaching && !curriculumLoading && !curriculumError;
   const busy = isLoading || clearing || conversationLoading;
+  const studyActions = buildCoachStudyActions(subjectId, activeTutorial?.id);
+  const navigationBlocked = busy || Boolean(input.trim());
 
   const persistConversation = async (thread: Msg[], request: AbortController) => {
     if (!accountId || !requestScope.current.isCurrent(request)) return;
@@ -177,13 +180,13 @@ function CoachWorkspace() {
   };
 
   useEffect(() => {
-    if (!manuallySelectedTutor.current && !busy && !requestedSubject && !requestedTutorial && messages.length === 0 && preferredCoachId !== "stemcoach" && SUBJECT_IDS.includes(preferredCoachId)) {
+    if (!manuallySelectedTutor.current && !busy && !input.trim() && !requestedSubject && !requestedTutorial && messages.length === 0 && preferredCoachId !== "stemcoach" && isCoachSubject(preferredCoachId)) {
       setSubjectId(preferredCoachId);
     }
-  }, [messages.length, preferredCoachId, requestedSubject, requestedTutorial, busy]);
+  }, [messages.length, preferredCoachId, requestedSubject, requestedTutorial, busy, input]);
 
   const selectTutor = (id: string) => {
-    if (busy || !SUBJECT_IDS.includes(id) || id === subjectId) return;
+    if (navigationBlocked || !isCoachSubject(id) || id === subjectId) return;
     manuallySelectedTutor.current = true;
     requestScope.current.cancel();
     followsLatest.current = true;
@@ -345,11 +348,33 @@ function CoachWorkspace() {
               </div>
             </div>
           </section>
+          <nav aria-labelledby="coach-study-actions-title" className="rounded-xl border bg-card px-3 py-3 sm:px-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-1">
+              <h2 id="coach-study-actions-title" className="text-sm font-semibold">{t("coach.studyActions.title")}</h2>
+              <span className="text-xs text-muted-foreground">{subjectLabel}{activeTutorial ? " · " + activeTutorial.title : ""}</span>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">
+              {studyActions.filter(action => action.id !== "weak" || user).map(action => {
+                const Icon = action.id === "practice" ? GraduationCap : action.id === "due" || action.id === "missed" || action.id === "weak" ? Target : BookOpen;
+                const label = action.id === "questions" ? t("qa.explore")
+                  : action.id === "practice" ? t("coach.practiseSubject", { subject: subjectLabel })
+                  : action.id === "weak" ? t("coach.openWeakDrill")
+                  : t(`coach.studyActions.${action.id}`);
+                return <Button key={action.id} type="button" variant="outline" size="sm"
+                  disabled={navigationBlocked} onClick={() => { if (!navigationBlocked) navigate(action.path); }}
+                  className="min-h-11 min-w-0 whitespace-normal rounded-lg text-left leading-tight">
+                  <Icon className="mr-1.5 h-4 w-4 shrink-0" aria-hidden="true" /><span className="break-words">{label}</span>
+                </Button>;
+              })}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">{input.trim()
+              ? t("coach.studyActions.draftNotice") : busy ? t("coach.studyActions.busyNotice") : t("coach.studyActions.notice")}</p>
+          </nav>
           <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:items-start">
           <aside className="min-w-0 space-y-3">
           <div className="rounded-2xl border bg-card p-3 shadow-sm sm:p-4">
             <p id="coach-subject-label" className="mb-2 text-sm font-semibold">{t("coach.tutorLabel")}</p>
-            <select aria-labelledby="coach-subject-label" value={subjectId} onChange={e => selectTutor(e.target.value)} disabled={busy} className="min-h-11 w-full rounded-xl border bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-ring lg:hidden">
+            <select aria-labelledby="coach-subject-label" value={subjectId} onChange={e => selectTutor(e.target.value)} disabled={navigationBlocked} className="min-h-11 w-full rounded-xl border bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-ring lg:hidden">
               {SUBJECT_IDS.map(id => <option key={id} value={id}>{t(`subjects.names.${id}`)}</option>)}
             </select>
             <div className="hidden gap-1.5 lg:grid" aria-labelledby="coach-subject-label" role="group">
@@ -357,7 +382,7 @@ function CoachWorkspace() {
                 const m = getMascot(id);
                 const isActive = subjectId === id;
                 return (
-                  <button key={id} onClick={() => selectTutor(id)} disabled={busy} aria-pressed={isActive}
+                  <button key={id} onClick={() => selectTutor(id)} disabled={navigationBlocked} aria-pressed={isActive}
                     className={`flex min-h-11 min-w-0 items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isActive ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-muted text-muted-foreground hover:text-foreground"}`}>
                     <MascotAvatar mascot={m} decorative className="h-7 w-7 shrink-0" />
                     <span className="min-w-0 break-words">{m.name} <span className="block text-xs opacity-80">{t(`subjects.names.${id}`)}</span></span>
@@ -409,9 +434,9 @@ function CoachWorkspace() {
               {messages.length === 0 && threadReady && (
                 <motion.div
                   key="empty"
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={reducedMotion ? false : { opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
+                  exit={reducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
                   <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
@@ -447,9 +472,9 @@ function CoachWorkspace() {
             {loadedSubject === subjectId && messages.map((msg, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 6 }}
+                initial={reducedMotion ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: reducedMotion ? 0 : 0.2 }}
                 className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
               >
                 {msg.role === "assistant" && (
@@ -482,20 +507,6 @@ function CoachWorkspace() {
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate("/qa-clinic?subject=" + encodeURIComponent(subjectId) + (activeTutorial ? "&topic=" + encodeURIComponent(activeTutorial.id) : ""))}>
-              <BookOpen className="h-4 w-4" /> {t("qa.explore")}
-            </Button>
-            <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate(`/practice/${subjectId}`)}>
-              <GraduationCap className="h-4 w-4" /> {t("coach.practiseSubject", { subject: subjectLabel })}
-            </Button>
-            {user && (
-              <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate("/weak-drills")}>
-                <Target className="h-4 w-4" /> {t("coach.openWeakDrill")}
-              </Button>
             )}
           </div>
 
