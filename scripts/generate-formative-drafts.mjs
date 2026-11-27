@@ -168,6 +168,39 @@ async function writePrivateDraftStream(output,limitPerFamily,selectedFamilyIds){
  }finally{await rm(temp,{recursive:true,force:true});}
  return count;
 }
+// Atomic directory export. Each shard is a normal draft envelope; no entire-bank array is needed.
+async function writePrivateShards(shardSize,limitPerFamily,selectedFamilyIds){
+ assertLimit(limitPerFamily);
+ if(!Number.isSafeInteger(shardSize)||shardSize<1||shardSize>10000)throw Error('Shard size must be 1–10000');
+ const familyIds=selectFamilies(selectedFamilyIds).map(f=>f.id);
+ const total=getDraftCoverage(limitPerFamily,familyIds).totalVariants;
+ if(Math.ceil(total/shardSize)>10000)throw Error('Choose a larger shard size (maximum 10000 shards)');
+ const dir='content/generated';
+ const key=hash(JSON.stringify({familyIds,limitPerFamily,shardSize})).slice(0,20);
+ const output=dir+'/formative-shards-'+key;
+ await mkdir(dir,{recursive:true,mode:0o700});
+ const temp=await mkdtemp(dir+'/.review-');
+ try{
+  const shards=[];
+  let items=[],count=0;
+  const flush=async()=>{
+   const name='part-'+String(shards.length+1).padStart(6,'0')+'.json';
+   const payload=JSON.stringify({schemaVersion:1,status:'draft',count:items.length,items})+'\n';
+   await writeFile(temp+'/'+name,payload,{flag:'wx',mode:0o600});
+   shards.push({name,count:items.length,sha256:hash(payload)});
+   count+=items.length;items=[];
+  };
+  for(const item of iterateDrafts(limitPerFamily,familyIds)){
+   items.push(item);
+   if(items.length===shardSize)await flush();
+  }
+  if(items.length)await flush();
+  if(count!==total)throw Error('Draft count mismatch');
+  await writeFile(temp+'/manifest.json',JSON.stringify({schemaVersion:1,kind:'formative-draft-shards',status:'draft',count,shardSize,familyIds,limitPerFamily,shards},null,2)+'\n',{flag:'wx',mode:0o600});
+  await rename(temp,output);
+  return {draftVariants:count,approvedQuestions:0,shardCount:shards.length,manifest:output+'/manifest.json'};
+ }finally{await rm(temp,{recursive:true,force:true});}
+}
 // Deterministic stratified samples: one item from each equal-width range of a family.
 export function generateDraftReviewSample({limitPerFamily=10000,selectedFamilyIds,samplesPerFamily=5,seed="review-v1"}={}){
  assertLimit(limitPerFamily);
@@ -209,6 +242,10 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
  if(process.argv[2]==='--list' && process.argv.length===3){
   const catalogue=getDraftFamilyCatalog();
   console.log(JSON.stringify({families:catalogue,capacity:catalogue.reduce((sum,f)=>sum+f.capacity,0)},null,2));
+ }else if(process.argv[2]==='--shards'){
+  const args=process.argv.slice(3);
+  if(args.length<2||args.slice(0,2).some(v=>!/^\d+$/.test(v)))throw Error('Usage: --shards SHARD_SIZE LIMIT_PER_FAMILY [FAMILY_ID ...]');
+  console.log(JSON.stringify(await writePrivateShards(Number(args[0]),Number(args[1]),args.length>2?args.slice(2):undefined)));
  }else if(process.argv[2]==='--sample'){
   const args=process.argv.slice(3);
   if(args.length<3||args.slice(0,2).some(v=>!/^\d+$/.test(v)))throw Error('Usage: --sample SAMPLES_PER_FAMILY LIMIT_PER_FAMILY SEED [FAMILY_ID ...]');
