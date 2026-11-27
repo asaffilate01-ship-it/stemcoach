@@ -17,6 +17,7 @@ import { Icon3D } from "@/components/ui/icon-3d";
 import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { QuotaWidget } from "@/components/dashboard/QuotaWidget";
+import { RevisionOverview } from "@/components/dashboard/RevisionOverview";
 import { getCoachStem, getDailyMotivation } from "@/lib/mascots";
 import { useTranslation } from "react-i18next";
 
@@ -130,6 +131,8 @@ export default function Dashboard() {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </section>
+
+          {user && <RevisionOverview accountId={user.id} />}
 
           {/* Quick Actions */}
           <div className="mb-5 md:mb-8">
