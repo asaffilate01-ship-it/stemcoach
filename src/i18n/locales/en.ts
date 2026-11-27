@@ -734,6 +734,32 @@ const en = {
     empty: "No notifications yet",
   },
   coach: {
+    workspace: {
+      "title": "Your AI study coach",
+      "description": "Choose a subject and how you want to learn. Work through a concept, practise independently or get feedback on your own solution.",
+      "modeLabel": "Coaching style",
+      "modeNotice": "Choose a style before sending your next message.",
+      "conversation": "Tutor conversation",
+      "answerNotice": "AI explanations can contain mistakes; verify important answers against your lessons.",
+      "modes": {
+        "explain": {
+          "label": "Explain",
+          "description": "Step-by-step teaching"
+        },
+        "hint": {
+          "label": "Give me a hint",
+          "description": "Guide me without the answer"
+        },
+        "quiz": {
+          "label": "Quiz me",
+          "description": "One practice question at a time"
+        },
+        "check": {
+          "label": "Check my work",
+          "description": "Feedback on your reasoning"
+        }
+      }
+    },
     persistent: "Your persistent coach",
     askNamed: "Ask {{name}}",
     premiumTitle: "STEMCoach Coaching — Premium Feature",
