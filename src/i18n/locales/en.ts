@@ -58,6 +58,10 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    quickReviewTitle: "Quick review filters",
+    quickReviewDescription: "Counts reflect your selected subject, topic, format and search. Review categories can overlap.",
+    scopeLoading: "Loading your revision workspace…",
+    scopedHistoryNotice: "Your revision progress and saved questions are separate for each signed-in account or guest session on this browser. Older shared records are not automatically imported.",
     sprintResults: {
       "correct": "Correct first try",
       "missed": "Missed first try",
@@ -99,7 +103,7 @@ const en = {
     "openCitedLesson": "Open cited lesson",
     "clearFilters": "Clear filters",
     "reviewFilterLabel": "Review focus",
-    "reviewFilters": {"all":"All questions","due":"Due for review","missed":"Previously missed","saved":"Saved questions"},
+    "reviewFilters": {"all":"All questions","due":"Due for review","missed":"Previously missed","saved":"Saved questions","new":"New to you"},
     "saveQuestion": "Save question",
     "removeBookmark": "Remove saved question",
         "fillBlankPlaceholder": "Type the missing word",
