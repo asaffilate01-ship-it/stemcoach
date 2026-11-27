@@ -58,6 +58,8 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    workspaceNavigation: "Q&A-Lernbereiche",
+    exitChallenge: "Diese Übungsrunde beenden",
     firstTryAccuracy: "Beim ersten Versuch richtig: {{accuracy}} % ({{correct}} von {{total}} Versuchen)",
     firstTryEmpty: "Die Erstversuchsquote erscheint nach deiner ersten Antwort.",
     studySkillsLink: "Lernen, Wiederholen und Prüfungen vorbereiten",
@@ -734,6 +736,32 @@ const de = {
     empty: "Noch keine Benachrichtigungen",
   },
   coach: {
+    workspace: {
+      "title": "Dein KI-Lerncoach",
+      "description": "Wähle ein Fach und deinen Lernstil. Verstehe ein Konzept, übe selbstständig oder erhalte Rückmeldung zu deiner Lösung.",
+      "modeLabel": "Lernstil",
+      "modeNotice": "Wähle einen Stil, bevor du deine nächste Nachricht sendest.",
+      "conversation": "Unterhaltung mit dem Tutor",
+      "answerNotice": "KI-Erklärungen können Fehler enthalten. Prüfe wichtige Antworten anhand deiner Lektionen.",
+      "modes": {
+        "explain": {
+          "label": "Erklären",
+          "description": "Schritt für Schritt lernen"
+        },
+        "hint": {
+          "label": "Tipp geben",
+          "description": "Hilfe ohne die Lösung"
+        },
+        "quiz": {
+          "label": "Quiz",
+          "description": "Eine Übungsfrage nach der anderen"
+        },
+        "check": {
+          "label": "Lösung prüfen",
+          "description": "Feedback zu deinem Lösungsweg"
+        }
+      }
+    },
     persistent: "Dein fester Coach",
     askNamed: "{{name}} fragen",
     premiumTitle: "STEMCoach-Coaching — Premium-Funktion",

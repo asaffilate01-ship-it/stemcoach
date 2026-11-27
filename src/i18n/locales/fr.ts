@@ -58,6 +58,8 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    workspaceNavigation: "Espaces de révision Q&R",
+    exitChallenge: "Terminer cette série",
     firstTryAccuracy: "Réussite au premier essai : {{accuracy}} % ({{correct}} sur {{total}} tentatives)",
     firstTryEmpty: "La précision au premier essai apparaît après une première réponse.",
     studySkillsLink: "Apprendre à réviser et à préparer les examens",
@@ -734,6 +736,32 @@ const fr = {
     empty: "Aucune notification pour le moment",
   },
   coach: {
+    workspace: {
+      "title": "Votre coach d’apprentissage IA",
+      "description": "Choisissez une matière et une méthode. Comprenez une notion, entraînez-vous ou obtenez un retour sur votre démarche.",
+      "modeLabel": "Style de coaching",
+      "modeNotice": "Choisissez un style avant d’envoyer votre prochain message.",
+      "conversation": "Conversation avec le tuteur",
+      "answerNotice": "Les explications de l’IA peuvent contenir des erreurs. Vérifiez les réponses importantes dans vos leçons.",
+      "modes": {
+        "explain": {
+          "label": "Expliquer",
+          "description": "Apprendre étape par étape"
+        },
+        "hint": {
+          "label": "Donner un indice",
+          "description": "Être guidé sans la réponse"
+        },
+        "quiz": {
+          "label": "Quiz",
+          "description": "Une question à la fois"
+        },
+        "check": {
+          "label": "Vérifier mon travail",
+          "description": "Retour sur votre raisonnement"
+        }
+      }
+    },
     persistent: "Votre coach attitré",
     askNamed: "Demander à {{name}}",
     premiumTitle: "Coaching STEMCoach — fonctionnalité Premium",

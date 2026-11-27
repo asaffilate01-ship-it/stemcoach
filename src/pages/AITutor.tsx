@@ -18,6 +18,8 @@ import { useTranslation } from "react-i18next";
 import { normalizeLanguage } from "@/i18n/language";
 import { tutorials } from "@/data/tutorials";
 import { CoachRequestScope, normaliseCoachThread, type CoachMessage as Msg } from "@/lib/coachThread";
+import { readCoachStream } from "@/lib/coachStream";
+import { COACH_MODES, type CoachMode } from "../../supabase/functions/_shared/coachModes";
 
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
@@ -41,6 +43,7 @@ function CoachWorkspace() {
   const { curriculumId, curriculum, loading: curriculumLoading, error: curriculumError, retry: retryCurriculum } = useLearnerCurriculum();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
+  const [mode, setMode] = useState<CoachMode>("explain");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationLoading, setConversationLoading] = useState(true);
   const [loadedSubject, setLoadedSubject] = useState<string | null>(null);
@@ -150,6 +153,19 @@ function CoachWorkspace() {
     }
   }, [messages.length, preferredCoachId, requestedSubject, requestedTutorial, busy]);
 
+  const selectTutor = (id: string) => {
+    if (busy || !SUBJECT_IDS.includes(id) || id === subjectId) return;
+    manuallySelectedTutor.current = true;
+    requestScope.current.cancel();
+    setMessages([]);
+    setInput("");
+    setLoadedSubject(null);
+    setSubjectId(id);
+    void setPreferredCoachId(id as Parameters<typeof setPreferredCoachId>[0]).then(({ error }) => {
+      if (error) setSaveError("Your tutor selection is active for this session, but your preference could not be saved.");
+    });
+  };
+
   const send = async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || busy || !threadReady || !accountId || requestScope.current.inFlight) return;
@@ -193,6 +209,7 @@ function CoachWorkspace() {
           curriculum: curriculumId,
           language: normalizeLanguage(i18n.resolvedLanguage || i18n.language),
           tutorialId: activeTutorial?.id,
+          mode,
         }),
       });
 
@@ -205,34 +222,7 @@ function CoachWorkspace() {
         throw new Error(errorMessage);
       }
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (!current()) { await reader.cancel(); return; }
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) upsertAssistant(content);
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
-        }
-      }
+      await readCoachStream(resp.body, upsertAssistant, request.signal);
       if (!current()) return;
       if (!assistantSoFar.trim()) throw new Error(t("coach.errors.generic"));
       try {
@@ -295,58 +285,57 @@ function CoachWorkspace() {
     <div className="flex min-h-screen flex-col bg-background">
       <AppHeader />
       <PageTransition>
-        <main className="container mx-auto flex flex-1 flex-col px-4 py-4">
-          {/* Subject selector with mascot avatars */}
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">{t("coach.tutorLabel")}</span>
-            {SUBJECT_IDS.map(id => {
-              const m = getMascot(id);
-              const isActive = subjectId === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => {
-                    manuallySelectedTutor.current = true;
-                    if (id !== subjectId) {
-                      requestScope.current.cancel();
-                      setMessages([]);
-                      setInput("");
-                      setLoadedSubject(null);
-                      setSubjectId(id);
-                    }
-                    void setPreferredCoachId(id as Parameters<typeof setPreferredCoachId>[0]).then(({ error }) => {
-                      if (error) setSaveError("Your tutor selection is active for this session, but your preference could not be saved.");
-                    });
-                  }}
-                  disabled={busy}
-                  aria-pressed={isActive}
-                  className={`flex min-h-11 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <MascotAvatar mascot={m} decorative className="h-6 w-6" />
-                  {m.name}
-                </button>
-              );
-            })}
-            {curriculum && (
-              <span className="flex items-center gap-1.5 rounded-xl border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary">
-                <GraduationCap className="h-3.5 w-3.5" /> {curriculum.label}
-              </span>
-            )}
-            {messages.length > 0 && (
-              <button
-                onClick={clearConversation}
-                disabled={busy || !threadReady}
-                className="ml-auto flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> {t("common.clear")}
-              </button>
-            )}
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 px-3 pb-28 pt-4 sm:px-6 md:pb-12 md:pt-7">
+          <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6" aria-labelledby="coach-workspace-title">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10"><MascotAvatar mascot={coach} decorative className="h-full w-full" /></div>
+              <div className="min-w-0">
+                <h1 id="coach-workspace-title" className="stem-heading text-xl font-bold sm:text-2xl">{t("coach.workspace.title")}</h1>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t("coach.workspace.description")}</p>
+              </div>
+            </div>
+          </section>
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:items-start">
+          <aside className="min-w-0 space-y-3">
+          <div className="rounded-2xl border bg-card p-3 shadow-sm sm:p-4">
+            <p id="coach-subject-label" className="mb-2 text-sm font-semibold">{t("coach.tutorLabel")}</p>
+            <select aria-labelledby="coach-subject-label" value={subjectId} onChange={e => selectTutor(e.target.value)} disabled={busy} className="min-h-11 w-full rounded-xl border bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-ring lg:hidden">
+              {SUBJECT_IDS.map(id => <option key={id} value={id}>{t(`subjects.names.${id}`)}</option>)}
+            </select>
+            <div className="hidden gap-1.5 lg:grid" aria-labelledby="coach-subject-label" role="group">
+              {SUBJECT_IDS.map(id => {
+                const m = getMascot(id);
+                const isActive = subjectId === id;
+                return (
+                  <button key={id} onClick={() => selectTutor(id)} disabled={busy} aria-pressed={isActive}
+                    className={`flex min-h-11 min-w-0 items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isActive ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-muted text-muted-foreground hover:text-foreground"}`}>
+                    <MascotAvatar mascot={m} decorative className="h-7 w-7 shrink-0" />
+                    <span className="min-w-0 break-words">{m.name} <span className="block text-xs opacity-80">{t(`subjects.names.${id}`)}</span></span>
+                  </button>
+                );
+              })}
+            </div>
+            {curriculum && <div className="mt-3 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/5 p-2 text-xs font-medium text-primary"><GraduationCap className="h-4 w-4 shrink-0" /> <span>{curriculum.label}</span></div>}
           </div>
-
+          <fieldset className="min-w-0 rounded-2xl border bg-card p-3 shadow-sm sm:p-4">
+            <legend className="px-2 text-sm font-semibold">{t("coach.workspace.modeLabel")}</legend>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
+              {COACH_MODES.map(value => (
+                <label key={value} className={`relative flex min-h-16 cursor-pointer flex-col rounded-xl border p-3 transition-colors focus-within:ring-2 focus-within:ring-ring ${mode === value ? "border-primary bg-primary/5" : "bg-background hover:bg-muted/40"} ${busy ? "cursor-default opacity-70" : ""}`}>
+                  <input type="radio" name="coach-mode" className="sr-only" value={value} checked={mode === value} onChange={() => setMode(value)} disabled={busy} />
+                  <span className="text-sm font-semibold">{t(`coach.workspace.modes.${value}.label`)}</span>
+                  <span className="mt-1 text-xs leading-snug text-muted-foreground">{t(`coach.workspace.modes.${value}.description`)}</span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">{t("coach.workspace.modeNotice")}</p>
+          </fieldset>
+          </aside>
+          <section className="flex min-w-0 flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card px-3 py-2">
+              <span className="flex min-w-0 items-center gap-2 text-sm font-semibold"><MascotAvatar mascot={mascot} decorative className="h-8 w-8 shrink-0" /> {subjectLabel}</span>
+              {messages.length > 0 && <Button type="button" variant="ghost" size="sm" onClick={clearConversation} disabled={busy || !threadReady} className="min-h-11 gap-1.5"><Trash2 className="h-4 w-4" /> {t("common.clear")}</Button>}
+            </div>
           {activeTutorial && (
             <div className="mb-3 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 sm:flex-row sm:items-center">
               <BookOpen className="h-5 w-5 shrink-0 text-primary" />
@@ -364,7 +353,7 @@ function CoachWorkspace() {
           {saveError && <p role="alert" className="mb-3 rounded-xl border border-destructive/30 p-3 text-sm">{saveError}</p>}
           {conversationLoading && <p role="status" className="mb-3 text-sm text-muted-foreground">Loading your private conversation…</p>}
           {/* Chat area */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto rounded-xl border bg-card p-4 space-y-4" style={{ maxHeight: "calc(100vh - 260px)" }}>
+          <div ref={scrollRef} role="log" aria-label={t("coach.workspace.conversation")} aria-live="polite" aria-relevant="additions" className="min-h-[320px] flex-1 space-y-4 overflow-y-auto rounded-2xl border bg-card p-3 shadow-sm sm:min-h-[400px] sm:p-5 lg:min-h-[480px]" style={{ maxHeight: "min(65dvh, 760px)" }}>
             <AnimatePresence mode="wait">
               {messages.length === 0 && threadReady && (
                 <motion.div
@@ -418,10 +407,10 @@ function CoachWorkspace() {
                   </div>
                 )}
                 <div
-                  className={`min-w-0 max-w-[85%] break-words [overflow-wrap:anywhere] rounded-xl px-4 py-2.5 text-sm ${
+                  className={`min-w-0 max-w-[calc(100%_-_2.5rem)] break-words [overflow-wrap:anywhere] rounded-2xl px-3 py-2.5 text-sm sm:max-w-[85%] sm:px-4 ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "bg-muted prose prose-sm dark:prose-invert"
+                      : "bg-muted prose prose-sm dark:prose-invert prose-pre:max-w-full prose-pre:overflow-x-auto prose-table:block prose-table:overflow-x-auto"
                   }`}
                 >
                   {msg.role === "assistant" ? <ReactMarkdown>{msg.content}</ReactMarkdown> : msg.content}
@@ -446,7 +435,7 @@ function CoachWorkspace() {
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate("/qa-clinic")}>
+            <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate("/qa-clinic?subject=" + encodeURIComponent(subjectId) + (activeTutorial ? "&topic=" + encodeURIComponent(activeTutorial.id) : ""))}>
               <BookOpen className="h-4 w-4" /> {t("qa.explore")}
             </Button>
             <Button type="button" variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => navigate(`/practice/${subjectId}`)}>
@@ -460,20 +449,26 @@ function CoachWorkspace() {
           </div>
 
           {/* Input */}
-          <div className="mt-4 flex gap-2">
-            <input
+          <div className="rounded-2xl border bg-card p-3 shadow-sm">
+            <div className="flex items-end gap-2">
+            <textarea
+              rows={2}
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && !e.shiftKey && send()}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void send(); } }}
               placeholder={t("coach.inputPlaceholder", { name: mascot.name, subject: subjectLabel })}
-              className="min-w-0 flex-1 rounded-xl border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-12 min-w-0 flex-1 resize-y rounded-xl border bg-background px-3 py-2.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-primary/50 sm:text-sm"
               aria-label={t("coach.inputPlaceholder", { name: mascot.name, subject: subjectLabel })}
               maxLength={2000}
               disabled={busy || !threadReady}
             />
-            <Button onClick={() => send()} disabled={busy || !threadReady || !input.trim()} className="rounded-xl" aria-label={t("coach.send")}>
+            <Button onClick={() => send()} disabled={busy || !threadReady || !input.trim()} className="min-h-12 min-w-12 rounded-xl" aria-label={t("coach.send")}>
               <Send className="h-4 w-4" />
             </Button>
+            </div>
+            <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground"><span>{t("coach.workspace.answerNotice")}</span><span>{input.length}/2000</span></div>
+          </div>
+          </section>
           </div>
         </main>
       </PageTransition>
