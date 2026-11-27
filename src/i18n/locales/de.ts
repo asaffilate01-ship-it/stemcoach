@@ -64,6 +64,8 @@ const de = {
     scopeLoading: "Dein Lernbereich wird geladen…",
     scopedHistoryNotice: "Lernfortschritt und gespeicherte Fragen werden in diesem Browser getrennt nach Konto oder Gastzugang geführt. Ältere gemeinsame Daten werden nicht automatisch übernommen.",
     sprintResults: {
+      "retryMissed": "Fehler wiederholen ({{count}})",
+      "retryUnanswered": "Unbeantwortete Fragen üben ({{count}})",
       "correct": "Beim ersten Versuch richtig",
       "missed": "Beim ersten Versuch falsch",
       "unattempted": "Kein Erstversuch",
