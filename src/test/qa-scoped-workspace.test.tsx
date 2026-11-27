@@ -43,6 +43,9 @@ describe("revision account switching", () => {
     auth.current = { user: { id: "account-b" }, loading: false };
     view.rerender(workspace());
     count("saved", 0); count("missed", 0); count("new", 6);
+    // The category survives in the public URL, not the previous account data.
+    expect(screen.queryAllByRole("article")).toHaveLength(0);
+    fireEvent.click(focus("all"));
     expect(screen.getAllByRole("article")).toHaveLength(6);
     expect(localStorage.getItem(b.history)).toBeNull();
     expect(localStorage.getItem(a.bookmarks)).toBe(saved);
