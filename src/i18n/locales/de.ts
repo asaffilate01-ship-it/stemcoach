@@ -744,6 +744,15 @@ const de = {
   },
   coach: {
     workspace: {
+      jumpLatest: "Zur neuesten Nachricht",
+      starterNotice: "Du brauchst einen Einstieg? Füge einen Vorschlag zum Entwurf hinzu und bearbeite oder sende ihn.",
+      useStarter: "Lernvorschlag verwenden",
+      starters: {
+        "explain": "Erkläre ein wichtiges Konzept in {{subject}} Schritt für Schritt mit Beispiel und Ergebniskontrolle.",
+        "hint": "Hilf mir bei einer Aufgabe in {{subject}} mit einzelnen Hinweisen. Frage mich zuerst nach der Aufgabe.",
+        "quiz": "Stelle mir jeweils eine Frage zu {{subject}} und erkläre Fehler nach meiner Antwort.",
+        "check": "Prüfe meinen Lösungsweg in {{subject}}. Bitte mich zuerst um meine Lösung."
+      },
       stopResponse: "Antwort stoppen",
       responseStopped: "Antwort gestoppt. Deine Frage wurde wiederhergestellt.",
       "title": "Dein KI-Lerncoach",
