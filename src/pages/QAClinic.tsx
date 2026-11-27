@@ -31,6 +31,7 @@ const PAGE_SIZE = 16;
 
 type ChallengeMode = "mixed" | "adaptive" | "timed";
 const existingQuestionIds = new Set(allQAEntries.map((entry) => entry.id));
+const launchQuestionIds = new Set(qaEntries.map((entry) => entry.id));
 
 export default function QAClinic() {
   const { t, i18n } = useTranslation();
@@ -152,8 +153,7 @@ export default function QAClinic() {
   const timedMinutes = effectiveSprintDurationSeconds(filtered.length, sprintSize) / 60;
 
   const launchChallenge = (selected: string[], kind: ChallengeMode) => {
-    const allowed = new Set(filtered.map((entry) => entry.id));
-    const unique = [...new Set(selected)].filter((id) => allowed.has(id));
+    const unique = [...new Set(selected)].filter((id) => launchQuestionIds.has(id));
     if (unique.length === 0) return;
     setChallengeIds(unique);
     setChallengeIndex(0);
@@ -176,6 +176,12 @@ export default function QAClinic() {
 
   const startPlannedSet = (ids: readonly string[]) => {
     const allowed = new Set(filtered.map((entry) => entry.id));
+    launchChallenge(ids.filter((id) => allowed.has(id)), "adaptive");
+  };
+
+  const retrySprintQuestions = (ids: readonly string[]) => {
+    // The original sprint is the scope, even if a due/saved filter changes during practice.
+    const allowed = new Set(challengeIds);
     launchChallenge(ids.filter((id) => allowed.has(id)), "adaptive");
   };
 
@@ -535,12 +541,12 @@ export default function QAClinic() {
               <p className="mx-auto mb-4 max-w-lg text-xs leading-5 text-muted-foreground">{t("qa.sprintRetryNote")}</p>
               <div className="mb-3 flex flex-wrap justify-center gap-2">
                 {sprintSummary.missedIds.length > 0 && (
-                  <Button type="button" className="min-h-11 rounded-xl" onClick={() => startPlannedSet(sprintSummary.missedIds)}>
+                  <Button type="button" className="min-h-11 rounded-xl" onClick={() => retrySprintQuestions(sprintSummary.missedIds)}>
                     {t("qa.retryMissed", { count: sprintSummary.missedIds.length })}
                   </Button>
                 )}
                 {sprintSummary.unansweredIds.length > 0 && (
-                  <Button type="button" variant="outline" className="min-h-11 rounded-xl" onClick={() => startPlannedSet(sprintSummary.unansweredIds)}>
+                  <Button type="button" variant="outline" className="min-h-11 rounded-xl" onClick={() => retrySprintQuestions(sprintSummary.unansweredIds)}>
                     {t("qa.retryUnanswered", { count: sprintSummary.unansweredIds.length })}
                   </Button>
                 )}
