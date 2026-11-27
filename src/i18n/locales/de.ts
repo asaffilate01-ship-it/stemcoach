@@ -58,6 +58,8 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    workspaceNavigation: "Q&A-Lernbereiche",
+    exitChallenge: "Diese Übungsrunde beenden",
     firstTryAccuracy: "Beim ersten Versuch richtig: {{accuracy}} % ({{correct}} von {{total}} Versuchen)",
     firstTryEmpty: "Die Erstversuchsquote erscheint nach deiner ersten Antwort.",
     studySkillsLink: "Lernen, Wiederholen und Prüfungen vorbereiten",
