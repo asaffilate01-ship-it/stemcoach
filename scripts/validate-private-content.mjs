@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFileSync, lstatSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
+import { resolve, dirname, join } from "node:path";
 
 const markets = new Set(["PK", "GB", "DE"]);
 const localLanguages = new Set(["arabic", "urdu", "turkish"]);
@@ -61,12 +61,46 @@ export function validateBatches(batches) {
   return { valid: errors.length === 0, errors, stats, approvedCount: 0, publishedCount: 0 };
 }
 
+// Validate one shard at a time; retain global duplicate fingerprints across the entire manifest.
+function readBoundedRegularFile(path,maxBytes){
+ const stat=lstatSync(path);
+ if(!stat.isFile() || stat.size>maxBytes)throw Error("Invalid private file");
+ return readFileSync(path);
+}
+export function validateDraftShardManifest(path){
+ const manifest=JSON.parse(readBoundedRegularFile(path,8*1024*1024).toString("utf8"));
+ if(!manifest || manifest.schemaVersion!==1 || manifest.kind!=="formative-draft-shards" || manifest.status!=="draft" ||
+    !Number.isSafeInteger(manifest.count) || manifest.count<1 ||
+    !Number.isSafeInteger(manifest.shardSize) || manifest.shardSize<1 || manifest.shardSize>10000 ||
+    !Array.isArray(manifest.shards) || manifest.shards.length>10000 ||
+    manifest.shards.length!==Math.ceil(manifest.count/manifest.shardSize))throw Error("Invalid shard manifest");
+ function* batches(){
+  for(const [index,entry] of manifest.shards.entries()){
+   const name="part-"+String(index+1).padStart(6,"0")+".json";
+   const expectedCount=Math.min(manifest.shardSize,manifest.count-index*manifest.shardSize);
+   if(!entry || entry.name!==name || entry.count!==expectedCount || typeof entry.sha256!=="string" || !/^[a-f0-9]{64}$/.test(entry.sha256))throw Error("Invalid shard entry");
+   const bytes=readBoundedRegularFile(join(dirname(path),name),32*1024*1024);
+   if(createHash("sha256").update(bytes).digest("hex")!==entry.sha256)throw Error("Shard checksum mismatch");
+   const batch=JSON.parse(bytes.toString("utf8"));
+   if(!batch || batch.schemaVersion!==1 || batch.status!=="draft" || batch.count!==expectedCount || !Array.isArray(batch.items) || batch.items.length!==expectedCount)throw Error("Shard envelope mismatch");
+   yield batch;
+  }
+ }
+ return validateBatches(batches());
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const paths = process.argv.slice(2);
     if (!paths.length) throw Error("Supply private JSON batch paths");
-    const batches = await Promise.all(paths.map(async p => JSON.parse(await readFile(p, "utf8"))));
-    const report = validateBatches(batches);
+    let report;
+    if(paths[0]==="--manifest"){
+      if(paths.length!==2)throw Error("Supply one manifest path");
+      report=validateDraftShardManifest(paths[1]);
+    }else{
+      function* batches(){for(const path of paths)yield JSON.parse(readFileSync(path,"utf8"));}
+      report=validateBatches(batches());
+    }
     console.log(JSON.stringify(report, null, 2));
     if (!report.valid) process.exitCode = 1;
   } catch {
