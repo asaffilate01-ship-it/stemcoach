@@ -5,7 +5,7 @@ import { ArrowRight, BookOpen, CalendarClock, Bookmark, CircleHelp, Target } fro
 import { Button } from "@/components/ui/button";
 import { qaEntries } from "@/data/qaClinic";
 import { isLaunchSubject } from "@/lib/launchDiscovery";
-import { qaStorageKeys, qaReviewPath, type ReviewFocus } from "@/lib/qaReviewFocus";
+import { qaStorageKeys, qaReviewPath, qaTopicReviewPath, type ReviewFocus } from "@/lib/qaReviewFocus";
 import { readRevisionOverview } from "@/lib/revisionOverview";
 
 const entries = qaEntries.filter(entry => isLaunchSubject(entry.subject));
@@ -69,6 +69,34 @@ function ScopedRevisionOverview({ accountId }: { accountId: string }) {
           ))}
         </div>
       ) : <Button type="button" variant="outline" className="mt-3 min-h-11" onClick={() => setOverview(read())}>{t("common.retry")}</Button>}
+      {overview && overview.recommendedTopics.length > 0 && (
+        <section aria-labelledby="dashboard-revision-topics" className="mt-5 border-t pt-4">
+          <h3 id="dashboard-revision-topics" className="text-sm font-semibold">{t("qa.topicRevision.title")}</h3>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t("qa.topicRevision.notice")}</p>
+          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {overview.recommendedTopics.map(item => (
+              <div key={item.subject + ":" + item.tutorialId} className="flex min-w-0 flex-col gap-3 rounded-xl border bg-muted/20 p-3">
+                <div className="min-w-0">
+                  <p className="break-words text-xs font-medium text-muted-foreground">{t(`subjects.names.${item.subject}`)}</p>
+                  <h4 className="mt-1 break-words text-sm font-semibold">{item.topic}</h4>
+                </div>
+                <dl className="grid grid-cols-2 gap-2 text-xs">
+                  <div><dt className="text-muted-foreground">{t("qa.topicRevision.attempts")}</dt><dd className="font-semibold tabular-nums">{item.firstAttempts}</dd></div>
+                  <div><dt className="text-muted-foreground">{t("qa.topicRevision.mistakes")}</dt><dd className="font-semibold tabular-nums">{item.firstMistakes}</dd></div>
+                  <div><dt className="text-muted-foreground">{t("qa.topicRevision.practised")}</dt><dd className="font-semibold tabular-nums">{item.practicedQuestions}</dd></div>
+                  <div><dt className="text-muted-foreground">{t("qa.topicRevision.due")}</dt><dd className="font-semibold tabular-nums">{item.dueQuestions}</dd></div>
+                </dl>
+                <Button asChild variant="outline" className="mt-auto min-h-11 w-full whitespace-normal rounded-lg">
+                  <Link to={qaTopicReviewPath(item.subject, item.tutorialId, item.focus)} aria-label={t("qa.dashboardTopicReview.openLabel", { topic: item.topic, count: item.eligibleCount, focus: t(`qa.reviewFilters.${item.focus}`) })}>
+                    <span className="min-w-0 break-words text-left">{t("qa.dashboardTopicReview.open", { count: item.eligibleCount, focus: t(`qa.reviewFilters.${item.focus}`) })}</span>
+                    <ArrowRight className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" />
+                  </Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
       <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("qa.privateHistoryNotice")}</p>
       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t("qa.scopedHistoryNotice")}</p>
     </section>
