@@ -58,6 +58,7 @@ const de = {
     toggleTheme: "Design wechseln",
   },
   qa: {
+    retainedReviewNotice: "Gerade beantwortete Fragen bleiben bis zum Filterwechsel sichtbar, damit du die Lösungen lesen kannst. Sie zählen nicht als neue oder fällige Fragen.",
     quickReviewTitle: "Schnelle Wiederholungsfilter",
     quickReviewDescription: "Die Anzahl richtet sich nach Fach, Thema, Format und Suche. Kategorien können sich überschneiden.",
     scopeLoading: "Dein Lernbereich wird geladen…",
