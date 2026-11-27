@@ -101,3 +101,23 @@ test("mistake-only revision accepts an exact fraction on the next independent at
   await expect(page.getByRole("button", { name: /^Retry mistakes/ })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /^Practise unanswered/ })).toHaveCount(0);
 });
+
+test("topic recommendations show first-attempt evidence and launch only eligible lesson questions", async ({ page }) => {
+  const stem = "What is the sixth term of an arithmetic sequence starting at 5 with common difference 3?";
+  await page.goto("/qa-clinic?topic=arithmetic-sequences-nth-term");
+  await dismissCookies(page);
+  await page.getByLabel("Question type").selectOption("numeric");
+  await page.getByLabel("Search Q&A").fill(stem);
+  const question = page.locator("article");
+  await expect(question).toHaveCount(1);
+  await question.getByLabel("Enter a number or fraction (without units)").fill("19");
+  await question.getByRole("button", { name: "Check & explain" }).click();
+  await expect(question.getByText("Not quite. Compare your approach")).toBeVisible();
+  const recommendations = page.getByRole("region", { name: "Recommended topic revision" });
+  await expect(recommendations).toBeVisible();
+  await expect(recommendations.getByText("First-try mistakes", { exact: true })).toBeVisible();
+  await recommendations.getByRole("button", { name: /Revise 1 questions from/ }).click();
+  await expect(page.getByRole("heading", { name: "Question 1 of 1", exact: true })).toBeVisible();
+  await expect(page.locator("article h3")).toHaveText(stem);
+  await expect(recommendations).toHaveCount(0);
+});
