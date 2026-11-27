@@ -58,10 +58,11 @@ const en = {
     toggleTheme: "Toggle theme",
   },
   qa: {
+    retainedReviewNotice: "Recently answered questions stay visible until you change a filter so you can read the worked solutions. They are not counted in your new or due totals.",
     quickReviewTitle: "Quick review filters",
     quickReviewDescription: "Counts reflect your selected subject, topic, format and search. Review categories can overlap.",
     scopeLoading: "Loading your revision workspace…",
-    scopedHistoryNotice: "Your revision progress and saved questions are separate for each signed-in account or guest session on this browser. Older shared records are not automatically imported.",
+    scopedHistoryNotice: "Your revision progress and saved questions are separate for each signed-in account or guest profile in this browser. Older shared records are not automatically imported.",
     sprintResults: {
       "correct": "Correct first try",
       "missed": "Missed first try",
