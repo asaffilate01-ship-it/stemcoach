@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3, Flag, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
@@ -61,6 +61,7 @@ export default function QAClinic() {
   const [challengeRound, setChallengeRound] = useState(0);
   const [deadline, setDeadline] = useState<number | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(sprintDurationSeconds(10));
+  const challengeHeading = useRef<HTMLHeadingElement>(null);
   const [savedIds, setSavedIds] = useState<string[]>(() => {
     try { return parseBookmarks(localStorage.getItem(QA_BOOKMARKS_KEY), existingQuestionIds); }
     catch { return []; }
@@ -98,12 +99,15 @@ export default function QAClinic() {
 
   useEffect(() => {
     if (challengeMode !== "timed" || deadline === null || challengeIds.length === 0 ||
-        challengeIndex >= challengeIds.length || secondsRemaining === 0) return;
+        challengeIndex >= challengeIds.length) return;
     const tick = () => setSecondsRemaining(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
     tick();
-    const interval = window.setInterval(tick, 1000);
+    const interval = window.setInterval(() => {
+      tick();
+      if (Date.now() >= deadline) window.clearInterval(interval);
+    }, 1000);
     return () => window.clearInterval(interval);
-  }, [challengeMode, deadline, challengeIds.length, challengeIndex, secondsRemaining]);
+  }, [challengeMode, deadline, challengeIds.length, challengeIndex]);
 
   // Only authored, known lesson IDs may be used as deep-linked topic presets.
   // A browser history navigation updates the visible filters as well.
@@ -112,6 +116,10 @@ export default function QAClinic() {
     const requested = searchParams.get("subject");
     setSubject(selected?.subject || (requested && subjects.some((item) => item.id === requested) ? requested : "all"));
     setTopic(selected?.id || "all");
+    setChallengeIds([]);
+    setChallengeIndex(0);
+    setDeadline(null);
+    setDisplayLimit(PAGE_SIZE);
   }, [searchParams]);
 
   const availableTopics = useMemo(
@@ -138,6 +146,11 @@ export default function QAClinic() {
   const activeChallenge = challengeIds.length > 0;
   const challengeCompleted = activeChallenge && (challengeIndex >= challengeIds.length ||
     (challengeMode === "timed" && secondsRemaining === 0));
+  useEffect(() => {
+    if (!activeChallenge) return;
+    const frame = window.requestAnimationFrame(() => challengeHeading.current?.focus({ preventScroll: false }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeChallenge, challengeIndex, challengeCompleted, challengeRound]);
   const challengeEntry = activeChallenge && !challengeCompleted
     ? qaEntries.find((entry) => entry.id === challengeIds[challengeIndex])
     : null;
@@ -162,7 +175,7 @@ export default function QAClinic() {
     const sprintSeconds = effectiveSprintDurationSeconds(selected.length, sprintSize);
     setSecondsRemaining(sprintSeconds);
     setDeadline(kind === "timed" ? Date.now() + sprintSeconds * 1000 : null);
-    window.setTimeout(() => document.getElementById("qa-library")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+
   };
 
   const startChallenge = (kind: ChallengeMode = "mixed") => {
@@ -174,6 +187,13 @@ export default function QAClinic() {
   const startPlannedSet = (ids: readonly string[]) => {
     const allowed = new Set(filtered.map((entry) => entry.id));
     launchChallenge(ids.filter((id) => allowed.has(id)), "adaptive");
+  };
+
+  const exitChallenge = () => {
+    setChallengeIds([]);
+    setChallengeIndex(0);
+    setDeadline(null);
+    window.requestAnimationFrame(() => document.getElementById("qa-library")?.focus());
   };
 
   const toggleSaved = (id: string) =>
@@ -266,10 +286,15 @@ export default function QAClinic() {
           )}
         </section>
 
+        <nav aria-label={t("qa.workspaceNavigation")} className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <a href="#qa-library" className="flex min-h-12 items-center justify-center gap-2 rounded-xl border bg-card px-3 py-2 text-center text-sm font-semibold hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"><BookOpen className="h-4 w-4 shrink-0 text-primary" /> {t("qa.libraryTitle")}</a>
+          <a href="#qa-revision" className="flex min-h-12 items-center justify-center gap-2 rounded-xl border bg-card px-3 py-2 text-center text-sm font-semibold hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"><Target className="h-4 w-4 shrink-0 text-primary" /> {t("qa.reviewTitle")}</a>
+          <a href="#qa-your-question" className="col-span-2 flex min-h-12 items-center justify-center gap-2 rounded-xl border bg-card px-3 py-2 text-center text-sm font-semibold hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring sm:col-span-1"><Sparkles className="h-4 w-4 shrink-0 text-primary" /> {t("qa.askTitle")}</a>
+        </nav>
         <section aria-labelledby="qa-your-question" className="mb-8 rounded-2xl border bg-card p-5 shadow-sm md:p-7">
           <div className="mb-3 flex items-center gap-2 text-primary">
             <Sparkles className="h-5 w-5" />
-            <h2 id="qa-your-question" className="text-lg font-semibold">{t("qa.askTitle")}</h2>
+            <h2 id="qa-your-question" className="scroll-mt-28 text-lg font-semibold">{t("qa.askTitle")}</h2>
           </div>
           <p className="mb-4 text-sm text-muted-foreground">{t("qa.askDescription")}</p>
           <div className="grid gap-3 md:grid-cols-[210px_1fr]">
@@ -298,7 +323,7 @@ export default function QAClinic() {
         <section aria-labelledby="qa-library">
           <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <h2 id="qa-library" className="flex items-center gap-2 text-xl font-bold">
+              <h2 id="qa-library" tabIndex={-1} className="scroll-mt-28 flex items-center gap-2 text-xl font-bold focus-visible:ring-2 focus-visible:ring-ring">
                 <Layers className="h-5 w-5 text-primary" /> {t("qa.libraryTitle")}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{t("qa.libraryDescription")}</p>
@@ -367,7 +392,7 @@ export default function QAClinic() {
             </div>
           </div>
 
-          <div className="mb-5 rounded-xl border bg-muted/30 p-4">
+          <div id="qa-revision" className="mb-5 scroll-mt-28 rounded-2xl border bg-card p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="flex items-center gap-2 text-sm font-semibold">
@@ -486,11 +511,11 @@ export default function QAClinic() {
           )}
 
           {activeChallenge && (
-            <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4" aria-live="polite">
+            <div className="mb-5 rounded-2xl border border-primary/20 bg-primary/5 p-4">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm font-semibold">
-                <span>{challengeCompleted
+                <h3 ref={challengeHeading} tabIndex={-1} className="scroll-mt-28 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{challengeCompleted
                   ? t("qa.challengeFinished")
-                  : t("qa.challengeProgress", { current: challengeIndex + 1, total: challengeIds.length })}</span>
+                  : t("qa.challengeProgress", { current: challengeIndex + 1, total: challengeIds.length })}</h3>
                 <span>{t("qa.challengeScore", { score: firstTryCorrect, total: challengeIds.length })}</span>
                 {challengeMode === "timed" && !challengeCompleted && (
                   <span aria-label={t("qa.timeRemaining")}>
@@ -499,11 +524,12 @@ export default function QAClinic() {
                   </span>
                 )}
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div role="progressbar" aria-label={t("qa.challengeTitle", { count: challengeIds.length })} aria-valuemin={0} aria-valuemax={challengeIds.length} aria-valuenow={Math.min(challengeIndex, challengeIds.length)} className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round(100 * challengeIndex / challengeIds.length)}%` }} />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{t("qa.challengeStreak", { count: challengeStreak })}</p>
               {challengeMode === "adaptive" && <p className="mt-1 text-xs text-muted-foreground">{t("qa.adaptiveExplanation")}</p>}
+              {!challengeCompleted && <Button type="button" variant="ghost" size="sm" className="mt-2 min-h-11" onClick={exitChallenge}>{t("qa.exitChallenge")}</Button>}
             </div>
           )}
 
@@ -515,7 +541,7 @@ export default function QAClinic() {
               <p className="mb-5 text-xs text-muted-foreground">{t("qa.challengeMastered", { count: masteredCount })}</p>
               <div className="flex flex-wrap justify-center gap-2">
                 <Button onClick={() => startChallenge(challengeMode)} className="rounded-xl">{t("qa.playAgain")}</Button>
-                <Button variant="outline" className="rounded-xl" onClick={() => { setChallengeIds([]); setChallengeIndex(0); }}>
+                <Button variant="outline" className="rounded-xl" onClick={exitChallenge}>
                   {t("qa.browseAll")}
                 </Button>
               </div>
@@ -526,7 +552,7 @@ export default function QAClinic() {
             {visibleEntries.map((entry) => {
               const mascot = getMascot(entry.subject);
               return (
-                <article key={entry.id} className="mb-4 flex flex-col rounded-2xl border bg-card p-5 shadow-sm">
+                <article key={entry.id} className="mb-4 flex min-w-0 flex-col rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
                   <div className="mb-4 flex items-center gap-3">
                     <img src={mascot.image} alt="" className="h-10 w-10 rounded-xl bg-muted object-cover" />
                     <div className="min-w-0">
