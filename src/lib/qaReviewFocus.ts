@@ -1,4 +1,4 @@
-import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, type ReviewHistory, type ReviewCandidate } from "./qaPractice";
+import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, getQuestionHistory, type ReviewHistory, type ReviewCandidate } from "./qaPractice";
 
 /** Local preferences are isolated by the current authenticated identity or guest.
  * Legacy unscoped data is deliberately not adopted into an account automatically.
@@ -28,7 +28,7 @@ export function qaReviewPath(focus: ReviewFocus): string {
 type ReviewContext = { history: ReviewHistory; saved: ReadonlySet<string>; now: number };
 
 export function matchesReviewFocus(id: string, focus: ReviewFocus, context: ReviewContext): boolean {
-  const row = Object.prototype.hasOwnProperty.call(context.history, id) ? context.history[id] : undefined;
+  const row = getQuestionHistory(context.history, id);
   switch (focus) {
     case "all": return true;
     case "saved": return context.saved.has(id);

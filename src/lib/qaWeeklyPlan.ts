@@ -1,4 +1,4 @@
-import type { ReviewCandidate, ReviewHistory } from "./qaPractice";
+import { getQuestionHistory, type ReviewCandidate, type ReviewHistory, type QuestionHistory } from "./qaPractice";
 
 export interface QAPlanDay {
   /** Local midnight on the learner's device. No dates or answers are uploaded. */
@@ -34,13 +34,16 @@ export function buildQAWeeklyPlan(
     seen.add(item.id);
     return true;
   });
-  const hasAttempt = (id: string) => (history[id]?.attempts || 0) > 0;
-  const due = unique.filter((item) => hasAttempt(item.id) &&
-    Number.isFinite(history[item.id].dueAt) && history[item.id].dueAt >= 0)
-    .sort((a, b) => history[a.id].dueAt - history[b.id].dueAt ||
-      history[b.id].incorrectFirst - history[a.id].incorrectFirst ||
+  const evidence = new Map<string, QuestionHistory>();
+  for (const item of unique) {
+    const row = getQuestionHistory(history, item.id);
+    if (row) evidence.set(item.id, row);
+  }
+  const due = unique.filter(item => evidence.has(item.id))
+    .sort((a, b) => evidence.get(a.id)!.dueAt - evidence.get(b.id)!.dueAt ||
+      evidence.get(b.id)!.incorrectFirst - evidence.get(a.id)!.incorrectFirst ||
       a.id.localeCompare(b.id));
-  const unseen = unique.filter((item) => !hasAttempt(item.id))
+  const unseen = unique.filter(item => !evidence.has(item.id))
     .sort((a, b) => a.subject.localeCompare(b.subject) ||
       a.topic.localeCompare(b.topic) || a.id.localeCompare(b.id));
   const subjectCount = new Map<string, number>();
@@ -58,11 +61,11 @@ export function buildQAWeeklyPlan(
     let dueCount = 0;
     let newCount = 0;
     let missedCount = 0;
-    while (questions.length < limit && due.length && history[due[0].id].dueAt < nextDay.getTime()) {
+    while (questions.length < limit && due.length && evidence.get(due[0].id)!.dueAt < nextDay.getTime()) {
       const item = due.shift()!;
       questions.push(item);
       dueCount++;
-      if (history[item.id].incorrectFirst > 0) missedCount++;
+      if (evidence.get(item.id)!.incorrectFirst > 0) missedCount++;
       subjectCount.set(item.subject, (subjectCount.get(item.subject) || 0) + 1);
     }
     // Spread introductory items between subjects rather than exhausting the
