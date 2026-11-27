@@ -6,7 +6,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target, Square } from "lucide-react";
+import { BookOpen, Send, User, Loader2, Trash2, Sparkles, CreditCard, GraduationCap, Target, Square, ArrowDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuotaGate } from "@/hooks/useQuotaGate";
@@ -64,6 +64,9 @@ function CoachWorkspace() {
       : "mathematics");
   const [subjectId, setSubjectId] = useState(initialSubject);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const followsLatest = useRef(true);
+  const [awayFromLatest, setAwayFromLatest] = useState(false);
   const manuallySelectedTutor = useRef(false);
 
   useEffect(() => {
@@ -149,9 +152,28 @@ function CoachWorkspace() {
     return () => { active = false; stopResponseRef.current = null; scope.cancel(); };
   }, [accountId, subjectId, retry, canUseCoaching, curriculumId, curriculumLoading, curriculumError]);
 
+  // Do not pull learners away from earlier worked explanations while a
+  // response streams. Instant scrolling also avoids stacked animations.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (followsLatest.current) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
   }, [messages]);
+  const updateScrollPosition = () => {
+    const node = scrollRef.current;
+    if (!node) return;
+    const following = node.scrollHeight - node.clientHeight - node.scrollTop < 72;
+    followsLatest.current = following;
+    setAwayFromLatest(!following);
+  };
+  const jumpToLatest = () => {
+    followsLatest.current = true;
+    setAwayFromLatest(false);
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
+  };
+  const fillStarter = (prompt: string) => {
+    if (busy || !threadReady || input.trim()) return;
+    setInput(prompt.slice(0, 2000));
+    inputRef.current?.focus();
+  };
 
   useEffect(() => {
     if (!manuallySelectedTutor.current && !busy && !requestedSubject && !requestedTutorial && messages.length === 0 && preferredCoachId !== "stemcoach" && SUBJECT_IDS.includes(preferredCoachId)) {
@@ -163,6 +185,8 @@ function CoachWorkspace() {
     if (busy || !SUBJECT_IDS.includes(id) || id === subjectId) return;
     manuallySelectedTutor.current = true;
     requestScope.current.cancel();
+    followsLatest.current = true;
+    setAwayFromLatest(false);
     setMessages([]);
     setInput("");
     setLoadedSubject(null);
@@ -181,6 +205,8 @@ function CoachWorkspace() {
     setResponseStopped(false);
     const userMsg: Msg = { role: "user", content: msg };
     const allMessages = normaliseCoachThread([...messages, userMsg]);
+    followsLatest.current = true;
+    setAwayFromLatest(false);
     setMessages(allMessages);
     setInput("");
     setIsLoading(true);
@@ -366,7 +392,7 @@ function CoachWorkspace() {
                 <p className="text-[10px] font-bold uppercase tracking-wider text-primary">{t("coach.tutorialContext")}</p>
                 <p className="truncate text-sm font-semibold">{activeTutorial.title}</p>
               </div>
-              <Button size="sm" variant="outline" disabled={busy || !threadReady} onClick={() => send(t("coach.tutorialPrompt", { title: activeTutorial.title }))}>
+              <Button size="sm" variant="outline" disabled={busy || !threadReady || !!input.trim()} onClick={() => fillStarter(t("coach.tutorialPrompt", { title: activeTutorial.title }))}>
                 {t("coach.workThroughLesson")}
               </Button>
             </div>
@@ -376,7 +402,7 @@ function CoachWorkspace() {
           {saveError && <p role="alert" className="mb-3 rounded-xl border border-destructive/30 p-3 text-sm">{saveError}</p>}
           {conversationLoading && <p role="status" className="mb-3 text-sm text-muted-foreground">Loading your private conversation…</p>}
           {/* Chat area */}
-          <div ref={scrollRef} role="log" aria-label={t("coach.workspace.conversation")} aria-live="polite" aria-relevant="additions" className="min-h-[320px] flex-1 space-y-4 overflow-y-auto rounded-2xl border bg-card p-3 shadow-sm sm:min-h-[400px] sm:p-5 lg:min-h-[480px]" style={{ maxHeight: "min(65dvh, 760px)" }}>
+          <div ref={scrollRef} onScroll={updateScrollPosition} role="log" aria-label={t("coach.workspace.conversation")} aria-live="polite" aria-relevant="additions" className="min-h-[320px] flex-1 space-y-4 overflow-y-auto rounded-2xl border bg-card p-3 shadow-sm sm:min-h-[400px] sm:p-5 lg:min-h-[480px]" style={{ maxHeight: "min(65dvh, 760px)" }}>
             <AnimatePresence mode="wait">
               {messages.length === 0 && threadReady && (
                 <motion.div
@@ -403,8 +429,8 @@ function CoachWorkspace() {
                     {quickPrompts.map(prompt => (
                       <button
                         key={prompt}
-                        onClick={() => send(prompt)}
-                        disabled={busy || !threadReady}
+                        onClick={() => fillStarter(prompt)}
+                        disabled={busy || !threadReady || !!input.trim()}
                         className="flex min-h-11 items-center gap-1.5 rounded-xl border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
                       >
                         <Sparkles className="h-3 w-3 text-primary/50" />
@@ -471,10 +497,21 @@ function CoachWorkspace() {
             )}
           </div>
 
+          {awayFromLatest && <Button type="button" variant="outline" size="sm" onClick={jumpToLatest} className="self-center min-h-11 gap-2 rounded-full">
+            <ArrowDown className="h-4 w-4" aria-hidden="true" />{t("coach.workspace.jumpLatest")}
+          </Button>}
           {/* Input */}
           <div className="rounded-2xl border bg-card p-3 shadow-sm">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-medium text-muted-foreground">{t("coach.workspace.starterNotice")}</p>
+              <Button type="button" variant="secondary" size="sm" className="min-h-11 gap-2 rounded-xl" disabled={busy || !threadReady || !!input.trim()}
+                onClick={() => fillStarter(t(`coach.workspace.starters.${mode}`, { subject: subjectLabel }))}>
+                <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />{t("coach.workspace.useStarter")}
+              </Button>
+            </div>
             <div className="flex items-end gap-2">
             <textarea
+              ref={inputRef}
               rows={2}
               value={input}
               onChange={e => setInput(e.target.value)}
