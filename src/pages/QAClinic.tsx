@@ -6,7 +6,7 @@ import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
 import { summariseSprint, sprintAcceptsAttempt } from "@/lib/qaSprintResults";
-import { qaStorageKeys, REVIEW_FOCUSES, matchesReviewFocus, getReviewFocusCounts, type ReviewFocus } from "@/lib/qaReviewFocus";
+import { qaStorageKeys, REVIEW_FOCUSES, matchesReviewFocus, getReviewFocusCounts, parseReviewFocus, type ReviewFocus } from "@/lib/qaReviewFocus";
 import { useAuth } from "@/hooks/useAuth";
 import { parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -65,7 +65,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
   const [topic, setTopic] = useState(linkedTopic?.id || "all");
   const [format, setFormat] = useState("all");
   const [level, setLevel] = useState("all");
-  const [reviewFilter, setReviewFilter] = useState<ReviewFocus>("all");
+  const reviewFilter = parseReviewFocus(searchParams.get("review"));
   const [retainedReviewIds, setRetainedReviewIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [reviewTime, setReviewTime] = useState(() => Date.now());
@@ -274,14 +274,25 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
     setSearchParams(params, { replace: true });
   };
 
+  const chooseReviewFocus = (value: ReviewFocus) => {
+    changeFilter(() => {
+      const next = parseReviewFocus(value);
+      const params = new URLSearchParams(searchParams);
+      if (next === "all") params.delete("review");
+      else params.set("review", next);
+      setSearchParams(params, { replace: true });
+    });
+  };
+
   const clearAllFilters = () => {
     changeFilter(() => {
       setSubject("all"); setTopic("all"); setFormat("all");
-      setLevel("all"); setReviewFilter("all"); setSearch("");
+      setLevel("all"); setSearch("");
     });
     const params = new URLSearchParams(searchParams);
     params.delete("topic");
     params.delete("subject");
+    params.delete("review");
     setSearchParams(params, { replace: true });
   };
 
@@ -424,7 +435,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
             <div>
               <label htmlFor="qa-review-filter" className="mb-1 block text-xs font-semibold">{t("qa.reviewFilterLabel")}</label>
               <select id="qa-review-filter" disabled={sprintInProgress} value={reviewFilter}
-                onChange={(event) => changeFilter(() => setReviewFilter(event.target.value as ReviewFocus))}
+                onChange={(event) => chooseReviewFocus(parseReviewFocus(event.target.value))}
                 className="h-11 w-full rounded-xl border bg-background px-3 text-sm">
                 {REVIEW_FOCUSES.map((choice) => (
                   <option key={choice} value={choice}>{t(`qa.reviewFilters.${choice}`)}</option>
@@ -472,7 +483,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
             <div role="group" aria-label={t("qa.quickReviewTitle")} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               {REVIEW_FOCUSES.map(focus => (
                 <button key={focus} type="button" disabled={sprintInProgress} aria-pressed={reviewFilter === focus}
-                  onClick={() => changeFilter(() => setReviewFilter(focus))}
+                  onClick={() => chooseReviewFocus(focus)}
                   className={`min-h-16 min-w-0 rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${reviewFilter === focus ? "border-primary bg-primary/5" : "bg-muted/20 hover:bg-muted/50"}`}>
                   <span className="block text-lg font-bold tabular-nums">{focusCounts[focus]}</span>
                   <span className="mt-1 block break-words text-xs font-medium text-muted-foreground">{t(`qa.reviewFilters.${focus}`)}</span>
