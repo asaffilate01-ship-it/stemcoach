@@ -27,3 +27,16 @@ export function sprintAcceptsAttempt({
   return Boolean(activeId && id === activeId && Number.isFinite(now) &&
     (deadline === null || (Number.isFinite(deadline) && now < deadline)));
 }
+
+/** A focused retry is an ordered subset of the original sprint, independent
+ * of changes to the current search, due-date, or bookmark filters. */
+export function selectSprintRetryIds(
+  ids: readonly string[],
+  firstAttempts: Readonly<Record<string, boolean>>,
+  focus: "missed" | "unattempted",
+): string[] {
+  return [...new Set(ids.filter(id => typeof id === "string" && id.length > 0))].filter(id => {
+    const attempted = Object.prototype.hasOwnProperty.call(firstAttempts, id) ? firstAttempts[id] : undefined;
+    return focus === "missed" ? attempted === false : attempted !== true && attempted !== false;
+  });
+}
