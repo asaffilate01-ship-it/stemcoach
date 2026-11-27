@@ -34,11 +34,11 @@ test("numeric answer and retryable feedback in the Q&A engine", async ({ page })
   await dismissCookies(page);
   await page.getByLabel("Question type").selectOption("numeric");
   const first = page.locator("article").first();
-  await first.getByLabel("Enter your number (without units)").fill("9999");
+  await first.getByLabel("Enter a number or fraction (without units)").fill("9999");
   await first.getByRole("button", { name: "Check & explain" }).click();
   await expect(first.getByText("Not quite. Compare your approach")).toBeVisible();
   await first.getByRole("button", { name: "Try again" }).click();
-  await first.getByLabel("Enter your number (without units)").fill("47");
+  await first.getByLabel("Enter a number or fraction (without units)").fill("47");
   await first.getByRole("button", { name: "Check & explain" }).click();
   await expect(first.getByText("Correct — well done!")).toBeVisible();
 });
