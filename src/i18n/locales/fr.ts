@@ -58,6 +58,13 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    sprintResults: {
+      "correct": "Réussies au premier essai",
+      "missed": "Ratées au premier essai",
+      "unattempted": "Sans premier essai",
+      "notice": "La prochaine série ciblée contient uniquement les questions sans premier essai autonome réussi. Elle est sans limite de temps et ne modifie pas le résultat de la série précédente.",
+      "retry": "Reprendre {{count}} questions ratées ou sans essai"
+    },
     workspaceNavigation: "Espaces de révision Q&R",
     exitChallenge: "Terminer cette série",
     firstTryAccuracy: "Réussite au premier essai : {{accuracy}} % ({{correct}} sur {{total}} tentatives)",
@@ -737,6 +744,8 @@ const fr = {
   },
   coach: {
     workspace: {
+      stopResponse: "Arrêter la réponse",
+      responseStopped: "Réponse arrêtée. Votre question a été restaurée.",
       "title": "Votre coach d’apprentissage IA",
       "description": "Choisissez une matière et une méthode. Comprenez une notion, entraînez-vous ou obtenez un retour sur votre démarche.",
       "modeLabel": "Style de coaching",
