@@ -29,3 +29,26 @@ export function effectiveSprintDurationSeconds(available: number, requested: Spr
   if (!count) return 0;
   return sprintDurationSeconds(count <= 5 ? 5 : count <= 10 ? 10 : 20);
 }
+
+/** A sprint's first-attempt evidence is immutable, even when a learner later solves a question.
+ * No response text or answer keys are needed for this summary.
+ */
+export function summariseSprint(
+  plannedIds: readonly string[],
+  firstAttempts: Readonly<Record<string, boolean>>,
+  mastered: Readonly<Record<string, boolean>>,
+) {
+  const ids = [...new Set(plannedIds)];
+  const missedIds = ids.filter(id => Object.hasOwn(firstAttempts, id) && firstAttempts[id] === false);
+  const correctIds = ids.filter(id => Object.hasOwn(firstAttempts, id) && firstAttempts[id] === true);
+  const unansweredIds = ids.filter(id => !Object.hasOwn(firstAttempts, id) || typeof firstAttempts[id] !== "boolean");
+  const solvedCount = ids.filter(id => Object.hasOwn(mastered, id) && mastered[id] === true).length;
+  return {
+    total: ids.length,
+    attempted: correctIds.length + missedIds.length,
+    firstTryCorrect: correctIds.length,
+    solvedCount,
+    missedIds,
+    unansweredIds,
+  };
+}
