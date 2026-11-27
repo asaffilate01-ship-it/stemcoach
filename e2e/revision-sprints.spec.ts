@@ -50,3 +50,26 @@ test("a full subject can run a genuine twenty-question ungraded sprint", async (
   await expect(page.getByText("First-try score: 0 / 20")).toBeVisible();
   await expect(page.locator("article")).toHaveCount(1);
 });
+
+test("completed sprints can retry only questions without a first-try answer", async ({ page }) => {
+  await page.goto("/qa-clinic?topic=arithmetic-sequences-nth-term");
+  await dismissCookies(page);
+  await page.getByLabel("Revision sprint length").selectOption("5");
+  await page.getByRole("button", { name: "Start challenge", exact: true }).click();
+  const questions: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    await expect(page.getByText(`Question ${i + 1} of 5`, { exact: true })).toBeVisible();
+    questions.push(await page.locator("article h3").innerText());
+    await page.getByRole("button", { name: i === 4 ? "Finish challenge" : "Next question", exact: true }).click();
+  }
+  await expect(page.getByRole("button", { name: "Practise unanswered (5)", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Retry mistakes/ })).toHaveCount(0);
+  await expect(page.getByRole("progressbar", { name: "Sprint progress" })).toHaveAttribute("aria-valuenow", "5");
+  await page.getByRole("button", { name: "Practise unanswered (5)", exact: true }).click();
+  for (let i = 0; i < 5; i++) {
+    await expect(page.getByText(`Question ${i + 1} of 5`, { exact: true })).toBeVisible();
+    await expect(page.locator("article h3")).toHaveText(questions[i]);
+    await page.getByRole("button", { name: i === 4 ? "Finish challenge" : "Next question", exact: true }).click();
+  }
+  await expect(page.getByRole("button", { name: "Practise unanswered (5)", exact: true })).toBeVisible();
+});
