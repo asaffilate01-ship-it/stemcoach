@@ -117,6 +117,10 @@ const fr = {
     "reviewTitle": "Vos progrès de révision",
     "reviewStats": "{{practiced}} sur {{total}} questions étudiées · {{due}} à revoir",
     "weakerTopics": "Notions à retravailler :",
+    dashboardTopicReview: {
+      open: "Ouvrir {{focus}} ({{count}})",
+      openLabel: "Ouvrir {{focus}} pour {{topic}} ({{count}} questions)",
+    },
     topicRevision: {
       title: "Révision conseillée par thème",
       notice: "D’après les premiers essais et révisions à faire conservés dans ce navigateur pour le compte actuel ou le profil invité. Ces chiffres ne mesurent pas la préparation à un examen officiel.",
