@@ -1,0 +1,58 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import QAClinic from "@/pages/QAClinic";
+import { qaEntries } from "@/data/qaClinic";
+import { qaStorageKeys } from "@/lib/qaReviewFocus";
+import { QA_HISTORY_KEY, QA_BOOKMARKS_KEY, recordReviewAttempt, serialiseBookmarks, serialiseReviewHistory } from "@/lib/qaPractice";
+
+const auth = vi.hoisted(() => ({ current: { user: null as { id: string } | null, loading: true } }));
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => auth.current }));
+vi.mock("@/components/layout/AppHeader", () => ({ AppHeader: () => null }));
+vi.mock("@/components/qa/OmniqoraEvidencePanel", () => ({ OmniqoraEvidencePanel: () => null }));
+vi.mock("@/components/qa/QuestionInteraction", () => ({ QuestionInteraction: () => null }));
+vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { resolvedLanguage: "en", language: "en" } }) }));
+
+const topic = "arithmetic-sequences-nth-term";
+const first = qaEntries.find(entry => entry.tutorialId === topic)!;
+const scope = () => screen.getByRole("group", { name: "qa.quickReviewTitle" });
+const focus = (name: string) => within(scope()).getByRole("button", { name: new RegExp("qa.reviewFilters." + name + "$") });
+const count = (name: string, value: number) => expect(focus(name)).toHaveTextContent(new RegExp("^" + value + "qa.reviewFilters." + name + "$"));
+const workspace = () => <MemoryRouter initialEntries={["/qa-clinic?topic=" + topic]}><QAClinic /></MemoryRouter>;
+
+describe("revision account switching", () => {
+  beforeEach(() => { localStorage.clear(); auth.current = { user: null, loading: true }; });
+  afterEach(() => { cleanup(); localStorage.clear(); });
+  it("waits for authentication, isolates saved and missed questions, and restores the original account on return", () => {
+    const a = qaStorageKeys("account-a"), b = qaStorageKeys("account-b"), guest = qaStorageKeys(null);
+    const history = serialiseReviewHistory(recordReviewAttempt({}, first.id, false, true, Date.now() - 1000));
+    const saved = serialiseBookmarks([first.id]);
+    localStorage.setItem(a.history, history);
+    localStorage.setItem(a.bookmarks, saved);
+    localStorage.setItem(QA_HISTORY_KEY, history);
+    localStorage.setItem(QA_BOOKMARKS_KEY, saved);
+    const view = render(workspace());
+    expect(screen.getByRole("status")).toHaveTextContent("qa.scopeLoading");
+    expect(localStorage.getItem(guest.history)).toBeNull();
+    auth.current = { user: { id: "account-a" }, loading: false };
+    view.rerender(workspace());
+    count("all", 6); count("due", 1); count("missed", 1); count("saved", 1); count("new", 5);
+    fireEvent.click(focus("saved"));
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    count("all", 6); count("new", 5);
+    auth.current = { user: { id: "account-b" }, loading: false };
+    view.rerender(workspace());
+    count("saved", 0); count("missed", 0); count("new", 6);
+    expect(screen.getAllByRole("article")).toHaveLength(6);
+    expect(localStorage.getItem(b.history)).toBeNull();
+    expect(localStorage.getItem(a.bookmarks)).toBe(saved);
+    auth.current = { user: null, loading: false };
+    view.rerender(workspace());
+    count("saved", 0); count("missed", 0);
+    expect(localStorage.getItem(QA_BOOKMARKS_KEY)).toBe(saved);
+    expect(localStorage.getItem(QA_HISTORY_KEY)).toBe(history);
+    auth.current = { user: { id: "account-a" }, loading: false };
+    view.rerender(workspace());
+    count("saved", 1); count("missed", 1); count("new", 5);
+  });
+});
