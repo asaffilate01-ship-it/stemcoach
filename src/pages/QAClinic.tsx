@@ -5,7 +5,7 @@ import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3
 import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
 import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
-import { summariseSprint, sprintAcceptsAttempt } from "@/lib/qaSprintResults";
+import { summariseSprint, sprintAcceptsAttempt, selectSprintRetryIds } from "@/lib/qaSprintResults";
 import { qaStorageKeys, REVIEW_FOCUSES, matchesReviewFocus, getReviewFocusCounts, parseReviewFocus, type ReviewFocus } from "@/lib/qaReviewFocus";
 import { useAuth } from "@/hooks/useAuth";
 import { parseReviewHistory, serialiseReviewHistory, parseBookmarks, serialiseBookmarks, recordReviewAttempt, buildReviewQueue, getReviewSummary, type ReviewHistory } from "@/lib/qaPractice";
@@ -34,6 +34,7 @@ const PAGE_SIZE = 16;
 
 type ChallengeMode = "mixed" | "adaptive" | "timed";
 const existingQuestionIds = new Set(allQAEntries.map((entry) => entry.id));
+const launchQuestionIds = new Set(qaEntries.map((entry) => entry.id));
 
 export default function QAClinic() {
   const { user, loading } = useAuth();
@@ -190,6 +191,8 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
     : null;
   const visibleEntries = activeChallenge ? (challengeEntry ? [challengeEntry] : []) : browseEntries.slice(0, displayLimit);
   const sprintResult = useMemo(() => summariseSprint(challengeIds, firstAttempts), [challengeIds, firstAttempts]);
+  const missedRetryIds = useMemo(() => selectSprintRetryIds(challengeIds, firstAttempts, "missed"), [challengeIds, firstAttempts]);
+  const unansweredRetryIds = useMemo(() => selectSprintRetryIds(challengeIds, firstAttempts, "unattempted"), [challengeIds, firstAttempts]);
   const attemptedCount = sprintResult.attempted;
   const firstTryCorrect = sprintResult.correct;
   const sprintInProgress = activeChallenge && !challengeCompleted;
@@ -201,7 +204,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
 
   const launchChallenge = (selected: string[], kind: ChallengeMode) => {
     if (sprintInProgress || selected.length === 0) return;
-    const ids = [...new Set(selected)].filter(id => existingQuestionIds.has(id)).slice(0, 20);
+    const ids = [...new Set(selected)].filter(id => launchQuestionIds.has(id)).slice(0, 20);
     if (!ids.length) return;
     setChallengeIds(ids);
     setChallengeIndex(0);
@@ -606,12 +609,12 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
           )}
 
           {challengeCompleted && (
-            <div className="mb-5 rounded-2xl border bg-card p-8 text-center">
+            <div className="mb-5 rounded-2xl border bg-card p-4 text-center sm:p-8">
               <Trophy className="mx-auto mb-3 h-12 w-12 text-primary" />
               <h3 className="mb-2 text-xl font-bold">{t(challengeMode === "timed" && secondsRemaining === 0 ? "qa.timeExpired" : "qa.challengeFinished")}</h3>
               <p className="mb-2 text-sm">{t("qa.challengeSummary", { correct: firstTryCorrect, attempted: attemptedCount, total: challengeIds.length })}</p>
               <p className="mb-4 text-xs text-muted-foreground">{t("qa.challengeMastered", { count: masteredCount })}</p>
-              <dl className="mx-auto mb-4 grid max-w-xl grid-cols-3 gap-2 text-center">
+              <dl className="mx-auto mb-4 grid max-w-xl grid-cols-1 gap-2 text-center min-[380px]:grid-cols-3">
                 {([
                   ["qa.sprintResults.correct", sprintResult.correct, "text-emerald-600 dark:text-emerald-400"],
                   ["qa.sprintResults.missed", sprintResult.missed, "text-amber-700 dark:text-amber-300"],
@@ -628,6 +631,8 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
                 {sprintResult.retryIds.length > 0 && <Button type="button" onClick={() => launchChallenge(sprintResult.retryIds, "mixed")} className="min-h-11 gap-2 rounded-xl">
                   <Target className="h-4 w-4" aria-hidden="true" /> {t("qa.sprintResults.retry", { count: sprintResult.retryIds.length })}
                 </Button>}
+                {missedRetryIds.length > 0 && <Button type="button" variant="outline" onClick={() => launchChallenge(missedRetryIds, "mixed")} className="min-h-11 rounded-xl">{t("qa.sprintResults.retryMissed", { count: missedRetryIds.length })}</Button>}
+                {unansweredRetryIds.length > 0 && <Button type="button" variant="outline" onClick={() => launchChallenge(unansweredRetryIds, "mixed")} className="min-h-11 rounded-xl">{t("qa.sprintResults.retryUnanswered", { count: unansweredRetryIds.length })}</Button>}
                 <Button type="button" variant="outline" onClick={() => launchChallenge(challengeIds, challengeMode)} className="min-h-11 rounded-xl">{t("qa.playAgain")}</Button>
                 <Button type="button" variant="outline" className="min-h-11 rounded-xl" onClick={exitChallenge}>{t("qa.browseAll")}</Button>
               </div>

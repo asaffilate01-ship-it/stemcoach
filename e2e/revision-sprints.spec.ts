@@ -50,3 +50,54 @@ test("a full subject can run a genuine twenty-question ungraded sprint", async (
   await expect(page.getByText("First-try score: 0 / 20")).toBeVisible();
   await expect(page.locator("article")).toHaveCount(1);
 });
+
+test("unanswered-only practice retries the exact original sprint, in order", async ({ page }) => {
+  await page.goto("/qa-clinic?topic=arithmetic-sequences-nth-term");
+  await dismissCookies(page);
+  await page.getByLabel("Revision sprint length").selectOption("5");
+  await page.getByRole("button", { name: "Start challenge", exact: true }).click();
+  const questions: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    await expect(page.getByRole("heading", { name: `Question ${i + 1} of 5`, exact: true })).toBeVisible();
+    questions.push(await page.locator("article h3").innerText());
+    await page.getByRole("button", { name: i === 4 ? "Finish challenge" : "Next question", exact: true }).click();
+  }
+  await expect(page.getByRole("button", { name: "Practise unanswered (5)", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Retry mistakes/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Practise unanswered (5)", exact: true }).click();
+  for (let i = 0; i < 5; i++) {
+    await expect(page.getByRole("heading", { name: `Question ${i + 1} of 5`, exact: true })).toBeVisible();
+    await expect(page.locator("article h3")).toHaveText(questions[i]);
+    await page.getByRole("button", { name: i === 4 ? "Finish challenge" : "Next question", exact: true }).click();
+  }
+  await expect(page.getByRole("button", { name: "Practise unanswered (5)", exact: true })).toBeVisible();
+});
+
+test("mistake-only revision accepts an exact fraction on the next independent attempt", async ({ page }) => {
+  const stem = "What is the sixth term of an arithmetic sequence starting at 5 with common difference 3?";
+  await page.goto("/qa-clinic?topic=arithmetic-sequences-nth-term");
+  await dismissCookies(page);
+  await page.getByLabel("Question type").selectOption("numeric");
+  await page.getByLabel("Search Q&A").fill(stem);
+  await expect(page.locator("article")).toHaveCount(1);
+  await page.getByRole("button", { name: "Start challenge", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Question 1 of 1", exact: true })).toBeVisible();
+  const question = page.locator("article");
+  const input = question.getByLabel("Enter a number or fraction (without units)");
+  await expect(input).toHaveAttribute("inputmode", "text");
+  await input.fill("19");
+  await question.getByRole("button", { name: "Check & explain" }).click();
+  await expect(question.getByText("Not quite. Compare your approach")).toBeVisible();
+  await page.getByRole("button", { name: "Finish challenge", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Retry mistakes (1)", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Practise unanswered/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Retry mistakes (1)", exact: true }).click();
+  await expect(question.locator("h3")).toHaveText(stem);
+  await input.fill("40/2");
+  await question.getByRole("button", { name: "Check & explain" }).click();
+  await expect(question.getByText("Correct — well done!")).toBeVisible();
+  await expect(page.getByText("First-try score: 1 / 1", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Finish challenge", exact: true }).click();
+  await expect(page.getByRole("button", { name: /^Retry mistakes/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Practise unanswered/ })).toHaveCount(0);
+});
