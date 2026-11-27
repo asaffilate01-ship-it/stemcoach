@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowRight, Bookmark, BookOpen, Brain, CalendarDays, CircleHelp, Clock3, Flag, Flame, GraduationCap, Layers, Search, Sparkles, Target, Trophy, Trash2 } from "lucide-react";
 import { contentReportHref } from "@/lib/contentReport";
 import { SPRINT_SIZES, parseSprintSize, sprintDurationSeconds, sprintQuestionCount, effectiveSprintDurationSeconds, type SprintSize } from "@/lib/qaSprints";
-import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
+import { buildQAWeeklyPlan, summariseQAWeeklyPlan, WEEKLY_PLAN_CAPACITIES, parseWeeklyPlanCapacity, type WeeklyPlanCapacity } from "@/lib/qaWeeklyPlan";
 import { buildTopicRevisionInsights } from "@/lib/qaTopicInsights";
 import { summariseSprint, sprintAcceptsAttempt, selectSprintRetryIds } from "@/lib/qaSprintResults";
 import { qaStorageKeys, REVIEW_FOCUSES, matchesReviewFocus, getReviewFocusCounts, parseReviewFocus, type ReviewFocus } from "@/lib/qaReviewFocus";
@@ -81,6 +81,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
   const [challengeStreak, setChallengeStreak] = useState(0);
   const [challengeMode, setChallengeMode] = useState<ChallengeMode>("mixed");
   const [sprintSize, setSprintSize] = useState<SprintSize>(10);
+  const [dailyCapacity, setDailyCapacity] = useState<WeeklyPlanCapacity>(5);
   const [challengeRound, setChallengeRound] = useState(0);
   const [deadline, setDeadline] = useState<number | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(sprintDurationSeconds(10));
@@ -199,7 +200,8 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
   const sprintInProgress = activeChallenge && !challengeCompleted;
   const masteredCount = challengeIds.filter((id) => mastered[id] === true).length;
   const reviewSummary = useMemo(() => getReviewSummary(filtered, history, reviewTime), [filtered, history, reviewTime]);
-  const weeklyPlan = useMemo(() => buildQAWeeklyPlan(filtered, history, reviewTime), [filtered, history, reviewTime]);
+  const weeklyPlan = useMemo(() => buildQAWeeklyPlan(filtered, history, reviewTime, dailyCapacity), [filtered, history, reviewTime, dailyCapacity]);
+  const weeklyTotals = useMemo(() => summariseQAWeeklyPlan(weeklyPlan, filtered, history, reviewTime), [weeklyPlan, filtered, history, reviewTime]);
   const topicInsights = useMemo(() => buildTopicRevisionInsights(filtered, history, reviewTime), [filtered, history, reviewTime]);
   const selectedCount = sprintQuestionCount(filtered.length, sprintSize);
   const timedMinutes = effectiveSprintDurationSeconds(filtered.length, sprintSize) / 60;
@@ -534,6 +536,31 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("qa.weekPlanDescription")}</p>
                 </div>
               </div>
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <label htmlFor="qa-daily-capacity" className="mb-1 block text-xs font-semibold">{t("qa.weeklyCapacity.label")}</label>
+                  <select id="qa-daily-capacity" value={dailyCapacity}
+                    onChange={event => setDailyCapacity(parseWeeklyPlanCapacity(event.target.value))}
+                    className="min-h-11 w-full max-w-xs rounded-xl border bg-background px-3 text-sm">
+                    {WEEKLY_PLAN_CAPACITIES.map(count => <option key={count} value={count}>{t("qa.weeklyCapacity.option", { count })}</option>)}
+                  </select>
+                </div>
+                <p className="text-xs text-muted-foreground">{t("qa.weeklyCapacity.notice")}</p>
+              </div>
+              <dl className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label={t("qa.weeklyCapacity.summary")}>
+                {[
+                  { key: "scheduled", count: weeklyTotals.scheduled },
+                  { key: "fresh", count: weeklyTotals.newCount },
+                  { key: "due", count: weeklyTotals.dueCount },
+                  { key: "backlog", count: weeklyTotals.unscheduledDue },
+                ].map(item => (
+                  <div key={item.key} className="min-w-0 rounded-xl border bg-muted/20 p-3">
+                    <dt className="break-words text-xs text-muted-foreground">{t(`qa.weeklyCapacity.${item.key}`)}</dt>
+                    <dd className="mt-1 text-xl font-semibold tabular-nums">{item.count}</dd>
+                  </div>
+                ))}
+              </dl>
+              {weeklyTotals.unscheduledDue > 0 && <p role="status" className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-foreground">{t("qa.weeklyCapacity.backlogNotice", { count: weeklyTotals.unscheduledDue })}</p>}
               {weeklyPlan.some((day) => day.questionIds.length > 0) ? (
                 <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {weeklyPlan.map((day, index) => (
@@ -550,7 +577,7 @@ function QAWorkspace({ accountId }: { accountId: string | null }) {
                           {t("qa.weekPlanMix", { fresh: day.newCount, due: day.dueCount })}
                         </p>
                       </div>
-                      <Button type="button" variant="outline" size="sm" className="min-h-10 w-full rounded-lg"
+                      <Button type="button" variant="outline" size="sm" className="min-h-11 w-full rounded-lg"
                         disabled={day.questionIds.length === 0}
                         aria-label={t("qa.weekPlanStartDay", { day: index + 1 })}
                         onClick={() => startPlannedSet(day.questionIds)}>
