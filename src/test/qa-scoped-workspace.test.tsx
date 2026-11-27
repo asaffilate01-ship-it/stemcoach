@@ -10,7 +10,7 @@ const auth = vi.hoisted(() => ({ current: { user: null as { id: string } | null,
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => auth.current }));
 vi.mock("@/components/layout/AppHeader", () => ({ AppHeader: () => null }));
 vi.mock("@/components/qa/OmniqoraEvidencePanel", () => ({ OmniqoraEvidencePanel: () => null }));
-vi.mock("@/components/qa/QuestionInteraction", () => ({ QuestionInteraction: () => null }));
+vi.mock("@/components/qa/QuestionInteraction", () => ({ QuestionInteraction: ({ onAttempt }: { onAttempt: (correct: boolean, firstAttempt: boolean) => void }) => <button type="button" onClick={() => onAttempt(true, true)}>Record correct</button> }));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { resolvedLanguage: "en", language: "en" } }) }));
 
 const topic = "arithmetic-sequences-nth-term";
@@ -54,5 +54,19 @@ describe("revision account switching", () => {
     auth.current = { user: { id: "account-a" }, loading: false };
     view.rerender(workspace());
     count("saved", 1); count("missed", 1); count("new", 5);
+  });
+  it("keeps answered cards visible in a live new-question filter without counting them as new", () => {
+    auth.current = { user: { id: "account-a" }, loading: false };
+    render(workspace());
+    fireEvent.click(focus("new"));
+    expect(screen.getAllByRole("article")).toHaveLength(6);
+    fireEvent.click(within(screen.getAllByRole("article")[0]).getByRole("button", { name: "Record correct" }));
+    count("new", 5);
+    expect(screen.getAllByRole("article")).toHaveLength(6);
+    expect(screen.getByText("qa.retainedReviewNotice")).toBeInTheDocument();
+    fireEvent.click(focus("all"));
+    fireEvent.click(focus("new"));
+    expect(screen.getAllByRole("article")).toHaveLength(5);
+    expect(screen.queryByText("qa.retainedReviewNotice")).not.toBeInTheDocument();
   });
 });
