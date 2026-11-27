@@ -23,29 +23,24 @@ const DAY = 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 1500;
 const MAX_BOOKMARKS = 500;
 
-const MAX_ATTEMPTS_PER_QUESTION = 10_000;
+const MAX_ATTEMPTS_PER_QUESTION = 1_000_000;
 const MAX_DATE_MS = 8_640_000_000_000_000;
 const MAX_HISTORY_BYTES = 250_000;
 const isCount = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 const isTimestamp = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= MAX_DATE_MS;
 const safeHistoryId = (id: string) => id.length > 0 && id.length <= 180 && !["__proto__", "prototype", "constructor"].includes(id);
 
-/** Validate the original evidence before bounding it. Preserve a consistent
- * sample of at most 10,000 attempts rather than independently clipping counts. */
+/** Keep recorded counts exact. Reject impossible or out-of-range rows instead
+ * of clipping independent totals or manufacturing a sample. */
 function cleanHistoryRow(value: unknown): QuestionHistory | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   const row = value as Partial<QuestionHistory>;
   const { attempts, correctFirst, incorrectFirst, firstTryStreak, lastAt, dueAt } = row;
   if (!isCount(attempts) || !isCount(correctFirst) || !isCount(incorrectFirst) ||
-      !isCount(firstTryStreak) || attempts === 0 || correctFirst > attempts ||
+      !isCount(firstTryStreak) || attempts === 0 || attempts > MAX_ATTEMPTS_PER_QUESTION || correctFirst > attempts ||
       incorrectFirst !== attempts - correctFirst || firstTryStreak > correctFirst ||
       !isTimestamp(lastAt) || !isTimestamp(dueAt)) return undefined;
-  const bounded = Math.min(attempts, MAX_ATTEMPTS_PER_QUESTION);
-  const correct = attempts === bounded ? correctFirst : Math.round(correctFirst / attempts * bounded);
-  return {
-    attempts: bounded, correctFirst: correct, incorrectFirst: bounded - correct,
-    firstTryStreak: Math.min(firstTryStreak, correct), lastAt, dueAt,
-  };
+  return { attempts, correctFirst, incorrectFirst, firstTryStreak, lastAt, dueAt };
 }
 
 export function getQuestionHistory(history: ReviewHistory, id: string): QuestionHistory | undefined {
@@ -119,6 +114,7 @@ export function recordReviewAttempt(
   const prior = getQuestionHistory(history, id);
   // A reveal followed by typing the displayed solution is not independent learning evidence.
   if (!firstAttempt && !prior) return history;
+  if (firstAttempt && prior && prior.attempts >= MAX_ATTEMPTS_PER_QUESTION) return history;
   const existing = prior || {
     attempts: 0, correctFirst: 0, incorrectFirst: 0, firstTryStreak: 0, lastAt: 0, dueAt: 0,
   };
