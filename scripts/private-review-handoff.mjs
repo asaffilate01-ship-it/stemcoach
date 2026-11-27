@@ -1,8 +1,12 @@
 import { createHash } from "node:crypto";
+import { readFile, lstat, realpath, writeFile } from "node:fs/promises";
+import { dirname, resolve, relative, basename, isAbsolute, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { reconcilePrivatePacks } from "./reconcile-private-bank.mjs";
 import { marketProgramme } from "../src/data/threeMarketProgramme.ts";
 
 export const REVIEW_SCOPE = "stemcoach-private-review-v1";
+export const MARKET_REVIEW_SCOPE = "stemcoach-private-market-review-v2";
 const CHECKS = ["answer", "distractors", "explanation", "curriculum", "language", "originality", "rights"];
 const allowedRegions = new Map(marketProgramme.map(m => [m.country, new Set(m.regions)]));
 const text = (v, max=240) => typeof v === "string" && v.trim().length > 0 && v.length <= max;
@@ -31,7 +35,10 @@ function mappingValid(m, item) {
 /** Offline consistency check only. Reviewer references are unverified labels,
  * not authenticated identities. No approval, publication or access grant. */
 export function evaluateReviewHandoff(packs, submission) {
-  const work = buildReviewWorklist(packs);
+  return evaluateWorklist(buildReviewWorklist(packs),submission);
+}
+
+function evaluateWorklist(work, submission) {
   const errors = [];
   let errorCount = 0;
   const fail = msg => { errorCount++; if (errors.length < 50) errors.push(msg); };
@@ -72,4 +79,111 @@ export function evaluateReviewHandoff(packs, submission) {
   }
   report.pending=report.originals-report.revisionRequired-report.rejectionRecorded-report.attestedCandidateCount;
   return finish(candidates);
+}
+
+/** Plan candidate-market work without pretending any curriculum has been mapped.
+ * A question can have multiple assignments, but still counts as one original. */
+export function buildMarketReviewPlan(packs) {
+  return marketPlanFromWork(buildReviewWorklist(packs));
+}
+
+function marketPlanFromWork(work) {
+  const summary={schemaVersion:1,scope:MARKET_REVIEW_SCOPE,valid:work.valid,uniqueOriginals:0,archivedOriginals:0,totalAssignments:0,markets:[],approvedCount:0,publishedCount:0,authenticatedReviewersVerified:false};
+  if(!work.valid)return {...summary,items:[]};
+  const byMarket=new Map(marketProgramme.map(m=>[m.country,{market:m.country,assignments:0,byTrack:Object.create(null)}]));
+  const items=[];
+  for(const row of work.items){
+    for(const market of [...row.candidateMarkets].sort()){
+      const group=byMarket.get(market);
+      if(!group)throw Error("Unexpected candidate market");
+      group.assignments++;
+      group.byTrack[row.track]=(group.byTrack[row.track]??0)+1;
+      items.push({questionId:row.questionId,questionDigest:row.questionDigest,pack:row.pack,row:row.row,track:row.track,language:row.language,market,status:"awaiting-curriculum-mapping"});
+    }
+  }
+  return {...summary,uniqueOriginals:work.items.length,archivedOriginals:work.reconciliation.archived.originals,totalAssignments:items.length,markets:[...byMarket.values()],items};
+}
+
+/** Each question/market pair receives its own mapping and two independent attestations.
+ * This is an offline consistency check, not verified identity or academic approval. */
+export function evaluateMarketReviewHandoff(packs, submission) {
+  const work=buildReviewWorklist(packs);
+  const plan=marketPlanFromWork(work);
+  const report={valid:false,scope:MARKET_REVIEW_SCOPE,uniqueOriginals:plan.uniqueOriginals,totalAssignments:plan.totalAssignments,pendingAssignments:plan.totalAssignments,revisionRequiredAssignments:0,rejectionRecordedAssignments:0,attestedCandidateAssignments:0,uniqueCandidateOriginals:0,markets:[],approvedCount:0,publishedCount:0,authenticatedReviewersVerified:false,errors:[],errorCount:0};
+  const fail=message=>{report.errorCount++;if(report.errors.length<50)report.errors.push(message);};
+  const finish=candidates=>({report:{...report,valid:report.errorCount===0},candidates:report.errorCount===0?candidates:[]});
+  if(!plan.valid){fail("Reconcile source packs before reviewing.");return finish([]);}
+  if(!submission || submission.schemaVersion!==1 || submission.scope!==MARKET_REVIEW_SCOPE || !Array.isArray(submission.items) || submission.items.length>plan.totalAssignments){fail("Invalid market review manifest.");return finish([]);}
+  const grouped=new Map(marketProgramme.map(m=>[m.country,[]]));
+  for(const [index,row] of submission.items.entries()){
+    if(!grouped.has(row?.mapping?.market)){fail("Review row "+(index+1)+": invalid market.");continue;}
+    grouped.get(row.mapping.market).push(row);
+  }
+  if(report.errorCount)return finish([]);
+  const candidates=[];
+  report.pendingAssignments=0;
+  for(const [market,rows] of grouped){
+    const eligible=work.items.filter(row=>row.candidateMarkets.includes(market));
+    const result=evaluateWorklist({...work,items:eligible},{schemaVersion:1,scope:REVIEW_SCOPE,items:rows});
+    if(!result.report.valid){
+      report.errorCount+=result.report.errorCount;
+      for(const error of result.report.errors){if(report.errors.length<50)report.errors.push(market+": "+error);}
+      continue;
+    }
+    const q=result.report;
+    report.markets.push({market,assignments:eligible.length,submitted:q.submitted,pending:q.pending,revisionRequired:q.revisionRequired,rejectionRecorded:q.rejectionRecorded,attestedCandidates:q.attestedCandidateCount});
+    report.pendingAssignments+=q.pending;
+    report.revisionRequiredAssignments+=q.revisionRequired;
+    report.rejectionRecordedAssignments+=q.rejectionRecorded;
+    report.attestedCandidateAssignments+=q.attestedCandidateCount;
+    candidates.push(...result.candidates);
+  }
+  if(report.errorCount){
+    // No partial candidate counts or assignments are returned for an invalid submission.
+    Object.assign(report,{pendingAssignments:plan.totalAssignments,revisionRequiredAssignments:0,rejectionRecordedAssignments:0,attestedCandidateAssignments:0,uniqueCandidateOriginals:0,markets:[]});
+    return finish([]);
+  }
+  report.uniqueCandidateOriginals=new Set(candidates.map(row=>row.questionId)).size;
+  return finish(candidates);
+}
+
+const MAX_PRIVATE_INPUT_BYTES=64*1024*1024;
+async function readPrivateJson(path){
+  const stat=await lstat(path);
+  if(!stat.isFile()||stat.size>MAX_PRIVATE_INPUT_BYTES)throw Error("Invalid private input");
+  return JSON.parse(await readFile(path,"utf8"));
+}
+async function writeOutsideRepo(output,payload){
+  const root=await realpath(resolve(dirname(fileURLToPath(import.meta.url)),".."));
+  const target=resolve(await realpath(dirname(resolve(output))),basename(output));
+  const rel=relative(root,target);
+  if(isAbsolute(rel)||!(rel===".."||rel.startsWith(".."+sep)))throw Error("Private output required");
+  await writeFile(target,JSON.stringify(payload,null,2)+"\n",{flag:"wx",mode:0o600});
+}
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+  try{
+    const [command,...args]=process.argv.slice(2);
+    if(command!=="--plan"&&command!=="--evaluate")throw Error("Unknown command");
+    const submissionPath=command==="--evaluate"?args.shift():null;
+    const output=args.shift();
+    if(!output||(command==="--evaluate"&&!submissionPath)||!args.length||args.length>200||args.some(arg=>arg.startsWith("--")))throw Error("Invalid arguments");
+    const empty=()=>({schemaVersion:1,items:[]});
+    const packs=[];
+    for(const path of args)packs.push({originals:await readPrivateJson(path),variants:empty(),quizzes:empty(),lessons:empty()});
+    if(command==="--plan"){
+      const plan=buildMarketReviewPlan(packs);
+      if(!plan.valid)throw Error("Invalid source packs");
+      await writeOutsideRepo(output,plan);
+      const {items,...summary}=plan;
+      console.log(JSON.stringify(summary,null,2));
+    }else{
+      const result=evaluateMarketReviewHandoff(packs,await readPrivateJson(submissionPath));
+      if(!result.report.valid)throw Error("Invalid review submission");
+      await writeOutsideRepo(output,result);
+      console.log(JSON.stringify(result.report,null,2));
+    }
+  }catch{
+    console.error("Unable to prepare private market review. Use --plan NEW_PRIVATE_OUTPUT ORIGINAL_JSON... or --evaluate SUBMISSION_JSON NEW_PRIVATE_OUTPUT ORIGINAL_JSON... . Outputs must be outside the repository. No question or answer text is logged.");
+    process.exitCode=1;
+  }
 }
