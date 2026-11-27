@@ -49,7 +49,7 @@ describe("secure resumable quiz assignments", () => {
   it("validates assignment membership and bypasses personal quota only for assigned work", () => {
     expect(answerChecker).toContain('.from("assignment_questions")');
     expect(answerChecker).toContain('.from("class_members")');
-    expect(answerChecker).toContain("if (!assignmentId)");
+    expect(answerChecker).toContain("if (!assignmentId && !partnerEligible)");
     expect(answerChecker).toContain("if (!assignmentId && quota?.total_questions > 0)");
     expect(answerChecker).toContain("Question has already been answered");
   });
