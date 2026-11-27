@@ -23,45 +23,75 @@ const DAY = 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 1500;
 const MAX_BOOKMARKS = 500;
 
-function validCount(value: unknown): number {
-  return Number.isSafeInteger(value) && Number(value) >= 0
-    ? Math.min(Number(value), 10_000)
-    : 0;
+const MAX_ATTEMPTS_PER_QUESTION = 10_000;
+const MAX_DATE_MS = 8_640_000_000_000_000;
+const MAX_HISTORY_BYTES = 250_000;
+const isCount = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+const isTimestamp = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= MAX_DATE_MS;
+const safeHistoryId = (id: string) => id.length > 0 && id.length <= 180 && !["__proto__", "prototype", "constructor"].includes(id);
+
+/** Validate the original evidence before bounding it. Preserve a consistent
+ * sample of at most 10,000 attempts rather than independently clipping counts. */
+function cleanHistoryRow(value: unknown): QuestionHistory | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const row = value as Partial<QuestionHistory>;
+  const { attempts, correctFirst, incorrectFirst, firstTryStreak, lastAt, dueAt } = row;
+  if (!isCount(attempts) || !isCount(correctFirst) || !isCount(incorrectFirst) ||
+      !isCount(firstTryStreak) || attempts === 0 || correctFirst > attempts ||
+      incorrectFirst !== attempts - correctFirst || firstTryStreak > correctFirst ||
+      !isTimestamp(lastAt) || !isTimestamp(dueAt)) return undefined;
+  const bounded = Math.min(attempts, MAX_ATTEMPTS_PER_QUESTION);
+  const correct = attempts === bounded ? correctFirst : Math.round(correctFirst / attempts * bounded);
+  return {
+    attempts: bounded, correctFirst: correct, incorrectFirst: bounded - correct,
+    firstTryStreak: Math.min(firstTryStreak, correct), lastAt, dueAt,
+  };
+}
+
+export function getQuestionHistory(history: ReviewHistory, id: string): QuestionHistory | undefined {
+  if (!safeHistoryId(id) || !Object.prototype.hasOwnProperty.call(history, id)) return undefined;
+  return cleanHistoryRow(history[id]);
+}
+
+/** Retain the most recently practised valid entries, with a stable tie-break. */
+function boundHistory(history: ReviewHistory): ReviewHistory {
+  return Object.fromEntries(Object.keys(history)
+    .flatMap(id => {
+      const row = getQuestionHistory(history, id);
+      return row ? [[id, row] as const] : [];
+    })
+    .sort((a,b) => b[1].lastAt - a[1].lastAt || a[0].localeCompare(b[0]))
+    .slice(0, MAX_ENTRIES));
 }
 
 export function parseReviewHistory(raw: string | null, validIds: ReadonlySet<string>): ReviewHistory {
-  if (!raw || raw.length > 250_000) return {};
+  if (!raw || raw.length > MAX_HISTORY_BYTES) return {};
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     const record = parsed as { version?: unknown; entries?: unknown };
     if (record.version !== 1 || !record.entries || typeof record.entries !== "object" || Array.isArray(record.entries)) return {};
-    const history: ReviewHistory = {};
-    for (const [id, val] of Object.entries(record.entries).slice(0, MAX_ENTRIES)) {
-      if (!validIds.has(id) || !val || typeof val !== "object" || Array.isArray(val)) continue;
-      const row = val as Partial<QuestionHistory>;
-      const lastAt = Number(row.lastAt);
-      const dueAt = Number(row.dueAt);
-      if (!Number.isFinite(lastAt) || !Number.isFinite(dueAt) ||
-        lastAt < 0 || dueAt < 0) continue;
-      history[id] = {
-        attempts: validCount(row.attempts),
-        correctFirst: validCount(row.correctFirst),
-        incorrectFirst: validCount(row.incorrectFirst),
-        firstTryStreak: validCount(row.firstTryStreak),
-        lastAt,
-        dueAt,
-      };
+    const entries: [string, QuestionHistory][] = [];
+    for (const [id, val] of Object.entries(record.entries)) {
+      if (!validIds.has(id) || !safeHistoryId(id)) continue;
+      const row = cleanHistoryRow(val);
+      if (row) entries.push([id,row]);
     }
-    return history;
+    return boundHistory(Object.fromEntries(entries));
   } catch {
     return {};
   }
 }
 
 export function serialiseReviewHistory(history: ReviewHistory): string {
-  const entries = Object.fromEntries(Object.entries(history).slice(-MAX_ENTRIES));
-  return JSON.stringify({ version: 1, entries });
+  const entries = Object.entries(boundHistory(history));
+  let output = JSON.stringify({ version: 1, entries: Object.fromEntries(entries) });
+  // Enforce the same input and output size contract, dropping oldest rows first.
+  while (output.length > MAX_HISTORY_BYTES && entries.length) {
+    entries.splice(Math.max(0, entries.length - 50));
+    output = JSON.stringify({ version: 1, entries: Object.fromEntries(entries) });
+  }
+  return output;
 }
 
 /** Store only known question IDs; never save submitted free text or answer keys. */
@@ -85,36 +115,36 @@ export function serialiseBookmarks(ids: readonly string[]): string {
 export function recordReviewAttempt(
   history: ReviewHistory, id: string, correct: boolean, firstAttempt: boolean, now: number,
 ): ReviewHistory {
-  if (!Number.isFinite(now) || now <= 0) return history;
+  if (!isTimestamp(now) || now <= 0 || !safeHistoryId(id)) return history;
+  const prior = getQuestionHistory(history, id);
   // A reveal followed by typing the displayed solution is not independent learning evidence.
-  if (!firstAttempt && !history[id]) return history;
-  const existing = history[id] || {
+  if (!firstAttempt && !prior) return history;
+  const existing = prior || {
     attempts: 0, correctFirst: 0, incorrectFirst: 0, firstTryStreak: 0, lastAt: 0, dueAt: 0,
   };
-  const streak = firstAttempt ? (correct ? existing.firstTryStreak + 1 : 0) : existing.firstTryStreak;
+  const streak = firstAttempt ? (correct ? Math.min(MAX_ATTEMPTS_PER_QUESTION, existing.firstTryStreak + 1) : 0) : existing.firstTryStreak;
   const dueAt = firstAttempt
     ? correct
-      ? now + Math.min(14, streak === 1 ? 1 : streak === 2 ? 3 : 7) * DAY
+      ? Math.min(MAX_DATE_MS, now + (streak === 1 ? 1 : streak === 2 ? 3 : 7) * DAY)
       : now
     : correct
-      ? Math.min(existing.dueAt || now + DAY, now + DAY)
+      ? Math.min(existing.dueAt || now + DAY, now + DAY, MAX_DATE_MS)
       : existing.dueAt;
-  return {
-    ...history,
-    [id]: {
-      attempts: existing.attempts + (firstAttempt ? 1 : 0),
-      correctFirst: existing.correctFirst + Number(firstAttempt && correct),
-      incorrectFirst: existing.incorrectFirst + Number(firstAttempt && !correct),
-      firstTryStreak: streak,
-      lastAt: now,
-      dueAt,
-    },
-  };
+  const next = cleanHistoryRow({
+    attempts: existing.attempts + Number(firstAttempt),
+    correctFirst: existing.correctFirst + Number(firstAttempt && correct),
+    incorrectFirst: existing.incorrectFirst + Number(firstAttempt && !correct),
+    firstTryStreak: streak,
+    lastAt: now,
+    dueAt,
+  });
+  if (!next) return history;
+  return boundHistory({ ...history, [id]: next });
 }
 
 export function reviewPriority(id: string, history: ReviewHistory, now: number): number {
-  const item = history[id];
-  if (!item || item.attempts === 0) return 5;
+  const item = getQuestionHistory(history, id);
+  if (!item) return 5;
   const weakness = item.incorrectFirst / Math.max(1, item.attempts);
   const isDue = item.dueAt <= now;
   // Due and previously missed material has strongest weight; fresh mastered
@@ -127,11 +157,12 @@ export function buildReviewQueue<T extends ReviewCandidate>(
   source: readonly T[], history: ReviewHistory, count: number, kind: "mixed" | "adaptive",
   now = Date.now(), random: () => number = Math.random,
 ): T[] {
-  const available = [...source];
+  const available = [...new Map(source.filter(item => safeHistoryId(item.id)).map(item => [item.id, item])).values()];
   const selected: T[] = [];
   const bySubject = new Map<string, number>();
   const byFormat = new Map<string, number>();
-  while (available.length && selected.length < Math.min(Math.max(0, count), 50)) {
+  const limit = Number.isFinite(count) ? Math.min(Math.max(0, Math.floor(count)), 50) : 0;
+  while (available.length && selected.length < limit) {
     const weights = available.map((candidate) => {
       if (kind === "mixed") return 1;
       const priority = reviewPriority(candidate.id, history, now);
@@ -139,7 +170,8 @@ export function buildReviewQueue<T extends ReviewCandidate>(
         (byFormat.get(candidate.format) || 0) * 0.2);
     });
     const total = weights.reduce((sum, weight) => sum + weight, 0);
-    let target = Math.min(0.999999, Math.max(0, random())) * total;
+    const draw = random();
+    let target = (Number.isFinite(draw) ? Math.min(0.999999, Math.max(0, draw)) : 0) * total;
     let index = weights.length - 1;
     for (let i = 0; i < weights.length; i++) {
       target -= weights[i];
@@ -154,18 +186,22 @@ export function buildReviewQueue<T extends ReviewCandidate>(
 }
 
 export function getReviewSummary(source: readonly ReviewCandidate[], history: ReviewHistory, now = Date.now()) {
-  const practiced = source.filter((entry) => (history[entry.id]?.attempts || 0) > 0);
-  const due = practiced.filter((entry) => history[entry.id].dueAt <= now).length;
+  const unique = [...new Map(source.map(entry => [entry.id, entry])).values()];
+  const practiced = unique.flatMap(entry => {
+    const row = getQuestionHistory(history, entry.id);
+    return row ? [{ entry, row }] : [];
+  });
+  const due = practiced.filter(({row}) => row.dueAt <= now).length;
   const topics = new Map<string, { topic: string; misses: number }>();
-  for (const entry of practiced) {
-    const misses = history[entry.id].incorrectFirst;
+  for (const {entry,row} of practiced) {
+    const misses = row.incorrectFirst;
     if (misses <= 0) continue;
     const key = entry.subject + ":" + entry.topic;
     const current = topics.get(key);
     topics.set(key, { topic: entry.topic, misses: (current?.misses || 0) + misses });
   }
-  const firstTryAttempts = practiced.reduce((sum, entry) => sum + history[entry.id].attempts, 0);
-  const firstTryCorrect = practiced.reduce((sum, entry) => sum + history[entry.id].correctFirst, 0);
+  const firstTryAttempts = practiced.reduce((sum, {row}) => sum + row.attempts, 0);
+  const firstTryCorrect = practiced.reduce((sum, {row}) => sum + row.correctFirst, 0);
   return {
     practiced: practiced.length,
     due,
