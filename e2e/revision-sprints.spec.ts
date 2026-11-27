@@ -50,3 +50,25 @@ test("a full subject can run a genuine twenty-question ungraded sprint", async (
   await expect(page.getByText("First-try score: 0 / 20")).toBeVisible();
   await expect(page.locator("article")).toHaveCount(1);
 });
+
+test("unanswered-only practice retries the exact original sprint, in order", async ({ page }) => {
+  await page.goto("/qa-clinic?topic=arithmetic-sequences-nth-term");
+  await dismissCookies(page);
+  await page.getByLabel("Revision sprint length").selectOption("5");
+  await page.getByRole("button", { name: "Start challenge", exact: true }).click();
+  const questions: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    await expect(page.getByRole("heading", { name: `Question ${i + 1} of 5`, exact: true })).toBeVisible();
+    questions.push(await page.locator("article h3").innerText());
+    await page.getByRole("button", { name: i === 4 ? "Finish challenge" : "Next question", exact: true }).click();
+  }
+  await expect(page.getByRole("button", { name: "Practise unanswered (5)", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Retry mistakes/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Practise unanswered (5)", exact: true }).click();
+  for (let i = 0; i < 5; i++) {
+    await expect(page.getByRole("heading", { name: `Question ${i + 1} of 5`, exact: true })).toBeVisible();
+    await expect(page.locator("article h3")).toHaveText(questions[i]);
+    await page.getByRole("button", { name: i === 4 ? "Finish challenge" : "Next question", exact: true }).click();
+  }
+  await expect(page.getByRole("button", { name: "Practise unanswered (5)", exact: true })).toBeVisible();
+});
