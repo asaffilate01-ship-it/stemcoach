@@ -58,6 +58,10 @@ const fr = {
     toggleTheme: "Changer de thème",
   },
   qa: {
+    quickReviewTitle: "Filtres de révision rapide",
+    quickReviewDescription: "Les compteurs tiennent compte de la matière, du thème, du format et de la recherche. Les catégories peuvent se chevaucher.",
+    scopeLoading: "Chargement de votre espace de révision…",
+    scopedHistoryNotice: "La progression et les questions enregistrées sont séparées par compte ou accès invité dans ce navigateur. Les anciennes données communes ne sont pas importées automatiquement.",
     sprintResults: {
       "correct": "Réussies au premier essai",
       "missed": "Ratées au premier essai",
@@ -99,7 +103,7 @@ const fr = {
     "openCitedLesson": "Ouvrir le cours cité",
     "clearFilters": "Effacer les filtres",
     "reviewFilterLabel": "Filtre de révision",
-    "reviewFilters": {"all":"Toutes les questions","due":"À réviser maintenant","missed":"Erreurs précédentes","saved":"Questions enregistrées"},
+    "reviewFilters": {"all":"Toutes les questions","due":"À réviser maintenant","missed":"Erreurs précédentes","saved":"Questions enregistrées","new":"Questions inédites"},
     "saveQuestion": "Enregistrer la question",
     "removeBookmark": "Retirer des questions enregistrées",
         "fillBlankPlaceholder": "Saisissez le mot manquant",
