@@ -600,3 +600,59 @@ test("new applied families have nonnegative integer choices and exact draft meta
   assert.equal(count,10000,family);
  }
 });
+
+test("original similarity audit flags exact, numeric-template and near duplicates without returning private text",async()=>{
+ const {auditOriginalSimilarity}=await import("./audit-original-similarity.mjs");
+ const mk=(text,extra={})=>({text,track:"mathematics",language:"en",status:"draft",...extra});
+ const q1="A shop buys 12 boxes and each box contains 4 pencils. Find the total pencil count.";
+ const q2="A shop buys 15 boxes and each box contains 6 pencils. Find the total pencil count.";
+ const q3="A shop buys 12 boxes and each box contains 4 pencils. Find the total pencil count!";
+ const q4="A shop buys 12 boxes and each box contains 4 pencils. Find the total pencil count today.";
+ const result=auditOriginalSimilarity([
+  {schemaVersion:1,items:[mk(q1),mk(q1,{variant:true}),mk("Which triangle has three equal sides?")]},
+  {schemaVersion:1,items:[mk(q2),mk(q3),mk(q4),mk(q1,{track:"commerce"})]},
+ ]);
+ assert.equal(result.checkedOriginals,6);
+ assert.equal(result.excludedVariants,1);
+ assert.ok(result.flags.some(f=>f.kind==="numeric-template"&&f.left.batch===1&&f.right.batch===2));
+ assert.ok(result.flags.some(f=>f.kind==="normalized-stem"));
+ assert.ok(result.flags.some(f=>f.kind==="similar-stem"));
+ assert.equal(result.approvedQuestions,0);
+ assert.ok(result.requiresHumanReview);
+ assert.ok(!JSON.stringify(result).includes(q1));
+ assert.ok(result.flags.every(f=>f.left.row!==2||f.left.batch!==1));
+ assert.ok(result.flags.every(f=>f.right.row!==4||f.right.batch!==2));
+});
+test("original similarity audit handles Unicode, rejects malformed input, and caps findings",async()=>{
+ const {auditOriginalSimilarity}=await import("./audit-original-similarity.mjs");
+ const mk=text=>({text,track:"german",language:"de",status:"draft"});
+ const batch={schemaVersion:1,items:[mk("Wähle den richtigen Artikel: Übung."),mk("WÄHLE DEN RICHTIGEN ARTIKEL: U\u0308bung!")]};
+ assert.equal(auditOriginalSimilarity([batch]).flagCount,1);
+ assert.throws(()=>auditOriginalSimilarity([batch],{threshold:NaN}),/Threshold/);
+ assert.throws(()=>auditOriginalSimilarity([{...batch,count:1}]),/count mismatch/);
+ assert.throws(()=>auditOriginalSimilarity([{schemaVersion:1,items:[{...mk("question"),status:"published"}]}]),/draft records/);
+ const repeated={schemaVersion:1,items:Array.from({length:25},()=>mk("A synthetic duplicate stem for review."))};
+ const result=auditOriginalSimilarity([repeated]);
+ assert.equal(result.flagCount,300);
+ assert.equal(result.flags.length,200);
+ assert.equal(result.truncated,true);
+});
+test("similarity CLI emits row references and never includes question content",async()=>{
+ const fs=await import("node:fs/promises");
+ const path=await import("node:path");
+ const os=await import("node:os");
+ const cp=await import("node:child_process");
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),"stemcoach-sim-"));
+ try{
+  const filename=path.join(root,"private.json");
+  const stem="Distinct private question text used as a synthetic fixture.";
+  const item={text:stem,track:"mathematics",language:"en",status:"draft"};
+  await fs.writeFile(filename,JSON.stringify({schemaVersion:1,items:[item,item]}));
+  const run=cp.spawnSync(process.execPath,["scripts/audit-original-similarity.mjs",filename],{encoding:"utf8"});
+  assert.equal(run.status,2,run.stderr);
+  const report=JSON.parse(run.stdout);
+  assert.equal(report.flagCount,1);
+  assert.ok(!run.stdout.includes(stem));
+  assert.equal(run.stderr,"");
+ }finally{await fs.rm(root,{recursive:true,force:true});}
+});
