@@ -117,6 +117,10 @@ const de = {
     "reviewTitle": "Dein Lernfortschritt",
     "reviewStats": "{{practiced}} von {{total}} Fragen geübt · {{due}} zur Wiederholung",
     "weakerTopics": "Themen zum Wiederholen:",
+    dashboardTopicReview: {
+      open: "{{focus}} öffnen ({{count}})",
+      openLabel: "{{focus}} zum Thema {{topic}} öffnen ({{count}} Fragen)",
+    },
     topicRevision: {
       title: "Empfohlene Themenwiederholung",
       notice: "Basierend auf Erstversuchen und fälligen Wiederholungen, die für das aktuelle Konto oder den Gastzugang in diesem Browser gespeichert sind. Diese Zahlen messen keine offizielle Prüfungsreife.",
