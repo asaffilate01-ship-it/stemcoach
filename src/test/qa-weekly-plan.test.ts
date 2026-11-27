@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
+import { buildQAWeeklyPlan, parseWeeklyPlanCapacity, summariseQAWeeklyPlan } from "@/lib/qaWeeklyPlan";
 import { qaEntries } from "@/data/qaClinic";
 import { recordReviewAttempt } from "@/lib/qaPractice";
 
@@ -53,5 +53,45 @@ describe("private seven-day Q&A revision plan", () => {
     const days = buildQAWeeklyPlan([], {}, new Date(2026, 9, 24, 12).getTime());
     expect(days.map(day => new Date(day.startAt).getDate())).toEqual([24, 25, 26, 27, 28, 29, 30]);
     expect(days.every(day => new Date(day.startAt).getHours() === 0)).toBe(true);
+  });
+});
+
+describe("adjustable workload and weekly revision totals", () => {
+  it("allows only the advertised workload options", () => {
+    for (const cap of [5,10,20] as const) {
+      expect(parseWeeklyPlanCapacity(cap)).toBe(cap);
+      expect(parseWeeklyPlanCapacity(String(cap))).toBe(cap);
+    }
+    for (const value of [null,undefined,"05"," 10","1e1",false,0,30,NaN,Infinity,[],{}]) {
+      expect(parseWeeklyPlanCapacity(value)).toBe(5);
+    }
+  });
+
+  it("reports actual scheduled items, keeps due work first and reveals the remaining backlog", () => {
+    const bank = Array.from({length:50},(_,i)=>({id:"q"+i,subject:"mathematics",topic:"Synthetic",format:"single"}));
+    const history = Object.fromEntries(bank.slice(0,40).map(item => [
+      item.id, {attempts:1,correctFirst:0,incorrectFirst:1,firstTryStreak:0,lastAt:now-100,dueAt:now-100},
+    ]));
+    const small = buildQAWeeklyPlan(bank,history,now,5);
+    expect(summariseQAWeeklyPlan(small,bank,history,now)).toEqual({
+      scheduled:35,newCount:0,dueCount:35,missedCount:35,unscheduledDue:5,
+    });
+    expect(new Set(small.flatMap(day=>day.questionIds)).size).toBe(35);
+    const large = buildQAWeeklyPlan(bank,history,now,10);
+    expect(summariseQAWeeklyPlan(large,bank,history,now)).toEqual({
+      scheduled:50,newCount:10,dueCount:40,missedCount:40,unscheduledDue:0,
+    });
+    expect(large.slice(0,4).every(day=>day.dueCount===10)).toBe(true);
+    expect(new Set(large.flatMap(day=>day.questionIds)).size).toBe(50);
+  });
+
+  it("does not inflate a six-question lesson or count future due dates as an overdue backlog", () => {
+    const bank = sample.slice(0,6);
+    const history = recordReviewAttempt({},bank[0].id,true,true,now);
+    const plan = buildQAWeeklyPlan(bank,history,now,20);
+    const totals = summariseQAWeeklyPlan(plan,[...bank,bank[0]],history,now);
+    expect(totals).toEqual({scheduled:6,newCount:5,dueCount:1,missedCount:0,unscheduledDue:0});
+    expect(plan[0].questionIds).not.toContain(bank[0].id);
+    expect(summariseQAWeeklyPlan([],bank,history,now).unscheduledDue).toBe(0);
   });
 });
