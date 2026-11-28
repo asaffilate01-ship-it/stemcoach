@@ -19,6 +19,7 @@ CREATE TABLE stemcoach_exam_fixture.questions (
   academic_verified_at timestamptz,
   academic_verified_by uuid,
   options jsonb NOT NULL,
+  question_text text NOT NULL DEFAULT 'Synthetic fixture question',
   correct_answer text NOT NULL
 );
 CREATE TABLE stemcoach_exam_fixture.user_quotas (
@@ -32,6 +33,12 @@ CREATE TABLE stemcoach_exam_fixture.sessions (
   subject text NOT NULL,
   curriculum text NOT NULL,
   expires_at timestamptz NOT NULL,
+  request_id uuid,
+  requested_count integer CHECK (requested_count BETWEEN 1 AND 100),
+  duration_seconds integer CHECK (duration_seconds BETWEEN 60 AND 10800),
+  CHECK ((request_id IS NULL AND requested_count IS NULL AND duration_seconds IS NULL) OR
+    (request_id IS NOT NULL AND requested_count IS NOT NULL AND duration_seconds IS NOT NULL)),
+  UNIQUE (user_id, request_id),
   UNIQUE (id, user_id)
 );
 CREATE TABLE stemcoach_exam_fixture.session_questions (
@@ -39,6 +46,11 @@ CREATE TABLE stemcoach_exam_fixture.session_questions (
   position integer NOT NULL CHECK (position BETWEEN 1 AND 100),
   question_id uuid NOT NULL,
   revision integer NOT NULL CHECK (revision >= 0),
+  stem_snapshot text,
+  options_snapshot jsonb,
+  key_digest bytea CHECK (octet_length(key_digest)=32),
+  CHECK ((stem_snapshot IS NULL) = (options_snapshot IS NULL)),
+  CHECK ((stem_snapshot IS NULL) = (key_digest IS NULL)),
   PRIMARY KEY (session_id, position),
   UNIQUE (session_id, question_id)
 );
@@ -183,7 +195,8 @@ BEGIN
 
   -- Lock question rows against concurrent changes. Missing rows fail closed.
   FOR v_question IN
-    SELECT sq.position, sq.question_id, sq.revision, q.subject, q.curriculum,
+    SELECT sq.position, sq.question_id, sq.revision, sq.stem_snapshot, sq.options_snapshot, sq.key_digest,
+      q.question_text, q.subject, q.curriculum,
       q.question_type, q.review_status, q.review_revision, q.academic_verified_at,
       q.academic_verified_by, q.options, q.correct_answer
     FROM stemcoach_exam_fixture.session_questions sq
@@ -194,6 +207,9 @@ BEGIN
       OR v_question.review_status <> 'published' OR v_question.review_revision <> v_question.revision
       OR v_question.academic_verified_at IS NULL OR v_question.academic_verified_by IS NULL
       OR v_question.question_type <> 'mcq'
+      OR (v_question.stem_snapshot IS NOT NULL AND v_question.stem_snapshot IS DISTINCT FROM v_question.question_text)
+      OR (v_question.options_snapshot IS NOT NULL AND v_question.options_snapshot IS DISTINCT FROM v_question.options)
+      OR (v_question.key_digest IS NOT NULL AND v_question.key_digest IS DISTINCT FROM sha256(convert_to(v_question.correct_answer,'UTF8')))
       OR nullif(btrim(v_question.correct_answer, E' \t\r\n'), '') IS NULL
       OR jsonb_typeof(v_question.options) <> 'array' THEN
       RAISE EXCEPTION 'Assigned question changed or not gradeable' USING ERRCODE = '22023';
@@ -252,3 +268,134 @@ END;
 $submit_mock_exam$;
 REVOKE ALL ON FUNCTION stemcoach_exam_fixture.submit_mock_exam(uuid,uuid,jsonb) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.submit_mock_exam(uuid,uuid,jsonb) TO service_role;
+
+
+-- Issuance is an isolated server-only operation. Existing manual fixtures may
+-- leave request_id/snapshot fields null; the new issuer always fills them.
+GRANT INSERT ON stemcoach_exam_fixture.sessions, stemcoach_exam_fixture.session_questions TO service_role;
+
+CREATE FUNCTION stemcoach_exam_fixture.valid_mcq_options(p_options jsonb, p_key text)
+RETURNS boolean LANGUAGE plpgsql IMMUTABLE SECURITY INVOKER
+SET search_path = pg_catalog, pg_temp
+AS $valid_mcq_options$
+BEGIN
+  IF p_options IS NULL OR jsonb_typeof(p_options) <> 'array' OR
+    nullif(btrim(p_key, E' \t\r\n'), '') IS NULL THEN RETURN false; END IF;
+  RETURN jsonb_array_length(p_options) BETWEEN 2 AND 8
+    AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(p_options) e(value)
+      WHERE jsonb_typeof(e.value) <> 'string' OR nullif(btrim(e.value#>>'{}', E' \t\r\n'), '') IS NULL
+        OR (e.value#>>'{}') <> btrim(e.value#>>'{}', E' \t\r\n'))
+    AND (SELECT count(DISTINCT value) FROM jsonb_array_elements(p_options)) = jsonb_array_length(p_options)
+    AND (p_options ? p_key);
+END;
+$valid_mcq_options$;
+REVOKE ALL ON FUNCTION stemcoach_exam_fixture.valid_mcq_options(jsonb,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.valid_mcq_options(jsonb,text) TO service_role;
+
+-- p_actor and template constraints must be established by authenticated
+-- server code. p_request is a retry token, not a caller-selected session ID.
+-- Deterministic selection is for the fixture only, not a production exam sampler.
+CREATE FUNCTION stemcoach_exam_fixture.issue_mock_exam(
+  p_actor uuid, p_request uuid, p_subject text, p_curriculum text,
+  p_count integer, p_duration integer
+) RETURNS jsonb
+LANGUAGE plpgsql VOLATILE SECURITY INVOKER
+SET search_path = pg_catalog, pg_temp
+AS $issue_mock_exam$
+DECLARE
+  v_session stemcoach_exam_fixture.sessions%ROWTYPE;
+  v_row record;
+  v_questions jsonb := '[]'::jsonb;
+  v_number integer := 0;
+  v_session_id uuid;
+  v_expiry timestamptz;
+BEGIN
+  IF p_actor IS NULL OR p_request IS NULL OR p_subject IS NULL OR p_curriculum IS NULL
+    OR length(p_subject) NOT BETWEEN 1 AND 100 OR length(p_curriculum) NOT BETWEEN 1 AND 100
+    OR p_subject <> btrim(p_subject) OR p_curriculum <> btrim(p_curriculum)
+    OR p_count IS NULL OR p_count NOT BETWEEN 1 AND 100
+    OR p_duration IS NULL OR p_duration NOT BETWEEN 60 AND 10800 THEN
+    RAISE EXCEPTION 'Invalid exam issuance request' USING ERRCODE = '22023';
+  END IF;
+  -- Serialize issuers for one learner without taking quota locks before question locks.
+  PERFORM pg_advisory_xact_lock(hashtextextended(p_actor::text, 493801));
+  SELECT s.* INTO v_session FROM stemcoach_exam_fixture.sessions s
+    WHERE s.user_id=p_actor AND s.request_id=p_request FOR SHARE;
+  IF FOUND THEN
+    IF v_session.subject IS DISTINCT FROM p_subject OR v_session.curriculum IS DISTINCT FROM p_curriculum
+      OR v_session.requested_count IS DISTINCT FROM p_count OR v_session.duration_seconds IS DISTINCT FROM p_duration THEN
+      RAISE EXCEPTION 'Issuance request differs from existing session' USING ERRCODE = '22023';
+    END IF;
+    IF EXISTS (SELECT 1 FROM stemcoach_exam_fixture.receipts r WHERE r.session_id=v_session.id AND r.user_id=p_actor) THEN
+      RETURN jsonb_build_object('session_id',v_session.id,'status','completed');
+    END IF;
+    IF clock_timestamp() >= v_session.expires_at THEN
+      RETURN jsonb_build_object('session_id',v_session.id,'status','expired');
+    END IF;
+    -- A retry never delivers changed, revoked or no-longer-verified material.
+    FOR v_row IN
+      SELECT sq.position,sq.question_id,sq.revision,sq.stem_snapshot,sq.options_snapshot,sq.key_digest,
+        q.review_revision,q.review_status,q.question_type,q.subject,q.curriculum,
+        q.academic_verified_at,q.academic_verified_by,q.question_text,q.options,q.correct_answer
+      FROM stemcoach_exam_fixture.session_questions sq
+      JOIN stemcoach_exam_fixture.questions q ON q.id=sq.question_id
+      WHERE sq.session_id=v_session.id ORDER BY sq.position FOR SHARE OF q
+    LOOP
+      IF v_row.review_status <> 'published' OR v_row.question_type <> 'mcq'
+        OR v_row.academic_verified_at IS NULL OR v_row.academic_verified_by IS NULL
+        OR v_row.subject <> p_subject OR v_row.curriculum <> p_curriculum
+        OR v_row.review_revision <> v_row.revision
+        OR v_row.stem_snapshot IS DISTINCT FROM v_row.question_text
+        OR v_row.options_snapshot IS DISTINCT FROM v_row.options
+        OR v_row.key_digest IS DISTINCT FROM sha256(convert_to(v_row.correct_answer,'UTF8'))
+        OR NOT stemcoach_exam_fixture.valid_mcq_options(v_row.options,v_row.correct_answer) THEN
+        RAISE EXCEPTION 'Assigned question changed or not gradeable' USING ERRCODE = '22023';
+      END IF;
+      v_questions := v_questions || jsonb_build_array(jsonb_build_object(
+        'id',v_row.question_id,'question_text',v_row.stem_snapshot,'options',v_row.options_snapshot));
+    END LOOP;
+    IF jsonb_array_length(v_questions) <> p_count THEN
+      RAISE EXCEPTION 'Assigned questions unavailable' USING ERRCODE = '22023';
+    END IF;
+    RETURN jsonb_build_object('session_id',v_session.id,'status','active',
+      'expires_at',v_session.expires_at,'questions',v_questions);
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM stemcoach_exam_fixture.sessions s
+      WHERE s.user_id=p_actor AND s.expires_at>clock_timestamp()
+        AND NOT EXISTS (SELECT 1 FROM stemcoach_exam_fixture.receipts r WHERE r.session_id=s.id)) THEN
+    RAISE EXCEPTION 'An active examination already exists' USING ERRCODE = '22023';
+  END IF;
+  -- Read-only allowance precheck. Submission is still the authoritative debit.
+  IF NOT EXISTS (SELECT 1 FROM stemcoach_exam_fixture.user_quotas q
+      WHERE q.user_id=p_actor AND q.mock_exams_used<q.mock_exams_total) THEN
+    RAISE EXCEPTION 'Mock-exam allowance exhausted' USING ERRCODE = '22023';
+  END IF;
+  v_session_id := gen_random_uuid();
+  v_expiry := clock_timestamp()+make_interval(secs=>p_duration);
+  INSERT INTO stemcoach_exam_fixture.sessions(id,user_id,subject,curriculum,expires_at,request_id,requested_count,duration_seconds)
+    VALUES(v_session_id,p_actor,p_subject,p_curriculum,v_expiry,p_request,p_count,p_duration);
+  FOR v_row IN
+    SELECT q.id,q.review_revision,q.question_text,q.options,q.correct_answer
+    FROM stemcoach_exam_fixture.questions q
+    WHERE q.subject=p_subject AND q.curriculum=p_curriculum AND q.question_type='mcq'
+      AND q.review_status='published' AND q.academic_verified_at IS NOT NULL AND q.academic_verified_by IS NOT NULL
+      AND length(btrim(q.question_text)) BETWEEN 1 AND 12000
+      AND stemcoach_exam_fixture.valid_mcq_options(q.options,q.correct_answer)
+    ORDER BY q.id LIMIT p_count FOR SHARE OF q
+  LOOP
+    v_number := v_number+1;
+    INSERT INTO stemcoach_exam_fixture.session_questions(session_id,position,question_id,revision,stem_snapshot,options_snapshot,key_digest)
+      VALUES(v_session_id,v_number,v_row.id,v_row.review_revision,v_row.question_text,v_row.options,sha256(convert_to(v_row.correct_answer,'UTF8')));
+    v_questions := v_questions || jsonb_build_array(jsonb_build_object(
+      'id',v_row.id,'question_text',v_row.question_text,'options',v_row.options));
+  END LOOP;
+  IF v_number <> p_count THEN
+    RAISE EXCEPTION 'Insufficient verified exam questions' USING ERRCODE = '22023';
+  END IF;
+  RETURN jsonb_build_object('session_id',v_session_id,'status','active',
+    'expires_at',v_expiry,'questions',v_questions);
+END;
+$issue_mock_exam$;
+REVOKE ALL ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer) TO service_role;

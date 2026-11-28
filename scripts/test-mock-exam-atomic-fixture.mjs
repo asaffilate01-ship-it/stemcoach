@@ -12,7 +12,7 @@ const good = id(101), exhausted = id(102), blank = id(103), stale = id(104), bad
 const sql = await readFile(new URL("../docs/staging/mock-exam-atomic-receipt-fixture.sql", import.meta.url), "utf8");
 
 // Catch damaged SQL quote delimiters before starting the isolated database.
-for (const tag of ["fixture_guard", "fixture_policies", "submit_mock_exam"]) {
+for (const tag of ["fixture_guard", "fixture_policies", "submit_mock_exam", "valid_mcq_options", "issue_mock_exam"]) {
   const delimiter = "$" + tag + "$";
   assert.equal(sql.split(delimiter).length, 3, "Unbalanced SQL delimiter: " + tag);
   assert.ok(sql.includes(delimiter + ";"), "Missing closing SQL delimiter: " + tag);
@@ -143,6 +143,74 @@ try {
   assert.deepEqual(await counts(rollback),{attempts:1,certificates:1,receipts:1});
   assert.deepEqual(await submit(bob,rollback,[answer(q2,"Beta")]),recovered);
   assert.equal(await used(bob),2);
+  // Test real issuance, not caller-created sessions, in a separate synthetic curriculum.
+  const issuer = id(301), noQuota = id(302), retryOwner = id(303), insufficient = id(304);
+  const issueQ1 = id(311), issueQ2 = id(312), invalidQ = id(313), draftQ = id(314);
+  const request = id(321), request2 = id(322), request3 = id(323);
+  await db.query("INSERT INTO " + schema + ".user_quotas VALUES($1,2,0),($2,0,0),($3,1,0),($4,1,0)",[issuer,noQuota,retryOwner,insufficient]);
+  await addQuestion(issueQ1,{key:"Beta"});
+  await addQuestion(issueQ2);
+  await addQuestion(invalidQ,{options:["Alpha","Alpha"]});
+  await addQuestion(draftQ,{verified:false});
+  await db.query("UPDATE " + schema + ".questions SET curriculum='fixture-issuance' WHERE id=ANY($1::uuid[])",[[issueQ1,issueQ2,invalidQ,draftQ]]);
+  await db.query("UPDATE " + schema + ".questions SET question_text='Synthetic issued question' WHERE id=ANY($1::uuid[])",[[issueQ1,issueQ2]]);
+  async function issue(actor, token, count=2, duration=600, role="service_role", subject="mathematics", curriculum="fixture-issuance") {
+    return asRole(role,async()=>{
+      const {rows}=await db.query("SELECT "+schema+".issue_mock_exam($1::uuid,$2::uuid,$3,$4,$5,$6) AS result",[actor,token,subject,curriculum,count,duration]);
+      return rows[0].result;
+    });
+  }
+  async function sessionCount(actor) {
+    const {rows}=await db.query("SELECT count(*) AS n FROM "+schema+".sessions WHERE user_id=$1",[actor]);
+    return Number(rows[0].n);
+  }
+  for(const role of ["anon","authenticated"]) await assert.rejects(()=>issue(issuer,request,2,600,role),/permission denied/);
+  for(const [count,duration] of [[0,600],[101,600],[1,59],[1,10801],[null,600]]) {
+    await assert.rejects(()=>issue(issuer,request,count,duration),/Invalid exam issuance request/);
+  }
+  await assert.rejects(()=>issue(noQuota,request),/allowance exhausted/);
+  await assert.rejects(()=>issue(insufficient,request,3),/Insufficient verified exam questions/);
+  assert.equal(await sessionCount(insufficient),0);
+  assert.equal(await used(insufficient),0);
+  const issued=await issue(issuer,request);
+  assert.equal(issued.status,"active");
+  assert.notEqual(issued.session_id,request);
+  assert.deepEqual(issued.questions.map(q=>q.id),[issueQ1,issueQ2]);
+  assert.ok(issued.questions.every(q=>Object.keys(q).sort().join(",")==="id,options,question_text"));
+  assert.ok(!JSON.stringify(issued).includes("key_digest"));
+  assert.ok(!JSON.stringify(issued).includes("correct_answer"));
+  assert.equal(await used(issuer),0);
+  assert.equal(await sessionCount(issuer),1);
+  assert.deepEqual(await issue(issuer,request),issued);
+  await assert.rejects(()=>issue(issuer,request,1),/differs from existing session/);
+  await assert.rejects(()=>issue(issuer,request,2,601),/differs from existing session/);
+  await assert.rejects(()=>issue(issuer,request2),/active examination already exists/);
+  const another=await issue(retryOwner,request);
+  assert.notEqual(another.session_id,issued.session_id);
+  await rejected(retryOwner,issued.session_id,[answer(issueQ1,"Beta"),answer(issueQ2,"Alpha")],/Exam session unavailable/);
+
+  // Detect changes even if an editor neglected to increment the revision.
+  await db.query("UPDATE "+schema+".questions SET correct_answer='Alpha' WHERE id=$1",[issueQ1]);
+  await assert.rejects(()=>issue(issuer,request),/not gradeable/);
+  await rejected(issuer,issued.session_id,[answer(issueQ1,"Beta"),answer(issueQ2,"Alpha")],/not gradeable/);
+  await db.query("UPDATE "+schema+".questions SET correct_answer='Beta' WHERE id=$1",[issueQ1]);
+  await db.query("UPDATE "+schema+".questions SET question_text='Changed synthetic stem' WHERE id=$1",[issueQ2]);
+  await assert.rejects(()=>issue(issuer,request),/not gradeable/);
+  await rejected(issuer,issued.session_id,[answer(issueQ1,"Beta"),answer(issueQ2,"Alpha")],/not gradeable/);
+  await db.query("UPDATE "+schema+".questions SET question_text='Synthetic issued question' WHERE id=$1",[issueQ2]);
+  const submitted=await submit(issuer,issued.session_id,[answer(issueQ1,"Beta"),answer(issueQ2,"Alpha")]);
+  assert.equal(submitted.score,2);
+  assert.equal(await used(issuer),1);
+  assert.deepEqual(await issue(issuer,request),{session_id:issued.session_id,status:"completed"});
+  const next=await issue(issuer,request2);
+  await db.query("UPDATE "+schema+".sessions SET expires_at=clock_timestamp()-interval '1 minute' WHERE id=$1",[next.session_id]);
+  assert.deepEqual(await issue(issuer,request2),{session_id:next.session_id,status:"expired"});
+  assert.equal(await used(issuer),1);
+  const fresh=await issue(issuer,request3);
+  assert.notEqual(fresh.session_id,next.session_id);
+  assert.equal(await used(issuer),1);
+  assert.equal(await sessionCount(issuer),3);
+  console.log("Isolated session issuance passed: ownership, bounded selection, safe sheets, replay, expiry, rollback and frozen keys.");
   console.log("Isolated mock-exam fixture passed: ownership, role permissions, stale/revoked keys, exact receipt replay, allowance and full rollback.");
   console.log("Independent PostgreSQL connection concurrency and hosted deployment remain unverified.");
 } finally {
