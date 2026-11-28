@@ -5,6 +5,7 @@ import { CheckCircle2, AlertTriangle, Award, Zap, BarChart3, Star, TrendingUp } 
 import { Button } from "@/components/ui/button";
 import { type MockExamTemplate } from "@/data/mockExamTemplates";
 import { useTranslation } from "react-i18next";
+import type { ConfirmedMockExamResult } from "@/lib/mockExamGrading";
 
 interface ExamQuestion {
   id: string;
@@ -21,20 +22,19 @@ interface ExamQuestion {
 
 interface ExamReviewProps {
   questions: ExamQuestion[];
-  answers: Record<number, string>;
+  result: ConfirmedMockExamResult;
   flagged: Set<number>;
   selectedTemplate: MockExamTemplate | null;
   onBrowse: () => void;
 }
 
-export function ExamReview({ questions, answers, flagged, selectedTemplate, onBrowse }: ExamReviewProps) {
+export function ExamReview({ questions, result, flagged, selectedTemplate, onBrowse }: ExamReviewProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [showReviewDetail, setShowReviewDetail] = useState(false);
 
-  const score = questions.reduce((acc, q, i) => acc + (answers[i] === q.correct_answer ? 1 : 0), 0);
-  const percent = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
-  const answered = Object.keys(answers).length;
+  const { score, total, percent, certificateIssued, byId } = result;
+  const answered = [...byId.values()].filter(item => item.answer !== null && item.answer.trim().length > 0).length;
 
   const gradeColor =
     percent >= 80 ? "text-emerald-500" : percent >= 60 ? "text-primary" : "text-destructive";
@@ -54,7 +54,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="rounded-3xl border border-border/40 bg-card p-8 md:p-12 shadow-[var(--stem-card-shadow)]">
+        <div className="rounded-3xl border border-border/40 bg-card p-4 sm:p-8 md:p-12 shadow-[var(--stem-card-shadow)]">
           {/* Achievement Header */}
           <div className="text-center mb-10">
             <motion.div
@@ -105,12 +105,12 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mx-auto mb-8 flex items-center justify-center gap-10"
+            className="mx-auto mb-8 flex items-center justify-center gap-4 sm:gap-10"
           >
             <div className="text-center">
               <div className="text-5xl font-extrabold tracking-tight">
                 {score}
-                <span className="text-2xl text-muted-foreground/50">/{questions.length}</span>
+                <span className="text-2xl text-muted-foreground/50">/{total}</span>
               </div>
               <div className="mt-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                 {t("mockExam.correct")}
@@ -130,7 +130,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mb-8 grid grid-cols-3 gap-4 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 p-5 ring-1 ring-border/15"
+            className="mb-8 grid grid-cols-3 gap-2 sm:gap-4 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 p-5 ring-1 ring-border/15"
           >
             <div className="text-center">
               <div className="text-lg font-extrabold text-foreground">{answered}</div>
@@ -145,7 +145,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
               </div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-extrabold text-muted-foreground">{questions.length - answered}</div>
+              <div className="text-lg font-extrabold text-muted-foreground">{total - answered}</div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                 {t("mockExam.skipped")}
               </div>
@@ -153,7 +153,7 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
           </motion.div>
 
           {/* Certificate Banner */}
-          {percent >= 60 && (
+          {certificateIssued && (
             <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -172,6 +172,8 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
             <Button
               variant="outline"
               className="gap-2 rounded-xl border-border/40 font-bold"
+              aria-expanded={showReviewDetail}
+              aria-controls="mock-exam-review-details"
               onClick={() => setShowReviewDetail(!showReviewDetail)}
             >
               <BarChart3 className="h-4 w-4" />
@@ -185,10 +187,12 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
+                id="mock-exam-review-details"
                 className="mb-8 space-y-3 overflow-hidden text-left"
               >
                 {questions.map((q, i) => {
-                  const correct = answers[i] === q.correct_answer;
+                  const grade = byId.get(q.id)!;
+                  const correct = grade.correct;
                   return (
                     <motion.div
                       key={q.id}
@@ -207,20 +211,20 @@ export function ExamReview({ questions, answers, flagged, selectedTemplate, onBr
                         ) : (
                           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                         )}
-                        <div className="text-sm font-semibold">
+                        <div className="min-w-0 break-words text-sm font-semibold">
                           Q{i + 1}: {q.question_text}
                         </div>
                       </div>
                       {!correct && (
                         <div className="ml-6.5 mb-2 text-xs text-muted-foreground" style={{ marginLeft: 26 }}>
                           {t("mockExam.yourAnswer")}:{" "}
-                          <span className="font-bold text-destructive">{answers[i] || "—"}</span> ·
+                          <span className="font-bold text-destructive">{grade.answer || "—"}</span> ·
                           {t("mockExam.correctAnswer")}:{" "}
-                          <span className="font-bold text-emerald-500">{q.correct_answer}</span>
+                          <span className="font-bold text-emerald-500">{grade.correct_answer}</span>
                         </div>
                       )}
                       <div className="text-xs leading-relaxed text-muted-foreground" style={{ marginLeft: 26 }}>
-                        {q.explanation}
+                        {grade.explanation}
                       </div>
                     </motion.div>
                   );
