@@ -30,7 +30,7 @@ RETURNS text LANGUAGE sql IMMUTABLE STRICT SECURITY INVOKER
 SET search_path=pg_catalog,pg_temp
 AS $choice_normalisation$
   SELECT lower(btrim(normalize(p_value,NFKC),
-    E' \t\n\r\f\v' || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) ||
+    E' \t\n\r\f' || chr(11) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) ||
     chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) ||
     chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) ||
     chr(12288) || chr(65279)));
