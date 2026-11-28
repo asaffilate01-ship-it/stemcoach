@@ -17,7 +17,7 @@ import { ExamActive } from "@/components/mock-exam/ExamActive";
 import { ExamReview } from "@/components/mock-exam/ExamReview";
 import { Button } from "@/components/ui/button";
 import { examDeadline, secondsToExamDeadline } from "@/lib/examClock";
-import { requireCompleteMockExamGrades, type MockExamGradeResult } from "@/lib/mockExamGrading";
+import { requireConfirmedMockExamResult, type ConfirmedMockExamResult } from "@/lib/mockExamGrading";
 import { useTranslation } from "react-i18next";
 
 type ExamState = "browse" | "setup" | "loading" | "active" | "grading" | "grading-error" | "review";
@@ -51,6 +51,7 @@ export default function MockExam() {
   const [flagged, setFlagged] = useState<Set<number>>(new Set());
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmedResult, setConfirmedResult] = useState<ConfirmedMockExamResult | null>(null);
   const submissionInFlight = useRef(false);
   const examDeadlineRef = useRef<number | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MockExamTemplate | null>(initialTemplate);
@@ -86,13 +87,11 @@ export default function MockExam() {
       subjects.find((s) => s.id === examSubject)?.name ||
       examSubject;
 
+    const submissions = questions.map((q, i) => ({ question_id: q.id, answer: answers[i] ?? null }));
     try {
       const { data, error } = await supabase.functions.invoke("grade-mock-exam", {
         body: {
-          submissions: questions.map((q, i) => ({
-            question_id: q.id,
-            answer: answers[i] ?? null,
-          })),
+          submissions,
           exam_name: examName,
           subject: selectedTemplate?.subject || examSubject,
         },
@@ -100,23 +99,9 @@ export default function MockExam() {
 
       if (error) throw error;
 
-      // Never render a 0%-style review until the backend has graded every item.
-      const results = data?.results as MockExamGradeResult[] | undefined;
-      const byId = requireCompleteMockExamGrades(
-        questions.map((q) => q.id),
-        results,
-      );
-      setQuestions((prev) =>
-        prev.map((q) => {
-          const r = byId.get(q.id)!;
-          return {
-            ...q,
-            correct_answer: r.correct_answer ?? undefined,
-            explanation: r.explanation ?? undefined,
-            worked_solution: r.worked_solution ?? undefined,
-          };
-        }),
-      );
+      // No locally reconstructed grade: validate the entire server response.
+      const confirmed = requireConfirmedMockExamResult(submissions, data);
+      setConfirmedResult(confirmed);
       setState("review");
 
       // Quota refresh is best-effort; a network error here must not discard a
@@ -127,10 +112,10 @@ export default function MockExam() {
         // Server-side quota remains authoritative.
       }
 
-      if (data?.certificate_issued) {
+      if (confirmed.certificateIssued) {
         toast({
           title: `🏆 ${t("mockExam.certificateEarned")}`,
-          description: t("mockExam.certificateDesc", { percent: data.percent }),
+          description: t("mockExam.certificateDesc", { percent: confirmed.percent }),
         });
       }
     } catch {
@@ -208,6 +193,7 @@ export default function MockExam() {
       }
 
       const shuffled = (data as ExamQuestion[]);
+      setConfirmedResult(null);
       setQuestions(shuffled);
       examDeadlineRef.current = examDeadline(dur);
       setTimeLeft(secondsToExamDeadline(examDeadlineRef.current));
@@ -228,6 +214,7 @@ export default function MockExam() {
     setSearchParams(nextParams, { replace: true });
     setState("browse");
     setQuestions([]);
+    setConfirmedResult(null);
     setSelectedTemplate(null);
   };
 
@@ -324,14 +311,14 @@ export default function MockExam() {
   }
 
   // ── Review ──
-  if (state === "review") {
+  if (state === "review" && confirmedResult) {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
         <PageTransition>
           <ExamReview
             questions={questions}
-            answers={answers}
+            result={confirmedResult}
             flagged={flagged}
             selectedTemplate={selectedTemplate}
             onBrowse={handleBrowse}
