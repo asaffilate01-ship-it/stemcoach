@@ -11,6 +11,13 @@ const good = id(101), exhausted = id(102), blank = id(103), stale = id(104), bad
   unverified = id(106), archived = id(107), unsupported = id(108), expired = id(109), rollback = id(110);
 const sql = await readFile(new URL("../docs/staging/mock-exam-atomic-receipt-fixture.sql", import.meta.url), "utf8");
 
+// Catch damaged SQL quote delimiters before starting the isolated database.
+for (const tag of ["fixture_guard", "fixture_policies", "submit_mock_exam"]) {
+  const delimiter = "$" + tag + "$";
+  assert.equal(sql.split(delimiter).length, 3, "Unbalanced SQL delimiter: " + tag);
+  assert.ok(sql.includes(delimiter + ";"), "Missing closing SQL delimiter: " + tag);
+}
+
 async function asRole(role, action) {
   assert.ok(["anon", "authenticated", "service_role"].includes(role));
   await db.exec("SET ROLE " + role);
