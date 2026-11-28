@@ -1,13 +1,13 @@
 -- SYNTHETIC TEST DATABASE ONLY. Never apply as a production migration.
 -- The harness creates stemcoach_exam_fixture and the fixture marker first.
 -- All tables below are isolated; no public questions, quotas or certificates are touched.
-DO $$
+DO $fixture_guard$
 BEGIN
   IF current_setting('stemcoach.fixture_mode', true) IS DISTINCT FROM 'isolated-mock-exam-v1' THEN
     RAISE EXCEPTION 'Use the isolated mock exam test harness';
   END IF;
 END;
-$;
+$fixture_guard$;
 
 CREATE TABLE stemcoach_exam_fixture.questions (
   id uuid PRIMARY KEY,
@@ -71,7 +71,7 @@ CREATE TABLE stemcoach_exam_fixture.receipts (
 REVOKE ALL ON SCHEMA stemcoach_exam_fixture FROM PUBLIC, anon, authenticated;
 GRANT USAGE ON SCHEMA stemcoach_exam_fixture TO service_role;
 REVOKE ALL ON ALL TABLES IN SCHEMA stemcoach_exam_fixture FROM PUBLIC, anon, authenticated, service_role;
-DO $$
+DO $fixture_policies$
 DECLARE
   table_name text;
 BEGIN
@@ -80,7 +80,7 @@ BEGIN
     EXECUTE format('CREATE POLICY server_only ON stemcoach_exam_fixture.%I TO service_role USING (true) WITH CHECK (true)', table_name);
   END LOOP;
 END;
-$;
+$fixture_policies$;
 GRANT SELECT ON stemcoach_exam_fixture.questions, stemcoach_exam_fixture.user_quotas,
   stemcoach_exam_fixture.sessions, stemcoach_exam_fixture.session_questions,
   stemcoach_exam_fixture.receipts TO service_role;
@@ -99,7 +99,7 @@ CREATE FUNCTION stemcoach_exam_fixture.submit_mock_exam(
 ) RETURNS jsonb
 LANGUAGE plpgsql VOLATILE SECURITY INVOKER
 SET search_path = pg_catalog, pg_temp
-AS $$
+AS $submit_mock_exam$
 DECLARE
   v_session stemcoach_exam_fixture.sessions%ROWTYPE;
   v_receipt stemcoach_exam_fixture.receipts%ROWTYPE;
@@ -249,6 +249,6 @@ BEGIN
   -- No exception swallowing: all writes roll back if any step fails.
   RETURN v_result;
 END;
-$;
+$submit_mock_exam$;
 REVOKE ALL ON FUNCTION stemcoach_exam_fixture.submit_mock_exam(uuid,uuid,jsonb) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.submit_mock_exam(uuid,uuid,jsonb) TO service_role;
