@@ -40,6 +40,14 @@ Before activating a new endpoint:
 
 Reference: [Supabase database function permissions](https://supabase.com/docs/guides/database/functions#secure-a-database-function) and [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security). No active migration or live database operation is part of this release.
 
+### Isolated server-owned examination issuance
+
+The fixture now includes a server-only `issue_mock_exam` function with a learner-scoped retry token and a separately generated session UUID. It validates bounded count, duration and curriculum parameters, selects only eligible academically verified single-answer MCQs, and snapshots question order, revision, stem, choices and a private key fingerprint. The returned sheet contains IDs, stems, options and expiry, not answer keys, fingerprints or learner identifiers. Selection is deterministic for the synthetic test harness; production must derive permitted subject/curriculum/board and exam size/duration from the authenticated learner's entitlements and an approved exam template, and use an appropriate secure sampling strategy.
+
+An advisory transaction lock serializes new issuance per learner. Same-token retries return the same active sheet if it is unchanged, or only completed/expired status once closed. A different request cannot start a second active session. Insufficient eligible questions cause the whole issuance transaction to roll back. No allowance is consumed until grading; the issuance precheck is not a reservation or debit. Changed keys, stems or options fail closed even when the revision has not been bumped. The two independent-connection issuance cases complement the existing five submission contention cases.
+
+The fixture deliberately permits older synthetic session seeds without snapshots. Production must require complete server-created snapshots and must not accept direct browser writes to sessions, assignments, keys or receipts. Before production, complete authenticated Edge Function session issuance and receipt recovery, confirm the actual schema and verified inventory, implement retention/expiry and cancellation policy, verify entitlements and notification triggers, and run hosted staging tests. No production schema or endpoint changes are included.
+
 ## Other deferred backend work
 
 - PR #5: teacher offboarding and tenant membership boundaries, including revoked access and overlapping institutional roles.
