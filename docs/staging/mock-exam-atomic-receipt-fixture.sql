@@ -48,7 +48,9 @@ CREATE TABLE stemcoach_exam_fixture.session_questions (
   revision integer NOT NULL CHECK (revision >= 0),
   stem_snapshot text,
   options_snapshot jsonb,
+  key_digest bytea CHECK (octet_length(key_digest)=32),
   CHECK ((stem_snapshot IS NULL) = (options_snapshot IS NULL)),
+  CHECK ((stem_snapshot IS NULL) = (key_digest IS NULL)),
   PRIMARY KEY (session_id, position),
   UNIQUE (session_id, question_id)
 );
@@ -193,7 +195,7 @@ BEGIN
 
   -- Lock question rows against concurrent changes. Missing rows fail closed.
   FOR v_question IN
-    SELECT sq.position, sq.question_id, sq.revision, sq.stem_snapshot, sq.options_snapshot,
+    SELECT sq.position, sq.question_id, sq.revision, sq.stem_snapshot, sq.options_snapshot, sq.key_digest,
       q.question_text, q.subject, q.curriculum,
       q.question_type, q.review_status, q.review_revision, q.academic_verified_at,
       q.academic_verified_by, q.options, q.correct_answer
@@ -207,6 +209,7 @@ BEGIN
       OR v_question.question_type <> 'mcq'
       OR (v_question.stem_snapshot IS NOT NULL AND v_question.stem_snapshot IS DISTINCT FROM v_question.question_text)
       OR (v_question.options_snapshot IS NOT NULL AND v_question.options_snapshot IS DISTINCT FROM v_question.options)
+      OR (v_question.key_digest IS NOT NULL AND v_question.key_digest IS DISTINCT FROM sha256(convert_to(v_question.correct_answer,'UTF8')))
       OR nullif(btrim(v_question.correct_answer, E' \t\r\n'), '') IS NULL
       OR jsonb_typeof(v_question.options) <> 'array' THEN
       RAISE EXCEPTION 'Assigned question changed or not gradeable' USING ERRCODE = '22023';
@@ -331,7 +334,7 @@ BEGIN
     END IF;
     -- A retry never delivers changed, revoked or no-longer-verified material.
     FOR v_row IN
-      SELECT sq.position,sq.question_id,sq.revision,sq.stem_snapshot,sq.options_snapshot,
+      SELECT sq.position,sq.question_id,sq.revision,sq.stem_snapshot,sq.options_snapshot,sq.key_digest,
         q.review_revision,q.review_status,q.question_type,q.subject,q.curriculum,
         q.academic_verified_at,q.academic_verified_by,q.question_text,q.options,q.correct_answer
       FROM stemcoach_exam_fixture.session_questions sq
@@ -344,6 +347,7 @@ BEGIN
         OR v_row.review_revision <> v_row.revision
         OR v_row.stem_snapshot IS DISTINCT FROM v_row.question_text
         OR v_row.options_snapshot IS DISTINCT FROM v_row.options
+        OR v_row.key_digest IS DISTINCT FROM sha256(convert_to(v_row.correct_answer,'UTF8'))
         OR NOT stemcoach_exam_fixture.valid_mcq_options(v_row.options,v_row.correct_answer) THEN
         RAISE EXCEPTION 'Assigned question changed or not gradeable' USING ERRCODE = '22023';
       END IF;
@@ -372,7 +376,7 @@ BEGIN
   INSERT INTO stemcoach_exam_fixture.sessions(id,user_id,subject,curriculum,expires_at,request_id,requested_count,duration_seconds)
     VALUES(v_session_id,p_actor,p_subject,p_curriculum,v_expiry,p_request,p_count,p_duration);
   FOR v_row IN
-    SELECT q.id,q.review_revision,q.question_text,q.options
+    SELECT q.id,q.review_revision,q.question_text,q.options,q.correct_answer
     FROM stemcoach_exam_fixture.questions q
     WHERE q.subject=p_subject AND q.curriculum=p_curriculum AND q.question_type='mcq'
       AND q.review_status='published' AND q.academic_verified_at IS NOT NULL AND q.academic_verified_by IS NOT NULL
@@ -381,8 +385,8 @@ BEGIN
     ORDER BY q.id LIMIT p_count FOR SHARE OF q
   LOOP
     v_number := v_number+1;
-    INSERT INTO stemcoach_exam_fixture.session_questions(session_id,position,question_id,revision,stem_snapshot,options_snapshot)
-      VALUES(v_session_id,v_number,v_row.id,v_row.review_revision,v_row.question_text,v_row.options);
+    INSERT INTO stemcoach_exam_fixture.session_questions(session_id,position,question_id,revision,stem_snapshot,options_snapshot,key_digest)
+      VALUES(v_session_id,v_number,v_row.id,v_row.review_revision,v_row.question_text,v_row.options,sha256(convert_to(v_row.correct_answer,'UTF8')));
     v_questions := v_questions || jsonb_build_array(jsonb_build_object(
       'id',v_row.id,'question_text',v_row.question_text,'options',v_row.options));
   END LOOP;
