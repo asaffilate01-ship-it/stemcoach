@@ -322,6 +322,81 @@ try {
   assert.ok(!JSON.stringify(await status(issuer,replacement.session_id)).includes("request_hash"));
   assert.ok(!JSON.stringify(await status(issuer,replacement.session_id)).includes("correct_answer"));
   await assert.rejects(()=>issue(issuer,id(325)),/allowance exhausted/);
+  // New issuance limits count all delivered sheets, not just active sessions.
+  // Neither cancellation nor an expiry/reset token clears a rolling budget.
+  const rateActor=id(501), otherRateActor=id(502), volumeActor=id(503);
+  await db.query("INSERT INTO "+schema+".user_quotas VALUES($1,10,0),($2,10,0),($3,10,0)",[rateActor,otherRateActor,volumeActor]);
+  const rateTokens=Array.from({length:13},(_,i)=>id(510+i));
+  const rateSessions=[];
+  // A failed request is rolled back and does not count as a delivered sheet.
+  await assert.rejects(()=>issue(rateActor,id(550),3),/Insufficient verified exam questions/);
+  assert.equal(await sessionCount(rateActor),0);
+  for(let i=0;i<5;i++){
+    const exam=await issue(rateActor,rateTokens[i],1);
+    assert.equal(exam.status,"active");
+    rateSessions.push(exam.session_id);
+    if(i===4) assert.deepEqual(await issue(rateActor,rateTokens[i],1),exam);
+    assert.deepEqual(await cancel(rateActor,exam.session_id),{session_id:exam.session_id,status:"cancelled"});
+  }
+  await assert.rejects(()=>issue(rateActor,rateTokens[5],1),/short-window limit reached/);
+  assert.equal(await sessionCount(rateActor),5);
+  assert.deepEqual(await issue(rateActor,rateTokens[0],1),{session_id:rateSessions[0],status:"cancelled"});
+  assert.equal(await used(rateActor),0);
+  // The budget is global to the learner, not split by subject or board.
+  await assert.rejects(()=>issue(rateActor,rateTokens[5],1,600,"service_role","mathematics","legacy-quality","AQA"),/short-window limit reached/);
+  const anotherLearner=await issue(otherRateActor,rateTokens[5],1);
+  assert.equal(anotherLearner.status,"active");
+  await cancel(otherRateActor,anotherLearner.session_id);
+
+  // Only the trusted fixture administrator can move historical timestamps.
+  async function ageIssued(actor,minutes){
+    await db.query("UPDATE "+schema+".sessions SET issued_at=clock_timestamp()-make_interval(mins=>$2::integer) WHERE user_id=$1",[actor,minutes]);
+  }
+  await assert.rejects(()=>asRole("service_role",()=>db.query("UPDATE "+schema+".sessions SET issued_at=now() WHERE user_id=$1",[rateActor])),/permission denied/);
+  await ageIssued(rateActor,11);
+  for(let i=5;i<12;i++){
+    if(i===10)await ageIssued(rateActor,11);
+    const exam=await issue(rateActor,rateTokens[i],1);
+    rateSessions.push(exam.session_id);
+    if(i===11){
+      // An expired sheet still counts; it was already delivered.
+      await db.query("UPDATE "+schema+".sessions SET expires_at=clock_timestamp()-interval '1 minute' WHERE id=$1",[exam.session_id]);
+      assert.deepEqual(await status(rateActor,exam.session_id),{session_id:exam.session_id,status:"expired"});
+    }else await cancel(rateActor,exam.session_id);
+  }
+  await assert.rejects(()=>issue(rateActor,rateTokens[12],1),/daily limit reached/);
+  assert.equal(await sessionCount(rateActor),12);
+  assert.equal(await used(rateActor),0);
+  await db.query("UPDATE "+schema+".sessions SET issued_at=clock_timestamp()-interval '25 hours' WHERE id=$1",[rateSessions[0]]);
+  const permitted=await issue(rateActor,rateTokens[12],1);
+  assert.equal(permitted.status,"active");
+  assert.equal(await sessionCount(rateActor),13);
+  assert.equal(await used(rateActor),0);
+  await cancel(rateActor,permitted.session_id);
+
+  // 300 delivered question slots in 24 hours, independent of exam count.
+  // The bulk rows are synthetic test data, not authored or published Q&A.
+  await db.exec("INSERT INTO "+schema+".questions(id,subject,curriculum,question_type,review_status,review_revision,academic_verified_at,academic_verified_by,options,correct_answer) SELECT ('00000000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'mathematics','exposure-fixture','mcq','published',1,now(),'00000000-0000-4000-8000-000000000003'::uuid,'[\"Alpha\",\"Beta\"]'::jsonb,'Alpha' FROM generate_series(1000,1099) i;");
+  const volumeSessions=[];
+  for(let i=0;i<3;i++){
+    const exam=await issue(volumeActor,id(560+i),100,600,"service_role","mathematics","exposure-fixture");
+    assert.equal(exam.questions.length,100);
+    volumeSessions.push(exam.session_id);
+    if(i===1){
+      // A graded sheet also counts, and consumes only its actual exam credit.
+      const result=await submit(volumeActor,exam.session_id,exam.questions.map(q=>answer(q.id,"Alpha")));
+      assert.equal(result.score,100);
+    }else await cancel(volumeActor,exam.session_id);
+  }
+  await assert.rejects(()=>issue(volumeActor,id(563),1),/question exposure limit reached/);
+  assert.equal(await sessionCount(volumeActor),3);
+  assert.equal(await used(volumeActor),1);
+  assert.equal((await status(volumeActor,volumeSessions[1])).status,"completed");
+  await db.query("UPDATE "+schema+".sessions SET issued_at=clock_timestamp()-interval '25 hours' WHERE id=$1",[volumeSessions[0]]);
+  const volumeReplacement=await issue(volumeActor,id(563),1);
+  assert.equal(volumeReplacement.status,"active");
+  assert.equal(await used(volumeActor),1);
+  console.log("Exam issuance budget passed: short/daily limits, exposure slots, rollback, retry exemptions, ownership and rolling-window recovery.");
   console.log("Exam lifecycle passed: owned status, terminal cancellation, unchanged allowance, expiry, replacement and receipt recovery.");
   console.log("Integrated legacy quality issuance passed: decoding, board scope, frozen metadata, exact choice and normalised key grading.");
   console.log("Isolated session issuance passed: ownership, bounded selection, safe sheets, replay, expiry, rollback and frozen keys.");
