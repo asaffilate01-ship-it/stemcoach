@@ -44,6 +44,7 @@ function ExamWorkspace({ accountId }: { accountId: string | null }) {
   const answerSnapshot = useRef<Record<number, string>>({});
   const [flagged, setFlagged] = useState<Set<number>>(new Set());
   const [questions, setQuestions] = useState<MockExamQuestion[]>([]);
+  const activeSheet = useRef<MockExamQuestion[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmedResult, setConfirmedResult] = useState<ConfirmedMockExamResult | null>(null);
   const submissionInFlight = useRef(false);
@@ -60,15 +61,16 @@ function ExamWorkspace({ accountId }: { accountId: string | null }) {
       mounted.current = false;
       requestVersion.current++;
       examDeadlineRef.current = null;
+      activeSheet.current = null;
     };
   }, []);
 
   const updateAnswers = useCallback((change: Record<number, string> | ((previous: Record<number, string>) => Record<number, string>)) => {
-    if (!mounted.current || !acceptsExamAnswer(examDeadlineRef.current, submitted.current)) return;
+    if (!mounted.current || activeSheet.current !== questions || !acceptsExamAnswer(examDeadlineRef.current, submitted.current)) return;
     const next = typeof change === "function" ? change(answerSnapshot.current) : change;
     answerSnapshot.current = next;
     setAnswers(next);
-  }, []);
+  }, [questions]);
 
   // Custom exam options
   const [examSubject, setExamSubject] = useState("physics");
@@ -84,7 +86,7 @@ function ExamWorkspace({ accountId }: { accountId: string | null }) {
 
   const handleSubmitExam = useCallback(async () => {
     // A synchronous guard prevents two timer/submit events charging or grading twice.
-    if (!mounted.current || submitted.current || submissionInFlight.current || !accountId || !questions.length || examDeadlineRef.current === null) return;
+    if (!mounted.current || submitted.current || submissionInFlight.current || !accountId || !questions.length || activeSheet.current !== questions || examDeadlineRef.current === null) return;
     submitted.current = true;
     submissionInFlight.current = true;
     const version = requestVersion.current;
@@ -224,7 +226,9 @@ function ExamWorkspace({ accountId }: { accountId: string | null }) {
 
       const sheet = requireMockExamSheet(data, subj, qCount);
       setConfirmedResult(null);
+      activeSheet.current = sheet;
       setQuestions(sheet);
+      setSubmitting(false);
       submitted.current = false;
       submissionInFlight.current = false;
       examDeadlineRef.current = examDeadline(dur);
@@ -247,6 +251,8 @@ function ExamWorkspace({ accountId }: { accountId: string | null }) {
     requestVersion.current++;
     startInFlight.current = false;
     examDeadlineRef.current = null;
+    activeSheet.current = null;
+    setSubmitting(false);
     answerSnapshot.current = {};
     setAnswers({});
     setFlagged(new Set());
