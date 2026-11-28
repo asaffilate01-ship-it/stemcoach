@@ -530,6 +530,7 @@ const fr = {
     limitReached: "Limite d'examens blancs atteinte",
     noQuestionsFound: "Aucune question trouvée",
     noQuestionsDesc: "Aucune question disponible pour cet examen. Essayez une autre sélection.",
+    invalidSheet: "Impossible de vérifier un questionnaire complet et valide. Aucun examen n’a démarré. Choisissez un autre examen ou contactez le support.",
     certificateEarned: "Certificat obtenu !",
     certificateDesc: "Vous avez obtenu {{percent}}% — un certificat a été ajouté à votre profil.",
     examCentre: "Centre d'examen",

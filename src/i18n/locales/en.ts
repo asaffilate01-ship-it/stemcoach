@@ -530,6 +530,7 @@ const en = {
     limitReached: "Mock exam limit reached",
     noQuestionsFound: "No questions found",
     noQuestionsDesc: "No questions available for this exam yet. Try a different selection.",
+    invalidSheet: "A complete, valid question sheet could not be verified. No exam was started. Choose another exam or contact support.",
     certificateEarned: "Certificate earned!",
     certificateDesc: "You scored {{percent}}% — a certificate has been added to your profile.",
     examCentre: "Exam Centre",

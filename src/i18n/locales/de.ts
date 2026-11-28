@@ -530,6 +530,7 @@ const de = {
     limitReached: "Probeklausurlimit erreicht",
     noQuestionsFound: "Keine Fragen gefunden",
     noQuestionsDesc: "Für diese Klausur sind noch keine Fragen verfügbar. Versuchen Sie eine andere Auswahl.",
+    invalidSheet: "Ein vollständiger, gültiger Fragensatz konnte nicht bestätigt werden. Die Prüfung wurde nicht gestartet. Wähle eine andere Prüfung oder kontaktiere den Support.",
     certificateEarned: "Zertifikat erhalten!",
     certificateDesc: "Sie haben {{percent}}% erreicht — ein Zertifikat wurde Ihrem Profil hinzugefügt.",
     examCentre: "Prüfungszentrum",

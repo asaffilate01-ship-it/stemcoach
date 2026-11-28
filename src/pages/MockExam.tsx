@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Footer } from "@/components/layout/Footer";
@@ -19,27 +19,20 @@ import { Button } from "@/components/ui/button";
 import { examDeadline, secondsToExamDeadline } from "@/lib/examClock";
 import { requireConfirmedMockExamResult, type ConfirmedMockExamResult } from "@/lib/mockExamGrading";
 import { useTranslation } from "react-i18next";
+import { requireMockExamSheet, acceptsExamAnswer, type MockExamQuestion } from "@/lib/mockExamSheet";
 
 type ExamState = "browse" | "setup" | "loading" | "active" | "grading" | "grading-error" | "review";
 
-interface ExamQuestion {
-  id: string;
-  question_text: string;
-  options: any;
-  topic: string;
-  subject: string;
-  difficulty: number;
-  points: number;
-  /** Only populated after server-side grading */
-  correct_answer?: string;
-  explanation?: string;
-  worked_solution?: string;
+export default function MockExam() {
+  const { user, loading } = useAuth();
+  const { t } = useTranslation();
+  if (loading) return <div className="min-h-screen bg-background"><AppHeader /><main className="p-8 text-center" role="status">{t("qa.scopeLoading")}</main></div>;
+  return <ExamWorkspace key={JSON.stringify(user?.id ?? null)} accountId={user?.id ?? null} />;
 }
 
-export default function MockExam() {
+function ExamWorkspace({ accountId }: { accountId: string | null }) {
   const { t } = useTranslation();
   useDocumentTitle(t("mockExam.title"));
-  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTemplate = mockExamTemplates.find((template) => template.id === searchParams.get("template")) || null;
   const { toast } = useToast();
@@ -48,13 +41,40 @@ export default function MockExam() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const answerSnapshot = useRef<Record<number, string>>({});
   const [flagged, setFlagged] = useState<Set<number>>(new Set());
-  const [questions, setQuestions] = useState<ExamQuestion[]>([]);
+  const [questions, setQuestions] = useState<MockExamQuestion[]>([]);
+  const activeSheet = useRef<MockExamQuestion[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmedResult, setConfirmedResult] = useState<ConfirmedMockExamResult | null>(null);
   const submissionInFlight = useRef(false);
+  const submitted = useRef(false);
+  const requestVersion = useRef(0);
+  const mounted = useRef(false);
+  const startInFlight = useRef(false);
   const examDeadlineRef = useRef<number | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MockExamTemplate | null>(initialTemplate);
+
+  const invalidateRequests = useCallback(() => {
+    requestVersion.current++;
+  }, []);
+
+  useLayoutEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      invalidateRequests();
+      examDeadlineRef.current = null;
+      activeSheet.current = null;
+    };
+  }, [invalidateRequests]);
+
+  const updateAnswers = useCallback((change: Record<number, string> | ((previous: Record<number, string>) => Record<number, string>)) => {
+    if (!mounted.current || activeSheet.current !== questions || !acceptsExamAnswer(examDeadlineRef.current, submitted.current)) return;
+    const next = typeof change === "function" ? change(answerSnapshot.current) : change;
+    answerSnapshot.current = next;
+    setAnswers(next);
+  }, [questions]);
 
   // Custom exam options
   const [examSubject, setExamSubject] = useState("physics");
@@ -70,26 +90,27 @@ export default function MockExam() {
 
   const handleSubmitExam = useCallback(async () => {
     // A synchronous guard prevents two timer/submit events charging or grading twice.
-    if (submissionInFlight.current) return;
+    if (!mounted.current || submitted.current || submissionInFlight.current || !accountId || !questions.length || activeSheet.current !== questions || examDeadlineRef.current === null) return;
+    submitted.current = true;
     submissionInFlight.current = true;
+    const version = requestVersion.current;
+    const isCurrent = () => mounted.current && requestVersion.current === version;
     setSubmitting(true);
     setState("grading");
-
-    if (!user || questions.length === 0) {
-      setState("grading-error");
-      submissionInFlight.current = false;
-      setSubmitting(false);
-      return;
-    }
 
     const examName =
       selectedTemplate?.name ||
       subjects.find((s) => s.id === examSubject)?.name ||
       examSubject;
 
-    const submissions = questions.map((q, i) => ({ question_id: q.id, answer: answers[i] ?? null }));
+    const submissions = questions.map((q, i) => ({ question_id: q.id, answer: answerSnapshot.current[i] ?? null }));
     try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (!isCurrent()) return;
+      if (sessionError || !session || session.user.id !== accountId) throw new Error("Exam account changed");
+      // Bind the outgoing request to the workspace's authenticated session.
       const { data, error } = await supabase.functions.invoke("grade-mock-exam", {
+        headers: { Authorization: "Bearer " + session.access_token },
         body: {
           submissions,
           exam_name: examName,
@@ -97,6 +118,7 @@ export default function MockExam() {
         },
       });
 
+      if (!isCurrent()) return;
       if (error) throw error;
 
       // No locally reconstructed grade: validate the entire server response.
@@ -112,13 +134,14 @@ export default function MockExam() {
         // Server-side quota remains authoritative.
       }
 
-      if (confirmed.certificateIssued) {
+      if (isCurrent() && confirmed.certificateIssued) {
         toast({
           title: `🏆 ${t("mockExam.certificateEarned")}`,
           description: t("mockExam.certificateDesc", { percent: confirmed.percent }),
         });
       }
     } catch {
+      if (!isCurrent()) return;
       // The server might already have received the submission. Do not offer
       // an automatic retry until grading and quota handling are idempotent.
       setState("grading-error");
@@ -128,10 +151,12 @@ export default function MockExam() {
         variant: "destructive",
       });
     } finally {
-      submissionInFlight.current = false;
-      setSubmitting(false);
+      if (isCurrent()) {
+        submissionInFlight.current = false;
+        setSubmitting(false);
+      }
     }
-  }, [user, questions, answers, selectedTemplate, examSubject, toast, refreshQuota, t]);
+  }, [accountId, questions, selectedTemplate, examSubject, toast, refreshQuota, t]);
 
   useEffect(() => {
     if (state !== "active" || examDeadlineRef.current === null) return;
@@ -155,7 +180,8 @@ export default function MockExam() {
   }, [state, handleSubmitExam]);
 
   const startExam = async () => {
-    if (!canTakeMockExam) {
+    if (!mounted.current || startInFlight.current || state !== "setup") return;
+    if (!accountId || !canTakeMockExam) {
       toast({
         title: t("mockExam.limitReached"),
         description: hasPurchased
@@ -172,8 +198,14 @@ export default function MockExam() {
     const dur = selectedTemplate ? selectedTemplate.durationMinutes : duration;
     const board = selectedTemplate?.board;
 
+    startInFlight.current = true;
+    const version = ++requestVersion.current;
+    const isCurrent = () => mounted.current && requestVersion.current === version;
     setState("loading");
     try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (!isCurrent()) return;
+      if (sessionError || !session || session.user.id !== accountId) throw new Error("Exam account changed");
       const { data, error } = await supabase.rpc("get_mock_exam_questions" as any, {
         _subject: subj,
         _curriculum: curr,
@@ -181,34 +213,53 @@ export default function MockExam() {
         _board: board || null,
       });
 
+      if (!isCurrent()) return;
       if (error) throw error;
+      const { data: { session: currentSession }, error: currentError } = await supabase.auth.getSession();
+      if (!isCurrent()) return;
+      if (currentError || currentSession?.user.id !== accountId) throw new Error("Exam account changed");
       if (!data || data.length === 0) {
         toast({
           title: t("mockExam.noQuestionsFound"),
           description: t("mockExam.noQuestionsDesc"),
           variant: "destructive",
         });
-        setState(selectedTemplate ? "browse" : "setup");
+        setState("setup");
         return;
       }
 
-      const shuffled = (data as ExamQuestion[]);
+      const sheet = requireMockExamSheet(data, subj, qCount);
       setConfirmedResult(null);
-      setQuestions(shuffled);
+      activeSheet.current = sheet;
+      setQuestions(sheet);
+      setSubmitting(false);
+      submitted.current = false;
+      submissionInFlight.current = false;
       examDeadlineRef.current = examDeadline(dur);
       setTimeLeft(secondsToExamDeadline(examDeadlineRef.current));
+      answerSnapshot.current = {};
       setAnswers({});
       setFlagged(new Set());
       setCurrentQ(0);
       setState("active");
-    } catch (e: any) {
-      toast({ title: t("common.error"), description: t("common.tryAgain"), variant: "destructive" });
-      setState(selectedTemplate ? "browse" : "setup");
+    } catch {
+      if (!isCurrent()) return;
+      toast({ title: t("common.error"), description: t("mockExam.invalidSheet", { defaultValue: "A complete question sheet could not be verified. No exam was started." }), variant: "destructive" });
+      setState("setup");
+    } finally {
+      if (isCurrent()) startInFlight.current = false;
     }
   };
 
   const handleBrowse = () => {
+    requestVersion.current++;
+    startInFlight.current = false;
     examDeadlineRef.current = null;
+    activeSheet.current = null;
+    setSubmitting(false);
+    answerSnapshot.current = {};
+    setAnswers({});
+    setFlagged(new Set());
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete("template");
     setSearchParams(nextParams, { replace: true });
@@ -261,13 +312,14 @@ export default function MockExam() {
             isLoading={state === "loading"}
             onStart={startExam}
             onBack={() => {
+              if (startInFlight.current) return;
               setSearchParams({}, { replace: true });
               setState("browse");
               setSelectedTemplate(null);
             }}
             mockExamsRemaining={mockExamsRemaining}
             mockExamsTotal={mockExamsTotal}
-            canTakeMockExam={canTakeMockExam}
+            canTakeMockExam={Boolean(accountId && canTakeMockExam)}
           />
         </PageTransition>
       </div>
@@ -337,7 +389,7 @@ export default function MockExam() {
         currentQ={currentQ}
         setCurrentQ={setCurrentQ}
         answers={answers}
-        setAnswers={setAnswers}
+        setAnswers={updateAnswers}
         flagged={flagged}
         setFlagged={setFlagged}
         timeLeft={timeLeft}
