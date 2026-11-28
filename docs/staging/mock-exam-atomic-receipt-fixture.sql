@@ -38,6 +38,7 @@ CREATE TABLE stemcoach_exam_fixture.sessions (
   curriculum text NOT NULL,
   board text,
   expires_at timestamptz NOT NULL,
+  issued_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   cancelled_at timestamptz,
   request_id uuid,
   requested_count integer CHECK (requested_count BETWEEN 1 AND 100),
@@ -47,6 +48,11 @@ CREATE TABLE stemcoach_exam_fixture.sessions (
   UNIQUE (user_id, request_id),
   UNIQUE (id, user_id)
 );
+-- Count server-issued sessions efficiently across all terminal states.
+CREATE INDEX exam_issuance_history_by_actor
+  ON stemcoach_exam_fixture.sessions (user_id, issued_at)
+  WHERE request_id IS NOT NULL;
+
 CREATE TABLE stemcoach_exam_fixture.session_questions (
   session_id uuid NOT NULL REFERENCES stemcoach_exam_fixture.sessions(id),
   position integer NOT NULL CHECK (position BETWEEN 1 AND 100),
@@ -379,6 +385,10 @@ DECLARE
   v_number integer := 0;
   v_session_id uuid;
   v_expiry timestamptz;
+  v_now timestamptz;
+  v_burst_count bigint;
+  v_daily_count bigint;
+  v_daily_questions bigint;
 BEGIN
   IF p_actor IS NULL OR p_request IS NULL OR p_subject IS NULL OR p_curriculum IS NULL
     OR length(p_subject) NOT BETWEEN 1 AND 100 OR length(p_curriculum) NOT BETWEEN 1 AND 100
@@ -453,10 +463,31 @@ BEGIN
       WHERE q.user_id=p_actor AND q.mock_exams_used<q.mock_exams_total) THEN
     RAISE EXCEPTION 'Mock-exam allowance exhausted' USING ERRCODE = '22023';
   END IF;
+  -- Illustrative fixture limits, not a commercial policy. The per-learner
+  -- advisory lock above serialises this calculation with all new issuances.
+  -- Count successfully issued sheets even when cancelled, expired or graded.
+  -- Existing issuance-token retries returned earlier and do not consume budget.
+  -- Failed issuance rolls back the session and therefore consumes no budget.
+  v_now := clock_timestamp();
+  SELECT count(*) FILTER (WHERE s.issued_at > v_now - interval '10 minutes'),
+         count(*), coalesce(sum(s.requested_count),0)
+    INTO v_burst_count,v_daily_count,v_daily_questions
+    FROM stemcoach_exam_fixture.sessions s
+    WHERE s.user_id=p_actor AND s.request_id IS NOT NULL
+      AND s.issued_at > v_now - interval '24 hours';
+  IF v_burst_count >= 5 THEN
+    RAISE EXCEPTION 'Exam issuance short-window limit reached' USING ERRCODE='22023';
+  END IF;
+  IF v_daily_count >= 12 THEN
+    RAISE EXCEPTION 'Exam issuance daily limit reached' USING ERRCODE='22023';
+  END IF;
+  IF v_daily_questions+p_count > 300 THEN
+    RAISE EXCEPTION 'Exam question exposure limit reached' USING ERRCODE='22023';
+  END IF;
   v_session_id := gen_random_uuid();
-  v_expiry := clock_timestamp()+make_interval(secs=>p_duration);
-  INSERT INTO stemcoach_exam_fixture.sessions(id,user_id,subject,curriculum,board,expires_at,request_id,requested_count,duration_seconds)
-    VALUES(v_session_id,p_actor,p_subject,p_curriculum,p_board,v_expiry,p_request,p_count,p_duration);
+  v_expiry := v_now+make_interval(secs=>p_duration);
+  INSERT INTO stemcoach_exam_fixture.sessions(id,user_id,subject,curriculum,board,expires_at,issued_at,request_id,requested_count,duration_seconds)
+    VALUES(v_session_id,p_actor,p_subject,p_curriculum,p_board,v_expiry,v_now,p_request,p_count,p_duration);
   FOR v_row IN
     SELECT q.id,q.review_revision,q.question_text,q.topic,q.difficulty,q.points,
       stemcoach_exam_fixture.usable_options(q.options,q.correct_answer) AS options,q.correct_answer

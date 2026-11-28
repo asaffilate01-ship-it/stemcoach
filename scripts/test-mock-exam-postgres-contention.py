@@ -277,4 +277,41 @@ assert one["status"] == "cancelled" and two["score"] == 1
 assert counts(actor) == {"used":1,"attempts":1,"certificates":1,"receipts":1}
 assert query(f"SELECT cancelled_at IS NULL FROM {SCHEMA}.sessions WHERE id={quote(session)};") == "t"
 
-print("Twelve independent-connection examination lifecycle and transaction contention cases passed on disposable PostgreSQL.")
+# Make a delivered sheet terminal within the same transaction. The first
+# issuer holds its advisory lock until commit, even after cancellation.
+def issue_then_cancel(actor, request):
+    statement = issue(actor, request).rstrip().rstrip(";")
+    return f"""WITH issued AS MATERIALIZED ({statement})
+      SELECT {SCHEMA}.cancel_mock_exam({quote(actor)}::uuid,
+        (result->>'session_id')::uuid) FROM (
+          SELECT issue_mock_exam AS result FROM issued
+        ) sheet;"""
+
+def seed_issuance_window(actor, initial_request):
+    seed(actor, [], [])
+    for n in range(4):
+        result = json.loads(query("SET ROLE service_role;\n"+issue(actor,uid(initial_request+n))))
+        terminal = json.loads(query("SET ROLE service_role;\n"+lifecycle("cancel_mock_exam",actor,result["session_id"])))
+        assert terminal["status"] == "cancelled"
+    assert query(f"SELECT count(*) FROM {SCHEMA}.sessions WHERE user_id={quote(actor)};") == "4"
+
+actor = uid(17)
+seed_issuance_window(actor,301)
+one, _ = race("issuance_budget_commit",issue_then_cancel(actor,uid(305)),
+              issue(actor,uid(306)),first_keyword="issue_mock_exam",
+              second_error="short-window limit reached")
+assert one["status"] == "cancelled"
+assert query(f"SELECT count(*) FROM {SCHEMA}.sessions WHERE user_id={quote(actor)};") == "5"
+assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
+
+actor = uid(18)
+seed_issuance_window(actor,311)
+one, two = race("issuance_budget_rollback",issue_then_cancel(actor,uid(315)),
+                issue(actor,uid(316)),first_keyword="issue_mock_exam",
+                first_end="ROLLBACK;")
+assert one["status"] == "cancelled" and two["status"] == "active"
+assert one["session_id"] != two["session_id"]
+assert query(f"SELECT count(*) FROM {SCHEMA}.sessions WHERE user_id={quote(actor)};") == "5"
+assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
+
+print("Fourteen independent-connection examination lifecycle, issuance-budget and transaction contention cases passed on disposable PostgreSQL.")
