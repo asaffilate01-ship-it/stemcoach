@@ -38,3 +38,6 @@ try {
 } finally {
   await db.close();
 }
+
+// Run the legacy selector and read-only quality audit in a separate synthetic database.
+await import("./test-mock-exam-selector-fixture.mjs");
