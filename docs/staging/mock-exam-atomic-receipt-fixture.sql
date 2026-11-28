@@ -38,6 +38,7 @@ CREATE TABLE stemcoach_exam_fixture.sessions (
   curriculum text NOT NULL,
   board text,
   expires_at timestamptz NOT NULL,
+  cancelled_at timestamptz,
   request_id uuid,
   requested_count integer CHECK (requested_count BETWEEN 1 AND 100),
   duration_seconds integer CHECK (duration_seconds BETWEEN 60 AND 10800),
@@ -109,7 +110,7 @@ GRANT SELECT ON stemcoach_exam_fixture.questions, stemcoach_exam_fixture.user_qu
   stemcoach_exam_fixture.receipts TO service_role;
 -- Row-locking SELECTs also require an UPDATE privilege. The fixture server is trusted.
 GRANT UPDATE (review_revision) ON stemcoach_exam_fixture.questions TO service_role;
-GRANT UPDATE (expires_at) ON stemcoach_exam_fixture.sessions TO service_role;
+GRANT UPDATE (expires_at, cancelled_at) ON stemcoach_exam_fixture.sessions TO service_role;
 GRANT UPDATE (mock_exams_used) ON stemcoach_exam_fixture.user_quotas TO service_role;
 GRANT INSERT ON stemcoach_exam_fixture.attempts, stemcoach_exam_fixture.certificates,
   stemcoach_exam_fixture.receipts TO service_role;
@@ -254,6 +255,9 @@ BEGIN
     RETURN v_receipt.result;
   END IF;
 
+  IF v_session.cancelled_at IS NOT NULL THEN
+    RAISE EXCEPTION 'Exam session cancelled' USING ERRCODE = '22023';
+  END IF;
   IF clock_timestamp() >= v_session.expires_at THEN
     RAISE EXCEPTION 'Exam session expired' USING ERRCODE = '22023';
   END IF;
@@ -397,6 +401,9 @@ BEGIN
     IF EXISTS (SELECT 1 FROM stemcoach_exam_fixture.receipts r WHERE r.session_id=v_session.id AND r.user_id=p_actor) THEN
       RETURN jsonb_build_object('session_id',v_session.id,'status','completed');
     END IF;
+    IF v_session.cancelled_at IS NOT NULL THEN
+      RETURN jsonb_build_object('session_id',v_session.id,'status','cancelled');
+    END IF;
     IF clock_timestamp() >= v_session.expires_at THEN
       RETURN jsonb_build_object('session_id',v_session.id,'status','expired');
     END IF;
@@ -437,7 +444,7 @@ BEGIN
   END IF;
 
   IF EXISTS (SELECT 1 FROM stemcoach_exam_fixture.sessions s
-      WHERE s.user_id=p_actor AND s.expires_at>clock_timestamp()
+      WHERE s.user_id=p_actor AND s.cancelled_at IS NULL AND s.expires_at>clock_timestamp()
         AND NOT EXISTS (SELECT 1 FROM stemcoach_exam_fixture.receipts r WHERE r.session_id=s.id)) THEN
     RAISE EXCEPTION 'An active examination already exists' USING ERRCODE = '22023';
   END IF;
@@ -481,3 +488,75 @@ END;
 $issue_mock_exam$;
 REVOKE ALL ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer,text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer,text) TO service_role;
+
+
+-- Session status and receipt recovery are separate from grading. A trusted
+-- authenticated caller must derive p_actor on the server. Never accept it
+-- from an untrusted browser payload. The status read takes a shared session
+-- lock so it observes the outcome of any submission/cancellation ahead of it.
+CREATE FUNCTION stemcoach_exam_fixture.get_mock_exam_status(p_actor uuid,p_session uuid)
+RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY INVOKER
+SET search_path=pg_catalog,pg_temp
+AS $mock_exam_status$
+DECLARE
+  v_session stemcoach_exam_fixture.sessions%ROWTYPE;
+  v_result jsonb;
+BEGIN
+  SELECT s.* INTO v_session FROM stemcoach_exam_fixture.sessions s
+    WHERE s.id=p_session AND s.user_id=p_actor FOR SHARE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Exam session unavailable' USING ERRCODE='42501';
+  END IF;
+  SELECT r.result INTO v_result FROM stemcoach_exam_fixture.receipts r
+    WHERE r.session_id=v_session.id AND r.user_id=p_actor;
+  IF FOUND THEN
+    -- A confirmed receipt remains recoverable after expiry, cancellation
+    -- requests, exhausted allowance or later editorial changes.
+    RETURN jsonb_build_object('session_id',v_session.id,'status','completed','result',v_result);
+  END IF;
+  IF v_session.cancelled_at IS NOT NULL THEN
+    RETURN jsonb_build_object('session_id',v_session.id,'status','cancelled');
+  END IF;
+  IF clock_timestamp()>=v_session.expires_at THEN
+    RETURN jsonb_build_object('session_id',v_session.id,'status','expired');
+  END IF;
+  RETURN jsonb_build_object('session_id',v_session.id,'status','active','expires_at',v_session.expires_at);
+END;
+$mock_exam_status$;
+
+-- Cancellation is a terminal transition, not a refund or grading operation.
+-- Both submit and cancel acquire the same exclusive session row lock first.
+-- Whichever commits first determines the outcome; a rolled-back cancellation
+-- has no effect. Completed and expired sessions are never rewritten.
+CREATE FUNCTION stemcoach_exam_fixture.cancel_mock_exam(p_actor uuid,p_session uuid)
+RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY INVOKER
+SET search_path=pg_catalog,pg_temp
+AS $cancel_mock_exam$
+DECLARE
+  v_session stemcoach_exam_fixture.sessions%ROWTYPE;
+  v_status jsonb;
+  v_now timestamptz;
+BEGIN
+  SELECT s.* INTO v_session FROM stemcoach_exam_fixture.sessions s
+    WHERE s.id=p_session AND s.user_id=p_actor FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Exam session unavailable' USING ERRCODE='42501';
+  END IF;
+  v_status:=stemcoach_exam_fixture.get_mock_exam_status(p_actor,p_session);
+  IF v_status->>'status'<>'active' THEN RETURN v_status; END IF;
+  v_now:=clock_timestamp();
+  IF v_now>=v_session.expires_at THEN
+    RETURN jsonb_build_object('session_id',v_session.id,'status','expired');
+  END IF;
+  UPDATE stemcoach_exam_fixture.sessions SET cancelled_at=v_now
+    WHERE id=v_session.id AND user_id=p_actor;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Exam session unavailable' USING ERRCODE='42501';
+  END IF;
+  RETURN jsonb_build_object('session_id',v_session.id,'status','cancelled');
+END;
+$cancel_mock_exam$;
+REVOKE ALL ON FUNCTION stemcoach_exam_fixture.get_mock_exam_status(uuid,uuid),
+  stemcoach_exam_fixture.cancel_mock_exam(uuid,uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.get_mock_exam_status(uuid,uuid),
+  stemcoach_exam_fixture.cancel_mock_exam(uuid,uuid) TO service_role;

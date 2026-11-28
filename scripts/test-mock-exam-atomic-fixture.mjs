@@ -12,7 +12,7 @@ const good = id(101), exhausted = id(102), blank = id(103), stale = id(104), bad
 const sql = await readFile(new URL("../docs/staging/mock-exam-atomic-receipt-fixture.sql", import.meta.url), "utf8");
 
 // Catch damaged SQL quote delimiters before starting the isolated database.
-for (const tag of ["fixture_guard", "fixture_policies", "choice_normalisation", "option_validation", "submit_mock_exam", "issue_mock_exam"]) {
+for (const tag of ["fixture_guard", "fixture_policies", "choice_normalisation", "option_validation", "submit_mock_exam", "issue_mock_exam", "mock_exam_status", "cancel_mock_exam"]) {
   const delimiter = "$" + tag + "$";
   assert.equal(sql.split(delimiter).length, 3, "Unbalanced SQL delimiter: " + tag);
   assert.ok(sql.includes(delimiter + ";"), "Missing closing SQL delimiter: " + tag);
@@ -262,6 +262,67 @@ try {
   assert.equal(await used(legacyActor),1);
   assert.deepEqual(await submit(legacyActor,legacy.session_id,[answer(legacyQ,"Ｂｅｔａ")]),grade);
   assert.deepEqual(await counts(legacy.session_id),{attempts:1,certificates:1,receipts:1});
+  // A status lookup recovers confirmed results without resubmitting answers.
+  // Cancellation is owned by the learner and cannot overwrite a final receipt.
+  async function lifecycle(method,actor,session,role="service_role"){
+    assert.ok(["get_mock_exam_status","cancel_mock_exam"].includes(method));
+    return asRole(role,async()=>{
+      const {rows}=await db.query("SELECT "+schema+"."+method+"($1::uuid,$2::uuid) AS result",[actor,session]);
+      return rows[0].result;
+    });
+  }
+  const status=(actor,session,role)=>lifecycle("get_mock_exam_status",actor,session,role);
+  const cancel=(actor,session,role)=>lifecycle("cancel_mock_exam",actor,session,role);
+  for(const role of ["anon","authenticated"]){
+    await assert.rejects(()=>status(issuer,fresh.session_id,role),/permission denied/);
+    await assert.rejects(()=>cancel(issuer,fresh.session_id,role),/permission denied/);
+  }
+  for(const [actor,session] of [[retryOwner,fresh.session_id],[null,fresh.session_id],[issuer,id(999)],[issuer,null]]){
+    await assert.rejects(()=>status(actor,session),/Exam session unavailable/);
+    await assert.rejects(()=>cancel(actor,session),/Exam session unavailable/);
+  }
+  const activeStatus=await status(issuer,fresh.session_id);
+  assert.deepEqual(activeStatus,{session_id:fresh.session_id,status:"active",expires_at:fresh.expires_at});
+  assert.equal(await used(issuer),1);
+
+  // A completed receipt is still recoverable after expiry and with zero credit.
+  const recoveredGood={session_id:good,status:"completed",result};
+  assert.deepEqual(await status(alice,good),recoveredGood);
+  assert.deepEqual(await cancel(alice,good),recoveredGood);
+  assert.equal(await used(alice),1);
+  assert.deepEqual(await counts(good),{attempts:2,certificates:1,receipts:1});
+  assert.deepEqual(await status(issuer,next.session_id),{session_id:next.session_id,status:"expired"});
+  assert.deepEqual(await cancel(issuer,next.session_id),{session_id:next.session_id,status:"expired"});
+  const expiredRow=(await db.query("SELECT cancelled_at FROM "+schema+".sessions WHERE id=$1",[next.session_id])).rows[0];
+  assert.equal(expiredRow.cancelled_at,null);
+
+  const cancelled=await cancel(issuer,fresh.session_id);
+  assert.deepEqual(cancelled,{session_id:fresh.session_id,status:"cancelled"});
+  const cancellationTime=(await db.query("SELECT cancelled_at FROM "+schema+".sessions WHERE id=$1",[fresh.session_id])).rows[0].cancelled_at;
+  assert.ok(cancellationTime);
+  assert.deepEqual(await cancel(issuer,fresh.session_id),cancelled);
+  assert.deepEqual((await db.query("SELECT cancelled_at FROM "+schema+".sessions WHERE id=$1",[fresh.session_id])).rows[0].cancelled_at,cancellationTime);
+  assert.deepEqual(await status(issuer,fresh.session_id),cancelled);
+  assert.deepEqual(await issue(issuer,request3),cancelled);
+  const completeAnswers=[answer(issueQ1,"Beta"),answer(issueQ2,"Alpha")];
+  await rejected(issuer,fresh.session_id,completeAnswers,/Exam session cancelled/);
+  assert.deepEqual(await counts(fresh.session_id),{attempts:0,certificates:0,receipts:0});
+  await db.query("UPDATE "+schema+".sessions SET expires_at=clock_timestamp()-interval '1 minute' WHERE id=$1",[fresh.session_id]);
+  assert.deepEqual(await status(issuer,fresh.session_id),cancelled);
+
+  // Cancellation frees the active slot, but neither charges nor refunds.
+  const replacement=await issue(issuer,id(324));
+  assert.notEqual(replacement.session_id,fresh.session_id);
+  assert.equal(await used(issuer),1);
+  const finalGrade=await submit(issuer,replacement.session_id,completeAnswers);
+  assert.deepEqual(await status(issuer,replacement.session_id),{session_id:replacement.session_id,status:"completed",result:finalGrade});
+  assert.deepEqual(await cancel(issuer,replacement.session_id),{session_id:replacement.session_id,status:"completed",result:finalGrade});
+  assert.equal(await used(issuer),2);
+  assert.deepEqual(await counts(replacement.session_id),{attempts:2,certificates:1,receipts:1});
+  assert.ok(!JSON.stringify(await status(issuer,replacement.session_id)).includes("request_hash"));
+  assert.ok(!JSON.stringify(await status(issuer,replacement.session_id)).includes("correct_answer"));
+  await assert.rejects(()=>issue(issuer,id(325)),/allowance exhausted/);
+  console.log("Exam lifecycle passed: owned status, terminal cancellation, unchanged allowance, expiry, replacement and receipt recovery.");
   console.log("Integrated legacy quality issuance passed: decoding, board scope, frozen metadata, exact choice and normalised key grading.");
   console.log("Isolated session issuance passed: ownership, bounded selection, safe sheets, replay, expiry, rollback and frozen keys.");
   console.log("Isolated mock-exam fixture passed: ownership, role permissions, stale/revoked keys, exact receipt replay, allowance and full rollback.");

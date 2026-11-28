@@ -229,4 +229,52 @@ result_after_restore=json.loads(query("SET ROLE service_role;\n"+submit(actor,is
 assert result_after_restore["score"] == 1
 assert counts(actor) == {"used":1,"attempts":1,"certificates":1,"receipts":1}
 
-print("Eight independent-connection submission and issuance contention cases passed on disposable PostgreSQL.")
+# The lifecycle operations use the same session lock as grading. Always issue
+# a complete server-owned session for these cases, rather than seed a shortcut.
+def lifecycle(method, actor, session):
+    assert method in ("cancel_mock_exam","get_mock_exam_status")
+    return f"SELECT {SCHEMA}.{method}({quote(actor)}::uuid,{quote(session)}::uuid);"
+
+def lifecycle_session(actor, request):
+    seed(actor, [], [])
+    issued = json.loads(query("SET ROLE service_role;\n" + issue(actor, request)))
+    assert issued["status"] == "active"
+    assert issued["questions"][0]["id"] == q1
+    return issued["session_id"]
+
+actor = uid(9)
+session = lifecycle_session(actor,uid(205))
+one, _ = race("cancel_before_submit",lifecycle("cancel_mock_exam",actor,session),
+              submit(actor,session,[(q1,"Alpha")]),first_keyword="cancel_mock_exam",
+              second_error="Exam session cancelled")
+assert one == {"session_id":session,"status":"cancelled"}
+assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
+assert json.loads(query("SET ROLE service_role;\n"+issue(actor,uid(205)))) == one
+replacement = json.loads(query("SET ROLE service_role;\n"+issue(actor,uid(206))))
+assert replacement["status"] == "active" and replacement["session_id"] != session
+
+actor = uid(10)
+session = lifecycle_session(actor,uid(207))
+one, two = race("submit_before_cancel",submit(actor,session,[(q1,"Alpha")]),
+                lifecycle("cancel_mock_exam",actor,session))
+assert two == {"session_id":session,"status":"completed","result":one}
+assert counts(actor) == {"used":1,"attempts":1,"certificates":1,"receipts":1}
+assert query(f"SELECT cancelled_at IS NULL FROM {SCHEMA}.sessions WHERE id={quote(session)};") == "t"
+
+actor = uid(15)
+session = lifecycle_session(actor,uid(208))
+one, two = race("recover_inflight_receipt",submit(actor,session,[(q1,"Alpha")]),
+                lifecycle("get_mock_exam_status",actor,session))
+assert two == {"session_id":session,"status":"completed","result":one}
+assert counts(actor) == {"used":1,"attempts":1,"certificates":1,"receipts":1}
+
+actor = uid(16)
+session = lifecycle_session(actor,uid(209))
+one, two = race("cancel_rollback",lifecycle("cancel_mock_exam",actor,session),
+                submit(actor,session,[(q1,"Alpha")]),first_keyword="cancel_mock_exam",
+                first_end="ROLLBACK;")
+assert one["status"] == "cancelled" and two["score"] == 1
+assert counts(actor) == {"used":1,"attempts":1,"certificates":1,"receipts":1}
+assert query(f"SELECT cancelled_at IS NULL FROM {SCHEMA}.sessions WHERE id={quote(session)};") == "t"
+
+print("Twelve independent-connection examination lifecycle and transaction contention cases passed on disposable PostgreSQL.")
