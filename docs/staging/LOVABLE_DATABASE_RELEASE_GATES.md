@@ -28,6 +28,18 @@ Before activating a new endpoint:
 5. Verify concurrent submissions, stale or revoked question revisions, cross-account access, duplicate and partial submissions, exhausted quotas, expired sessions, network failure after commit, replay with modified answers and rollback after a certificate/notification failure. Verify no duplicate certificate or notification. Include signed-in browser tests.
 6. Review deployment order and backwards compatibility before changing the active Edge Function and client. Do not assume that merging GitHub deploys the database or frontend.
 
+### Isolated atomic receipt prototype
+
+`mock-exam-atomic-receipt-fixture.sql` now implements an isolated PostgreSQL transaction prototype and is exercised by `npm run test:mock-exam-atomic`. It creates synthetic tables in a distinct fixture schema only, requires a fixture-mode marker, and is deliberately outside the active migration and Edge Function directories.
+
+- Lock the learner-owned session before checking the stored receipt. Canonicalise the exact submitted UUID/answer mapping and retain its SHA-256 digest privately. An identical retry returns the original result, even after session expiry or exhausted allowance; a different payload fails closed.
+- Grade only academically verified, currently published single-answer MCQs with unchanged revisions, distinct valid choices and an exact selected option. A blank is unanswered. The narrow fixture contract is **not** a drop-in replacement for the current mixed-format API. Neither formal qualification marks nor new production certificates are authorised by this prototype.
+- Consume one allowance through a conditional update, then insert attempts, the synthetic certificate when appropriate, and the receipt in one database transaction. Injected certificate and receipt failures must roll back all writes.
+- Use invoker privileges, explicitly restricted execution, RLS on fixture tables, schema-qualified references and a trusted server-only role. The actor argument must be derived from verified authentication at the future Edge Function boundary. The receipt returns correctness and totals but no answer keys or digest.
+- The PGlite fixture checks sequential replay and rollback. The separate `Mock exam PostgreSQL contention` CI workflow uses a fresh PostgreSQL 17 service container and independent connections, observes the actual blocking backend, and asserts receipt, final-allowance, conflicting-payload, rollback and editorial-revision outcomes. These tests must pass; they are not a substitute for hosted staging tests against the real schema, authentication, notification and billing integrations. Before production, build server-owned session issuance, verify academic publication eligibility, implement the actual endpoint/client contract and privacy retention, and test independent connections in an isolated staging database. Reconcile existing certificates and parent notification triggers before switching live writes.
+
+Reference: [Supabase database function permissions](https://supabase.com/docs/guides/database/functions#secure-a-database-function) and [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security). No active migration or live database operation is part of this release.
+
 ## Other deferred backend work
 
 - PR #5: teacher offboarding and tenant membership boundaries, including revoked access and overlapping institutional roles.
