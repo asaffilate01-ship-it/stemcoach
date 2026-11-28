@@ -91,14 +91,14 @@ def cleanup(process):
             process.kill()
             process.communicate(timeout=3)
 
-def race(label, first_sql, second_sql, first_end="COMMIT;", second_error=None, admin_first=False):
+def race(label, first_sql, second_sql, first_end="COMMIT;", second_error=None, admin_first=False, first_keyword="submit_mock_exam"):
     first = second = None
     a, b = "exam_" + label + "_a", "exam_" + label + "_b"
     try:
         first = start(a, "BEGIN;\n" + ("" if admin_first else "SET LOCAL ROLE service_role;\n") + first_sql)
         wait_for(first, f"""EXISTS (SELECT 1 FROM pg_stat_activity
           WHERE application_name={quote(a)} AND state='idle in transaction'
-          AND query LIKE {quote('%' + ('UPDATE' if admin_first else 'submit_mock_exam') + '%')})""")
+          AND query LIKE {quote('%' + ('UPDATE' if admin_first else first_keyword) + '%')})""")
         second = start(b, "BEGIN;\nSET LOCAL ROLE service_role;\n" + second_sql + "\nCOMMIT;")
         close_input(second)
         # Prove the second connection actually waits on the first backend.
@@ -184,4 +184,26 @@ race("question_revision", f"UPDATE {SCHEMA}.questions SET review_revision=2 WHER
      submit(actor,session,[(revoked,"Alpha")]), second_error="not gradeable", admin_first=True)
 assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
 
-print("Five independent-connection contention cases passed on disposable PostgreSQL.")
+# Concurrent issuance for the same learner is serialised by an advisory lock.
+# No quota is consumed; a repeated token returns one exact active sheet.
+def issue(actor, request):
+    return f"""SELECT {SCHEMA}.issue_mock_exam({quote(actor)}::uuid,{quote(request)}::uuid,
+        'mathematics','GCSE',1,600);"""
+
+actor, request = uid(6), uid(201)
+seed(actor, [], [])
+one, two = race("same_issuance", issue(actor,request), issue(actor,request), first_keyword="issue_mock_exam")
+assert one == two and one["status"] == "active"
+assert len(one["questions"]) == 1
+assert set(one["questions"][0]) == {"id","question_text","options"}
+assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
+assert query(f"SELECT count(*) FROM {SCHEMA}.sessions WHERE user_id={quote(actor)};") == "1"
+
+actor = uid(7)
+seed(actor, [], [])
+race("different_issuance", issue(actor,uid(202)), issue(actor,uid(203)),
+     first_keyword="issue_mock_exam", second_error="active examination already exists")
+assert query(f"SELECT count(*) FROM {SCHEMA}.sessions WHERE user_id={quote(actor)};") == "1"
+assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
+
+print("Seven independent-connection submission and issuance contention cases passed on disposable PostgreSQL.")
