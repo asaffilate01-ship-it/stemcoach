@@ -55,15 +55,19 @@ function ExamWorkspace({ accountId }: { accountId: string | null }) {
   const examDeadlineRef = useRef<number | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MockExamTemplate | null>(initialTemplate);
 
+  const invalidateRequests = useCallback(() => {
+    requestVersion.current++;
+  }, []);
+
   useLayoutEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
-      requestVersion.current++;
+      invalidateRequests();
       examDeadlineRef.current = null;
       activeSheet.current = null;
     };
-  }, []);
+  }, [invalidateRequests]);
 
   const updateAnswers = useCallback((change: Record<number, string> | ((previous: Record<number, string>) => Record<number, string>)) => {
     if (!mounted.current || activeSheet.current !== questions || !acceptsExamAnswer(examDeadlineRef.current, submitted.current)) return;
