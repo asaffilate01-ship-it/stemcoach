@@ -52,6 +52,7 @@ export function ExamSetup({
           variant="ghost"
           size="sm"
           onClick={onBack}
+          disabled={isLoading}
           className="mb-6 gap-1.5 text-muted-foreground hover:text-foreground rounded-xl"
         >
           <ChevronLeft className="h-4 w-4" /> {t("mockExam.backToExams")}
@@ -116,6 +117,7 @@ export function ExamSetup({
                     <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.subject")}</label>
                     <select
                       value={examSubject}
+                      disabled={isLoading}
                       onChange={(e) => setExamSubject(e.target.value)}
                       className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
@@ -128,6 +130,7 @@ export function ExamSetup({
                     <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.curriculum")}</label>
                     <select
                       value={examCurriculum}
+                      disabled={isLoading}
                       onChange={(e) => setExamCurriculum(e.target.value)}
                       className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
@@ -142,6 +145,7 @@ export function ExamSetup({
                     <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.questions")}</label>
                     <select
                       value={questionCount}
+                      disabled={isLoading}
                       onChange={(e) => setQuestionCount(Number(e.target.value))}
                       className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
@@ -154,6 +158,7 @@ export function ExamSetup({
                     <label className="mb-1.5 block text-sm font-semibold">{t("mockExam.durationLabel")}</label>
                     <select
                       value={duration}
+                      disabled={isLoading}
                       onChange={(e) => setDuration(Number(e.target.value))}
                       className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
