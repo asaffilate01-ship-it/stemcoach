@@ -1,0 +1,38 @@
+name: Mock exam PostgreSQL contention
+on:
+  pull_request:
+    paths:
+      - 'docs/staging/mock-exam-atomic-receipt-fixture.sql'
+      - 'scripts/test-mock-exam-postgres-contention.py'
+      - '.github/workflows/mock-exam-postgres-contention.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/staging/mock-exam-atomic-receipt-fixture.sql'
+      - 'scripts/test-mock-exam-postgres-contention.py'
+      - '.github/workflows/mock-exam-postgres-contention.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      examdb:
+        image: postgres:17
+        env:
+          POSTGRES_USER: fixture_admin
+          POSTGRES_PASSWORD: synthetic_ci_only
+          POSTGRES_DB: stemcoach_exam_ci
+        options: >-
+          --health-cmd "pg_isready -U fixture_admin -d stemcoach_exam_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify independent PostgreSQL transactions on a disposable service
+        env:
+          STEMCOACH_EXAM_FIXTURE_CONTAINER: ${{ job.services.examdb.id }}
+        run: python3 scripts/test-mock-exam-postgres-contention.py
