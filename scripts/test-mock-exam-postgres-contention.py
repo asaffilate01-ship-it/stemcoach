@@ -195,7 +195,7 @@ seed(actor, [], [])
 one, two = race("same_issuance", issue(actor,request), issue(actor,request), first_keyword="issue_mock_exam")
 assert one == two and one["status"] == "active"
 assert len(one["questions"]) == 1
-assert set(one["questions"][0]) == {"id","question_text","options"}
+assert set(one["questions"][0]) == {"id","question_text","options","topic","subject","difficulty","points"}
 assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
 assert query(f"SELECT count(*) FROM {SCHEMA}.sessions WHERE user_id={quote(actor)};") == "1"
 
@@ -206,4 +206,27 @@ race("different_issuance", issue(actor,uid(202)), issue(actor,uid(203)),
 assert query(f"SELECT count(*) FROM {SCHEMA}.sessions WHERE user_id={quote(actor)};") == "1"
 assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
 
-print("Seven independent-connection submission and issuance contention cases passed on disposable PostgreSQL.")
+# A board-scoped, legacy-encoded question is issued safely, but a concurrent
+# withdrawal of its board eligibility must stop grading before allowance debit.
+actor, request, legacy = uid(8), uid(204), uid(14)
+seed(actor, [], [])
+encoded_options = json.dumps(json.dumps(["Alpha","Ｂｅｔａ"],ensure_ascii=False),ensure_ascii=False)
+query(f"""INSERT INTO {SCHEMA}.questions(id,subject,curriculum,boards,question_type,
+    review_status,review_revision,academic_verified_at,academic_verified_by,options,correct_answer)
+    VALUES ({quote(legacy)},'mathematics','GCSE',ARRAY['AQA'],'mcq','published',1,now(),
+    {quote(uid(99))},{quote(encoded_options)}::jsonb,' beta ');""")
+issued = json.loads(query(f"""SET ROLE service_role;
+    SELECT {SCHEMA}.issue_mock_exam({quote(actor)}::uuid,{quote(request)}::uuid,
+    'mathematics','GCSE',1,600,'AQA');"""))
+assert issued["questions"][0]["id"] == legacy
+assert issued["questions"][0]["options"] == ["Alpha","Ｂｅｔａ"]
+race("board_withdrawal",f"UPDATE {SCHEMA}.questions SET boards=ARRAY['Edexcel'] WHERE id={quote(legacy)};",
+     submit(actor,issued["session_id"],[(legacy,"Ｂｅｔａ")]),
+     second_error="not gradeable",admin_first=True)
+assert counts(actor) == {"used":0,"attempts":0,"certificates":0,"receipts":0}
+query(f"UPDATE {SCHEMA}.questions SET boards=ARRAY['AQA'] WHERE id={quote(legacy)};")
+result_after_restore=json.loads(query("SET ROLE service_role;\n"+submit(actor,issued["session_id"],[(legacy,"Ｂｅｔａ")])))
+assert result_after_restore["score"] == 1
+assert counts(actor) == {"used":1,"attempts":1,"certificates":1,"receipts":1}
+
+print("Eight independent-connection submission and issuance contention cases passed on disposable PostgreSQL.")

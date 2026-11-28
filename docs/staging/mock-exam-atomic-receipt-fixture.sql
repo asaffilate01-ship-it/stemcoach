@@ -13,13 +13,17 @@ CREATE TABLE stemcoach_exam_fixture.questions (
   id uuid PRIMARY KEY,
   subject text NOT NULL,
   curriculum text NOT NULL,
+  boards text[] NOT NULL DEFAULT ARRAY[]::text[],
   question_type text NOT NULL,
   review_status text NOT NULL,
   review_revision integer NOT NULL CHECK (review_revision >= 0),
   academic_verified_at timestamptz,
   academic_verified_by uuid,
-  options jsonb NOT NULL,
+  options jsonb,
   question_text text NOT NULL DEFAULT 'Synthetic fixture question',
+  topic text NOT NULL DEFAULT 'Synthetic fixture topic',
+  difficulty integer NOT NULL DEFAULT 2,
+  points integer NOT NULL DEFAULT 1,
   correct_answer text NOT NULL
 );
 CREATE TABLE stemcoach_exam_fixture.user_quotas (
@@ -32,6 +36,7 @@ CREATE TABLE stemcoach_exam_fixture.sessions (
   user_id uuid NOT NULL,
   subject text NOT NULL,
   curriculum text NOT NULL,
+  board text,
   expires_at timestamptz NOT NULL,
   request_id uuid,
   requested_count integer CHECK (requested_count BETWEEN 1 AND 100),
@@ -48,9 +53,15 @@ CREATE TABLE stemcoach_exam_fixture.session_questions (
   revision integer NOT NULL CHECK (revision >= 0),
   stem_snapshot text,
   options_snapshot jsonb,
+  topic_snapshot text,
+  difficulty_snapshot integer,
+  points_snapshot integer,
   key_digest bytea CHECK (octet_length(key_digest)=32),
   CHECK ((stem_snapshot IS NULL) = (options_snapshot IS NULL)),
   CHECK ((stem_snapshot IS NULL) = (key_digest IS NULL)),
+  CHECK ((stem_snapshot IS NULL) = (topic_snapshot IS NULL)),
+  CHECK ((stem_snapshot IS NULL) = (difficulty_snapshot IS NULL)),
+  CHECK ((stem_snapshot IS NULL) = (points_snapshot IS NULL)),
   PRIMARY KEY (session_id, position),
   UNIQUE (session_id, question_id)
 );
@@ -102,6 +113,68 @@ GRANT UPDATE (expires_at) ON stemcoach_exam_fixture.sessions TO service_role;
 GRANT UPDATE (mock_exams_used) ON stemcoach_exam_fixture.user_quotas TO service_role;
 GRANT INSERT ON stemcoach_exam_fixture.attempts, stemcoach_exam_fixture.certificates,
   stemcoach_exam_fixture.receipts TO service_role;
+
+-- Quality helpers mirror the separate selector fixture; regression tests check parity.
+CREATE FUNCTION stemcoach_exam_fixture.canonical_choice(p_value text)
+RETURNS text LANGUAGE sql IMMUTABLE STRICT SECURITY INVOKER
+SET search_path=pg_catalog,pg_temp
+AS $choice_normalisation$
+  SELECT lower(btrim(normalize(p_value,NFKC),
+    E' \t\n\r\f' || chr(11) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) ||
+    chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) ||
+    chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) ||
+    chr(12288) || chr(65279)));
+$choice_normalisation$;
+
+-- Decode an array or one historical string-encoded array. Fail closed on
+-- malformed JSONB input (including invalid Unicode escape sequences).
+-- Return original choice text, never the private key or its normalised value.
+CREATE FUNCTION stemcoach_exam_fixture.usable_options(p_options jsonb,p_key text)
+RETURNS jsonb LANGUAGE plpgsql IMMUTABLE SECURITY INVOKER
+SET search_path=pg_catalog,pg_temp
+AS $option_validation$
+DECLARE
+  v_options jsonb;
+  v_text text;
+  v_choice jsonb;
+  v_value text;
+  v_normalised text;
+  v_seen text[] := ARRAY[]::text[];
+  v_key text;
+BEGIN
+  IF p_options IS NULL OR p_key IS NULL OR length(p_key)>2000 THEN RETURN NULL; END IF;
+  IF jsonb_typeof(p_options)='array' THEN
+    v_options:=p_options;
+  ELSIF jsonb_typeof(p_options)='string' THEN
+    v_text:=p_options #>> '{}';
+    IF length(v_text)>100000 OR NOT pg_input_is_valid(v_text,'jsonb') THEN RETURN NULL; END IF;
+    v_options:=v_text::jsonb;
+  ELSE
+    RETURN NULL;
+  END IF;
+  IF jsonb_typeof(v_options)<>'array' THEN RETURN NULL; END IF;
+  IF jsonb_array_length(v_options) NOT BETWEEN 2 AND 8 THEN RETURN NULL; END IF;
+  v_key:=stemcoach_exam_fixture.canonical_choice(p_key);
+  IF v_key='' THEN RETURN NULL; END IF;
+  FOR v_choice IN SELECT value FROM jsonb_array_elements(v_options) LOOP
+    IF jsonb_typeof(v_choice)<>'string' THEN RETURN NULL; END IF;
+    v_value:=v_choice #>> '{}';
+    -- The byte bound is deliberately conservative versus JS UTF-16 length.
+    IF octet_length(v_value)>2000 THEN RETURN NULL; END IF;
+    v_normalised:=stemcoach_exam_fixture.canonical_choice(v_value);
+    IF v_normalised='' OR v_normalised=ANY(v_seen) THEN RETURN NULL; END IF;
+    v_seen:=array_append(v_seen,v_normalised);
+  END LOOP;
+  IF NOT (v_key=ANY(v_seen)) THEN RETURN NULL; END IF;
+  RETURN v_options;
+END;
+$option_validation$;
+
+
+REVOKE ALL ON FUNCTION stemcoach_exam_fixture.canonical_choice(text),
+  stemcoach_exam_fixture.usable_options(jsonb,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.canonical_choice(text),
+  stemcoach_exam_fixture.usable_options(jsonb,text) TO service_role;
 
 -- p_actor MUST be derived from authenticated server-side identity, never from
 -- the request body. The session/question snapshot is issued by trusted code.
@@ -196,37 +269,48 @@ BEGIN
   -- Lock question rows against concurrent changes. Missing rows fail closed.
   FOR v_question IN
     SELECT sq.position, sq.question_id, sq.revision, sq.stem_snapshot, sq.options_snapshot, sq.key_digest,
-      q.question_text, q.subject, q.curriculum,
+      sq.topic_snapshot,sq.difficulty_snapshot,sq.points_snapshot,
+      q.question_text, q.subject, q.curriculum, q.boards,q.topic,q.difficulty,q.points,
       q.question_type, q.review_status, q.review_revision, q.academic_verified_at,
-      q.academic_verified_by, q.options, q.correct_answer
+      q.academic_verified_by, stemcoach_exam_fixture.usable_options(q.options,q.correct_answer) AS options, q.correct_answer
     FROM stemcoach_exam_fixture.session_questions sq
     JOIN stemcoach_exam_fixture.questions q ON q.id = sq.question_id
     WHERE sq.session_id = p_session ORDER BY sq.position FOR SHARE OF q
   LOOP
     IF v_question.subject <> v_session.subject OR v_question.curriculum <> v_session.curriculum
+      OR (v_session.board IS NOT NULL AND NOT coalesce(v_session.board=ANY(v_question.boards),false))
       OR v_question.review_status <> 'published' OR v_question.review_revision <> v_question.revision
       OR v_question.academic_verified_at IS NULL OR v_question.academic_verified_by IS NULL
       OR v_question.question_type <> 'mcq'
+      OR octet_length(v_question.question_text) NOT BETWEEN 1 AND 12000
+      OR stemcoach_exam_fixture.canonical_choice(v_question.question_text)=''
+      OR octet_length(v_question.topic) NOT BETWEEN 1 AND 1000
+      OR stemcoach_exam_fixture.canonical_choice(v_question.topic)=''
+      OR v_question.difficulty NOT BETWEEN 1 AND 5 OR v_question.points NOT BETWEEN 1 AND 10000
+      OR (v_question.topic_snapshot IS NOT NULL AND v_question.topic_snapshot IS DISTINCT FROM v_question.topic)
+      OR (v_question.difficulty_snapshot IS NOT NULL AND v_question.difficulty_snapshot IS DISTINCT FROM v_question.difficulty)
+      OR (v_question.points_snapshot IS NOT NULL AND v_question.points_snapshot IS DISTINCT FROM v_question.points)
       OR (v_question.stem_snapshot IS NOT NULL AND v_question.stem_snapshot IS DISTINCT FROM v_question.question_text)
       OR (v_question.options_snapshot IS NOT NULL AND v_question.options_snapshot IS DISTINCT FROM v_question.options)
       OR (v_question.key_digest IS NOT NULL AND v_question.key_digest IS DISTINCT FROM sha256(convert_to(v_question.correct_answer,'UTF8')))
-      OR nullif(btrim(v_question.correct_answer, E' \t\r\n'), '') IS NULL
-      OR jsonb_typeof(v_question.options) <> 'array' THEN
+      OR (v_session.request_id IS NOT NULL AND v_question.stem_snapshot IS NULL) THEN
       RAISE EXCEPTION 'Assigned question changed or not gradeable' USING ERRCODE = '22023';
     END IF;
-    IF jsonb_array_length(v_question.options) NOT BETWEEN 2 AND 8
-      OR EXISTS (SELECT 1 FROM jsonb_array_elements(v_question.options) e(value)
-        WHERE jsonb_typeof(e.value) <> 'string' OR nullif(btrim(e.value#>>'{}', E' \t\r\n'), '') IS NULL
-          OR (e.value#>>'{}') <> btrim(e.value#>>'{}', E' \t\r\n'))
-      OR (SELECT count(DISTINCT value) FROM jsonb_array_elements(v_question.options)) <> jsonb_array_length(v_question.options)
-      OR NOT (v_question.options ? v_question.correct_answer) THEN
+    IF v_question.options IS NULL THEN
       RAISE EXCEPTION 'Invalid assigned answer choices' USING ERRCODE = '22023';
     END IF;
     v_answer := v_payload->>v_question.question_id::text;
-    IF v_answer IS NOT NULL AND NOT (v_question.options ? v_answer) THEN
+    -- The learner must select an issued option (only ASCII edge trimming is
+    -- allowed for transport/replay). Compare its canonical value with the
+    -- verified key; do not accept arbitrary case-folded or NFKC submissions.
+    IF v_answer IS NOT NULL AND NOT EXISTS (
+      SELECT 1 FROM jsonb_array_elements_text(v_question.options) AS choice(value)
+      WHERE btrim(choice.value,E' \t\r\n')=v_answer
+    ) THEN
       RAISE EXCEPTION 'Answer is not an assigned option' USING ERRCODE = '22023';
     END IF;
-    v_correct := v_answer IS NOT NULL AND v_answer = v_question.correct_answer;
+    v_correct := v_answer IS NOT NULL AND
+      stemcoach_exam_fixture.canonical_choice(v_answer)=stemcoach_exam_fixture.canonical_choice(v_question.correct_answer);
     v_total := v_total + 1;
     IF v_correct THEN v_score := v_score + 1; END IF;
     IF v_answer IS NOT NULL THEN
@@ -274,30 +358,12 @@ GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.submit_mock_exam(uuid,uuid,json
 -- leave request_id/snapshot fields null; the new issuer always fills them.
 GRANT INSERT ON stemcoach_exam_fixture.sessions, stemcoach_exam_fixture.session_questions TO service_role;
 
-CREATE FUNCTION stemcoach_exam_fixture.valid_mcq_options(p_options jsonb, p_key text)
-RETURNS boolean LANGUAGE plpgsql IMMUTABLE SECURITY INVOKER
-SET search_path = pg_catalog, pg_temp
-AS $valid_mcq_options$
-BEGIN
-  IF p_options IS NULL OR jsonb_typeof(p_options) <> 'array' OR
-    nullif(btrim(p_key, E' \t\r\n'), '') IS NULL THEN RETURN false; END IF;
-  RETURN jsonb_array_length(p_options) BETWEEN 2 AND 8
-    AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(p_options) e(value)
-      WHERE jsonb_typeof(e.value) <> 'string' OR nullif(btrim(e.value#>>'{}', E' \t\r\n'), '') IS NULL
-        OR (e.value#>>'{}') <> btrim(e.value#>>'{}', E' \t\r\n'))
-    AND (SELECT count(DISTINCT value) FROM jsonb_array_elements(p_options)) = jsonb_array_length(p_options)
-    AND (p_options ? p_key);
-END;
-$valid_mcq_options$;
-REVOKE ALL ON FUNCTION stemcoach_exam_fixture.valid_mcq_options(jsonb,text) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.valid_mcq_options(jsonb,text) TO service_role;
-
 -- p_actor and template constraints must be established by authenticated
 -- server code. p_request is a retry token, not a caller-selected session ID.
 -- Deterministic selection is for the fixture only, not a production exam sampler.
 CREATE FUNCTION stemcoach_exam_fixture.issue_mock_exam(
   p_actor uuid, p_request uuid, p_subject text, p_curriculum text,
-  p_count integer, p_duration integer
+  p_count integer, p_duration integer, p_board text DEFAULT NULL
 ) RETURNS jsonb
 LANGUAGE plpgsql VOLATILE SECURITY INVOKER
 SET search_path = pg_catalog, pg_temp
@@ -313,6 +379,7 @@ BEGIN
   IF p_actor IS NULL OR p_request IS NULL OR p_subject IS NULL OR p_curriculum IS NULL
     OR length(p_subject) NOT BETWEEN 1 AND 100 OR length(p_curriculum) NOT BETWEEN 1 AND 100
     OR p_subject <> btrim(p_subject) OR p_curriculum <> btrim(p_curriculum)
+    OR (p_board IS NOT NULL AND (length(p_board) NOT BETWEEN 1 AND 150 OR p_board<>btrim(p_board)))
     OR p_count IS NULL OR p_count NOT BETWEEN 1 AND 100
     OR p_duration IS NULL OR p_duration NOT BETWEEN 60 AND 10800 THEN
     RAISE EXCEPTION 'Invalid exam issuance request' USING ERRCODE = '22023';
@@ -323,6 +390,7 @@ BEGIN
     WHERE s.user_id=p_actor AND s.request_id=p_request FOR SHARE;
   IF FOUND THEN
     IF v_session.subject IS DISTINCT FROM p_subject OR v_session.curriculum IS DISTINCT FROM p_curriculum
+      OR v_session.board IS DISTINCT FROM p_board
       OR v_session.requested_count IS DISTINCT FROM p_count OR v_session.duration_seconds IS DISTINCT FROM p_duration THEN
       RAISE EXCEPTION 'Issuance request differs from existing session' USING ERRCODE = '22023';
     END IF;
@@ -335,8 +403,10 @@ BEGIN
     -- A retry never delivers changed, revoked or no-longer-verified material.
     FOR v_row IN
       SELECT sq.position,sq.question_id,sq.revision,sq.stem_snapshot,sq.options_snapshot,sq.key_digest,
-        q.review_revision,q.review_status,q.question_type,q.subject,q.curriculum,
-        q.academic_verified_at,q.academic_verified_by,q.question_text,q.options,q.correct_answer
+        sq.topic_snapshot,sq.difficulty_snapshot,sq.points_snapshot,
+        q.review_revision,q.review_status,q.question_type,q.subject,q.curriculum,q.boards,q.topic,q.difficulty,q.points,
+        q.academic_verified_at,q.academic_verified_by,q.question_text,
+        stemcoach_exam_fixture.usable_options(q.options,q.correct_answer) AS options,q.correct_answer
       FROM stemcoach_exam_fixture.session_questions sq
       JOIN stemcoach_exam_fixture.questions q ON q.id=sq.question_id
       WHERE sq.session_id=v_session.id ORDER BY sq.position FOR SHARE OF q
@@ -344,15 +414,20 @@ BEGIN
       IF v_row.review_status <> 'published' OR v_row.question_type <> 'mcq'
         OR v_row.academic_verified_at IS NULL OR v_row.academic_verified_by IS NULL
         OR v_row.subject <> p_subject OR v_row.curriculum <> p_curriculum
+        OR (p_board IS NOT NULL AND NOT coalesce(p_board=ANY(v_row.boards),false))
         OR v_row.review_revision <> v_row.revision
         OR v_row.stem_snapshot IS DISTINCT FROM v_row.question_text
+        OR v_row.topic_snapshot IS DISTINCT FROM v_row.topic
+        OR v_row.difficulty_snapshot IS DISTINCT FROM v_row.difficulty
+        OR v_row.points_snapshot IS DISTINCT FROM v_row.points
         OR v_row.options_snapshot IS DISTINCT FROM v_row.options
         OR v_row.key_digest IS DISTINCT FROM sha256(convert_to(v_row.correct_answer,'UTF8'))
-        OR NOT stemcoach_exam_fixture.valid_mcq_options(v_row.options,v_row.correct_answer) THEN
+        OR v_row.options IS NULL THEN
         RAISE EXCEPTION 'Assigned question changed or not gradeable' USING ERRCODE = '22023';
       END IF;
       v_questions := v_questions || jsonb_build_array(jsonb_build_object(
-        'id',v_row.question_id,'question_text',v_row.stem_snapshot,'options',v_row.options_snapshot));
+        'id',v_row.question_id,'question_text',v_row.stem_snapshot,'options',v_row.options_snapshot,
+        'topic',v_row.topic_snapshot,'subject',v_session.subject,'difficulty',v_row.difficulty_snapshot,'points',v_row.points_snapshot));
     END LOOP;
     IF jsonb_array_length(v_questions) <> p_count THEN
       RAISE EXCEPTION 'Assigned questions unavailable' USING ERRCODE = '22023';
@@ -373,22 +448,29 @@ BEGIN
   END IF;
   v_session_id := gen_random_uuid();
   v_expiry := clock_timestamp()+make_interval(secs=>p_duration);
-  INSERT INTO stemcoach_exam_fixture.sessions(id,user_id,subject,curriculum,expires_at,request_id,requested_count,duration_seconds)
-    VALUES(v_session_id,p_actor,p_subject,p_curriculum,v_expiry,p_request,p_count,p_duration);
+  INSERT INTO stemcoach_exam_fixture.sessions(id,user_id,subject,curriculum,board,expires_at,request_id,requested_count,duration_seconds)
+    VALUES(v_session_id,p_actor,p_subject,p_curriculum,p_board,v_expiry,p_request,p_count,p_duration);
   FOR v_row IN
-    SELECT q.id,q.review_revision,q.question_text,q.options,q.correct_answer
+    SELECT q.id,q.review_revision,q.question_text,q.topic,q.difficulty,q.points,
+      stemcoach_exam_fixture.usable_options(q.options,q.correct_answer) AS options,q.correct_answer
     FROM stemcoach_exam_fixture.questions q
     WHERE q.subject=p_subject AND q.curriculum=p_curriculum AND q.question_type='mcq'
       AND q.review_status='published' AND q.academic_verified_at IS NOT NULL AND q.academic_verified_by IS NOT NULL
-      AND length(btrim(q.question_text)) BETWEEN 1 AND 12000
-      AND stemcoach_exam_fixture.valid_mcq_options(q.options,q.correct_answer)
+      AND (p_board IS NULL OR p_board=ANY(q.boards))
+      AND octet_length(q.question_text) BETWEEN 1 AND 12000
+      AND stemcoach_exam_fixture.canonical_choice(q.question_text)<>''
+      AND octet_length(q.topic) BETWEEN 1 AND 1000
+      AND stemcoach_exam_fixture.canonical_choice(q.topic)<>''
+      AND q.difficulty BETWEEN 1 AND 5 AND q.points BETWEEN 1 AND 10000
+      AND stemcoach_exam_fixture.usable_options(q.options,q.correct_answer) IS NOT NULL
     ORDER BY q.id LIMIT p_count FOR SHARE OF q
   LOOP
     v_number := v_number+1;
-    INSERT INTO stemcoach_exam_fixture.session_questions(session_id,position,question_id,revision,stem_snapshot,options_snapshot,key_digest)
-      VALUES(v_session_id,v_number,v_row.id,v_row.review_revision,v_row.question_text,v_row.options,sha256(convert_to(v_row.correct_answer,'UTF8')));
+    INSERT INTO stemcoach_exam_fixture.session_questions(session_id,position,question_id,revision,stem_snapshot,options_snapshot,topic_snapshot,difficulty_snapshot,points_snapshot,key_digest)
+      VALUES(v_session_id,v_number,v_row.id,v_row.review_revision,v_row.question_text,v_row.options,v_row.topic,v_row.difficulty,v_row.points,sha256(convert_to(v_row.correct_answer,'UTF8')));
     v_questions := v_questions || jsonb_build_array(jsonb_build_object(
-      'id',v_row.id,'question_text',v_row.question_text,'options',v_row.options));
+      'id',v_row.id,'question_text',v_row.question_text,'options',v_row.options,
+      'topic',v_row.topic,'subject',p_subject,'difficulty',v_row.difficulty,'points',v_row.points));
   END LOOP;
   IF v_number <> p_count THEN
     RAISE EXCEPTION 'Insufficient verified exam questions' USING ERRCODE = '22023';
@@ -397,5 +479,5 @@ BEGIN
     'expires_at',v_expiry,'questions',v_questions);
 END;
 $issue_mock_exam$;
-REVOKE ALL ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer) TO service_role;
+REVOKE ALL ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION stemcoach_exam_fixture.issue_mock_exam(uuid,uuid,text,text,integer,integer,text) TO service_role;

@@ -12,11 +12,23 @@ const good = id(101), exhausted = id(102), blank = id(103), stale = id(104), bad
 const sql = await readFile(new URL("../docs/staging/mock-exam-atomic-receipt-fixture.sql", import.meta.url), "utf8");
 
 // Catch damaged SQL quote delimiters before starting the isolated database.
-for (const tag of ["fixture_guard", "fixture_policies", "submit_mock_exam", "valid_mcq_options", "issue_mock_exam"]) {
+for (const tag of ["fixture_guard", "fixture_policies", "choice_normalisation", "option_validation", "submit_mock_exam", "issue_mock_exam"]) {
   const delimiter = "$" + tag + "$";
   assert.equal(sql.split(delimiter).length, 3, "Unbalanced SQL delimiter: " + tag);
   assert.ok(sql.includes(delimiter + ";"), "Missing closing SQL delimiter: " + tag);
 }
+
+// Both fixtures must use identical option-validation semantics.
+const selector = await readFile(new URL("../docs/staging/mock-exam-legacy-selector-fixture.sql", import.meta.url), "utf8");
+function helperBlock(source, schemaName) {
+  const start = source.indexOf("CREATE FUNCTION " + schemaName + ".canonical_choice");
+  const tag = "$option_validation$;";
+  const end = source.indexOf(tag, start);
+  assert.ok(start >= 0 && end > start, "Missing quality helpers");
+  return source.slice(start, end + tag.length).replaceAll(schemaName, "fixture_schema");
+}
+assert.equal(helperBlock(sql, schema), helperBlock(selector, "stemcoach_selector_fixture"),
+  "Standalone selector and atomic issuance must agree on choice eligibility");
 
 async function asRole(role, action) {
   assert.ok(["anon", "authenticated", "service_role"].includes(role));
@@ -154,9 +166,9 @@ try {
   await addQuestion(draftQ,{verified:false});
   await db.query("UPDATE " + schema + ".questions SET curriculum='fixture-issuance' WHERE id=ANY($1::uuid[])",[[issueQ1,issueQ2,invalidQ,draftQ]]);
   await db.query("UPDATE " + schema + ".questions SET question_text='Synthetic issued question' WHERE id=ANY($1::uuid[])",[[issueQ1,issueQ2]]);
-  async function issue(actor, token, count=2, duration=600, role="service_role", subject="mathematics", curriculum="fixture-issuance") {
+  async function issue(actor, token, count=2, duration=600, role="service_role", subject="mathematics", curriculum="fixture-issuance", board=null) {
     return asRole(role,async()=>{
-      const {rows}=await db.query("SELECT "+schema+".issue_mock_exam($1::uuid,$2::uuid,$3,$4,$5,$6) AS result",[actor,token,subject,curriculum,count,duration]);
+      const {rows}=await db.query("SELECT "+schema+".issue_mock_exam($1::uuid,$2::uuid,$3,$4,$5,$6,$7) AS result",[actor,token,subject,curriculum,count,duration,board]);
       return rows[0].result;
     });
   }
@@ -176,7 +188,7 @@ try {
   assert.equal(issued.status,"active");
   assert.notEqual(issued.session_id,request);
   assert.deepEqual(issued.questions.map(q=>q.id),[issueQ1,issueQ2]);
-  assert.ok(issued.questions.every(q=>Object.keys(q).sort().join(",")==="id,options,question_text"));
+  assert.ok(issued.questions.every(q=>Object.keys(q).sort().join(",")==="difficulty,id,options,points,question_text,subject,topic"));
   assert.ok(!JSON.stringify(issued).includes("key_digest"));
   assert.ok(!JSON.stringify(issued).includes("correct_answer"));
   assert.equal(await used(issuer),0);
@@ -210,6 +222,47 @@ try {
   assert.notEqual(fresh.session_id,next.session_id);
   assert.equal(await used(issuer),1);
   assert.equal(await sessionCount(issuer),3);
+  // End-to-end legacy decoding, board-scoped selection, frozen metadata and
+  // normalised grading without permitting an answer outside the issued choices.
+  const legacyActor=id(401), legacyRequest=id(402), boardActor=id(403);
+  const legacyQ=id(411), wrongBoard=id(412), ambiguousQ=id(413), malformedQ=id(414), badMeta=id(415);
+  await db.query("INSERT INTO "+schema+".user_quotas VALUES($1,1,0),($2,1,0)",[legacyActor,boardActor]);
+  await addQuestion(legacyQ,{options:'["  Alpha  ","Ｂｅｔａ"]',key:" beta "});
+  await addQuestion(wrongBoard);
+  await addQuestion(ambiguousQ,{options:["Alpha","ＡＬＰＨＡ"]});
+  await addQuestion(malformedQ,{options:'["Alpha","\\u0000"]'});
+  await addQuestion(badMeta);
+  await db.query("UPDATE "+schema+".questions SET curriculum='legacy-quality',boards=ARRAY['AQA'] WHERE id=ANY($1::uuid[])",[[legacyQ,wrongBoard,ambiguousQ,malformedQ,badMeta]]);
+  await db.query("UPDATE "+schema+".questions SET boards=ARRAY['Edexcel'] WHERE id=$1",[wrongBoard]);
+  await db.query("UPDATE "+schema+".questions SET points=0 WHERE id=$1",[badMeta]);
+  const issueLegacy=(actor,token,count=1,board="AQA")=>issue(actor,token,count,600,"service_role","mathematics","legacy-quality",board);
+  await assert.rejects(()=>issueLegacy(boardActor,legacyRequest,2),/Insufficient verified exam questions/);
+  assert.equal(await sessionCount(boardActor),0);
+  assert.equal(await used(boardActor),0);
+  const legacy=await issueLegacy(legacyActor,legacyRequest);
+  assert.deepEqual(legacy.questions,[{id:legacyQ,question_text:"Synthetic fixture question",options:["  Alpha  ","Ｂｅｔａ"],topic:"Synthetic fixture topic",subject:"mathematics",difficulty:2,points:1}]);
+  assert.deepEqual(await issueLegacy(legacyActor,legacyRequest),legacy);
+  await assert.rejects(()=>issueLegacy(legacyActor,legacyRequest,1,"Edexcel"),/differs from existing session/);
+  // Equivalent storage re-encoding is safe; substantive edits are not.
+  await db.query("UPDATE "+schema+".questions SET options=$2::jsonb WHERE id=$1",[legacyQ,JSON.stringify(["  Alpha  ","Ｂｅｔａ"])]);
+  assert.deepEqual(await issueLegacy(legacyActor,legacyRequest),legacy);
+  await rejected(legacyActor,legacy.session_id,[answer(legacyQ,"Beta")],/not an assigned option/);
+  await db.query("UPDATE "+schema+".questions SET boards=ARRAY['Edexcel'] WHERE id=$1",[legacyQ]);
+  await assert.rejects(()=>issueLegacy(legacyActor,legacyRequest),/not gradeable/);
+  await rejected(legacyActor,legacy.session_id,[answer(legacyQ,"Ｂｅｔａ")],/not gradeable/);
+  await db.query("UPDATE "+schema+".questions SET boards=ARRAY['AQA'],topic='Changed topic' WHERE id=$1",[legacyQ]);
+  await assert.rejects(()=>issueLegacy(legacyActor,legacyRequest),/not gradeable/);
+  await rejected(legacyActor,legacy.session_id,[answer(legacyQ,"Ｂｅｔａ")],/not gradeable/);
+  await db.query("UPDATE "+schema+".questions SET topic='Synthetic fixture topic' WHERE id=$1",[legacyQ]);
+  await db.query("UPDATE "+schema+".questions SET options=$2::jsonb WHERE id=$1",[legacyQ,JSON.stringify(["Ｂｅｔａ","  Alpha  "])]);
+  await rejected(legacyActor,legacy.session_id,[answer(legacyQ,"Ｂｅｔａ")],/not gradeable/);
+  await db.query("UPDATE "+schema+".questions SET options=$2::jsonb WHERE id=$1",[legacyQ,JSON.stringify(["  Alpha  ","Ｂｅｔａ"])]);
+  const grade=await submit(legacyActor,legacy.session_id,[answer(legacyQ,"Ｂｅｔａ")]);
+  assert.equal(grade.score,1);
+  assert.equal(await used(legacyActor),1);
+  assert.deepEqual(await submit(legacyActor,legacy.session_id,[answer(legacyQ,"Ｂｅｔａ")]),grade);
+  assert.deepEqual(await counts(legacy.session_id),{attempts:1,certificates:1,receipts:1});
+  console.log("Integrated legacy quality issuance passed: decoding, board scope, frozen metadata, exact choice and normalised key grading.");
   console.log("Isolated session issuance passed: ownership, bounded selection, safe sheets, replay, expiry, rollback and frozen keys.");
   console.log("Isolated mock-exam fixture passed: ownership, role permissions, stale/revoked keys, exact receipt replay, allowance and full rollback.");
   console.log("Independent PostgreSQL connection concurrency and hosted deployment remain unverified.");
