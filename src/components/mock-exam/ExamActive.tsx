@@ -3,21 +3,10 @@ import { Clock, CheckCircle2, Flag, ChevronLeft, ChevronRight, Loader2 } from "l
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
-interface ExamQuestion {
-  id: string;
-  question_text: string;
-  options: any;
-  correct_answer?: string;
-  topic: string;
-  subject: string;
-  difficulty: number;
-  points: number;
-  explanation?: string;
-  worked_solution?: string;
-}
+import type { MockExamQuestion } from "@/lib/mockExamSheet";
 
 interface ExamActiveProps {
-  questions: ExamQuestion[];
+  questions: MockExamQuestion[];
   currentQ: number;
   setCurrentQ: (q: number | ((prev: number) => number)) => void;
   answers: Record<number, string>;
@@ -45,8 +34,7 @@ export function ExamActive({
 }: ExamActiveProps) {
   const { t } = useTranslation();
   const q = questions[currentQ];
-  const parsedOptions: string[] =
-    typeof q.options === "string" ? JSON.parse(q.options) : q.options || [];
+  const parsedOptions = q.options;
   const answered = Object.keys(answers).length;
   const progressPct = (answered / questions.length) * 100;
   const timeWarning = timeLeft < 300 && timeLeft > 0;
@@ -84,7 +72,7 @@ export function ExamActive({
               variant="destructive"
               onClick={onSubmit}
               disabled={submitting}
-              className="gap-1.5 rounded-xl text-xs font-bold shadow-sm"
+              className="min-h-11 gap-1.5 rounded-xl text-xs font-bold shadow-sm"
             >
               {submitting ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -117,7 +105,7 @@ export function ExamActive({
                 aria-label={t("mockExam.questionOf", { current: i + 1, total: questions.length })}
                 aria-current={i === currentQ ? "step" : undefined}
                 onClick={() => setCurrentQ(i)}
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
                   i === currentQ
                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-110"
                     : answers[i]
@@ -190,6 +178,7 @@ export function ExamActive({
                         key={option}
                         type="button"
                         aria-pressed={isSelected}
+                        disabled={submitting || timeLeft === 0}
                         whileTap={{ scale: 0.98 }}
                         onClick={() =>
                           setAnswers((prev: Record<number, string>) => ({
